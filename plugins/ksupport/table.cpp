@@ -1,6 +1,6 @@
 #include "ncbind.hpp"
 
-tjs_uint32 posHint, sizeHint, addHint;
+static tjs_uint32 posHint, sizeHint, addHint, getTextWidthHint;
 
 //----------------------------------------------------------------------
 // 配列を作成
@@ -52,6 +52,52 @@ tTJSVariant table_find_list_range(tTJSVariant list, tjs_int pos, tjs_int size)
   return result;
 }
 
+ttstr substr_ttstr(ttstr src, tjs_int index, tjs_int length)
+{
+  if (length <= 0
+      || index >= src.length())
+    return L"";
+  if (index + length > src.length())
+    length = src.length() - index;
+  return ttstr(src.c_str() + index, length);
+}
+
+tjs_int getTextWidth(tTJSVariant font, ttstr text)
+{
+  ncbPropAccessor fontObj(font);
+  tTJSVariant result;
+  fontObj.FuncCall(0, L"getTextWidth", &getTextWidthHint, &result, text);
+  return tjs_int(result);
+}
+
+tTJSVariant table_find_text_range(tTJSVariant font, ttstr text, tjs_int w, tjs_int omitTextWidth)
+{
+  ncbPropAccessor fontObj(font);
+
+  if (getTextWidth(font, text) <= w)
+    return tTJSVariant();
+
+  w -= omitTextWidth;
+  tjs_int begin, end, mid;
+  begin = 0;
+  end = text.length();
+  mid = (begin + end) / 2;
+  tjs_int tw = getTextWidth(font, substr_ttstr(text, 0, mid));
+  while (begin < end) {
+    if (tw <= w) {
+      begin = mid + 1;
+      mid = (begin + end) / 2;
+      tw += getTextWidth(font, substr_ttstr(text, (begin - 1), mid - (begin - 1)));
+    } else {
+      end = mid - 1;
+      mid = (begin + end) / 2;
+      tw -= getTextWidth(font, substr_ttstr(text, mid, (end + 1) - mid));
+    }
+  }
+  return tTJSVariant(mid);
+}
+
 //----------------------------------------------------------------------
 // バインド
 NCB_REGISTER_FUNCTION(table_find_list_range, table_find_list_range);
+NCB_REGISTER_FUNCTION(table_find_text_range, table_find_text_range);
