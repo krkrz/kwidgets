@@ -85,13 +85,22 @@ tTJSVariant table_find_text_range(tTJSVariant font, ttstr text, tjs_int w, tjs_i
   tjs_int tw = getTextWidth(font, substr_ttstr(text, 0, mid));
   while (begin < end) {
     if (tw <= w) {
-      begin = mid + 1;
+      if ((end - mid) < 4) {
+        for (tjs_int i = mid + 1; i < end; i++) {
+          tw += getTextWidth(font, substr_ttstr(text, i, 1));
+          if (tw > w)
+            break;
+          mid++;
+        }
+        break;
+      }
+      begin = mid;
       mid = (begin + end) / 2;
-      tw += getTextWidth(font, substr_ttstr(text, (begin - 1), mid - (begin - 1)));
+      tw += getTextWidth(font, substr_ttstr(text, begin, mid - begin));
     } else {
-      end = mid - 1;
+      end = mid;
       mid = (begin + end) / 2;
-      tw -= getTextWidth(font, substr_ttstr(text, mid, (end + 1) - mid));
+      tw -= getTextWidth(font, substr_ttstr(text, mid, end - mid));
     }
   }
   return tTJSVariant(mid);
