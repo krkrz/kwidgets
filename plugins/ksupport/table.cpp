@@ -23,6 +23,13 @@ tTJSVariant table_find_list_range(tTJSVariant list, tjs_int pos, tjs_int size)
 
   tTJSVariant result = createArray();
 
+  if (pos < 0) {
+    size += pos;
+    pos = 0;
+  }
+  if (size < 0)
+    return result;
+
   while (begin < end) {
     mid = int((begin + end) / 2);
     tTJSVariant item = listObj.GetValue(mid, ncbTypedefs::Tag<tTJSVariant>());
