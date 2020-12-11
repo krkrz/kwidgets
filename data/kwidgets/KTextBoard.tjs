@@ -1,0 +1,70 @@
+class KTextBoard extends KVirtualWidget
+{
+  var rows = [];
+  var linefeedPat = new RegExp("\r\n|\r|\n");
+  var _marginalWidth = 1000;
+  var _marginalHeight = 1000;
+  
+  function KTextBoard(window, name) {
+    super.KVirtualWidget(...);
+    setMinMaxSize(0, 0, _marginalWidth, _marginalHeight);
+  }
+
+  property value {
+    getter {
+      return rows.join("\r\n");
+    }
+    setter (v) {
+      rows = v.split(linefeedPat);
+      invalidateLayout();
+      redrawAll();
+    }
+  }
+
+  function setMarginalSize(w, h) {
+    _marginalWidth = w;
+    _marginalHeight = h;
+    invalidateLayout();
+    redrawAll();
+  }
+
+  property marginalWidth {
+    getter {
+      return _marginalWidth;
+    }
+    setter(v) {
+      _marginalWidth = v;
+      invalidateLayout();
+      redrawAll();
+    }
+  }
+
+  property marginalHeight {
+    getter {
+      return _marginalHeight;
+    }
+    setter(v) {
+      _marginalHeight = v;
+      invalidateLayout();
+      redrawAll();
+    }
+  }
+  
+  function invalidateLayout() {
+    var w = 0;
+    for (var i = 0; i < rows.count; i++) 
+      w = Math.max(w, rows[i].length);
+    w *= font.height;
+    var h = rows.count * font.height;
+    setMinMaxSize(w, h, Math.max(w, _marginalWidth), Math.max(h, _marginalHeight));
+  }
+
+  function onDraw(l, t, w, h) {
+    fillRect(l, t, w, h, 0xffffffff);
+    var maxRow = rows.count - 1;
+    var fromIndex = Math.min(maxRow, int(t / font.height));
+    var toIndex = Math.min(maxRow, int((t + h) / font.height));
+    for (var i = fromIndex; i <= toIndex; i++) 
+      drawText(0, i * font.height, rows[i], 0);
+  }
+};
