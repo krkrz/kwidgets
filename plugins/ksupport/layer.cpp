@@ -538,6 +538,82 @@ public:
 
     this->update();
   }
+
+  tjs_uint32 fetchBuffer(unsigned char* buffer, tjs_int width, tjs_int height, tjs_int sx, tjs_int sy) {
+    bool areaOver = false;
+    if (sx < 0) { sx = 0; areaOver = true; }
+    if (sy < 0) { sy = 0; areaOver = true; }
+    if (sx >= width) { sx = width - 1; areaOver = true; }
+    if (sy >= height) { sy = height - 1; areaOver = true; }
+    tjs_uint32 color = ((tjs_uint32*)buffer)[sx + sy * width];
+    if (areaOver)
+      color &= 0x00FFFFFF;
+    return color;
+  }
+
+  tjs_uint32 blendColor32(tjs_uint32 c0, tjs_uint32 c1, tjs_real rate) {
+    tjs_uint a, r, g, b;
+    tjs_uint a0, r0, g0, b0;
+    tjs_uint a1, r1, g1, b1;
+    a0 = (c0 >> 24) & 0xff, r0 = (c0 >> 16) & 0xff, g0 = (c0 >> 8) & 0xff, b0 = c0 & 0xff;
+    a1 = (c1 >> 24) & 0xff, r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff;
+    a = int(a0 * (1 - rate) + a1 * rate + 0.5);
+    r = int(r0 * (1 - rate) + r1 * rate + 0.5);
+    g = int(g0 * (1 - rate) + g1 * rate + 0.5); 
+    b = int(b0 * (1 - rate) + b1 * rate + 0.5);
+    tjs_uint32 color = (a << 24) | (r << 16) | (g << 8) | b;
+    return color;
+  }
+  
+  tjs_uint32 samplingBuffer(unsigned char* buffer, tjs_int width, tjs_int height, tjs_real sx, tjs_real sy) {
+    tjs_int ix = floor(sx), iy = floor(sy);
+    tjs_real fx = sx - ix, fy = sy - iy;
+    tjs_uint32 c0 = fetchBuffer(buffer, width, height, ix    , iy);
+    tjs_uint32 c1 = fetchBuffer(buffer, width, height, ix + 1, iy);
+    tjs_uint32 c2 = fetchBuffer(buffer, width, height, ix,     iy + 1);
+    tjs_uint32 c3 = fetchBuffer(buffer, width, height, ix + 1, iy + 1);
+    tjs_uint32 c01 = blendColor32(c0, c1, fx);
+    tjs_uint32 c23 = blendColor32(c2, c3, fx);
+    tjs_uint32 result = blendColor32(c01, c23, fy);
+    return result;
+  }
+  
+  void roundRect(tjs_int left, tjs_int top, tjs_int width, tjs_int height, tjs_int cx, tjs_int cy) {
+    ncbPropAccessor layerObj(mObjthis);
+
+    tjs_int layerWidth, layerHeight, pitch;
+    unsigned char *imageBuffer;
+    layerWidth = layerObj.GetValue(L"width",  ncbTypedefs::Tag<tjs_int>());
+    layerHeight = layerObj.GetValue(L"height",  ncbTypedefs::Tag<tjs_int>());
+    pitch = layerObj.GetValue(L"mainImageBufferPitch", ncbTypedefs::Tag<tjs_int>());
+    imageBuffer = reinterpret_cast<unsigned char*>(layerObj.GetValue(L"mainImageBufferForWrite", ncbTypedefs::Tag<tjs_int64>()));
+    tjs_int clipLeft, clipTop, clipWidth, clipHeight;
+    
+    auto srcBuffer = new unsigned char [ width * height * 4 ];
+    
+    for (tjs_int ux = 0; ux < width; ux++) 
+      for (tjs_int uy = 0; uy < height; uy++) 
+	memcpy(srcBuffer + (ux + uy * width) * 4, imageBuffer + (left + ux) * 4 + (top + uy) * pitch, 4);
+
+    cx -= left;
+    cy -= top;
+
+    for (tjs_int ux = 0; ux < width; ux++) 
+      for (tjs_int uy = 0; uy < height; uy++) {
+	tjs_int dx = ux - cx, dy = uy - cy;
+	if (dx == 0 || dy == 0)
+	  continue;
+	auto expandRate = sqrt(dx * dx + dy * dy) / std::max(std::abs(dx), std::abs(dy));
+	auto sampleX = cx + dx * expandRate;
+	auto sampleY = cy + dy * expandRate;
+	tjs_uint32 color = samplingBuffer(srcBuffer, width, height, sampleX, sampleY);
+	*(tjs_uint32*)(imageBuffer + (left + ux) * 4 + (top + uy) * pitch) = color;
+      }
+
+    delete[] srcBuffer;
+
+    this->update();
+  }
 };
 
 NCB_GET_INSTANCE_HOOK(LayerSupport)
@@ -562,6 +638,7 @@ NCB_ATTACH_CLASS_WITH_HOOK(LayerSupport, Layer) {
   NCB_METHOD(fillGradientRectUD);
   NCB_METHOD(colorGradientRectLR);
   NCB_METHOD(colorGradientRectUD);
+  NCB_METHOD(roundRect);
 };
 
 
