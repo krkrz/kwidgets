@@ -1,0 +1,93 @@
+class KStyleRepository
+{
+  var classStyleMap = %[];
+  var idStyleMap = %[];
+  var _style;
+  var _idStyleKeys = [];
+  var _classStyleKeys = [];
+  var className = "KStyleRepository";
+  
+  function KStyleRepository() {
+    _style = %[ isId: idStyleMap,
+                isClass: classStyleMap ];
+  }
+
+  function registerClassStyle(className, style) {
+    classStyleMap[className] = style;
+    _classStyleKeys = dictionaryKeys(classStyleMap);
+    invalidateStyles();
+  }
+
+  function overwriteClassStyle(className, style) {
+    if (typeof(classStyleMap[className]) === K_UNDEFINED)
+      registerClassStyle(...);
+    else
+      (Dictionary.assign incontextof classStyleMap[className])(style, false);
+    invalidateStyles();
+  }
+  
+  function registerIdStyle(idName, style) {
+    idStyleMap[idName] = style;
+    _idStyleKeys = dictionaryKeys(idStyleMap);
+    invalidateStyles();
+  }
+
+  function overwriteIdStyle(idName, style) {
+    if (typeof(idStyleMap[idName]) === K_UNDEFINED)
+      registerIdStyle(...);
+    else
+      (Dictionary.assign incontextof idStyleMap[idMame])(style, false);
+    invalidateStyles();
+  }
+
+  function invalidateStyles() {
+    for (var i = 0; i < _existentWindowList.count; i++) {
+      var window = _existentWindowList[i];
+      window.invalidateStylesToDescendants();
+    }
+  }
+  
+  function getPropertyFromStyle(style, states, key, result) {
+    return global.getPropertyFromStyle(style, states, key, result);
+      
+    if (states !== void)
+      for (var i = 0; i < states.count; i++) {
+        var state = states[i];
+        if (typeof(style[state]) != K_UNDEFINED
+            && getPropertyFromStyle(style[state], void, key, result))
+          return true;
+      }
+
+    if (key instanceof "String") {
+      if (key != ""
+          && typeof(style[key]) != K_UNDEFINED) {
+        result[0] = style[key];
+        return true;
+      }
+    } else {
+      var keys = key;
+      for (var i = 0; i < keys.count; i++) {
+        key = keys[i];
+        if (key != ""
+            && typeof(style[key]) != K_UNDEFINED) {
+          result[0] = style[key];
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  function getPropertyFromStyleChain(styleChain, states, key, defaultValue) {
+    var result = [];
+    for (var i = 0; i < styleChain.count; i++) {
+      var style = styleChain[i];
+      if (getPropertyFromStyle(style, states, key, result))
+        return result[0];
+    }
+    return defaultValue;
+  }
+};
+
+
+global.styleRepository = new KStyleRepository();
