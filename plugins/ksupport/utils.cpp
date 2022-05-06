@@ -47,6 +47,16 @@ tTJSVariant createArray(void)
 }
 
 //----------------------------------------------------------------------
+// 配列をカウント
+static tjs_uint 
+countArray(tTJSVariant array)
+{
+  static tjs_uint32 countHint;
+  ncbPropAccessor arrayObj(array);
+  return arrayObj.GetValue(L"count", ncbTypedefs::Tag<tjs_uint>(), 0, &countHint);
+}
+
+//----------------------------------------------------------------------
 // 辞書の要素を全比較するCaller
 class DictMemberCompareCaller : public tTJSDispatch
 {
@@ -655,6 +665,53 @@ tjs_error TJS_INTF_METHOD eachDictionary(tTJSVariant *result,
   return TJS_S_OK;
 }
 
+//----------------------------------------------------------------------
+// プロパティ取得
+bool getPropertyFromStyle(tTJSVariant style, tTJSVariant states, tTJSVariant key, tTJSVariant result)
+{
+  ncbPropAccessor styleObj(style);
+  
+  if (states.Type() != tvtVoid) {
+    auto statesCount = countArray(states);
+    ncbPropAccessor statesObj(states);
+    for (tjs_uint i = 0; i < statesCount; i++) {
+      ttstr state = statesObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
+      if (styleObj.HasValue(state.c_str())) {
+	tTJSVariant nullObject;
+	if (getPropertyFromStyle(styleObj.GetValue(state.c_str(), ncbTypedefs::Tag<tTJSVariant>()),
+				 nullObject,
+				 key,
+				 result))
+	  return true;
+      }
+    }
+  }
+
+  if (key.Type() == tvtString) {
+    ttstr keyString = key;
+    if (keyString != L"" 
+	&& styleObj.HasValue(keyString.c_str())) {
+      ncbPropAccessor resultObj(result);
+      resultObj.SetValue(tjs_int(0), styleObj.GetValue(keyString.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
+      return true;
+    }
+  } else {
+    auto keysCount = countArray(key);
+    ncbPropAccessor keysObj(key);
+    for (tjs_uint i = 0; i < keysCount; i++) {
+      ttstr keyString = keysObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
+      if (keyString != L""
+	  && styleObj.HasValue(keyString.c_str())) {
+	ncbPropAccessor resultObj(result);
+	resultObj.SetValue(tjs_int(0), styleObj.GetValue(keyString.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
+	return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 NCB_REGISTER_FUNCTION(equalStruct, equalStruct);
 NCB_REGISTER_FUNCTION(equalStructNumericLoose, equalStructNumericLoose);
 NCB_REGISTER_FUNCTION(dictionaryKeys, dictionaryKeys);
@@ -667,3 +724,4 @@ NCB_REGISTER_FUNCTION(differenceSet, differenceSet);
 NCB_REGISTER_FUNCTION(sliceArray, sliceArray);
 NCB_REGISTER_FUNCTION(eachArray, eachArray);
 NCB_REGISTER_FUNCTION(eachDictionary, eachDictionary);
+NCB_REGISTER_FUNCTION(getPropertyFromStyle, getPropertyFromStyle);
