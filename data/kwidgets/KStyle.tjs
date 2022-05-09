@@ -1,93 +1,121 @@
 class KStyleRepository
 {
-  var classStyleMap = %[];
-  var idStyleMap = %[];
-  var _style;
-  var _idStyleKeys = [];
-  var _classStyleKeys = [];
-  var className = "KStyleRepository";
-  
-  function KStyleRepository() {
-    _style = %[ isId: idStyleMap,
-                isClass: classStyleMap ];
-  }
+	var classStyleMap = %[];
+	var idStyleMap = %[];
+	var _style;
+	var _idStyleKeys = [];
+	var _classStyleKeys = [];
+	var className = "KStyleRepository";
 
-  function registerClassStyle(className, style) {
-    classStyleMap[className] = style;
-    _classStyleKeys = dictionaryKeys(classStyleMap);
-    invalidateStyles();
-  }
+	function KStyleRepository() {
+		_style = %[ isId: idStyleMap,
+					isClass: classStyleMap ];
+	}
 
-  function overwriteClassStyle(className, style) {
-    if (typeof(classStyleMap[className]) === K_UNDEFINED)
-      registerClassStyle(...);
-    else
-      (Dictionary.assign incontextof classStyleMap[className])(style, false);
-    invalidateStyles();
-  }
-  
-  function registerIdStyle(idName, style) {
-    idStyleMap[idName] = style;
-    _idStyleKeys = dictionaryKeys(idStyleMap);
-    invalidateStyles();
-  }
+	function registerClassStyle(className, style) {
+		classStyleMap[className] = style;
+		_classStyleKeys = dictionaryKeys(classStyleMap);
+		invalidateStyles();
+	}
 
-  function overwriteIdStyle(idName, style) {
-    if (typeof(idStyleMap[idName]) === K_UNDEFINED)
-      registerIdStyle(...);
-    else
-      (Dictionary.assign incontextof idStyleMap[idMame])(style, false);
-    invalidateStyles();
-  }
+	function overwriteClassStyle(className, style) {
+		if (typeof(classStyleMap[className]) === K_UNDEFINED)
+			registerClassStyle(...);
+		else
+			(Dictionary.assign incontextof classStyleMap[className])(style, false);
+		invalidateStyles();
+	}
 
-  function invalidateStyles() {
-    for (var i = 0; i < _existentWindowList.count; i++) {
-      var window = _existentWindowList[i];
-      window.invalidateStylesToDescendants();
-    }
-  }
-  
-  function getPropertyFromStyle(style, states, key, result) {
-    return global.getPropertyFromStyle(style, states, key, result);
-      
-    if (states !== void)
-      for (var i = 0; i < states.count; i++) {
-        var state = states[i];
-        if (typeof(style[state]) != K_UNDEFINED
-            && getPropertyFromStyle(style[state], void, key, result))
-          return true;
-      }
+	function registerIdStyle(idName, style) {
+		idStyleMap[idName] = style;
+		_idStyleKeys = dictionaryKeys(idStyleMap);
+		invalidateStyles();
+	}
 
-    if (key instanceof "String") {
-      if (key != ""
-          && typeof(style[key]) != K_UNDEFINED) {
-        result[0] = style[key];
-        return true;
-      }
-    } else {
-      var keys = key;
-      for (var i = 0; i < keys.count; i++) {
-        key = keys[i];
-        if (key != ""
-            && typeof(style[key]) != K_UNDEFINED) {
-          result[0] = style[key];
-          return true;
-        }
-      }
-    }
-    return false;
-  }
+	function overwriteIdStyle(idName, style) {
+		if (typeof(idStyleMap[idName]) === K_UNDEFINED)
+			registerIdStyle(...);
+		else
+			(Dictionary.assign incontextof idStyleMap[idMame])(style, false);
+		invalidateStyles();
+	}
 
-  function getPropertyFromStyleChain(styleChain, states, key, defaultValue) {
-    var result = [];
-    for (var i = 0; i < styleChain.count; i++) {
-      var style = styleChain[i];
-      if (getPropertyFromStyle(style, states, key, result))
-        return result[0];
-    }
-    return defaultValue;
-  }
+	function invalidateStyles() {
+		for (var i = 0; i < _existentWindowList.count; i++) {
+			var window = _existentWindowList[i];
+			window.invalidateStylesToDescendants();
+		}
+	}
+
+	function getPropertyFromStyle(style, states, key, result) {
+		return global.getPropertyFromStyle(style, states, key, result);
+
+		if (states !== void)
+			for (var i = 0; i < states.count; i++) {
+				var state = states[i];
+				if (typeof(style[state]) != K_UNDEFINED
+					&& getPropertyFromStyle(style[state], void, key, result))
+					return true;
+			}
+
+		if (key instanceof "String") {
+			if (key != ""
+				&& typeof(style[key]) != K_UNDEFINED) {
+				result[0] = style[key];
+				return true;
+			}
+		} else {
+			var keys = key;
+			for (var i = 0; i < keys.count; i++) {
+				key = keys[i];
+				if (key != ""
+					&& typeof(style[key]) != K_UNDEFINED) {
+					result[0] = style[key];
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	function getPropertyFromStyleChain(styleChain, states, key, defaultValue) {
+		var result = [];
+		for (var i = 0; i < styleChain.count; i++) {
+			var style = styleChain[i];
+			if (getPropertyFromStyle(style, states, key, result))
+				return result[0];
+		}
+		return defaultValue;
+	}
+
+	function loadStyles(defs) {
+		for (var i = 0; i < defs.count; i++) {
+			var def = defs[i];
+
+			var style;
+			if (typeof(def.styleOfKlass) != K_UNDEFINED)
+				style = classStyleMap[def.styleOfKlass];
+			else if (typeof(def.styleOfId) != K_UNDEFINED)
+				style = idStyleMap[def.styleOfId];
+			if (typeof(def.style) != K_UNDEFINED) {
+				if (style === void)
+					style = %[];
+				style = unionDictionary(def.style, style, true);
+			}
+
+			if (style === void)
+				throw new Exception("no effective style found in style definition.");
+
+			if (typeof(def.klass) != K_UNDEFINED)
+				registerClassStyle(def.klass, style);
+			else if (typeof(def.id) != K_UNDEFINED)
+				registerIdStyle(def.id, style);
+			else
+				throw new Exception("no effective identifier found in style definition.");
+		}
+	}
 };
 
 
 global.styleRepository = new KStyleRepository();
+

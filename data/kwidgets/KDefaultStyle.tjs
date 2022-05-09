@@ -1,49 +1,216 @@
-@if(0)
+[
+		%[
+			klass: "KWidget",
+			style: %[
+				backgroundColor: 0xfff0f0f0,
+				nodeDisabled: %[
+					borderColorBlending: 0xfff0f0f0,
+				]
+			]
+		],
 
-styleRepository.registerClassStyle
-("KTextLabel",
- %[ fontFace: "MS UI Gothic",
-    fontHeight: 14,
-    fontColor: 0,
-    fontAntiAlias: true,
-    fontBold: false,
-    fontItalic: false,
-    fontStrikeout: false,
-    fontUnderline: false,
-    fontOutline: false,
-    padding: 0,
-    //    marginLeft: 0,
-//    marginTop: 0,
-//    marginRight: 0,
-//    marginBottom: 0,
-//    spaceVertical: 0,
-//    spaceHorizontal: 0,
-//    alignHorizontal: ALIGN_LEFT,
-//    alignVertical: ALIGN_TOP,
-    focusable: false,
-    backgroundColor: 0xfff0f0f0,
-    status: "",
-    hint: "",
+		%[
+			klass: "KSpacer",
+			style: %[
+				backgroundColor: 0
+			]
+		],
 
-    nodeDisabled: %[
-      fontColor: 0x808080,
-    ],
+		%[
+			klass: "KFrameLayout",
+			style:  %[
+				fontColor: 0,
+				borderColor: 0xffacacac,
+				borderStyle: BORDER_STYLE_SOLID,
+				borderWidth: 1,
+				padding: 1,
+				nodeDisabled: %[
+					fontColor: 0x808080,
+					borderColor: blendColor(0xffacacac, 0xfff0f0f0),
+				],
+			]
+		],
 
-    hover: %[
-      backgroundColor: 0xffe0e0e0,
-      borderColor: 0xc0c0ff,
-      borderStyle: BORDER_STYLE_DASHED,
-      borderWidth: 4,
-      borderRadius: 10,
-      /*
-      borderWidthLeft: 10,
-      borderWidthTop: 6,
-      borderWidthBottom: 3,
-      borderWidthRight: 0,
-*/
-      padding: 20,
-    ],
-  ]);
+		%[
+			klass: "KButton",
+			style: %[
+				fontColor: 0,
+				frameType: FRAME_RAISED,
+				nodeDisabled: %[
+					fontColor: 0x808080
+				],
+				hover: %[
+					backgroundColor: 0xfff8f8f8
+				],
+				mouseDown: %[
+					backgroundColor: 0xffffffff,
+					paddingOffset: 1,
+					paddingInset: 1,
+					borderStyle: BORDER_STYLE_SOLID,
+					borderWidth: 1,
+					borderColor: 0xffacacac,
+				],
+			],
+		],
+
+		%[
+			klass: "KTextButton",
+			style: %[
+				focus:
+					%[
+						fontUnderline: true
+					],
+				paddingHorizontal: 15,
+				paddingVertical: 10 ]
+		],
+
+		%[
+			klass: "KImageButton",
+			style: %[
+				padding: 5,
+				opacity: 255,
+				nodeDisabled: %[ opacity: 128 ]
+			]
+		],
+
+		%[
+			klass: "KToggleButton",
+			style: %[
+				fontColor: 0,
+				frameType: FRAME_RAISED,
+				nodeDisabled: %[ fontColor: 0x808080 ],
+				hover: %[
+					backgroundColor: 0xfff8f8f8
+				],
+				mouseDown: %[
+					backgroundColor: 0xffffffff,
+				],
+				toggleOn: %[
+					frameType: FRAME_SUNKEN,
+					paddingOffset: 1
+				],
+			]
+		],
+
+		%[
+			klass: "KTextToggleButton",
+			style: %[
+				focus:
+					%[
+						fontUnderline: true
+					],
+				paddingHorizontal: 15,
+				paddingVertical: 10 ]
+		],
+
+		%[
+			klass: "KImageToggleButton",
+			style: %[ padding: 5 ]
+		],
+
+		%[
+			id: "checkbox_icon",
+			style: %[
+				backgroundColor: 0
+			]
+		],
+
+		%[
+			klass: "KCheckBox",
+			style: %[
+				fontColor: 0,
+				nodeDisabled: %[ fontColor: 0x808080 ],
+				focus: %[ fontUnderline: true ],
+				hover: %[
+					backgroundColor: 0xfff8f8f8
+				],
+				mouseDown: %[
+					backgroundColor: 0xffffffff,
+				],
+				checkOn: %[ icon: "k_check_button_on" ],
+				checkOff: %[ icon: "k_check_button_off" ],
+			]
+		],
+
+		%[
+			klass: "KRadioButton",
+			style: %[
+				checkOn: %[ icon: "k_radio_button_on" ],
+				checkOff: %[ icon: "k_radio_button_off" ],
+			]
+		],
+
+		%[
+			id: "range_pointer_2d_knob",
+			style: %[
+				backgroundColor: WIN_BG,
+				frameType: FRAME_RAISED,
+				hover: %[ backgroundColor: 0xfff8f8f8 ]
+			]
+		],
+
+		%[
+			klass: "KRangePointer2D",
+			style: %[
+				backgroundColor: WIN_LIGHTEN1,
+				frameType: FRAME_SUNKEN,
+				focus: %[ backgroundColor: WIN_HIGHLIGHT ]
+			]
+		],
+
+		%[
+			id: "slider_knob",
+			styleOfId: "range_pointer_2d_knob",
+		],
 
 
-@endif
+		%[
+			id: "scrollbar_knob",
+			styleOfId: "range_pointer_2d_knob"
+		],
+		%[
+			id: "scrollbar_button",
+			style: %[ padding: 4 ]
+		],
+		%[
+			klass: "KScrollBar",
+			style: %[
+				buttonId: "scrollbar_button",
+				knobId: "scrollbar_knob"
+			]
+		],
+		%[
+			klass: "KVerticalScrollBar",
+			style: %[
+				backwardButtonLabel: "k_scroll_up",
+				forwardButtonLabel: "k_scroll_down"
+			]
+		],
+		%[
+			klass: "KHorizontalScrollBar",
+			style: %[
+				backwardButtonLabel: "k_scroll_left",
+				forwardButtonLabel: "k_scroll_right"
+			]
+		],
+
+		%[
+			klass: "KTextLabel",
+			style:  %[
+				fontColor: 0,
+				nodeDisabled: %[
+					fontColor: 0x808080
+				],
+			]
+		],
+
+		%[
+			klass: "KImageLabel",
+			style: %[
+				opacity: 0xff,
+				nodeDisabled: %[
+					opacity: 0x80,
+				],
+			]
+		]
+]
