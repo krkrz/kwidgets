@@ -141,6 +141,26 @@
 		],
 
 		%[
+			klass: "KTextLabel",
+			style:  %[
+				fontColor: 0,
+				nodeDisabled: %[
+					fontColor: 0x808080
+				],
+			]
+		],
+
+		%[
+			klass: "KImageLabel",
+			style: %[
+				opacity: 0xff,
+				nodeDisabled: %[
+					opacity: 0x80,
+				],
+			]
+		],
+
+		%[
 			id: "range_pointer_2d_knob",
 			style: %[
 				backgroundColor: WIN_BG,
@@ -195,22 +215,9 @@
 		],
 
 		%[
-			klass: "KTextLabel",
-			style:  %[
-				fontColor: 0,
-				nodeDisabled: %[
-					fontColor: 0x808080
-				],
-			]
-		],
-
-		%[
-			klass: "KImageLabel",
+			klass: "KGridLayout",
 			style: %[
-				opacity: 0xff,
-				nodeDisabled: %[
-					opacity: 0x80,
-				],
+				backgroundColor: 0
 			]
 		]
 ]
