@@ -32,6 +32,13 @@
 		],
 
 		%[
+			klass: "KScrollLayout",
+			style: %[
+				backgroundColor: 0,
+			],
+		],
+
+		%[
 			klass: "KButton",
 			style: %[
 				fontColor: 0,
@@ -219,5 +226,35 @@
 			style: %[
 				backgroundColor: 0
 			]
+		],
+
+		%[
+			klass: "KTextEdit",
+			style: %[
+				backgroundColor: 0xffffffff,
+				fontColor: 0,
+				selectionBackgroundColor: WIN_SELECTED,
+				selectionFontColor: 0xffffff,
+				padding: 1,
+			],
+		],
+
+		%[
+			id: "textinput_textedit",
+			style: %[
+				backgroundColor: 0xffffffff,
+				hover: %[ backgroundColor: 0xffeaeaea ],
+			]
+		],
+
+		%[
+			klass: "KTextInput",
+			style: %[
+				frameType: FRAME_SUNKEN,
+				padding: 2,
+				backgroundColor: 0xffffffff,
+				descendantFocus: %[ backgroundColor: 0xffffeaea ],
+				texteditId: "textinput_textedit",
+			],
 		]
 ]
