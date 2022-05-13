@@ -6,4 +6,4 @@
 	- [KLayout](KLayout.md)
 		- [KGridLayout](KGridLayout.md)
 	- [KVirtualWidget](KVirtualWidget.md)
-
+		- [KTextEdit](KTextEdit.md)
