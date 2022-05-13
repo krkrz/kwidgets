@@ -1,9 +1,9 @@
 # KWidget
 
-KWidgetはすべてのウィジェットの既定となるベースクラス。
+KWidgetはすべてのウィジェットの既定となるベースクラスです。
 
 吉里吉里のLayer クラスの継承クラスなので、
-Layerが対応している描画関数はすべて呼び出せる。
+Layerが対応している描画関数はすべて呼び出せます。
 
 ## 親クラス
 
@@ -41,7 +41,7 @@ Layerが対応している描画関数はすべて呼び出せる。
 	ポップアップウィンドウでヒントテキストが表示されるようになります。
 
 - **isAvoidDictionaryRegistration** (bool: false)
-  - 永続化辞書への登録を回避する
+  - 永続化辞書への登録を回避します。
 
 ## プロパティ
 - **id** (string)
@@ -134,19 +134,19 @@ Layerが対応している描画関数はすべて呼び出せる。
 - **borderPaddingLeft** (int)
   - layoutStyle.paddingLeft + borderStyle.widthLeft  
   ボーダーとパディングの左側サイズの合計。  
-  子ウィジェットを配置する際の左側の余白の基準
+  子ウィジェットを配置する際の左側の余白の基準です。
 - **borderPaddingRight** (int)
   - layoutStyle.paddingRight + borderStyle.widthRight  
   ボーダーとパディングの右側サイズの合計。  
-  子ウィジェットを配置する際の右側の余白の基準
+  子ウィジェットを配置する際の右側の余白の基準です。
 - **borderPaddingTop** (int)
   - layoutStyle.paddingTop + borderStyle.widthTop  
   ボーダーとパディングの上側サイズの合計。  
-  子ウィジェットを配置する際の上側の余白の基準
+  子ウィジェットを配置する際の上側の余白の基準です。
 - **borderPaddingBottom** (int)
   - layoutStyle.paddingBottom + borderStyle.widthBottom  
   ボーダーとパディングの下側サイズの合計。  
-  子ウィジェットを配置する際の下側の余白の基準
+  子ウィジェットを配置する際の下側の余白の基準です。
 - **borderPaddingWidth** (int)
   - borderPaddingLeft + borderPaddingRight;
 - **borderPaddingHeight** (int)
@@ -156,51 +156,51 @@ Layerが対応している描画関数はすべて呼び出せる。
 
 ## メソッド
 - var **getOption**(*key, defaultValue = void*);
-  - オプション引数を取得する。  
+  - オプション引数を取得します。  
 	コンストラクタで指定されたオプション引数から、
-	特定の*key*に対応した値を取得する。
+	特定の*key*に対応した値を取得します。
 	対応する*key*が存在しない時には、
-	*defaultValue*が返ってくる。
+	*defaultValue*が返ってきます。
 
 - var **getStyleProperty**(*key, defaultValue = void*);
-  - スタイルのプロパティを取得する。  
+  - スタイルのプロパティを取得します。  
 	現在のスタイルチェーンから、
-	*key*に対応したプロパティを検索してその値を取得する。
+	*key*に対応したプロパティを検索してその値を取得します。
 	*key*に対応するプロパティが定義されていない場合には
-	*defaultValue*が返ってくる。
+	*defaultValue*が返ってきます。
 
 - object **find**(*name*);
   - ウィジェットツリーから特定の名前を持つウィジェットを検索します。
 - bool **isAncestorOf**(*widget*);
-  - 指定の*widget*が自分の先祖であるか判定する。
+  - 指定の*widget*が自分の先祖であるか判定します。
 - bool **isDescendantOf**(*widget*);
-  - 指定の*widget*が自分の先祖であるか判定する。
+  - 指定の*widget*が自分の先祖であるか判定します。
 - **setMinSize**(*minWidth, minHeight*);
-  - ウィジェットの最小サイズを設定する
+  - ウィジェットの最小サイズを設定します
 - **setMaxSize**(*maxWidth, maxHeight*);
-  - ウィジェットの最大サイズを設定する
+  - ウィジェットの最大サイズを設定します
 - **setMinMaxSize**(*minWidth, minHeight, maxWidth, maxHeight*);
-  - ウィジェットの最小最大サイズをまとめて設定する
+  - ウィジェットの最小最大サイズをまとめて設定します
 - **setFixedSize**(*width, height*);
-  - ウィジェットを固定サイズに設定する
+  - ウィジェットを固定サイズに設定します
 - **setFixedSizeToImageSize**(*width, height*);
-  - ***Layer#loadImages***()でロードした画像サイズに併せてウィジェットを固定サイズに設定する
+  - ***Layer#loadImages***()でロードした画像サイズに併せてウィジェットを固定サイズに設定します
 - **drawUIText**(*fontStyle, x, y, text, overrideFontColor = void*);
-  - スタイルで指定されたフォントスタイルに応じてUIテキストを描画する。
+  - スタイルで指定されたフォントスタイルに応じてUIテキストを描画します。
 
-	*x*,*y*で指定した座標じ*text*に描画する。
+	*x*,*y*で指定した座標に*text*を描画します。
 
 	*overrideFontColor*を指定すると、*fontStyle*自体の上書きなしに
-	フォントカラーのみ変更して描画を行える。
+	フォントカラーのみ変更して描画を行えます。
 
 - object **drawUITextInRange**(*fontStyle, x, y, w, text, alignment, fill = false*);
-  - 指定範囲にUIテキストを描画する。
+  - 指定範囲にUIテキストを描画します。
 
-	**drawUIText**() 同様にテキストを描画するが、
-	*w*で指定した幅をオーバーした分は省略表示される。
+	**drawUIText**() 同様にテキストを描画しますが、
+	*w*で指定した幅をオーバーした分は省略表示されます。
 	テキスト幅が指定幅に足りない場合は *alignment* にしたがって
-	右詰め・センタリング・左詰めのいずれかで表示される。
-	*fill* を指定するとテキスト描画前に バックグラウンドカラーで背景をフィルする。
+	右詰め・センタリング・左詰めのいずれかで表示されます。
+	*fill* を指定するとテキスト描画前に バックグラウンドカラーで背景をフィルします。
 
   - **返り値**
 	- %[  
@@ -211,13 +211,13 @@ Layerが対応している描画関数はすべて呼び出せる。
 		]
 
 - **extractTextArea**(*fontStyle, text, lineSpacing*);
-  - テキストをテキストエリアに分割し、描画準備を行う。
+  - テキストをテキストエリアに分割し、描画準備を行います。
 
 	テキストを、行ごとに分割し、
 	指定のスタイル(*fontStyle*)と行間(*lineSpacing*)に従ってサイズ計算を行い
-	テキストエリアの描画準備を行う。
+	テキストエリアの描画準備を行います。
 
-	この関数の返した値を **drawTextArea**() 関数に渡してテキストエリアを描画する。
+	この関数の返した値を **drawTextArea**() 関数に渡してテキストエリアを描画します。
 
   - **返り値**
 	- %[  
@@ -228,13 +228,13 @@ Layerが対応している描画関数はすべて呼び出せる。
 		]
 
 - **drawTextArea**(*fontStyle, x, y, w, lineSpacing, texts, textWidths, textAlign*);
-  - テキストエリアを描画する
+  - テキストエリアを描画します
 
 	  **extractTextArea**() で得られたテキストエリア情報に基づいて
-	  テキストエリアを描画する。
+	  テキストエリアを描画します。
 
 	  各行の長さがテキストエリアの全体幅に満たない場合は、textAlignに基づいて
-	  左寄せ・センタリング・右寄せで各行がアライメントされる。
+	  左寄せ・センタリング・右寄せで各行がアライメントされます。
 
 - **drawBorder**(*borderStyle, x, y, w, h, clear = true*);
   - ボーダーを描画する
@@ -243,17 +243,17 @@ Layerが対応している描画関数はすべて呼び出せる。
 	  *clear*を指定すると描画前に*backgroundColor*で領域をクリアする。
 
 - **drawChecker**(*l, t, w, h, csize, color1 = 0xFFFFFFFF, color2 = 0xFFC0C0C0, sx = 0, sy = 0*);
-  - チェッカー(市松模様)を描画する。
+  - チェッカー(市松模様)を描画します。
 
 	*(l,t,w,h)*で指定した領域に*color1*と*color2*の二色で*csize*サイズの矩形で
-	構成された市松模様を描画する。
-	*sx,sy*を指定すると市松模様の描画開始位置をシフトする。
+	構成された市松模様を描画します。
+	*sx,sy*を指定すると市松模様の描画開始位置をシフトします。
 
 - **fillChecker**(*csize, color1 = 0xFFFFFFFF, color2 = 0xFFC0C0C0*);
-  - ウィジェットの全域をチェッカーでフィルする。
+  - ウィジェットの全域をチェッカーでフィルします。
 
 - object **getChildsBounds**(*child*);
-	- マージン、パディング、ボーダーをすべて含んだ「子ウィジェットのバウンズ」を返す。
+	- マージン、パディング、ボーダーをすべて含んだ「子ウィジェットのバウンズ」を返します。
 	- **返り値**  
 		%[  
 		**minWidth** (int)  子ウィジェットを配置するのに必要な空白を含んだ minWidth
@@ -262,10 +262,10 @@ Layerが対応している描画関数はすべて呼び出せる。
 		**maxHeight** (int) 子ウィジェットを配置するのに必要な空白を含んだ maxHeight
 
 - **embedChild**(*x, y, w, h, child, clear = false*);
-  - 指定した領域に子ウィジェットを埋め込む。
+  - 指定した領域に子ウィジェットを埋め込みます。
 
-	  指定した領域にボーダーを描画した上で、適切な空白を加えて子ウィジェットを配置する。
-	  getChildBounds() と併せて以下のように使う。
+	  指定した領域にボーダーを描画した上で、適切な空白を加えて子ウィジェットを配置します。
+	  getChildBounds() と併せて以下のように使います。
 
 		var cb = getChildBounds(child);
 		setMinMaxSize(cb.minWidth, cb.minHeight, cb.maxWidth, cb.maxHeight);
@@ -273,36 +273,36 @@ Layerが対応している描画関数はすべて呼び出せる。
 
 ## フック
 - **onExtractWidgetStyle**(*widgetStyle*);
-  - ウィジェット固有のスタイルを展開するタイミングで呼び出される。  
+  - ウィジェット固有のスタイルを展開するタイミングで呼び出されます。  
 	KWidgetの標準スタイルプロパティ以外に
 	ウィジェット固有のスタイルプロパティを定義したい場合は、
-	このフックが呼び出されたタイミングで以下のようにプロパティを取得できる。
+	このフックが呼び出されたタイミングで以下のようにプロパティを取得できます。
 
 		function onExtractWidgetStyle(widgetStyle) {
 		  widgetStyle.lineSpacing = getStyleProperty("lineSpacing", 0);
 		}
 
 - **onAttachedToWindow**();
-  - ウィジェットがウィンドウにアタッチされたタイミングで呼び出される
+  - ウィジェットがウィンドウにアタッチされたタイミングで呼び出されます
 - **onDetachedFromWindow**();
-  - ウィジェットがウィンドウからでタッチされたタイミングで呼び出される
+  - ウィジェットがウィンドウからでタッチされたタイミングで呼び出されます
 - **onBindPersistentDictionary**(*dictionary*);
-  - 永続化辞書とバインドされるタイミングで呼び出される  
-  辞書からプロパティの初期値を読みだすのに利用する。
+  - 永続化辞書とバインドされるタイミングで呼び出されます  
+  辞書からプロパティの初期値を読みだすのに利用します。
 - **onUnbindPersistentDictionary**(*dictionary*);
-  - 永続化辞書とのバインドが解除されるタイミングで呼び出される。  
-  辞書にプロパティの現在値を記録するのに利用する。
+  - 永続化辞書とのバインドが解除されるタイミングで呼び出されます。  
+  辞書にプロパティの現在値を記録するのに利用します。
 - **onValueModified**(*newValue* );
-  - **値**を持つウィジェットで値が変更されたタイミングで呼び出される。
+  - **値**を持つウィジェットで値が変更されたタイミングで呼び出されます。
 
 	  **デフォルト動作**  
-	  親の onChildValueModified() を呼び出す。
+	  親の onChildValueModified() を呼び出します。
 
 - **onChildValueModified**(*child, newValue* );
-  - 子の値が変更されたタイミングで呼び出される。
+  - 子の値が変更されたタイミングで呼び出されます。
 
 	  **デフォルト動作**  
-	  親の onChildValueModified()にそのままデリゲートする。
+	  親の onChildValueModified()にそのままデリゲートします。
 	  この動作により、ウィジェットツリーの上位階層で、
-	  子孫ウィジェットの値の変更をまとめて補足することが出来る。
+	  子孫ウィジェットの値の変更をまとめて補足することが出来ます。
 
