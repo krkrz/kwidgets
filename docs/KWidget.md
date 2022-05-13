@@ -277,6 +277,7 @@ Layerが対応している描画関数はすべて呼び出せる。
 	KWidgetの標準スタイルプロパティ以外に
 	ウィジェット固有のスタイルプロパティを定義したい場合は、
 	このフックが呼び出されたタイミングで以下のようにプロパティを取得できる。
+
 		function onExtractWidgetStyle(widgetStyle) {
 		  widgetStyle.lineSpacing = getStyleProperty("lineSpacing", 0);
 		}
