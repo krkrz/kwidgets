@@ -1,4 +1,4 @@
-# kwidgetsƒNƒ‰ƒXŠK‘w
+# kwidgetsã‚¯ãƒ©ã‚¹éšå±¤
 
 - [KWidget](KWidget.md)
   - [KEntity](KEntity.md)

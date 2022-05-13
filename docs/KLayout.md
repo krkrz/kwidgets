@@ -1,30 +1,30 @@
 # KLayout
 
-KLayout �́u�q�v��z�u���邱�Ƃ��ł���u���C�A�E�g�E�B�W�F�b�g�v�̃x�[�X�ƂȂ�N���X�ł��B
+KLayout は「子」を配置することができる「レイアウトウィジェット」のベースとなるクラスです。
 
 
-## �e�N���X
+## 親クラス
 
 **KLayout** -> [KEntity](KEntity.md) -> [KWidget](KWidget.md)
 
-## �R���X�g���N�^
+## コンストラクタ
 ```KLayout(window, options = %[])```
 
-## �t�b�N
+## フック
 - **onCalculateLayout**();
-  - ���C�A�E�g�̍Čv�Z���s���^�C�~���O�ŌĂяo����܂��B
+  - レイアウトの再計算を行うタイミングで呼び出されます。
 
-	�p���N���X�œK�؂Ɏ�������K�v������܂��B
+	継承クラスで適切に実装する必要があります。
 
-	�q�̃T�C�Y���ς��A�������g�̃X�^�C�����ς��A
-	�Ȃǂ́u�q�E�B�W�F�b�g�̃��C�A�E�g���Čv�Z����K�v������v�^�C�~���O�ŌĂяo����܂��B
+	子のサイズが変わる、自分自身のスタイルが変わる、
+	などの「子ウィジェットのレイアウトを再計算する必要がある」タイミングで呼び出されます。
 
 - **onLocateLayout**() ;
-  - �q�̍Ĕz�u���s���܂��B
+  - 子の再配置を行います。
 
-	�p���N���X�œK�؂Ɏ�������K�v������܂��B
+	継承クラスで適切に実装する必要があります。
 
-	�����̃T�C�Y���ς��ȂǁA�q�̍Ĕz�u���s���K�v������^�C�~���O�ŌĂяo����܂��B
-	���O�� **onCalculateLayout**() �Ōv�Z���Ă��������C�A�E�g���Ɋ�Â��āA
-	�q�̍Ĕz�u���s���Ă��������B
+	自分のサイズが変わるなど、子の再配置を行う必要があるタイミングで呼び出されます。
+	事前に **onCalculateLayout**() で計算しておいたレイアウト情報に基づいて、
+	子の再配置を行ってください。
 

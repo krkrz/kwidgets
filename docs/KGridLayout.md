@@ -1,29 +1,29 @@
 
 # KGridLayout
 
-KGridLayout�́A�O���b�h��ɃE�B�W�F�b�g��z�u���郌�C�A�E�g�E�B�W�F�b�g�ł��B
+KGridLayoutは、グリッド上にウィジェットを配置するレイアウトウィジェットです。
 
-## �e�N���X
+## 親クラス
 
 **KGridLayout** -> [KLayout](KLayout.md) -> [KEntity](KEntity.md) -> [KWidget](KWidget.md)
 
-## �R���X�g���N�^
+## コンストラクタ
 ```KGridLayout(window, options = %[])```
 
-## �X�^�C��
+## スタイル
 - **borderStyle**, **paddingStyle**
-  - �X�^�C���w��Ɋ�Â��A�q�E�B�W�F�b�g�̎��͂Ƀ{�[�_�[���`�悳��܂��B
+  - スタイル指定に基づき、子ウィジェットの周囲にボーダーが描画されます。
 
-## ���\�b�h
+## メソッド
 - **add**(*x, y, child, colspan = 1, rowspan = 1*);
-  - (*x*,*y*) �Ŏw�肵���O���b�h���W�Ɏq�E�B�W�F�b�g*child*��ǉ����܂��B
+  - (*x*,*y*) で指定したグリッド座標に子ウィジェット*child*を追加します。
   
-	*colspan*, *rowspan* ���w�肷�邱�ƂŁA���ꂼ�ꉡ�����A�c������
-	�����}�X�̃O���b�h���܂�����z�u���w��ł��܂��B
+	*colspan*, *rowspan* を指定することで、それぞれ横方向、縦方向に
+	複数マスのグリッドをまたがる配置を指定できます。
 
 - **remove**(*child, doInvalidate = true*);
-  - �w��̎q�E�B�W�F�b�g*child*���O���b�h����폜���܂��B
+  - 指定の子ウィジェット*child*をグリッドから削除します。
 
-	�f�t�H���g����ł͍폜����*child*�������I��invalidate����܂����A
-	*doInvalidate*��false���w�肷���invalidate���ȗ����A
-	remove����*child*���ė��p���邱�Ƃ��ł��܂��B�B
+	デフォルト動作では削除時に*child*が自動的にinvalidateされますが、
+	*doInvalidate*にfalseを指定するとinvalidateを省略し、
+	removeした*child*を再利用することができます。。

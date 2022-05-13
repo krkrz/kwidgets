@@ -1,152 +1,152 @@
 # KWidget
 
-KWidget�͂��ׂẴE�B�W�F�b�g�̊���ƂȂ�x�[�X�N���X�ł��B
+KWidgetはすべてのウィジェットの既定となるベースクラスです。
 
-�g���g����Layer �N���X�̌p���N���X�Ȃ̂ŁA
-Layer���Ή����Ă���`��֐��͂��ׂČĂяo���܂��B
+吉里吉里のLayer クラスの継承クラスなので、
+Layerが対応している描画関数はすべて呼び出せます。
 
-## �e�N���X
+## 親クラス
 
 **KWidget** -> [Layer](https://krkrz.github.io/docs/kirikiriz/j/contents/f_Layer.html)
 
-## �R���X�g���N�^
+## コンストラクタ
 ```KWidget(window, options = %[])```
-### �I�v�V��������(�^: �����l)
+### オプション引数(型: 初期値)
 - **name** (string: "")
-  - ���O
+  - 名前
 
-	UI�c���[��̃E�B�W�F�b�g�͎w�肵�����O�Ŏ��ʉ\�ɂȂ�܂��B
+	UIツリー上のウィジェットは指定した名前で識別可能になります。
 
 - **id** (string: "")
   - ID
 
-	 ID��ݒ肷�邱�ƂőΉ���������̃X�^�C�����w��\�ɂȂ�܂��B
+	 IDを設定することで対応した特定のスタイルを指定可能になります。
 
 - **style** (dictionary: %[])
-  - �X�^�C��
+  - スタイル
 
-	 �E�B�W�F�b�g�̌����ڂ��`����X�^�C�����w�肵�܂��B
+	 ウィジェットの見た目を定義するスタイルを指定します。
 
 - **status** (string: "")
-  - �X�e�[�^�X
+  - ステータス
 
-	�X�e�[�^�X���w�肷��ƁA���̃E�B�W�F�b�g�̃}�E�X�z�o�[����
-	[KStatusBar](KStatusBar.md) �ɑΉ������X�e�[�^�X�e�L�X�g��
-	�\�������悤�ɂȂ�܂��B
+	ステータスを指定すると、このウィジェットのマウスホバー時に
+	[KStatusBar](KStatusBar.md) に対応したステータステキストが
+	表示されるようになります。
 
 - **hint** (string: "")
-  - �q���g�e�L�X�g
+  - ヒントテキスト
 
-	�q���g���w�肷��ƁA���̃E�B�W�F�b�g�̃}�E�X�z�o�[����
-	�|�b�v�A�b�v�E�B���h�E�Ńq���g�e�L�X�g���\�������悤�ɂȂ�܂��B
+	ヒントを指定すると、このウィジェットのマウスホバー時に
+	ポップアップウィンドウでヒントテキストが表示されるようになります。
 
 - **isAvoidDictionaryRegistration** (bool: false)
-  - �i���������ւ̓o�^��������܂��B
+  - 永続化辞書への登録を回避します。
 
-## �v���p�e�B
+## プロパティ
 - **id** (string)
   - ID
 - **style** (dictionary)
-  - �X�^�C��
+  - スタイル
 - **status** (string)
-  - �X�e�[�^�X
+  - ステータス
 - **hint** (string)
-  - �q���g�e�L�X�g
+  - ヒントテキスト
 - **isAvoidDictionaryRegistration** (bool)
-  - �i���������ւ̓o�^���������
+  - 永続化辞書への登録を回避する
 - **ancestors** (Array)
-  - �������g�̑c��E�B�W�F�b�g�̈ꗗ
+  - 自分自身の祖先ウィジェットの一覧
 - **descendants** (Array)
-  - �������g�̎q���E�B�W�F�b�g�̈ꗗ
+  - 自分自身の子孫ウィジェットの一覧
 - **minWidth** (int)
-  - �E�B�W�F�b�g�̍ŏ���
+  - ウィジェットの最小幅
 - **maxWidth** (int)
-  - �E�B�W�F�b�g�̍ő啝
+  - ウィジェットの最大幅
 - **minHeight** (int)
-  - �E�B�W�F�b�g�̍ŏ�����
+  - ウィジェットの最小高さ
 - **maxHeight** (int)
-  - �E�B�W�F�b�g�̍ő卂��
+  - ウィジェットの最大高さ
 - **widgetStyle** (readonly dictionary)
-  - �E�B�W�F�b�g�ŗL�̃X�^�C��  
-	KWidget�̕W���X�^�C���Ƃ͕ʂɁA�p���N���X�ŃE�B�W�F�b�g�ŗL�̃X�^�C����`���i�[���邽�߂̎����B
+  - ウィジェット固有のスタイル  
+	KWidgetの標準スタイルとは別に、継承クラスでウィジェット固有のスタイル定義を格納するための辞書。
 - **fontStyle** (readonly dictionary)
-  - �X�^�C���`�F�[�����璊�o���ꂽ�E�B�W�F�b�g�̌��݂̃t�H���g�X�^�C��  
+  - スタイルチェーンから抽出されたウィジェットの現在のフォントスタイル  
   - %[  
-	**face** (string) �t�F�C�X  
-	**height** (int) �n�C�g  
-	**color** (int) �J���[(0xRRGGBB)  
-	**antiAlias** (bool) �A���`�G���A�X�̗L��  
-	**outlline** (bool) �A�E�g���C���̗L��  
-	**outlineColor** (int) �A�E�g���C���J���[(0xRRGGBB)  
-	**bold** (bool) �{�[���h�̗L��  
-	**italic** (bool) �C�^���b�N�̗L��  
-	**strikeout** (bool) �X�g���C�N�A�E�g�̗L��  
-	**underline** (bool) �A���_�[���C���̗L��  
+	**face** (string) フェイス  
+	**height** (int) ハイト  
+	**color** (int) カラー(0xRRGGBB)  
+	**antiAlias** (bool) アンチエリアスの有無  
+	**outlline** (bool) アウトラインの有無  
+	**outlineColor** (int) アウトラインカラー(0xRRGGBB)  
+	**bold** (bool) ボールドの有無  
+	**italic** (bool) イタリックの有無  
+	**strikeout** (bool) ストライクアウトの有無  
+	**underline** (bool) アンダーラインの有無  
 	]
 
 - **borderStyle** (readonly dictionary)
-  - �X�^�C���`�F�[�����璊�o���ꂽ�E�B�W�F�b�g�̌��݂̃{�[�_�[�X�^�C��
+  - スタイルチェーンから抽出されたウィジェットの現在のボーダースタイル
   - %[  
-	**backgroundColor** (int) �w�i�J���[(0xAARRGGBB)  
-	**width{Left|Right|Top|Bottom}** (int) ��/�E/��/����  
-	**color{Left|Right|Top|Bottom}** (int) ��/�E/��/���J���[(0xRRGGBB)  
-	**style{Left|Right|Top|Bottom}** (int) ��/�E/��/���X�^�C��  
-	**radius{LeftTop|RightTop|LeftBottom|RightBottom}** (int) ����/�E��/����/�E�����a  
+	**backgroundColor** (int) 背景カラー(0xAARRGGBB)  
+	**width{Left|Right|Top|Bottom}** (int) 左/右/上/下幅  
+	**color{Left|Right|Top|Bottom}** (int) 左/右/上/下カラー(0xRRGGBB)  
+	**style{Left|Right|Top|Bottom}** (int) 左/右/上/下スタイル  
+	**radius{LeftTop|RightTop|LeftBottom|RightBottom}** (int) 左上/右上/左下/右下半径  
 	]
 
 - **locateStyle** (readonly dictionary)
-  - �X�^�C���`�F�[�����璊�o���ꂽ�E�B�W�F�b�g�̌��݂̃��P�[�g�X�^�C��
+  - スタイルチェーンから抽出されたウィジェットの現在のロケートスタイル
   - %[  
-	**margin{Left|Right|Top|Bottom}** (int) �E�B�W�F�b�g�̍�/�E/��/���ɑ}�������󂫃X�y�[�X�̃T�C�Y  
-	**alignHorizontal** (int) ���ɋ󂫃X�y�[�X������ۂɃE�B�W�F�b�g���A���C�����g�������  
-	**alignVertical** (int) �c�ɋ󂫃X�y�[�X������ۂɃE�B�W�F�b�g���A���C�����g�������  
+	**margin{Left|Right|Top|Bottom}** (int) ウィジェットの左/右/上/下に挿入される空きスペースのサイズ  
+	**alignHorizontal** (int) 横に空きスペースがある際にウィジェットをアライメントする方向  
+	**alignVertical** (int) 縦に空きスペースがある際にウィジェットをアライメントする方向  
 	]
 - **marginLeft** (int)
-  - locateStyle.marginLeft �̃V���[�g�J�b�g
+  - locateStyle.marginLeft のショートカット
 - **marginRight** (int)
-  - locateStyle.marginRight �̃V���[�g�J�b�g
+  - locateStyle.marginRight のショートカット
 - **marginTop** (int)
-  - locateStyle.marginTop �̃V���[�g�J�b�g
+  - locateStyle.marginTop のショートカット
 - **marginBottom** (int)
-  - locateStyle.marginBottom �̃V���[�g�J�b�g
+  - locateStyle.marginBottom のショートカット
 - **alignHorizontal** (int)
-  - locateStyle.alignHorizontal �̃V���[�g�J�b�g
+  - locateStyle.alignHorizontal のショートカット
 - **layoutStyle** (readonly dictionary)
-  - �X�^�C���`�F�[�����璊�o���ꂽ�E�B�W�F�b�g�̌��݂̃��C�A�E�g�X�^�C��
+  - スタイルチェーンから抽出されたウィジェットの現在のレイアウトスタイル
   - %[  
-	**spaceHorizontal** (int) �q�E�B�W�F�b�g�����ɕ��ׂĔz�u����ۑ}�������󂫃X�y�[�X�̃T�C�Y  
-	**spaceVertidcal** (int) �q�E�B�W�F�b�g���c�ɕ��ׂĔz�u����ۑ}�������󂫃X�y�[�X�̃T�C�Y  
-	**padding{Left|Right|Top|Bottom>** (int) �q�E�B�W�F�b�g�̔z�u���ɍ�/�E/��/�����ɊJ����X�y�[�X�̃T�C�Y  
+	**spaceHorizontal** (int) 子ウィジェットを横に並べて配置する際挿入される空きスペースのサイズ  
+	**spaceVertidcal** (int) 子ウィジェットを縦に並べて配置する際挿入される空きスペースのサイズ  
+	**padding{Left|Right|Top|Bottom>** (int) 子ウィジェットの配置時に左/右/上/下側に開けるスペースのサイズ  
 	]
 - **spaceHorizontal** (int)
-  - layoutStyle.spaceHorizontal �̃V���[�g�J�b�g
+  - layoutStyle.spaceHorizontal のショートカット
 - **spaceVertical** (int)
-  - layoutStyle.spaceVertical �̃V���[�g�J�b�g
+  - layoutStyle.spaceVertical のショートカット
 - **paddingLeft** (int)
-  - layoutStyle.paddingLeft �̃V���[�g�J�b�g
+  - layoutStyle.paddingLeft のショートカット
 - **paddingRight** (int)
-  - layoutStyle.paddingRight �̃V���[�g�J�b�g
+  - layoutStyle.paddingRight のショートカット
 - **paddingTop** (int)
-  - layoutStyle.paddingTop �̃V���[�g�J�b�g
+  - layoutStyle.paddingTop のショートカット
 - **paddingBottom** (int)
-  - layoutStyle.paddingBottom �̃V���[�g�J�b�g
+  - layoutStyle.paddingBottom のショートカット
 
 - **borderPaddingLeft** (int)
   - layoutStyle.paddingLeft + borderStyle.widthLeft  
-  �{�[�_�[�ƃp�f�B���O�̍����T�C�Y�̍��v�B  
-  �q�E�B�W�F�b�g��z�u����ۂ̍����̗]���̊�ł��B
+  ボーダーとパディングの左側サイズの合計。  
+  子ウィジェットを配置する際の左側の余白の基準です。
 - **borderPaddingRight** (int)
   - layoutStyle.paddingRight + borderStyle.widthRight  
-  �{�[�_�[�ƃp�f�B���O�̉E���T�C�Y�̍��v�B  
-  �q�E�B�W�F�b�g��z�u����ۂ̉E���̗]���̊�ł��B
+  ボーダーとパディングの右側サイズの合計。  
+  子ウィジェットを配置する際の右側の余白の基準です。
 - **borderPaddingTop** (int)
   - layoutStyle.paddingTop + borderStyle.widthTop  
-  �{�[�_�[�ƃp�f�B���O�̏㑤�T�C�Y�̍��v�B  
-  �q�E�B�W�F�b�g��z�u����ۂ̏㑤�̗]���̊�ł��B
+  ボーダーとパディングの上側サイズの合計。  
+  子ウィジェットを配置する際の上側の余白の基準です。
 - **borderPaddingBottom** (int)
   - layoutStyle.paddingBottom + borderStyle.widthBottom  
-  �{�[�_�[�ƃp�f�B���O�̉����T�C�Y�̍��v�B  
-  �q�E�B�W�F�b�g��z�u����ۂ̉����̗]���̊�ł��B
+  ボーダーとパディングの下側サイズの合計。  
+  子ウィジェットを配置する際の下側の余白の基準です。
 - **borderPaddingWidth** (int)
   - borderPaddingLeft + borderPaddingRight;
 - **borderPaddingHeight** (int)
@@ -154,155 +154,155 @@ Layer���Ή����Ă���`��֐��͂��ׂČĂяo���܂��B
 
 
 
-## ���\�b�h
+## メソッド
 - var **getOption**(*key, defaultValue = void*);
-  - �I�v�V�����������擾���܂��B  
-	�R���X�g���N�^�Ŏw�肳�ꂽ�I�v�V������������A
-	�����*key*�ɑΉ������l���擾���܂��B
-	�Ή�����*key*�����݂��Ȃ����ɂ́A
-	*defaultValue*���Ԃ��Ă��܂��B
+  - オプション引数を取得します。  
+	コンストラクタで指定されたオプション引数から、
+	特定の*key*に対応した値を取得します。
+	対応する*key*が存在しない時には、
+	*defaultValue*が返ってきます。
 
 - var **getStyleProperty**(*key, defaultValue = void*);
-  - �X�^�C���̃v���p�e�B���擾���܂��B  
-	���݂̃X�^�C���`�F�[������A
-	*key*�ɑΉ������v���p�e�B���������Ă��̒l���擾���܂��B
-	*key*�ɑΉ�����v���p�e�B����`����Ă��Ȃ��ꍇ�ɂ�
-	*defaultValue*���Ԃ��Ă��܂��B
+  - スタイルのプロパティを取得します。  
+	現在のスタイルチェーンから、
+	*key*に対応したプロパティを検索してその値を取得します。
+	*key*に対応するプロパティが定義されていない場合には
+	*defaultValue*が返ってきます。
 
 - object **find**(*name*);
-  - �E�B�W�F�b�g�c���[�������̖��O�����E�B�W�F�b�g���������܂��B
+  - ウィジェットツリーから特定の名前を持つウィジェットを検索します。
 - bool **isAncestorOf**(*widget*);
-  - �w���*widget*�������̐�c�ł��邩���肵�܂��B
+  - 指定の*widget*が自分の先祖であるか判定します。
 - bool **isDescendantOf**(*widget*);
-  - �w���*widget*�������̐�c�ł��邩���肵�܂��B
+  - 指定の*widget*が自分の先祖であるか判定します。
 - **setMinSize**(*minWidth, minHeight*);
-  - �E�B�W�F�b�g�̍ŏ��T�C�Y��ݒ肵�܂�
+  - ウィジェットの最小サイズを設定します
 - **setMaxSize**(*maxWidth, maxHeight*);
-  - �E�B�W�F�b�g�̍ő�T�C�Y��ݒ肵�܂�
+  - ウィジェットの最大サイズを設定します
 - **setMinMaxSize**(*minWidth, minHeight, maxWidth, maxHeight*);
-  - �E�B�W�F�b�g�̍ŏ��ő�T�C�Y���܂Ƃ߂Đݒ肵�܂�
+  - ウィジェットの最小最大サイズをまとめて設定します
 - **setFixedSize**(*width, height*);
-  - �E�B�W�F�b�g���Œ�T�C�Y�ɐݒ肵�܂�
+  - ウィジェットを固定サイズに設定します
 - **setFixedSizeToImageSize**(*width, height*);
-  - ***Layer#loadImages***()�Ń��[�h�����摜�T�C�Y�ɕ����ăE�B�W�F�b�g���Œ�T�C�Y�ɐݒ肵�܂�
+  - ***Layer#loadImages***()でロードした画像サイズに併せてウィジェットを固定サイズに設定します
 - **drawUIText**(*fontStyle, x, y, text, overrideFontColor = void*);
-  - �X�^�C���Ŏw�肳�ꂽ�t�H���g�X�^�C���ɉ�����UI�e�L�X�g��`�悵�܂��B
+  - スタイルで指定されたフォントスタイルに応じてUIテキストを描画します。
 
-	*x*,*y*�Ŏw�肵�����W��*text*��`�悵�܂��B
+	*x*,*y*で指定した座標に*text*を描画します。
 
-	*overrideFontColor*���w�肷��ƁA*fontStyle*���̂̏㏑���Ȃ���
-	�t�H���g�J���[�̂ݕύX���ĕ`����s���܂��B
+	*overrideFontColor*を指定すると、*fontStyle*自体の上書きなしに
+	フォントカラーのみ変更して描画を行えます。
 
 - object **drawUITextInRange**(*fontStyle, x, y, w, text, alignment, fill = false*);
-  - �w��͈͂�UI�e�L�X�g��`�悵�܂��B
+  - 指定範囲にUIテキストを描画します。
 
-	**drawUIText**() ���l�Ƀe�L�X�g��`�悵�܂����A
-	*w*�Ŏw�肵�������I�[�o�[�������͏ȗ��\������܂��B
-	�e�L�X�g�����w�蕝�ɑ���Ȃ��ꍇ�� *alignment* �ɂ���������
-	�E�l�߁E�Z���^�����O�E���l�߂̂����ꂩ�ŕ\������܂��B
-	*fill* ���w�肷��ƃe�L�X�g�`��O�� �o�b�N�O���E���h�J���[�Ŕw�i���t�B�����܂��B
+	**drawUIText**() 同様にテキストを描画しますが、
+	*w*で指定した幅をオーバーした分は省略表示されます。
+	テキスト幅が指定幅に足りない場合は *alignment* にしたがって
+	右詰め・センタリング・左詰めのいずれかで表示されます。
+	*fill* を指定するとテキスト描画前に バックグラウンドカラーで背景をフィルします。
 
-  - **�Ԃ�l**
+  - **返り値**
 	- %[  
-		**inRange** (bool) �e�L�X�g���w��͈͓��ɕ`�悳�ꂽ���ǂ���  
-		**x** (int) ���ۂɃe�L�X�g���`�悳�ꂽX���W  
-		**y** (int) ���ۂɃe�L�X�g���`�悳�ꂽY���W  
-		**w** (int) ���ۂɃe�L�X�g���`�悳�ꂽ��  
+		**inRange** (bool) テキストが指定範囲内に描画されたかどうか  
+		**x** (int) 実際にテキストが描画されたX座標  
+		**y** (int) 実際にテキストが描画されたY座標  
+		**w** (int) 実際にテキストが描画された幅  
 		]
 
 - **extractTextArea**(*fontStyle, text, lineSpacing*);
-  - �e�L�X�g���e�L�X�g�G���A�ɕ������A�`�揀�����s���܂��B
+  - テキストをテキストエリアに分割し、描画準備を行います。
 
-	�e�L�X�g���A�s���Ƃɕ������A
-	�w��̃X�^�C��(*fontStyle*)�ƍs��(*lineSpacing*)�ɏ]���ăT�C�Y�v�Z���s��
-	�e�L�X�g�G���A�̕`�揀�����s���܂��B
+	テキストを、行ごとに分割し、
+	指定のスタイル(*fontStyle*)と行間(*lineSpacing*)に従ってサイズ計算を行い
+	テキストエリアの描画準備を行います。
 
-	���̊֐��̕Ԃ����l�� **drawTextArea**() �֐��ɓn���ăe�L�X�g�G���A��`�悵�܂��B
+	この関数の返した値を **drawTextArea**() 関数に渡してテキストエリアを描画します。
 
-  - **�Ԃ�l**
+  - **返り値**
 	- %[  
-		**texts** (Array) �s���Ƃɕ������ꂽ�e�L�X�g�̔z��  
-		**textWidths** (Array) �s���Ƃ̃e�L�X�g�̕`�敝�̔z��  
-		**width** (int) �e�L�X�g�G���A�S�̂̕�  
-		**height** (int) �e�L�X�g�G���A�S�̂̍���  
+		**texts** (Array) 行ごとに分割されたテキストの配列  
+		**textWidths** (Array) 行ごとのテキストの描画幅の配列  
+		**width** (int) テキストエリア全体の幅  
+		**height** (int) テキストエリア全体の高さ  
 		]
 
 - **drawTextArea**(*fontStyle, x, y, w, lineSpacing, texts, textWidths, textAlign*);
-  - �e�L�X�g�G���A��`�悵�܂�
+  - テキストエリアを描画します
 
-	  **extractTextArea**() �œ���ꂽ�e�L�X�g�G���A���Ɋ�Â���
-	  �e�L�X�g�G���A��`�悵�܂��B
+	  **extractTextArea**() で得られたテキストエリア情報に基づいて
+	  テキストエリアを描画します。
 
-	  �e�s�̒������e�L�X�g�G���A�̑S�̕��ɖ����Ȃ��ꍇ�́AtextAlign�Ɋ�Â���
-	  ���񂹁E�Z���^�����O�E�E�񂹂Ŋe�s���A���C�����g����܂��B
+	  各行の長さがテキストエリアの全体幅に満たない場合は、textAlignに基づいて
+	  左寄せ・センタリング・右寄せで各行がアライメントされます。
 
 - **drawBorder**(*borderStyle, x, y, w, h, clear = true*);
-  - �{�[�_�[��`�悷��
+  - ボーダーを描画する
 
-	  *borderStyle*�ɉ����āA*x,y,w,h*�Ŏw�肵���̈�Ƀ{�[�_�[��`�悷��B
-	  *clear*���w�肷��ƕ`��O��*backgroundColor*�ŗ̈���N���A����B
+	  *borderStyle*に応じて、*x,y,w,h*で指定した領域にボーダーを描画する。
+	  *clear*を指定すると描画前に*backgroundColor*で領域をクリアする。
 
 - **drawChecker**(*l, t, w, h, csize, color1 = 0xFFFFFFFF, color2 = 0xFFC0C0C0, sx = 0, sy = 0*);
-  - �`�F�b�J�[(�s���͗l)��`�悵�܂��B
+  - チェッカー(市松模様)を描画します。
 
-	*(l,t,w,h)*�Ŏw�肵���̈��*color1*��*color2*�̓�F��*csize*�T�C�Y�̋�`��
-	�\�����ꂽ�s���͗l��`�悵�܂��B
-	*sx,sy*���w�肷��Ǝs���͗l�̕`��J�n�ʒu���V�t�g���܂��B
+	*(l,t,w,h)*で指定した領域に*color1*と*color2*の二色で*csize*サイズの矩形で
+	構成された市松模様を描画します。
+	*sx,sy*を指定すると市松模様の描画開始位置をシフトします。
 
 - **fillChecker**(*csize, color1 = 0xFFFFFFFF, color2 = 0xFFC0C0C0*);
-  - �E�B�W�F�b�g�̑S����`�F�b�J�[�Ńt�B�����܂��B
+  - ウィジェットの全域をチェッカーでフィルします。
 
 - object **getChildsBounds**(*child*);
-	- �}�[�W���A�p�f�B���O�A�{�[�_�[�����ׂĊ܂񂾁u�q�E�B�W�F�b�g�̃o�E���Y�v��Ԃ��܂��B
-	- **�Ԃ�l**  
+	- マージン、パディング、ボーダーをすべて含んだ「子ウィジェットのバウンズ」を返します。
+	- **返り値**  
 		%[  
-		**minWidth** (int)  �q�E�B�W�F�b�g��z�u����̂ɕK�v�ȋ󔒂��܂� minWidth
-		**maxWidth** (int) �q�E�B�W�F�b�g��z�u����̂ɕK�v�ȋ󔒂��܂� maxWidth
-		**minHeight** (int) �q�E�B�W�F�b�g��z�u����̂ɕK�v�ȋ󔒂��܂� minHeight
-		**maxHeight** (int) �q�E�B�W�F�b�g��z�u����̂ɕK�v�ȋ󔒂��܂� maxHeight
+		**minWidth** (int)  子ウィジェットを配置するのに必要な空白を含んだ minWidth
+		**maxWidth** (int) 子ウィジェットを配置するのに必要な空白を含んだ maxWidth
+		**minHeight** (int) 子ウィジェットを配置するのに必要な空白を含んだ minHeight
+		**maxHeight** (int) 子ウィジェットを配置するのに必要な空白を含んだ maxHeight
 
 - **embedChild**(*x, y, w, h, child, clear = false*);
-  - �w�肵���̈�Ɏq�E�B�W�F�b�g�𖄂ߍ��݂܂��B
+  - 指定した領域に子ウィジェットを埋め込みます。
 
-	  �w�肵���̈�Ƀ{�[�_�[��`�悵����ŁA�K�؂ȋ󔒂������Ďq�E�B�W�F�b�g��z�u���܂��B
-	  getChildBounds() �ƕ����Ĉȉ��̂悤�Ɏg���܂��B
+	  指定した領域にボーダーを描画した上で、適切な空白を加えて子ウィジェットを配置します。
+	  getChildBounds() と併せて以下のように使います。
 
 		var cb = getChildBounds(child);
 		setMinMaxSize(cb.minWidth, cb.minHeight, cb.maxWidth, cb.maxHeight);
 		embedChild(child, 0, 0, width, height);
 
-## �t�b�N
+## フック
 - **onExtractWidgetStyle**(*widgetStyle*);
-  - �E�B�W�F�b�g�ŗL�̃X�^�C����W�J����^�C�~���O�ŌĂяo����܂��B  
-	KWidget�̕W���X�^�C���v���p�e�B�ȊO��
-	�E�B�W�F�b�g�ŗL�̃X�^�C���v���p�e�B���`�������ꍇ�́A
-	���̃t�b�N���Ăяo���ꂽ�^�C�~���O�ňȉ��̂悤�Ƀv���p�e�B���擾�ł��܂��B
+  - ウィジェット固有のスタイルを展開するタイミングで呼び出されます。  
+	KWidgetの標準スタイルプロパティ以外に
+	ウィジェット固有のスタイルプロパティを定義したい場合は、
+	このフックが呼び出されたタイミングで以下のようにプロパティを取得できます。
 
 		function onExtractWidgetStyle(widgetStyle) {
 		  widgetStyle.lineSpacing = getStyleProperty("lineSpacing", 0);
 		}
 
 - **onAttachedToWindow**();
-  - �E�B�W�F�b�g���E�B���h�E�ɃA�^�b�`���ꂽ�^�C�~���O�ŌĂяo����܂�
+  - ウィジェットがウィンドウにアタッチされたタイミングで呼び出されます
 - **onDetachedFromWindow**();
-  - �E�B�W�F�b�g���E�B���h�E����Ń^�b�`���ꂽ�^�C�~���O�ŌĂяo����܂�
+  - ウィジェットがウィンドウからでタッチされたタイミングで呼び出されます
 - **onBindPersistentDictionary**(*dictionary*);
-  - �i���������ƃo�C���h�����^�C�~���O�ŌĂяo����܂�  
-  ��������v���p�e�B�̏����l��ǂ݂����̂ɗ��p���܂��B
+  - 永続化辞書とバインドされるタイミングで呼び出されます  
+  辞書からプロパティの初期値を読みだすのに利用します。
 - **onUnbindPersistentDictionary**(*dictionary*);
-  - �i���������Ƃ̃o�C���h�����������^�C�~���O�ŌĂяo����܂��B  
-  �����Ƀv���p�e�B�̌��ݒl���L�^����̂ɗ��p���܂��B
+  - 永続化辞書とのバインドが解除されるタイミングで呼び出されます。  
+  辞書にプロパティの現在値を記録するのに利用します。
 - **onValueModified**(*newValue* );
-  - **�l**�����E�B�W�F�b�g�Œl���ύX���ꂽ�^�C�~���O�ŌĂяo����܂��B
+  - **値**を持つウィジェットで値が変更されたタイミングで呼び出されます。
 
-	  **�f�t�H���g����**  
-	  �e�� onChildValueModified() ���Ăяo���܂��B
+	  **デフォルト動作**  
+	  親の onChildValueModified() を呼び出します。
 
 - **onChildValueModified**(*child, newValue* );
-  - �q�̒l���ύX���ꂽ�^�C�~���O�ŌĂяo����܂��B
+  - 子の値が変更されたタイミングで呼び出されます。
 
-	  **�f�t�H���g����**  
-	  �e�� onChildValueModified()�ɂ��̂܂܃f���Q�[�g���܂��B
-	  ���̓���ɂ��A�E�B�W�F�b�g�c���[�̏�ʊK�w�ŁA
-	  �q���E�B�W�F�b�g�̒l�̕ύX���܂Ƃ߂ĕ⑫���邱�Ƃ��o���܂��B
+	  **デフォルト動作**  
+	  親の onChildValueModified()にそのままデリゲートします。
+	  この動作により、ウィジェットツリーの上位階層で、
+	  子孫ウィジェットの値の変更をまとめて補足することが出来ます。
 

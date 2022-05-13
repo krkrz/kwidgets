@@ -1,34 +1,34 @@
 # KEntity
 
-KEntity �͎��̂����E�B�W�F�b�g�̃x�[�X�ƂȂ�N���X�ł��B
+KEntity は実体を持つウィジェットのベースとなるクラスです。
 
-���ʌ݊������ێ����邽�߂̗��j�I�o�܂� KWidget �ƕ��������`�Œ�`����Ă��܂����A
-kwidgets ver2 �ȍ~�́A���� KEntity ��������
-���ׂẴE�B�W�F�b�g�̊��N���X�ƈ����Ă��܂��܂���B
+下位互換性を維持するための歴史的経緯で KWidget と分離した形で定義されていますが、
+kwidgets ver2 以降は、この KEntity を実質上
+すべてのウィジェットの基底クラスと扱ってかまいません。
 
-## �e�N���X
+## 親クラス
 
 **KEntity** -> [KWidget](KWidget.md)
 
-## �R���X�g���N�^
+## コンストラクタ
 ```KEntity(window, options = %[])```
 
-## ���\�b�h
+## メソッド
 - **redarwContents**();
-  - �R���e���c�̍ĕ`������N�G�X�g���܂��B
+  - コンテンツの再描画をリクエストします。
 
-	�����𖞂����Ă���Α����� **onDrawContents**() ���Ăяo����܂��B
+	条件を満たしていれば即座に **onDrawContents**() が呼び出されます。
 
-	�E�B���h�E�ɃA�^�b�`����Ă��Ȃ����Ȃǂ́A
-	�����ɌĂяo�����s��ꂸ�A
-	�����𖞂������i�K�Œx�����Ď��s���s���܂��B
+	ウィンドウにアタッチされていない時などは、
+	即座に呼び出しが行われず、
+	条件を満たした段階で遅延して実行が行われます。
 
-## �t�b�N
+## フック
 - **onDrawContents**();
-  - �R���e���c�̍ĕ`�悪�K�v�ȃ^�C�~���O�ŌĂяo����܂��B
+  - コンテンツの再描画が必要なタイミングで呼び出されます。
 
-	�p���N���X�œK�؂Ɏ������āA�R���e���c��`�悷��R�}���h���L�q���܂��B
+	継承クラスで適切に実装して、コンテンツを描画するコマンドを記述します。
 	
-	*redrawContents*() �Ŗ����I�ɌĂяo���ȊO�ɁA
-	�G���e�B�e�B�̃X�^�C����T�C�Y���ύX����A
-	�V�X�e���I�ɍĕ`�悪�K�v�ɂȂ����^�C�~���O�ł��Ăяo����܂��B
+	*redrawContents*() で明示的に呼び出す以外に、
+	エンティティのスタイルやサイズが変更され、
+	システム的に再描画が必要になったタイミングでも呼び出されます。

@@ -1,42 +1,42 @@
 # KValueEntity
 
-KValueEntity �́u�l�v�����E�B�W�F�b�g�̃x�[�X�ƂȂ�N���X�ł��B
+KValueEntity は「値」を持つウィジェットのベースとなるクラスです。
 
-�i���������Ƃ̃o�C���h�A�l�̐e�ւ̒ʒm�Ȃǂ̋@�\�������܂��B
+永続化辞書とのバインド、値の親への通知などの機能を持ちます。
 
-**value** �v���p�e�B���p���N���X�Ŏ������邱�ƂŁA�ȉ��̋@�\�������I�Ɏg����悤�ɂȂ�܂��B
+**value** プロパティを継承クラスで実装することで、以下の機能が自動的に使えるようになります。
 
-1. **�i���������Ƃ̃o�C���h**
+1. **永続化辞書とのバインド**
 
-   �i���������ƃo�C���h���ꂽ�^�C�~���O��**value**�̒l����������ǂݏo���A
-   �A���o�C���h���ꂽ�^�C�~���O�Ŏ����ɏ����߂��悤�ɂȂ�܂��B
+   永続化辞書とバインドされたタイミングで**value**の値を辞書から読み出し、
+   アンバインドされたタイミングで辞書に書き戻すようになります。
 
-   �Ȃ��A�����̃L�[�̓E�B���h�E��name�v���p�e�B�ƃE�B�W�F�b�g��name�v���p�e�B���琶�������̂ŁA
-   name���w�肳��Ă��Ȃ��E�B�W�F�b�g�ł̓o�C���h�͍s���܂���B
+   なお、辞書のキーはウィンドウのnameプロパティとウィジェットのnameプロパティから生成されるので、
+   nameが指定されていないウィジェットではバインドは行われません。
 
-2. **dispatch() �ɂ��l�̒ʒm�B**
+2. **dispatch() による値の通知。**
 
-   �C�ӂ̃^�C�~���O�ŁA**dispatch**() �����s���邱�Ƃɂ���Č��݂́u�l�v��
-   **onValueModified**() �t�b�N�ɒʒm���邱�Ƃ��ł��܂��B
+   任意のタイミングで、**dispatch**() を実行することによって現在の「値」を
+   **onValueModified**() フックに通知することができます。
 
-   �Ȃ��AnodeEnabled = false �̏�Ԃł́A**dispatch**() �����s���Ă�
-   �ʒm�͍s���܂���B
+   なお、nodeEnabled = false の状態では、**dispatch**() を実行しても
+   通知は行われません。
  
 
-## �e�N���X
+## 親クラス
 
 **KValueEntity** -> [KEntity](KEntity.md) -> [KWidget](KWidget.md)
 
-## �R���X�g���N�^
+## コンストラクタ
 ```KValueEntity(window, options = %[])```
 
-## �v���p�e�B
+## プロパティ
 
 - **value**
-  - �l������킷�v���p�e�B  
-	�p���N���X�œK�؂Ɏ�������K�v������܂��B
+  - 値をあらわすプロパティ  
+	継承クラスで適切に実装する必要があります。
 
-## ���\�b�h
+## メソッド
 - **dispatch**();
-  - ���݂́u�l�v�� **onValueModifed**() �t�b�N�ɒʒm���܂��B
+  - 現在の「値」を **onValueModifed**() フックに通知します。
 

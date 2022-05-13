@@ -1,62 +1,62 @@
 # KVirtualWidget
 
-KVirtualWidget ��
-�X�N���[���̈�̓��A���ۂɉ�ʂɕ\������鋷���̈�݂̂Ƀ��C���̎��̂����蓖�Ă邱�ƂŁA
-���Ȃ�����������ōL��ȗ̈�̕`����\�ɂ���d�g�݂ł��B
+KVirtualWidget は
+スクロール領域の内、実際に画面に表示される狭い領域のみにレイヤの実体を割り当てることで、
+少ないメモリ消費で広大な領域の描画を可能にする仕組みです。
 
-KScrollLayout �Ɋi�[���� KVirtualWidget �̕\���̈悪�X�V�����ƁA
-�V���ɕ\�����ꂽ�̈�̕`����s������ onDraw() �t�b�N���Ăяo����܂��B
+KScrollLayout に格納した KVirtualWidget の表示領域が更新されると、
+新たに表示された領域の描画を行うため onDraw() フックが呼び出されます。
 
-onDraw() �t�b�N���ł́A�ʏ�̋g���g����
+onDraw() フック内では、通常の吉里吉里の
 [Layer](https://krkrz.github.io/docs/kirikiriz/j/contents/f_Layer.html)
-�Ɠ��l�̕`��֐��Q���g���ă��C���ւ̕`������N�G�X�g���邱�Ƃ��ł��܂��B
+と同様の描画関数群を使ってレイヤへの描画をリクエストすることができます。
 
-���ۂɂ͂����̕`�惊�N�G�X�g�́A�\���̈�Ɠ����̃T�C�Y���������Ȃ�
-�����I�� **canvas** ���C���ɓ]�����ď�������܂��B
+実際にはこれらの描画リクエストは、表示領域と同等のサイズしか持たない
+内部的な **canvas** レイヤに転送して処理されます。
 
-## �e�N���X
+## 親クラス
 
 **KVirtualWidget** -> [KEntity](KEntity.md) -> [KWidget](KWidget.md)
 
-## �R���X�g���N�^
+## コンストラクタ
 ```KVirtualWidget(window, options = %[])```
 
-## �v���p�e�B
+## プロパティ
 - Layer **canvas** (readonly)
-  - ���ۂ̕`�悪�s����L�����o�X���C��
+  - 実際の描画が行われるキャンバスレイヤ
 - **siteLeft** (int)
-  - ���݂�canvas�́A�X�N���[���̈撆�ɐ�߂鍶�[���W
+  - 現在のcanvasの、スクロール領域中に占める左端座標
 - **siteTop** (int)
-  - ���݂�canvas�́A�X�N���[���̈撆�ɐ�߂��[���W
+  - 現在のcanvasの、スクロール領域中に占める上端座標
 - **siteWidth** (int)
-  - ���݂�canvas�́A�X�N���[���̈撆�ɐ�߂镝
+  - 現在のcanvasの、スクロール領域中に占める幅
 - **siteWidth** (int)
-  - ���݂�canvas�́A�X�N���[���̈撆�ɐ�߂鍂��
+  - 現在のcanvasの、スクロール領域中に占める高さ
 - **avoidSiteUpdateDrawing** (bool)
-  - �̈�X�V���̍ĕ`����s�����ǂ���
+  - 領域更新時の再描画を行うかどうか
 
-	���̃v���p�e�B��true���w�肷��ƁA�ꎞ�I�ɃT�C�g�X�V���̍ĕ`�悪�}������܂��B
-	�`�惊�N�G�X�g�̓L���b�V������Afalse���w�肵���u�Ԃɍĕ`�悪���s����܂��B
+	このプロパティにtrueを指定すると、一時的にサイト更新時の再描画が抑制されます。
+	描画リクエストはキャッシュされ、falseを指定した瞬間に再描画が実行されます。
 
-	�E�B�W�F�b�g�ɍĕ`��𔺂��傫�ȕύX��A�����ĉ�����ہA
-	�X�V���I���܂ŕ`���}������Ƃ������ړI�Ŏg�p���܂��B
+	ウィジェットに再描画を伴う大きな変更を連続して加える際、
+	更新が終わるまで描画を抑制するといった目的で使用します。
 
-## ���\�b�h
+## メソッド
 - **redrawRect**(*left, top, width, height*);
-  - �E�B�W�F�b�g���̎w�肵���̈�ɍĕ`�惊�N�G�X�g�𑗂�܂��B
+  - ウィジェット中の指定した領域に再描画リクエストを送ります。
 - **redrawAll**();
-  - �E�B�W�F�b�g�̑S��ɍĕ`�惊�N�G�X�g�𑗂�܂��B
+  - ウィジェットの全域に再描画リクエストを送ります。
 
-## �t�b�N
+## フック
 - **onDraw(left, top, width, height);
-  - canvas�ւ̍ĕ`�悪�K�v�ȃ^�C�~���O�ŌĂ΂�܂��B
+  - canvasへの再描画が必要なタイミングで呼ばれます。
 
-	�̈�̃X�N���[���A�E�B�W�F�b�g�̃��T�C�Y�A�`�惊�N�G�X�g�̔��s�ȂǁA
-	�l�X�ȗv���ōĕ`�悪�K�v�ɂȂ����^�C�~���O�ŌĂяo�����t�b�N�ł��B
+	領域のスクロール、ウィジェットのリサイズ、描画リクエストの発行など、
+	様々な要因で再描画が必要になったタイミングで呼び出されるフックです。
 
-	�ʏ��Layer�̍X�V�Ɠ��l�̎菇�ŁA�w��̗̈�֕`�揈�������s���Ă��������B
+	通常のLayerの更新と同様の手順で、指定の領域へ描画処理を実行してください。
 
-## �����ς݂̃f���Q�[�g�`��֐�
+## 実装済みのデリゲート描画関数
 - **drawText**();
 - **drawUIText**();
 - **drawUITextInRange**();
@@ -88,16 +88,16 @@ onDraw() �t�b�N���ł́A�ʏ�̋g���g����
 - **drawRectangles**();
 - **drawPathString**();
 
-## �C�ӂ̕`��֐����f���Q�[�g�Ώۂɂ���
-KVirtualWidget�Ƀr���g�C������Ă��Ȃ��`��֐���
-�Ή�������ɂ́Akwidgets��mixin�@�\���g���܂��B
+## 任意の描画関数をデリゲート対象にする
+KVirtualWidgetにビルトインされていない描画関数を
+対応させるには、kwidgetsのmixin機能を使います。
 
-��Ƃ��āADLL�o�R��Layer�N���X�Ɉȉ��̂悤�Ȏd�l�̕`��֐����ǉ����ꂽ�ꍇ���l���܂��B
+例として、DLL経由でLayerクラスに以下のような仕様の描画関数が追加された場合を考えます。
 
 	function grayscaleRect(left, top, width, height, rate);
-	// �w��̗̈��ω������w�肵�ăO���[�X�P�[��������֐�
+	// 指定の領域を変化率を指定してグレースケール化する関数
 
-�����Ƃ��āA�܂��ȉ��̂悤�ȃf���Q�[�g�N���X�����܂��B
+準備として、まず以下のようなデリゲートクラスを作ります。
 
 	class MyVirtualWidgetDelegate
 		function grasyaleRect(left, top, width, height, rate) {
@@ -105,12 +105,12 @@ KVirtualWidget�Ƀr���g�C������Ă��Ȃ��`��֐���
 		}
 	}
 
-**KVirtualWidget#grayscaleRect**() ���Ăяo���ꂽ�Ƃ��ɁA
-���W������킷 *left*��*top*�̈������A
-���E�̃X�N���[���ʂł��� *siteLeft*��*siteTop*���g���ĕ␳������ŁA
-���ۂ̕`���ł���canvas�ɑ΂��ăf���Q�[�g����悤�ɂ��Ă��܂��B
+**KVirtualWidget#grayscaleRect**() が呼び出されたときに、
+座標をあらわす *left*と*top*の引数を、
+視界のスクロール量である *siteLeft*と*siteTop*を使って補正した上で、
+実際の描画先であるcanvasに対してデリゲートするようにしています。
 
-���Ƃ́A�ȉ��̂悤�ɂ��Ă��̃f���Q�[�g�N���X��KVirtualWidget�Ƀ~�b�N�X�C������ΑΉ������ł��B
+あとは、以下のようにしてこのデリゲートクラスをKVirtualWidgetにミックスインすれば対応完了です。
 
 	mixin(KVirtualWidget, MyVirtualWidgetDelegate);
 
