@@ -47,6 +47,12 @@ onDraw() フック内では、通常の吉里吉里の
 - **redrawAll**();
   - ウィジェットの全域に再描画リクエストを送ります。
 
+## 静的メソッド
+- **registerDelegateClasss**(*delegateClass*);
+  - デリゲートクラスを登録します。
+- **unregisterDelegateClasss**(*delegateClass*);
+  - デリゲートクラスを解除します。
+
 ## フック
 - **onDraw(left, top, width, height);
   - canvasへの再描画が必要なタイミングで呼ばれます。
@@ -89,8 +95,7 @@ onDraw() フック内では、通常の吉里吉里の
 - **drawPathString**();
 
 ## 任意の描画関数をデリゲート対象にする
-KVirtualWidgetにビルトインされていない描画関数を
-対応させるには、kwidgetsのmixin機能を使います。
+KVirtualWidgetにビルトインされていない描画関数を後付けでデリゲート対象にすることができます。
 
 例として、DLL経由でLayerクラスに以下のような仕様の描画関数が追加された場合を考えます。
 
@@ -110,8 +115,8 @@ KVirtualWidgetにビルトインされていない描画関数を
 視界のスクロール量である *siteLeft*と*siteTop*を使って補正した上で、
 実際の描画先であるcanvasに対してデリゲートするようにしています。
 
-あとは、以下のようにしてこのデリゲートクラスをKVirtualWidgetにミックスインすれば対応完了です。
+あとは、以下のようにしてこのデリゲートクラスをKVirtualWidgetに登録すれば対応完了です。
 
-	mixin(KVirtualWidget, MyVirtualWidgetDelegate);
+	KVirtualWidget.registerDelegateClass(MyVirtualWidgetDelegate);
 
 
