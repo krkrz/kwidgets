@@ -1,13 +1,13 @@
-# KTextToggleButton
+# KTextLabel
 
-KTextToggleButton は、任意のテキストラベルを表示するトグルボタンです。
+KTextLabel は、任意のテキストを表示するラベルです。
 
 ## 親クラス
 
-**KTextToggleButton** -> [KToggleButton](KToggleButton.md) -> [KValueEntity](KValueEntity.md) -> [KEntity](KEntity.md) -> [KWidget](KWidget.md)
+**KTextLabel** -> [KLabel](KLabel.md) -> [KEntity](KEntity.md) -> [KWidget](KWidget.md)
 
 ## コンストラクタ
-```KTextToggleButton(window, options = %[])```
+```KTextLabel(window, options = %[])```
 
 ### オプション引数(型: 初期値)
 - **label** (string)

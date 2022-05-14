@@ -25,3 +25,6 @@ KTextButton は、任意のテキストラベルを表示するボタンです�
 - **textAlign** ([Alignment](KDefs.md#alignment) : ALIGN_LEFT)
   - テキストアライメント  
 	variableWidth = true 時にテキストを配置するアライメントを指定します。
+- **maxLabelWidth** (int: void)
+  - ラベルの最大表示幅
+  ラベルの最大表示幅を明示的に指定します。
