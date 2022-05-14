@@ -10,6 +10,9 @@ KTextInput は、指定したフォーマットのみ受け付けるテキストフィールドです。
 ```KTextInput(window, options = %[])```
 
 ### オプション引数(型: 初期値)
+- **focusable** (bool: true)
+  - フォーカス可能
+    trueを指定するとフォーカス可能になります。
 - **width** (int)
   - テキストフィールドの幅
 - **height** (int)

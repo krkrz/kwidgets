@@ -14,6 +14,9 @@ KTextEditは、長文のテキストを編集できるテキストエディタ�
 ```KTextEdit(window, options = %[])```
 
 ### オプション引数(型: 初期値)
+- **focusable** (bool: true)
+  - フォーカス可能
+    trueを指定するとフォーカス可能になります。
 - **tabWidth** (int: 4) 
   - KTextEditに値を設定した際、tabは自動的にスペースに展開されます。
   その文字数を設定します。

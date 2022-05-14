@@ -84,13 +84,15 @@
 			klass: "KToggleButton",
 			style: %[
 				fontColor: 0,
-				frameType: FRAME_RAISED,
 				nodeDisabled: %[ fontColor: 0x808080 ],
 				hover: %[
 					backgroundColor: 0xfff8f8f8
 				],
 				mouseDown: %[
 					backgroundColor: 0xffffffff,
+				],
+				toggleOff: %[
+					frameType: FRAME_RAISED,
 				],
 				toggleOn: %[
 					frameType: FRAME_SUNKEN,
