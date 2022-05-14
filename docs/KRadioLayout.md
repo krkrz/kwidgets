@@ -20,6 +20,7 @@ KGridLayout同様にグリッド上に配置を行えます。
 子である KRadioButton のオプション引数 **choice** が、
 そのウィジェットを選択した際の「ラジオボックスの値」となります。
 
+## 親クラス
 **KRadioLayout** -> [KGridLayout](KGridLayout.md) -> [KLayout](KLayout.md) -> [KEntity](KEntity.md) -> [KWidget](KWidget.md)
 
 ## コンストラクタ
