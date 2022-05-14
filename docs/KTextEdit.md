@@ -57,7 +57,7 @@ KTextEditは、長文のテキストを編集できるテキストエディタ�
   キーコード*key*とモディファイヤ*modifier*で指定されるキーと特定の関数*func*を関連付けます。  
 	*shiftSelect*に1を指定すると、shiftキーを押しながらの選択範囲の移動ができるようになります。  
 	*shiftSelect*に2を指定すると、操作に伴い選択範囲解除しないようになります。
-- **bindWindoskeyMap**();
+- **bindWindosKeyMap**();
   - Windowsのメモ帳仕様のキーマップをバインドします。
 - **bindEmacsKeyMap**();
   - Emacs仕様のキーマップをバインドします。
