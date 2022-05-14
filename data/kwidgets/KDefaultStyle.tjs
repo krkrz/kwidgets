@@ -128,8 +128,14 @@
 			klass: "KCheckBox",
 			style: %[
 				fontColor: 0,
-				nodeDisabled: %[ fontColor: 0x808080 ],
-				focus: %[ fontUnderline: true ],
+				opacity: 255,
+				nodeDisabled: %[
+					fontColor: 0x808080,
+					opacity: 128
+				],
+				focus: %[
+					fontUnderline: true
+				],
 				hover: %[
 					backgroundColor: 0xfff8f8f8
 				],
