@@ -1,6 +1,6 @@
 # KWidget
 
-KWidgetはすべてのウィジェットの既定となるベースクラスです。
+KWidgetはすべてのウィジェットの基底となるベースクラスです。
 
 吉里吉里のLayer クラスの継承クラスなので、
 Layerが対応している描画関数はすべて呼び出せます。
@@ -15,12 +15,12 @@ Layerが対応している描画関数はすべて呼び出せます。
 - **name** (string: "")
   - 名前
 
-	UIツリー上のウィジェットは指定した名前で識別可能になります。
+	UIツリー上のウィジェットは引数で指定した任意の名前で検索できるようになります。
 
 - **id** (string: "")
   - ID
 
-	 IDを設定することで対応した特定のスタイルを指定可能になります。
+	 IDを設定することで特定のスタイルと対応させられます。
 
 - **style** (dictionary: %[])
   - スタイル
@@ -46,8 +46,6 @@ Layerが対応している描画関数はすべて呼び出せます。
 ## プロパティ
 - **id** (string)
   - ID
-- **style** (dictionary)
-  - スタイル
 - **status** (string)
   - ステータス
 - **hint** (string)
@@ -68,7 +66,7 @@ Layerが対応している描画関数はすべて呼び出せます。
   - ウィジェットの最大高さ
 - **widgetStyle** (readonly dictionary)
   - ウィジェット固有のスタイル  
-	KWidgetの標準スタイルとは別に、継承クラスでウィジェット固有のスタイル定義を格納するための辞書。
+	KWidgetの標準スタイルプロパティとは別に、継承クラスでウィジェット固有のスタイルプロパティを格納するための辞書。
 - **fontStyle** (readonly dictionary)
   - スタイルチェーンから抽出されたウィジェットの現在のフォントスタイル  
   - %[  
@@ -90,7 +88,7 @@ Layerが対応している描画関数はすべて呼び出せます。
 	**backgroundColor** (int) 背景カラー(0xAARRGGBB)  
 	**width{Left|Right|Top|Bottom}** (int) 左/右/上/下幅  
 	**color{Left|Right|Top|Bottom}** (int) 左/右/上/下カラー(0xRRGGBB)  
-	**style{Left|Right|Top|Bottom}** (int) 左/右/上/下スタイル  
+	**style{Left|Right|Top|Bottom}** ([BorderStyle](KDefs#borderstyle)) 左/右/上/下スタイル  
 	**radius{LeftTop|RightTop|LeftBottom|RightBottom}** (int) 左上/右上/左下/右下半径  
 	]
 
@@ -98,8 +96,8 @@ Layerが対応している描画関数はすべて呼び出せます。
   - スタイルチェーンから抽出されたウィジェットの現在のロケートスタイル
   - %[  
 	**margin{Left|Right|Top|Bottom}** (int) ウィジェットの左/右/上/下に挿入される空きスペースのサイズ  
-	**alignHorizontal** (int) 横に空きスペースがある際にウィジェットをアライメントする方向  
-	**alignVertical** (int) 縦に空きスペースがある際にウィジェットをアライメントする方向  
+	**alignHorizontal** ([Alignment](KDefs.md#alignment)) 横に空きスペースがある際にウィジェットをアライメントする方向  
+	**alignVertical** ([Alignment](KDefs.md#alignment)) 縦に空きスペースがある際にウィジェットをアライメントする方向  
 	]
 - **marginLeft** (int)
   - locateStyle.marginLeft のショートカット
@@ -109,14 +107,16 @@ Layerが対応している描画関数はすべて呼び出せます。
   - locateStyle.marginTop のショートカット
 - **marginBottom** (int)
   - locateStyle.marginBottom のショートカット
-- **alignHorizontal** (int)
+- **alignHorizontal** ([Alignment](KDefs.md#alignment))
   - locateStyle.alignHorizontal のショートカット
+- **alignVertical** ([Alignment](KDefs.md#alignment))
+  - locateStyle.alignVertical のショートカット
 - **layoutStyle** (readonly dictionary)
   - スタイルチェーンから抽出されたウィジェットの現在のレイアウトスタイル
   - %[  
-	**spaceHorizontal** (int) 子ウィジェットを横に並べて配置する際挿入される空きスペースのサイズ  
-	**spaceVertidcal** (int) 子ウィジェットを縦に並べて配置する際挿入される空きスペースのサイズ  
-	**padding{Left|Right|Top|Bottom>** (int) 子ウィジェットの配置時に左/右/上/下側に開けるスペースのサイズ  
+	**spaceHorizontal** (int) 子ウィジェットを横に複数並べて配置する際、挿入される空きスペースのサイズ  
+	**spaceVertidcal** (int) 子ウィジェットを縦に複数並べて配置する際、挿入される空きスペースのサイズ  
+	**padding{Left|Right|Top|Bottom}** (int) 子ウィジェットの配置時に左/右/上/下側に開けるスペースのサイズ  
 	]
 - **spaceHorizontal** (int)
   - layoutStyle.spaceHorizontal のショートカット
@@ -152,8 +152,6 @@ Layerが対応している描画関数はすべて呼び出せます。
 - **borderPaddingHeight** (int)
   - borderPaddingTop + borderPaddingBottom;
 
-
-
 ## メソッド
 - var **getOption**(*key, defaultValue = void*);
   - オプション引数を取得します。  
@@ -169,12 +167,15 @@ Layerが対応している描画関数はすべて呼び出せます。
 	*key*に対応するプロパティが定義されていない場合には
 	*defaultValue*が返ってきます。
 
+- **overwriteStyle**(*style*);
+  - スタイルを上書きします。
+
 - object **find**(*name*);
   - ウィジェットツリーから特定の名前を持つウィジェットを検索します。
 - bool **isAncestorOf**(*widget*);
   - 指定の*widget*が自分の先祖であるか判定します。
 - bool **isDescendantOf**(*widget*);
-  - 指定の*widget*が自分の先祖であるか判定します。
+  - 指定の*widget*が自分の子孫であるか判定します。
 - **setMinSize**(*minWidth, minHeight*);
   - ウィジェットの最小サイズを設定します
 - **setMaxSize**(*maxWidth, maxHeight*);
@@ -183,23 +184,24 @@ Layerが対応している描画関数はすべて呼び出せます。
   - ウィジェットの最小最大サイズをまとめて設定します
 - **setFixedSize**(*width, height*);
   - ウィジェットを固定サイズに設定します
-- **setFixedSizeToImageSize**(*width, height*);
+- **setFixedSizeToImageSize**();
   - ***Layer#loadImages***()でロードした画像サイズに併せてウィジェットを固定サイズに設定します
 - **drawUIText**(*fontStyle, x, y, text, overrideFontColor = void*);
   - スタイルで指定されたフォントスタイルに応じてUIテキストを描画します。
 
 	*x*,*y*で指定した座標に*text*を描画します。
 
-	*overrideFontColor*を指定すると、*fontStyle*自体の上書きなしに
-	フォントカラーのみ変更して描画を行えます。
+	*overrideFontColor*を指定すると、*fontStyle* を変更せずに
+	フォントカラーのみ変えて描画を行えます。
 
-- object **drawUITextInRange**(*fontStyle, x, y, w, text, alignment, fill = false*);
+- dictionary **drawUITextInRange**(*fontStyle, x, y, w, text, alignment, fill = false*);
   - 指定範囲にUIテキストを描画します。
 
 	**drawUIText**() 同様にテキストを描画しますが、
 	*w*で指定した幅をオーバーした分は省略表示されます。
 	テキスト幅が指定幅に足りない場合は *alignment* にしたがって
 	右詰め・センタリング・左詰めのいずれかで表示されます。
+	([Alignment](KDefs.md#alignment) で指定します)
 	*fill* を指定するとテキスト描画前に バックグラウンドカラーで背景をフィルします。
 
   - **返り値**
@@ -235,12 +237,13 @@ Layerが対応している描画関数はすべて呼び出せます。
 
 	  各行の長さがテキストエリアの全体幅に満たない場合は、textAlignに基づいて
 	  左寄せ・センタリング・右寄せで各行がアライメントされます。
+	  ([Alignment](KDefs.md#alignment) で指定します)
 
 - **drawBorder**(*borderStyle, x, y, w, h, clear = true*);
-  - ボーダーを描画する
+  - ボーダーを描画します
 
-	  *borderStyle*に応じて、*x,y,w,h*で指定した領域にボーダーを描画する。
-	  *clear*を指定すると描画前に*backgroundColor*で領域をクリアする。
+	  *borderStyle*に応じて、*x,y,w,h*で指定した領域にボーダーを描画します。
+	  *clear*を指定すると描画前に*backgroundColor*で領域をクリアします。
 
 - **drawChecker**(*l, t, w, h, csize, color1 = 0xFFFFFFFF, color2 = 0xFFC0C0C0, sx = 0, sy = 0*);
   - チェッカー(市松模様)を描画します。
@@ -252,14 +255,15 @@ Layerが対応している描画関数はすべて呼び出せます。
 - **fillChecker**(*csize, color1 = 0xFFFFFFFF, color2 = 0xFFC0C0C0*);
   - ウィジェットの全域をチェッカーでフィルします。
 
-- object **getChildsBounds**(*child*);
-	- マージン、パディング、ボーダーをすべて含んだ「子ウィジェットのバウンズ」を返します。
+- dictionary **getChildBounds**(*child*);
+	- マージン、パディング、ボーダーをすべて含んだ「子ウィジェットのサイズ情報」を返します。
 	- **返り値**  
 		%[  
-		**minWidth** (int)  子ウィジェットを配置するのに必要な空白を含んだ minWidth
-		**maxWidth** (int) 子ウィジェットを配置するのに必要な空白を含んだ maxWidth
-		**minHeight** (int) 子ウィジェットを配置するのに必要な空白を含んだ minHeight
-		**maxHeight** (int) 子ウィジェットを配置するのに必要な空白を含んだ maxHeight
+		**minWidth** (int)  子ウィジェットを配置するのに必要な空白を含んだ minWidth  
+		**maxWidth** (int) 子ウィジェットを配置するのに必要な空白を含んだ maxWidth  
+		**minHeight** (int) 子ウィジェットを配置するのに必要な空白を含んだ minHeight  
+		**maxHeight** (int) 子ウィジェットを配置するのに必要な空白を含んだ maxHeight  
+		]
 
 - **embedChild**(*x, y, w, h, child, clear = false*);
   - 指定した領域に子ウィジェットを埋め込みます。
@@ -276,7 +280,8 @@ Layerが対応している描画関数はすべて呼び出せます。
   - ウィジェット固有のスタイルを展開するタイミングで呼び出されます。  
 	KWidgetの標準スタイルプロパティ以外に
 	ウィジェット固有のスタイルプロパティを定義したい場合は、
-	このフックが呼び出されたタイミングで以下のようにプロパティを取得できます。
+	継承先クラスでこのフックが呼び出されたタイミングで
+	以下のようにプロパティを取得して保存してください。
 
 		function onExtractWidgetStyle(widgetStyle) {
 		  widgetStyle.lineSpacing = getStyleProperty("lineSpacing", 0);
@@ -285,7 +290,7 @@ Layerが対応している描画関数はすべて呼び出せます。
 - **onAttachedToWindow**();
   - ウィジェットがウィンドウにアタッチされたタイミングで呼び出されます
 - **onDetachedFromWindow**();
-  - ウィジェットがウィンドウからでタッチされたタイミングで呼び出されます
+  - ウィジェットがウィンドウからデタッチされたタイミングで呼び出されます
 - **onBindPersistentDictionary**(*dictionary*);
   - 永続化辞書とバインドされるタイミングで呼び出されます  
   辞書からプロパティの初期値を読みだすのに利用します。
@@ -296,13 +301,13 @@ Layerが対応している描画関数はすべて呼び出せます。
   - **値**を持つウィジェットで値が変更されたタイミングで呼び出されます。
 
 	  **デフォルト動作**  
-	  親の onChildValueModified() を呼び出します。
+	  親の **onChildValueModified**() を呼び出します。
 
 - **onChildValueModified**(*child, newValue* );
   - 子の値が変更されたタイミングで呼び出されます。
 
 	  **デフォルト動作**  
-	  親の onChildValueModified()にそのままデリゲートします。
+	  親の **onChildValueModified**()にそのままデリゲートします。
 	  この動作により、ウィジェットツリーの上位階層で、
 	  子孫ウィジェットの値の変更をまとめて補足することが出来ます。
 

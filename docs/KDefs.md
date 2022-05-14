@@ -35,10 +35,10 @@
 ## TextType
 テキストタイプを指定します
 - **TEXT_SYMBOL**
- - 英数字のみ
+  - 英数字のみ
 - **TEXT_DIGIT**
   - 整数
 - **TEXT_REAL**
-  - 少数
+  - 小数
 - **TEXT_ANY**
   - なんでもあり

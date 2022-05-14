@@ -17,7 +17,7 @@ KTextInput は、指定したフォーマットのみ受け付けるテキストフィールドです。
     省略するとフォントサイズから自動計算されます。
 - **type** (int: TEXT_SYMBOL)
   - テキストタイプ  
-	入力を受け付けるテキストのタイプを [TextType](KDefs.md#TextType) で指定します。
+	入力を受け付けるテキストのタイプを [TextType](KDefs.md#texttype) で指定します。
 - **hideText** (bool: false)
   - テキストを隠すかどうかを指定します。  
   trueに設定すると入力したテキストは「*」の表示でカバーされます。
