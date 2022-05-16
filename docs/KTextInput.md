@@ -1,5 +1,22 @@
 # KTextInput
 
+<details>
+<summary>凡例</summary>
+
+	new KTextInput(window,
+		%[
+			name: "textinput",
+			type: TEXT_REAL,
+			width: 100,
+			height: 20,
+			value: 3.141592
+		]
+		);
+
+</details>
+
+![KTextInput](KTextInput.png)
+
 KTextInput は、指定したフォーマットのみ受け付けるテキストフィールドです。
 
 ## 親クラス

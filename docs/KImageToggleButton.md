@@ -1,5 +1,20 @@
 # KImageToggleButton
 
+<details>
+<summary>凡例</summary>
+
+	new KImageToggleButton(window,
+		%[
+			name: "imagebutton",
+			icon: "gotta_mail",
+			value: true,
+		]
+		);
+
+</details>
+
+![KImageToggleButton](KImageToggleButton.png)
+
 KImageToggleButton は、任意のアイコンイメージを表示するトグルボタンです。
 
 このクラスでは、表示するアイコンイメージを

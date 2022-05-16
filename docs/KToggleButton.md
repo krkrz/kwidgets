@@ -33,5 +33,8 @@ KToggleButton は、押すたびにオン/オフ状態を切り替える
 ## プロパティ
 - **value** (bool)
   - トグルの値です。
+- **isVariableWidth** (bool)
+  - 可変幅指定。  
+	true を指定すると、ボタンの横幅が可変長になります。
 
 

@@ -1,5 +1,20 @@
 # KCheckBox
 
+<details>
+<summary>凡例</summary>
+
+	new KCheckBox(window,
+		%[
+			name: "checkbox",
+			label: "テストフレームが有効",
+			value: true,
+		]
+		);
+
+</details>
+
+![KCheckBox](KCheckBox.png)
+
 KCheckBox は、オンオフのチェックを切り替えられるラベルつきのチェックボックスです。
 
 ## 親クラス

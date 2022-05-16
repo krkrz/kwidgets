@@ -1,5 +1,19 @@
 # KImageButton
 
+<details>
+<summary>凡例</summary>
+
+	new KImageButton(window,
+		%[
+			name: "imagebutton",
+			icon: "gotta_mail",
+		]
+		);
+
+</details>
+
+![KImageButton](KImageButton.png)
+
 KImageButton は、任意のアイコンイメージを表示するボタンです。
 
 このクラスでは、表示するアイコンイメージを

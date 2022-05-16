@@ -1,6 +1,31 @@
 
 # KGridLayout
 
+<details>
+<summary>凡例</summary>
+
+		var gridlayout = new KGridLayout(window,
+			%[
+				name: "gridlayout",
+				style: %[
+					space: 5,
+					isClass: %[
+						KButton: %[
+							isVariableWidth: true,
+							textAlign: ALIGN_CENTER,
+						]
+					]
+				]
+			]
+		));
+		gridlayout.add(0, 0, new KTextButton(this, %[ name: "textbutton1", label: "ボタン1" ]));
+		gridlayout.add(1, 0, new KTextButton(this, %[ name: "textbutton2", label: "ボタン2" ]));
+		gridlayout.add(0, 1, new KTextButton(this, %[ name: "textbutton3", label: "ボタン3" ]), 2);
+
+</details>
+
+![KGridLayout](KGridLayout.png)
+
 KGridLayoutは、グリッド上にウィジェットを配置するレイアウトウィジェットです。
 
 ## 親クラス

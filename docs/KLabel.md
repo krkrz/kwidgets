@@ -17,5 +17,8 @@ KLabel は、表示のみを行うラベルです。
 ## スタイル
 - **borderStyle**, **fontStyle**
   - スタイル指定に基づき、ボーダーが表示されます。
+- **isVariableWidth** (bool)
+  - 可変幅指定。  
+	true を指定すると、ボタンの横幅が可変長になります。
 
 

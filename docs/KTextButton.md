@@ -1,5 +1,20 @@
 # KTextButton
 
+<details>
+<summary>凡例</summary>
+
+	new KTextButton(window,
+		%[
+			name: "textbutton",
+			label: "ボタン",
+		]
+		);
+
+</details>
+
+![KTextButton](KTextButton.png)
+
+
 KTextButton は、任意のテキストラベルを表示するボタンです。
 
 ## 親クラス

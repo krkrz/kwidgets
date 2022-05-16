@@ -1,18 +1,32 @@
 # KRadioLayout
 
+<details>
+<summary>凡例</summary>
+
+	var radioBox = new KRadioLayout(window,
+		%[
+			name: "radioBox"
+			value: 1,
+			style: %[
+				space: 10
+			],
+		]
+	);
+	radioBox.add(0, 0, new KRadioButton(window, %[ label: "選択肢1", choice: 1 ]));
+	radioBox.add(0, 1, new KRadioButton(window, %[ label: "選択肢2", choice: 2 ]));
+	radioBox.add(0, 2, new KRadioButton(window, %[ label: "選択肢3", choice: 3 ]));
+	radioBox.add(0, 2, new KRadioButton(window, %[ label: "選択肢4", choice: 4 ]));
+
+</details>
+
+![KRadioLayout.png](KRadioLayout.png)
+
 KRadioLayout は、子として登録されている複数のウィジェットの内、
 1つのウィジェットのみを「選択状態」にするラジオボックスです。
 
 通常、子としては [KRadioButton](KRadioButton.md) を使いますが、
 trueとfalseの二値を取るウィジェットならば対象は何でもかまいません。
 
-配置は以下のように行います。
-
-	var radioBox = new KRadioLayout(window, %[ name: "radioBox" ]);
-	radioBox.add(0, 0, new KRadioButton(window, %[ label: "選択肢1", choice: 1 ]));
-	radioBox.add(0, 1, new KRadioButton(window, %[ label: "選択肢2", choice: 2 ]));
-	radioBox.add(0, 2, new KRadioButton(window, %[ label: "選択肢3", choice: 3 ]));
-	radioBox.value = 2;
 
 KRadioLayout は [KGridLayout](KGridLayout.md) の継承クラスなので、
 KGridLayout同様にグリッド上に配置を行えます。

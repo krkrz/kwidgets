@@ -1,5 +1,19 @@
 # KTextLabel
 
+<details>
+<summary>凡例</summary>
+
+	new KTextLabel(this, 
+		%[
+			name: "textlabel", 
+			label: "シンプルなテキストラベル"
+		]
+	);
+
+</details>
+
+![KTextLabel](KTextLabel.png)
+
 KTextLabel は、任意のテキストを表示するラベルです。
 
 ## 親クラス

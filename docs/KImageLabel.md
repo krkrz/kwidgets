@@ -1,5 +1,19 @@
 # KImageLabel
 
+<details>
+<summary>凡例</summary>
+
+	new KImageLabel(this, 
+		%[
+			name: "imagelabel",
+			icon: "gotta_mail"
+		]
+	);
+
+</details>
+
+![KImageLabel](KImageLabel.png)
+
 KImageLabel は、任意のアイコンイメージを表示するラベルです。
 
 このクラスでは、表示するアイコンイメージを

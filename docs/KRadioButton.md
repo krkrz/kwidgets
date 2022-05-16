@@ -1,5 +1,19 @@
 # KRadioButton
 
+<details>
+<summary>凡例</summary>
+
+	new KRadioButton(window,
+		%[
+			label: "項目1",
+			choice: 1,
+		]
+		);
+
+</details>
+
+![KRadioButton](KRadioButton.png)
+
 KRadioButton はラジオボタンのウィジェットです。
 
 機能上は KCheckBox のボタンの見た目が違うだけのバージョンです。

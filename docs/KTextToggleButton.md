@@ -1,5 +1,20 @@
 # KTextToggleButton
 
+<details>
+<summary>凡例</summary>
+
+	new KTextToggleButton(window,
+		%[
+			name: "textbutton",
+			label: "ボタン",
+			value: true,
+		]
+		);
+
+</details>
+
+![KTextToggleButton](KTextToggleButton.png)
+
 KTextToggleButton は、任意のテキストラベルを表示するトグルボタンです。
 
 ## 親クラス
