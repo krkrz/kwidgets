@@ -1,10 +1,26 @@
 # KTextEdit
 
+<details>
+<summary>凡例</summary>
+
+	new KTextEdit(window, 
+		%[ name: "textedit",
+		   value: "これは任意の文字列を入力できるテキストエディタ。\nWindosバインドかEmacsバインドがデフォルトで使える。"
+		 ]
+		);
+
+</details>
+
+![KTextEdit](KTextEdit.png)
+
 KTextEditは、長文のテキストを編集できるテキストエディタクラスです。
 
 目的に応じてキーバインドを自由にカスタマイズ可能です。
 
 デフォルトで、Windowsキーバインドと、emacsキーバインドが使えるようになっています。
+
+
+
 
 ## 親クラス
 
