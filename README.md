@@ -3,12 +3,12 @@
 KWidgetsは[吉里吉里Z](https://krkrz.github.io/)で
 GUIアプリを構築するためのライブラリです。
 
-吉里吉里ZのADvアプリケーションであるKAGとの互換性はありません。
+吉里吉里ZのADVアプリケーションであるKAGとの互換性はありません。
 
 吉里吉里Zで使うための画像データを作成する用途に向いています。
 
-各種Windowsプラグインと組み合わせることで、
-汎用敵なGUIアプリケーションを作る目的にも供します。
+吉里吉里Z用の各種Windowsプラグインと組み合わせることで、
+汎用的なGUIアプリケーションを作る目的にも利用できます。
 
 ## コードの凡例
 
@@ -49,7 +49,9 @@ KWidgetsを使ったアプリの凡例は以下のようになります。
 			rootGrid.add(0, 0, new KTextButton(this, %[ name: "button1", label: "Button1" ] ));
 			rootGrid.add(1, 0, new KTextButton(this, %[ name: "button2", label: "Button2" ] ));
 			rootGrid.add(2, 0, new KTextButton(this, %[ name: "button3", label: "Button3" ] ));
-			rootGrid.add(0, 1, new KTextButton(this, %[ name: "widebutton", label: "Wide Buttonnnnn!" ] ), 3);
+			rootGrid.add(0, 1, new KTextButton(this, 
+				%[ name: "widebutton", 
+				   label: "Wide Buttonnnnn!" ] ), 3);
 			// スクロールエリアをグリッド上に配置
 			rootGrid.add(0, 2, new KScrollLayout(this,
 				%[ name: "scroll",
@@ -129,7 +131,7 @@ KWidgetsを使ったアプリの凡例は以下のようになります。
 
 	ツリー内の深部にある子孫ウィジェットで発火したのイベントも、上位階層でまとめてトラップ出来ます。
 
-	このため、イベント処理コードを変更する必要がありません。ウィジェットの細かいレイアウトを気軽に変更することが出来ます。
+	このため、イベント処理コードを変更することなく、ウィジェットの細かいレイアウトを気軽に変更することが出来ます。
 
 - **さまざまなウィジェットセット**
 
