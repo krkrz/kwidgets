@@ -16,9 +16,6 @@ KToggleButton は、押すたびにオン/オフ状態を切り替える
 - **focusable** (bool: false)
   - フォーカス可能  
     trueを指定するとフォーカス可能になります。
-- **isVariableWidth** (bool: false)
-  - 可変幅指定。  
-	true を指定すると、ボタンの横幅が可変長になります。
 
 ## スタイル
 - **borderStyle**, **fontStyle**

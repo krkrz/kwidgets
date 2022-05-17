@@ -16,9 +16,6 @@ KButton は、押すとイベントを通知するボタンです。
 - **focusable** (bool: false)
   - フォーカス可能  
     trueを指定するとフォーカス可能になります。
-- **isVariableWidth** (bool: false)
-  - 可変幅指定。  
-	true を指定すると、ボタンの横幅が可変長になります。
 - **dispatchOnMouseDown** (bool: false)
   - ディスパッチタイミングの切り替え  
 	デフォルト動作ではボタンの解放時に dispatch() が実行されますが、

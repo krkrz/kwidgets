@@ -39,7 +39,8 @@ KWidgetsを使ったアプリの凡例は以下のようになります。
 						isClass: %[
 							// KTextButtonのアライメントをセンターに、サイズを可変幅に設定
 							KTextButton: %[
-								textAlign: ALIGN_CENTER
+								textAlign: ALIGN_CENTER,
+								isVariableWidth: true
 							]
 						]
 					],
@@ -107,6 +108,11 @@ KWidgetsを使ったアプリの凡例は以下のようになります。
 
 ## 特徴
 
+- **ウィジェットはLayerベース**
+	ウィジェット群は [吉里吉里ZのLayerクラス](https://krkrz.github.io/docs/kirikiriz/j/contents/f_Layer.html) を継承しているため、
+	吉里吉里Z用のプラグインによる描画メソッド拡張はすべてそのまま
+	適用可能です。
+
 - **コンポジットパターンで、ウィジェットを入れ子上に配置する**
 
 	例として、サンプルアプリのウィジェットツリーは以下のような構造になっています。
@@ -135,7 +141,7 @@ KWidgetsを使ったアプリの凡例は以下のようになります。
 
 - **さまざまなウィジェットセット**
 
-	デフォルトでさまざまな実用的なウィジェットセットが実装済みです。
+	さまざまな実用的ウィジェットセットが実装済みです。
 	
 	- [クラス階層](docs/ClassHierarchy.md)
 
