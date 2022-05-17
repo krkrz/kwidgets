@@ -114,6 +114,10 @@ class KStyleRepository
 				throw new Exception("no effective identifier found in style definition.");
 		}
 	}
+
+	function loadStylesStorage(filename) {
+		loadStyles(Scripts.evalStorage(filename));
+	}
 };
 
 

@@ -23,6 +23,10 @@ KTextInput は、指定したフォーマットのみ受け付けるテキストフィールドです。
 
 **KTextInput** -> [KValueEntity](KValueEntity.md) -> [KEntity](KEntity.md) -> [KWidget](KWidget.md)
 
+## 内部クラス
+
+- [KTextEdit](KTextEdit.md)
+
 ## コンストラクタ
 ```KTextInput(window, options = %[])```
 
@@ -50,7 +54,7 @@ KTextInput は、指定したフォーマットのみ受け付けるテキストフィールドです。
 ## スタイル
 - **borderStyle**, **fontStyle**
   - スタイル指定に基づき、背景がフィルされます
-- **texteditId**
+- **texteditId** (string: "textinput_textedit")
   - KTextInput中のテキストフィールドに埋め込まれたKTextEdit のidです  
 	テキストフィールドのスタイルは指定したidに対してカスタマイズできます。
 

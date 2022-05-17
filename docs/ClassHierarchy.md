@@ -1,5 +1,6 @@
 # kwidgetsクラス階層
 
+- [KStyleRepository](KStyleRepository.md)
 - [KWidget](KWidget.md)
   - [KEntity](KEntity.md)
 	- [KValueEntity](KValueEntity.md)
@@ -20,5 +21,6 @@
 			- [KHorizontalBarLayout](KHorizontalBarLayout.md)
 			- [KVerticalBarLayout](KVerticalBarLayout.md)
 			- [KRadioLayout](KRadioLayout.md)
+		- [KScrollLayout](KScrollLayout.md)
 	- [KVirtualWidget](KVirtualWidget.md)
 		- [KTextEdit](KTextEdit.md)

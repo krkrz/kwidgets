@@ -170,6 +170,18 @@ Layerが対応している描画関数はすべて呼び出せます。
 - **overwriteStyle**(*style*);
   - スタイルを上書きします。
 
+- **addCustomStyleState**(*addState*);
+  - カスタムスタイルステートを追加します。  
+	スタイルチェーンの更新に伴いウィジェットの再描画が必要な場合は自動的に実行されます。
+
+- **removeCustomStyleState**(*removeState*);
+  - カスタムスタイルステートを削除します。  
+	スタイルチェーンの更新に伴いウィジェットの再描画が必要な場合は自動的に実行されます。
+
+- **addRemoveCustomStyleState**(*addState, removeState*);
+  - カスタムスタイルステートの追加と削除を同時に実行します。  
+	スタイルチェーンの更新に伴いウィジェットの再描画が必要な場合は自動的に実行されます。
+
 - object **find**(*name*);
   - ウィジェットツリーから特定の名前を持つウィジェットを検索します。
 - bool **isAncestorOf**(*widget*);
