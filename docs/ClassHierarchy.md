@@ -1,4 +1,4 @@
-# kwidgetsクラス階層
+# クラス階層
 
 - [KStyleRepository](KStyleRepository.md)
 - [KWidget](KWidget.md)
