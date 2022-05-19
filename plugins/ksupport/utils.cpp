@@ -756,6 +756,83 @@ bool getPropertyFromStyle(tTJSVariant style, tTJSVariant states, tTJSVariant key
 	return false;
 }
 
+tTJSVariant getPropertyFromStyleChain(tTJSVariant styleChain, tTJSVariant states, tTJSVariant key, tTJSVariant defaultValue)
+{
+	tTJSVariant result = createArray();
+
+	tjs_uint styleChainCount = countArray(styleChain);
+	ncbPropAccessor styleChainObj(styleChain);
+	for (tjs_uint i = 0; i < styleChainCount; i++) {
+		tTJSVariant style = styleChainObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+		if (getPropertyFromStyle(style, states, key, result))
+			return ncbPropAccessor(result).GetValue(tjs_int(0), ncbTypedefs::Tag<tTJSVariant>());
+	}
+	return defaultValue;
+}
+
+void extractDefinedProperties(tTJSVariant style, tTJSVariant defines, tTJSVariant defineKeys) {
+	ncbPropAccessor styleObj(style);
+
+	tTJSVariant styleKeys = dictionaryKeys(style);
+	ncbPropAccessor styleKeysObj(styleKeys);
+	auto styleKeysCount = countArray(styleKeys);
+
+	for (tjs_uint i = 0; i < styleKeysCount; i++) {
+		ttstr key = styleKeysObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
+		tTJSVariant member = styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+		if (member.Type() == tvtObject) {
+			tTJSVariantClosure &m = member.AsObjectClosureNoAddRef();
+			if (m.IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL) == TJS_S_TRUE)
+				extractDefinedProperties(member, defines, defineKeys);
+		}
+	}
+
+	ncbPropAccessor defineKeysObj(defineKeys);
+	auto defineKeysCount = countArray(defineKeys);
+
+	for (tjs_uint i = 0; i < defineKeysCount; i++) {
+		ttstr key = defineKeysObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
+		if (! styleObj.HasValue(key.c_str()))
+			continue;
+		if (styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>())
+			.Type() == tvtVoid)
+			continue;
+		tjs_uint defineIndex = styleObj.getIntValue(key.c_str());
+		ncbPropAccessor definesObj(defines);
+		tTJSVariant define = definesObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+		ncbPropAccessor defineObj(define);
+		tTJSVariant props = defineObj.GetValue(defineIndex, ncbTypedefs::Tag<tTJSVariant>());
+		ncbPropAccessor propsObj(props);
+		tTJSVariant propKeys = dictionaryKeys(props);
+		ncbPropAccessor propKeysObj(propKeys);
+		auto propKeysCount = countArray(propKeys);
+		for (tjs_uint j = 0; j < propKeysCount; j++) {
+			ttstr propKey = propKeysObj.GetValue(j, ncbTypedefs::Tag<ttstr>());
+			if (! styleObj.HasValue(propKey.c_str()))
+				styleObj.SetValue(propKey.c_str(), propsObj.GetValue(propKey.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
+		}
+	}
+}
+
+tTJSVariant extractStyleWithChain(tTJSVariant chain, tTJSVariant states, tTJSVariant definition)
+{
+	tTJSVariant style = createDictionary();
+	ncbPropAccessor styleObj(style);
+
+	ncbPropAccessor definitionObj(definition);
+	tjs_uint definitionCount = countArray(definition);
+	for (tjs_uint i = 0; i < definitionCount; i++) {
+		tTJSVariant def = definitionObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+		ncbPropAccessor defObj(def);
+		ttstr memberKey = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
+		tTJSVariant styleKey = defObj.GetValue(tjs_int(1), ncbTypedefs::Tag<tTJSVariant>());
+		tTJSVariant defaultValue = defObj.GetValue(tjs_int(2), ncbTypedefs::Tag<tTJSVariant>());
+		styleObj.SetValue(memberKey.c_str(), getPropertyFromStyleChain(chain, states, styleKey, defaultValue));
+	}
+	return style;
+}
+
+
 NCB_REGISTER_FUNCTION(equalStruct, equalStruct);
 NCB_REGISTER_FUNCTION(equalStructNumericLoose, equalStructNumericLoose);
 NCB_REGISTER_FUNCTION(dictionaryKeys, dictionaryKeys);
@@ -769,3 +846,6 @@ NCB_REGISTER_FUNCTION(sliceArray, sliceArray);
 NCB_REGISTER_FUNCTION(eachArray, eachArray);
 NCB_REGISTER_FUNCTION(eachDictionary, eachDictionary);
 NCB_REGISTER_FUNCTION(getPropertyFromStyle, getPropertyFromStyle);
+NCB_REGISTER_FUNCTION(getPropertyFromStyleChain, getPropertyFromStyleChain);
+NCB_REGISTER_FUNCTION(extractDefinedProperties, extractDefinedProperties);
+NCB_REGISTER_FUNCTION(extractStyleWithChain, extractStyleWithChain);

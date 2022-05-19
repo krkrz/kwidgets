@@ -22,5 +22,6 @@
 			- [KVerticalBarLayout](KVerticalBarLayout.md)
 			- [KRadioLayout](KRadioLayout.md)
 		- [KScrollLayout](KScrollLayout.md)
+		- [KFrameLayout](KFrameLayout.md)
 	- [KVirtualWidget](KVirtualWidget.md)
 		- [KTextEdit](KTextEdit.md)
