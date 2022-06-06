@@ -42,7 +42,7 @@ class KFrameLayout extends KLayout
 		_type = getOption("type", void);
 		_label = getOption("label", "");
 		_helpText = getOption("helpText", "");
-		overwriteStyle(%[ frameTypePrior: _type ]);
+		overwriteStyle(%[ frameType: _type ]);
 	}
 
 	function onExtractWidgetStyle(widgetStyle) {
@@ -63,7 +63,7 @@ class KFrameLayout extends KLayout
 			if (_type == v)
 				return;
 			_type = v;
-			overwriteStyle(%[ frameTypePrior: _type ]);
+			overwriteStyle(%[ frameType: _type ]);
 		}
 	}
 
