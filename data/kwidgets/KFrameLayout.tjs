@@ -145,8 +145,8 @@ class KFrameLayout extends KLayout
 		}
 
 		if (label != "") {
-			minH += fontStyle.height;
-			maxH += fontStyle.height;
+			minH += fontStyle.fontHeight;
+			maxH += fontStyle.fontHeight;
 		}
 
 		setMinMaxSize(minW, minH, maxW, maxH);
@@ -158,7 +158,7 @@ class KFrameLayout extends KLayout
 	function onLocateLayout {
 		var contentTop = 0;
 		if (label != "")
-			contentTop = fontStyle.height;
+			contentTop = fontStyle.fontHeight;
 
 		fillRect(0, 0, width, height, borderStyle.backgroundColor);
 		drawBorder(borderStyle, 0, contentTop / 2, width, height - contentTop / 2);
@@ -168,20 +168,20 @@ class KFrameLayout extends KLayout
 
 		if (label != "") {
 			applyFontStyle(font, fontStyle);
-			var lx = fontStyle.height / 2;
+			var lx = fontStyle.fontHeight / 2;
 			var ly = 0;
-			var lw = width - fontStyle.height;
+			var lw = width - fontStyle.fontHeight;
 			if (helpText != "")
 				lw -= findIcon("k_help").width;
 			var result = drawUITextInRange(fontStyle,
-										   fontStyle.height / 2, 0, lw,
+										   fontStyle.fontHeight / 2, 0, lw,
 										   label, widgetStyle.textAlign, true);
 			if (! result.inRange)
-				labelBounds = new KRect(result.x, result.y, result.w, fontStyle.height);
+				labelBounds = new KRect(result.x, result.y, result.w, fontStyle.fontHeight);
 			if (helpText != "") {
 				var helpIcon = findIcon("k_help");
 				var hx = int(result.x + result.w);
-				var hy = int(result.y + (fontStyle.height - helpIcon.height) / 2);
+				var hy = int(result.y + (fontStyle.fontHeight - helpIcon.height) / 2);
 				operateRect(hx, hy, helpIcon, 0, 0, helpIcon.width, helpIcon.height, omAuto, nodeEnabled ? 255 : 128);
 				helpBounds = new KRect(hx, hy, helpIcon.width, helpIcon.height);
 			}

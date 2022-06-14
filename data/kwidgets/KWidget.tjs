@@ -169,13 +169,13 @@ global.K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS =  [ "borderRadiusLeftBot
 global.K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS = [ "borderRadiusRightBottom", "borderRadiusRight", "borderRadiusBottom", "borderRadius" ];
 
 global.K_WIDGET_FONT_STYLE_DEFINITION = [
-	[ "antiAlias",    "fontAntiAlias",  true ],
-	[ "outline",      "fontOutline", false ],
-	[ "outlineColor", "fontOutlineColor", 0 ],
-	[ "bold",         "fontBold", false ],
-	[ "italic",       "fontItalic", false ],
-	[ "strikeout",    "fontStrikeout", false ],
-	[ "underline",    "fontUnderline", false ]
+	[ "fontAntiAlias",    "fontAntiAlias",  true ],
+	[ "fontOutline",      "fontOutline", false ],
+	[ "fontOutlineColor", "fontOutlineColor", 0 ],
+	[ "fontBold",         "fontBold", false ],
+	[ "fontItalic",       "fontItalic", false ],
+	[ "fontStrikeout",    "fontStrikeout", false ],
+	[ "fontUnderline",    "fontUnderline", false ]
 ];
 
 global.K_WIDGET_LAYOUT_STYLE_DEFINITION = [
@@ -191,23 +191,23 @@ global.K_WIDGET_LAYOUT_STYLE_DEFINITION = [
 
 global.K_WIDGET_BORDER_STYLE_DEFNITION = [
 	[ "backgroundColor", "backgroundColor", 0xfff0f0f0 ],
-	[ "widthLeft",   K_WIDGET_BORDER_LEFT_WIDTH_PROPERTY_KEYS, 0 ],
-	[ "widthTop",    K_WIDGET_BORDER_TOP_WIDTH_PROPERTY_KEYS,    0 ],
-	[ "widthRight",  K_WIDGET_BORDER_RIGHT_WIDTH_PROPERTY_KEYS,  0 ],
-	[ "widthBottom", K_WIDGET_BORDER_BOTTOM_WIDTH_PROPERTY_KEYS, 0 ],
-	[ "colorLeft",   K_WIDGET_BORDER_LEFT_COLOR_PROPERTY_KEYS,   0 ],
-	[ "colorTop",    K_WIDGET_BORDER_TOP_COLOR_PROPERTY_KEYS,    0 ],
-	[ "colorRight",  K_WIDGET_BORDER_RIGHT_COLOR_PROPERTY_KEYS,  0 ],
-	[ "colorBottom", K_WIDGET_BORDER_BOTTOM_COLOR_PROPERTY_KEYS, 0 ],
-	[ "styleLeft",   K_WIDGET_BORDER_LEFT_STYLE_PROPERTY_KEYS,   BORDER_STYLE_NONE ],
-	[ "styleTop",    K_WIDGET_BORDER_TOP_STYLE_PROPERTY_KEYS,    BORDER_STYLE_NONE ],
-	[ "styleRight",  K_WIDGET_BORDER_RIGHT_STYLE_PROPERTY_KEYS,  BORDER_STYLE_NONE ],
-	[ "styleBottom", K_WIDGET_BORDER_BOTTOM_STYLE_PROPERTY_KEYS, BORDER_STYLE_NONE ],
-	[ "radiusLeftTop",     K_WIDGET_BORDER_LEFTTOP_RADIUS_PROPERTY_KEYS,     0 ],
-	[ "radiusRightTop",    K_WIDGET_BORDER_RIGHTTOP_RADIUS_PROPERTY_KEYS,    0 ],
-	[ "radiusLeftBottom",  K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS,  0 ],
-	[ "radiusRightBottom", K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS, 0 ],
-	[ "colorBlending", K_WIDGET_BORDER_COLOR_BLENDING_PROPERTY_KEYS, void ]
+	[ "borderWidthLeft",   K_WIDGET_BORDER_LEFT_WIDTH_PROPERTY_KEYS, 0 ],
+	[ "borderWidthTop",    K_WIDGET_BORDER_TOP_WIDTH_PROPERTY_KEYS,    0 ],
+	[ "borderWidthRight",  K_WIDGET_BORDER_RIGHT_WIDTH_PROPERTY_KEYS,  0 ],
+	[ "borderWidthBottom", K_WIDGET_BORDER_BOTTOM_WIDTH_PROPERTY_KEYS, 0 ],
+	[ "borderColorLeft",   K_WIDGET_BORDER_LEFT_COLOR_PROPERTY_KEYS,   0 ],
+	[ "borderColorTop",    K_WIDGET_BORDER_TOP_COLOR_PROPERTY_KEYS,    0 ],
+	[ "borderColorRight",  K_WIDGET_BORDER_RIGHT_COLOR_PROPERTY_KEYS,  0 ],
+	[ "borderColorBottom", K_WIDGET_BORDER_BOTTOM_COLOR_PROPERTY_KEYS, 0 ],
+	[ "borderStyleLeft",   K_WIDGET_BORDER_LEFT_STYLE_PROPERTY_KEYS,   BORDER_STYLE_NONE ],
+	[ "borderStyleTop",    K_WIDGET_BORDER_TOP_STYLE_PROPERTY_KEYS,    BORDER_STYLE_NONE ],
+	[ "borderStyleRight",  K_WIDGET_BORDER_RIGHT_STYLE_PROPERTY_KEYS,  BORDER_STYLE_NONE ],
+	[ "borderStyleBottom", K_WIDGET_BORDER_BOTTOM_STYLE_PROPERTY_KEYS, BORDER_STYLE_NONE ],
+	[ "borderRadiusLeftTop",     K_WIDGET_BORDER_LEFTTOP_RADIUS_PROPERTY_KEYS,     0 ],
+	[ "borderRadiusRightTop",    K_WIDGET_BORDER_RIGHTTOP_RADIUS_PROPERTY_KEYS,    0 ],
+	[ "borderRadiusLeftBottom",  K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS,  0 ],
+	[ "borderRadiusRightBottom", K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS, 0 ],
+	[ "borderColorBlending", K_WIDGET_BORDER_COLOR_BLENDING_PROPERTY_KEYS, void ]
 ];
 
 /*------------------------------
@@ -491,7 +491,7 @@ class KWidget extends Layer
 			if (window.focusedLayer.hover)
 			styleStates.add("descendantHover");
 			if (window.focusedLayer.dragHover)
-				styleStates.add("descendantHover");
+				styleStates.add("descendantDragHover");
 			if (window.focusedLayer.focused)
 				styleStates.add("descendantFocus");
 		}
@@ -553,8 +553,8 @@ class KWidget extends Layer
 			_classStyleKeys = dictionaryKeys(_style.isClass);
 	}
 
-	function updateStyleChain() {
-		_styleChain = [ _style ];
+	function extractStyleChain(includeSelf = false, classes = classTrees) {
+		var result =  [ _style ];
 
 		var list;
 		if (isAttachedToWindow) {
@@ -566,20 +566,26 @@ class KWidget extends Layer
 			list = [ styleRepository ];
 		}
 
-		var classes = classTrees;
+		if (includeSelf)
+			list.insert(0, this);
 
 		for (var i = 0; i < list.count; i++) {
 			var widget = list[i];
 			if (widget._idStyleKeys.find(_id) >= 0)
-				_styleChain.add(widget._style.isId[_id]);
+				result.add(widget._style.isId[_id]);
 			if (intersectionSet(widget._classStyleKeys, classes).count > 0)
 				for (var j = 0; j < classes.count; j++) {
 					var klass = classes[j];
 					if (typeof(widget._style.isClass[klass]) != K_UNDEFINED) {
-						_styleChain.add(widget._style.isClass[klass]);
+						result.add(widget._style.isClass[klass]);
 					}
 				}
 		}
+		return result;
+	}
+
+	function updateStyleChain() {
+		_styleChain = extractStyleChain();
 	}
 
 	property respondToStyleModification {
@@ -852,7 +858,7 @@ class KWidget extends Layer
 	}
 
 	// 祖先であるかどうか判定
-	function isAncestorOf(item) {
+	function isWidgetAncestorOf(item) {
 		if (item === void)
 			return false;
 		for (; item instanceof "KWidget"; item = item.parent) {
@@ -860,6 +866,11 @@ class KWidget extends Layer
 				return true;
 		}
 		return false;
+	}
+
+	// 祖先であるかどうか判定
+	function isAncestorOf(item) {
+		return isWidgetAncestorOf(item);
 	}
 
 	/**------------------------------
@@ -1032,11 +1043,11 @@ class KWidget extends Layer
 	 ----------------------------------------------------------------------*/
 	function extractBorderStyle() {
 		var borderStyle = extractStyle(K_WIDGET_BORDER_STYLE_DEFNITION);
-		if (borderStyle.colorBlending !== void) {
-			borderStyle.colorLeft = blendColor(borderStyle.colorBlending, borderStyle.colorLeft, 0.2);
-			borderStyle.colorTop = blendColor(borderStyle.colorBlending, borderStyle.colorTop, 0.2);
-			borderStyle.colorRight = blendColor(borderStyle.colorBlending, borderStyle.colorRight, 0.2);
-			borderStyle.colorBottom = blendColor(borderStyle.colorBlending, borderStyle.colorBottom, 0.2);
+		if (borderStyle.borderColorBlending !== void) {
+			borderStyle.borderColorLeft = blendColor(borderStyle.borderColorBlending, borderStyle.borderColorLeft, 0.2);
+			borderStyle.borderColorTop = blendColor(borderStyle.borderColorBlending, borderStyle.borderColorTop, 0.2);
+			borderStyle.borderColorRight = blendColor(borderStyle.borderColorBlending, borderStyle.borderColorRight, 0.2);
+			borderStyle.borderColorBottom = blendColor(borderStyle.borderColorBlending, borderStyle.borderColorBottom, 0.2);
 		}
 		return borderStyle;
 	}
@@ -1057,19 +1068,19 @@ class KWidget extends Layer
 	 ----------------------------------------------------------------------*/
 	function extractFontStyle() {
 		var fontStyle = extractStyle(K_WIDGET_FONT_STYLE_DEFINITION);
-		fontStyle.face   = getStyleProperty("fontFace",   _fontFace);
-		fontStyle.height = getStyleProperty("fontHeight", font.height);
-		fontStyle.color  = getStyleProperty("fontColor",  _fontColor);
+		fontStyle.fontFace   = getStyleProperty("fontFace",   _fontFace);
+		fontStyle.fontHeight = getStyleProperty("fontHeight", font.height);
+		fontStyle.fontColor  = getStyleProperty("fontColor",  _fontColor);
 		return fontStyle;
 	}
 
 	function applyFontStyle(font, fontStyle) {
-		font.height =    fontStyle.height;
-		font.face =      fontStyle.face;
-		font.bold =      fontStyle.bold;
-		font.italic =    fontStyle.italic;
-		font.strikeout = fontStyle.strikeout;
-		font.underline = fontStyle.underline;
+		font.height =    fontStyle.fontHeight;
+		font.face =      fontStyle.fontFace;
+		font.bold =      fontStyle.fontBold;
+		font.italic =    fontStyle.fontItalic;
+		font.strikeout = fontStyle.fontStrikeout;
+		font.underline = fontStyle.fontUnderline;
 	}
 
 	function updateFontStyle() {
@@ -1189,25 +1200,25 @@ class KWidget extends Layer
 	 ----------------------------------------------------------------------*/
 	property borderPaddingLeft {
 		getter {
-			return layoutStyle.paddingLeft + borderStyle.widthLeft;
+			return layoutStyle.paddingLeft + borderStyle.borderWidthLeft;
 		}
 	}
 
 	property borderPaddingRight {
 		getter {
-			return layoutStyle.paddingRight + borderStyle.widthRight;
+			return layoutStyle.paddingRight + borderStyle.borderWidthRight;
 		}
 	}
 
 	property borderPaddingTop {
 		getter {
-			return layoutStyle.paddingTop + borderStyle.widthTop;
+			return layoutStyle.paddingTop + borderStyle.borderWidthTop;
 		}
 	}
 
 	property borderPaddingBottom {
 		getter {
-			return layoutStyle.paddingBottom + borderStyle.widthBottom;
+			return layoutStyle.paddingBottom + borderStyle.borderWidthBottom;
 		}
 	}
 
@@ -1229,7 +1240,7 @@ class KWidget extends Layer
 	function invalidateStylesToDescendants() {
 		parentWidget.respondToStyleModification = false;
 
-		var widgets = descendants;
+		var widgets = widgetDescendants;
 		widgets.insert(0, this);
 
 		widgets.reverse();
@@ -1243,10 +1254,14 @@ class KWidget extends Layer
 			var widget = widgets[i];
 			widget.updateStyleChain();
 			widget.invalidateStyles();
+			widget.onUpdateAscendantStyle();
 			widget.respondToStyleModification = true;
 		}
 
 		parentWidget.respondToStyleModification = true;
+	}
+
+	function onUpdateAscendantStyle() {
 	}
 
 	//------------------------------
@@ -1980,7 +1995,7 @@ class KWidget extends Layer
 	 ------------------------------*/
 	property fontFace {
 		getter {
-			return fontStyle.face;
+			return fontStyle.fontFace;
 		}
 		setter(newFace) {
 			// 更新がある時だけ処理
@@ -2016,7 +2031,7 @@ class KWidget extends Layer
 	 ------------------------------*/
 	property fontHeight {
 		getter {
-			return fontStyle.height;
+			return fontStyle.fontHeight;
 		}
 		setter(newHeight) {
 			// 更新がある時だけ処理
@@ -2052,7 +2067,7 @@ class KWidget extends Layer
 	 ------------------------------*/
 	property fontColor {
 		getter {
-			return fontStyle.color;
+			return fontStyle.fontColor;
 		}
 		setter(color) {
 			// 更新がある時だけ処理
@@ -2113,12 +2128,12 @@ class KWidget extends Layer
 	 * UIテキストを書く
 	 ------------------------------*/
 	function drawUIText(fontStyle, x, y, text, overrideFontColor = void) {
-		var fontColor = overrideFontColor !== void ? overrideFontColor : fontStyle.color;
+		var fontColor = overrideFontColor !== void ? overrideFontColor : fontStyle.fontColor;
 		applyFontStyle(font, fontStyle);
-		if (! fontStyle.outline)
-			drawText(x, y, text, fontColor, 255, fontStyle.antiAlias);
+		if (! fontStyle.fontOutline)
+			drawText(x, y, text, fontColor, 255, fontStyle.fontAntiAlias);
 		else
-			drawText(x, y, text, fontColor, 255, fontStyle.antiAlias, 2048, fontStyle.outlineColor, 2.5);
+			drawText(x, y, text, fontColor, 255, fontStyle.fontAntiAlias, 2048, fontStyle.fontOutlineColor, 2.5);
 	}
 
 	//------------------------------
@@ -2170,7 +2185,7 @@ class KWidget extends Layer
 			textAreaWidth = Math.max(textAreaWidth, textWidth);
 		}
 
-		textAreaHeight = texts.count * fontStyle.height + (texts.count - 1) * lineSpacing;
+		textAreaHeight = texts.count * fontStyle.fontHeight + (texts.count - 1) * lineSpacing;
 
 		var result = %[
 			texts: texts,
@@ -2190,7 +2205,7 @@ class KWidget extends Layer
 		var textOmitLength = getTextOmitLength();
 		for (var i = 0; i < texts.count; i++) {
 			drawUITextInRange(fontStyle, x, y, w, texts[i], textAlign, false, textWidths[i], textOmitLength);
-			y += fontStyle.height + lineSpacing;
+			y += fontStyle.fontHeight + lineSpacing;
 		}
 	}
 
@@ -2283,12 +2298,12 @@ class KWidget extends Layer
 	function drawBorderEdge(borderStyle, dir, x, y, w, h) {
 		var camelDir = dir[0].toUpperCase() + dir.substr(1);
 
-		var width = borderStyle[ "width" + camelDir ];
+		var width = borderStyle[ "borderWidth" + camelDir ];
 		if (width == 0)
 			return;
 
-		var color = borderStyle[ "color" + camelDir ];
-		var style = borderStyle[ "style" + camelDir ];
+		var color = borderStyle[ "borderColor" + camelDir ];
+		var style = borderStyle[ "borderStyle" + camelDir ];
 		var bgColor = borderStyle.backgroundColor;
 
 		generateBorderPen(borderPenLayer, dir, style, width, color, bgColor);
@@ -2296,8 +2311,8 @@ class KWidget extends Layer
 		switch (dir) {
 		case "left":
 		case "right": {
-			var wt = Math.max(0, borderStyle.widthTop - 1);
-			var wb = Math.max(0, borderStyle.widthBottom, -1);
+			var wt = Math.max(0, borderStyle.borderWidthTop - 1);
+			var wb = Math.max(0, borderStyle.borderWidthBottom, -1);
 
 			for (var i = 0; i < w; i++) {
 				var ra = i / (w == 1 ? 1 : (w - 1));
@@ -2312,8 +2327,8 @@ class KWidget extends Layer
 		}
 		case "top":
 		case "bottom": {
-			var wl = Math.max(0, borderStyle.widthLeft - 1);
-			var wr = Math.max(0, borderStyle.widthRight - 1);
+			var wl = Math.max(0, borderStyle.borderWidthLeft - 1);
+			var wr = Math.max(0, borderStyle.borderWidthRight - 1);
 
 			for (var i = 0; i < h; i++) {
 				var ra = i / (h == 1 ? 1 : (h - 1));
@@ -2330,10 +2345,10 @@ class KWidget extends Layer
 	}
 
 	function hasBorderRoundCorner(borderStyle) {
-		return borderStyle.radiusLeftTop
-			|| borderStyle.radiusRightTop
-			|| borderStyle.radiusLeftBottom
-			|| borderStyle.radiusRightBottom;
+		return borderStyle.borderRadiusLeftTop
+			|| borderStyle.borderRadiusRightTop
+			|| borderStyle.borderRadiusLeftBottom
+			|| borderStyle.borderRadiusRightBottom;
 	}
 
 	function storeABorderCornerOne(index, l, t, r) {
@@ -2347,10 +2362,10 @@ class KWidget extends Layer
 	}
 
 	function storeBorderCorner(borderStyle, x, y, w, h) {
-		storeABorderCornerOne(0, x, y, borderStyle.radiusLeftTop);
-		storeABorderCornerOne(1, x + w - borderStyle.radiusRightTop, y, borderStyle.radiusRightTop);
-		storeABorderCornerOne(2, x, y + h - borderStyle.radiusLeftBottom, borderStyle.radiusLeftBottom);
-		storeABorderCornerOne(3, x + w - borderStyle.radiusRightBottom, y + h - borderStyle.radiusRightBottom, borderStyle.radiusRightBottom);
+		storeABorderCornerOne(0, x, y, borderStyle.borderRadiusLeftTop);
+		storeABorderCornerOne(1, x + w - borderStyle.borderRadiusRightTop, y, borderStyle.borderRadiusRightTop);
+		storeABorderCornerOne(2, x, y + h - borderStyle.borderRadiusLeftBottom, borderStyle.borderRadiusLeftBottom);
+		storeABorderCornerOne(3, x + w - borderStyle.borderRadiusRightBottom, y + h - borderStyle.borderRadiusRightBottom, borderStyle.borderRadiusRightBottom);
 	}
 
 	function restoreABorderCornerOne(index, l, t, r) {
@@ -2362,10 +2377,10 @@ class KWidget extends Layer
 	}
 
 	function restoreBorderCorner(borderStyle, x, y, w, h) {
-		restoreABorderCornerOne(0, x, y, borderStyle.radiusLeftTop);
-		restoreABorderCornerOne(1, x + w - borderStyle.radiusRightTop, y, borderStyle.radiusRightTop);
-		restoreABorderCornerOne(2, x, y + h - borderStyle.radiusLeftBottom, borderStyle.radiusLeftBottom);
-		restoreABorderCornerOne(3, x + w - borderStyle.radiusRightBottom, y + h - borderStyle.radiusRightBottom, borderStyle.radiusRightBottom);
+		restoreABorderCornerOne(0, x, y, borderStyle.borderRadiusLeftTop);
+		restoreABorderCornerOne(1, x + w - borderStyle.borderRadiusRightTop, y, borderStyle.borderRadiusRightTop);
+		restoreABorderCornerOne(2, x, y + h - borderStyle.borderRadiusLeftBottom, borderStyle.borderRadiusLeftBottom);
+		restoreABorderCornerOne(3, x + w - borderStyle.borderRadiusRightBottom, y + h - borderStyle.borderRadiusRightBottom, borderStyle.radiusRightBottom);
 	}
 
 	function drawBorder(borderStyle, x, y, w, h, clear = true) {
@@ -2380,27 +2395,27 @@ class KWidget extends Layer
 
 		fillRect(x, y, w, h, borderStyle.backgroundColor);
 
-		drawBorderEdge(borderStyle, "left", x, y, borderStyle.widthLeft, h);
-		drawBorderEdge(borderStyle, "top", x, y, w, borderStyle.widthTop);
-		drawBorderEdge(borderStyle, "right", x + w - borderStyle.widthRight, y, borderStyle.widthRight, h);
-		drawBorderEdge(borderStyle, "bottom", x, y + h - borderStyle.widthBottom, w, borderStyle.widthBottom);
+		drawBorderEdge(borderStyle, "left", x, y, borderStyle.borderWidthLeft, h);
+		drawBorderEdge(borderStyle, "top", x, y, w, borderStyle.borderWidthTop);
+		drawBorderEdge(borderStyle, "right", x + w - borderStyle.borderWidthRight, y, borderStyle.borderWidthRight, h);
+		drawBorderEdge(borderStyle, "bottom", x, y + h - borderStyle.borderWidthBottom, w, borderStyle.borderWidthBottom);
 
-		if (borderStyle.radiusLeftTop)
+		if (borderStyle.borderRadiusLeftTop)
 			roundRect(x, y,
-					  borderStyle.radiusLeftTop, borderStyle.radiusLeftTop,
-					  x + borderStyle.radiusLeftTop - 1, y + borderStyle.radiusLeftTop - 1);
-		if (borderStyle.radiusRightTop)
-			roundRect(x + w - borderStyle.radiusRightTop, y,
-					  borderStyle.radiusRightTop, borderStyle.radiusRightTop,
-					  x + w - borderStyle.radiusRightTop, y + borderStyle.radiusRightTop - 1);
-		if (borderStyle.radiusLeftBottom)
-			roundRect(x, y + h - borderStyle.radiusLeftBottom,
-					  borderStyle.radiusLeftBottom, borderStyle.radiusLeftBottom,
-					  x + borderStyle.radiusLeftBottom - 1, y + h - borderStyle.radiusLeftBottom);
-		if (borderStyle.radiusRightBottom)
-			roundRect(x + w - borderStyle.radiusRightBottom, y + h - borderStyle.radiusRightBottom,
-					  borderStyle.radiusRightBottom, borderStyle.radiusRightBottom,
-					  x + w - borderStyle.radiusRightBottom, y + h - borderStyle.radiusRightBottom);
+					  borderStyle.borderRadiusLeftTop, borderStyle.borderRadiusLeftTop,
+					  x + borderStyle.borderRadiusLeftTop - 1, y + borderStyle.borderRadiusLeftTop - 1);
+		if (borderStyle.borderRadiusRightTop)
+			roundRect(x + w - borderStyle.borderRadiusRightTop, y,
+					  borderStyle.borderRadiusRightTop, borderStyle.borderRadiusRightTop,
+					  x + w - borderStyle.borderRadiusRightTop, y + borderStyle.borderRadiusRightTop - 1);
+		if (borderStyle.borderRadiusLeftBottom)
+			roundRect(x, y + h - borderStyle.borderRadiusLeftBottom,
+					  borderStyle.borderRadiusLeftBottom, borderStyle.borderRadiusLeftBottom,
+					  x + borderStyle.borderRadiusLeftBottom - 1, y + h - borderStyle.borderRadiusLeftBottom);
+		if (borderStyle.borderRadiusRightBottom)
+			roundRect(x + w - borderStyle.borderRadiusRightBottom, y + h - borderStyle.borderRadiusRightBottom,
+					  borderStyle.borderRadiusRightBottom, borderStyle.borderRadiusRightBottom,
+					  x + w - borderStyle.borderRadiusRightBottom, y + h - borderStyle.borderRadiusRightBottom);
 
 		if (blendCorner)
 			restoreBorderCorner(borderStyle, x, y, w, h);

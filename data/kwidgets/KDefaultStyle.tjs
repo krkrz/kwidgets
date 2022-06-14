@@ -264,6 +264,35 @@
 				descendantFocus: %[ backgroundColor: 0xffffeaea ],
 				texteditId: "textinput_textedit",
 			],
+		],
+
+		%[
+			klass: "KList",
+			style: %[
+				slideWidth: 14,
+				backgroundColor: 0xffffffff,
+				renameTextinputId: "list_rename_textinput",
+			],
+		],
+
+		%[
+			id: "list_rename_textinput",
+			style: %[
+				backgroundColor: 0xffffffff,
+				padding: 2,
+				borderStyle: BORDER_STYLE_SOLID,
+				borderWidth: 1,
+				borderRadius: 3,
+				borderColor: 0xff808080,
+				texteditId: "list_rename_textinput_textedit",
+			],
+		],
+
+		%[
+			id: "list_rename_textinput_textedit",
+			style: %[
+				backgroundColor: 0xffffffff,
+			]
 		]
 ]
 
