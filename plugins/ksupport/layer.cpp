@@ -321,6 +321,38 @@ public:
     update();
   }
 
+	void blendWrappedRect(tjs_int dleft, tjs_int dtop, tjs_int dwidth, tjs_int dheight,
+							tTJSVariant src, tjs_int sleft, tjs_int stop, tjs_int swidth, tjs_int sheight,
+							tjs_int shiftLeft, tjs_int shiftTop, tjs_int opacity) {
+		ncbPropAccessor dstObj(mObjthis), srcObj(src);
+		tjs_int dright = dleft + dwidth, dbottom = dtop + dheight;
+		dleft = std::max(dleft, dstObj.GetValue(L"clipLeft", ncbTypedefs::Tag<tjs_int>()));
+		dtop = std::max(dtop, dstObj.GetValue(L"clipTop", ncbTypedefs::Tag<tjs_int>()));
+		dright = std::min(dright, dstObj.GetValue(L"clipLeft", ncbTypedefs::Tag<tjs_int>()) + dstObj.GetValue(L"clipWidth", ncbTypedefs::Tag<tjs_int>()));
+		dbottom = std::min(dbottom, dstObj.GetValue(L"clipTop", ncbTypedefs::Tag<tjs_int>()) + dstObj.GetValue(L"clipHeight", ncbTypedefs::Tag<tjs_int>()));
+		dwidth = dright - dleft;
+		dheight = dbottom - dtop;
+		tjs_int dstPitch = dstObj.GetValue(L"mainImageBufferPitch", ncbTypedefs::Tag<tjs_int>());
+		unsigned char *dstBuffer = reinterpret_cast<unsigned char*>(dstObj.GetValue(L"mainImageBufferForWrite", ncbTypedefs::Tag<tjs_int64>()));
+		tjs_int srcPitch = srcObj.GetValue(L"mainImageBufferPitch", ncbTypedefs::Tag<tjs_int>());
+		const unsigned char *srcBuffer = reinterpret_cast<const unsigned char*>(srcObj.GetValue(L"mainImageBuffer", ncbTypedefs::Tag<tjs_int64>()));
+		for (tjs_int y = dtop; y < dbottom; y++) {
+			unsigned char *dst = dstBuffer + dstPitch * y + dleft * 4;
+			const unsigned char *srcBase = srcBuffer + (stop + wrap_mod(shiftTop + y,  sheight)) * srcPitch;
+			for (tjs_int x = dleft; x < dright; x++) {
+				const unsigned char *src = srcBase + (sleft + wrap_mod(shiftLeft + x, swidth)) * 4;
+				tjs_int a = src[3] * opacity / 255;
+				dst[0] = (dst[0] * (255 - a) + src[0] * a) / 255;
+				dst[1] = (dst[1] * (255 - a) + src[1] * a) / 255;
+				dst[2] = (dst[2] * (255 - a) + src[2] * a) / 255;
+				dst[3] = std::max(tjs_int((dst[3] * (255 - a) + src[3] * 255) / 255), tjs_int(255));
+				dst += 4;
+				src += 4;
+			}
+		}
+		update();
+	}
+
   inline tjs_uint blendColor(tjs_uint c0, tjs_uint c1, tjs_int x, tjs_int w) {
     return (c0 * (w - x - 1) + c1 * x) / (w - 1);
   }
@@ -634,6 +666,7 @@ NCB_ATTACH_CLASS_WITH_HOOK(LayerSupport, Layer) {
   NCB_METHOD(fillHSV);
   NCB_METHOD(fillRGB);
   NCB_METHOD(copyWrappedRect);
+  NCB_METHOD(blendWrappedRect);
   NCB_METHOD(fillGradientRectLR);
   NCB_METHOD(fillGradientRectUD);
   NCB_METHOD(colorGradientRectLR);

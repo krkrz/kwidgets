@@ -158,7 +158,6 @@ global.K_WIDGET_BORDER_LEFT_COLOR_PROPERTY_KEYS   = [ "borderColorLeft",   "bord
 global.K_WIDGET_BORDER_TOP_COLOR_PROPERTY_KEYS    = [ "borderColorTop",    "borderVerticalColor",   "borderColor" ];
 global.K_WIDGET_BORDER_RIGHT_COLOR_PROPERTY_KEYS  = [ "borderColorRight",  "borderHorizontalColor", "borderColor" ];
 global.K_WIDGET_BORDER_BOTTOM_COLOR_PROPERTY_KEYS = [ "borderColorBottom", "borderVerticalColor",   "borderColor" ];
-global.K_WIDGET_BORDER_COLOR_BLENDING_PROPERTY_KEYS = [ "borderColorBlending" ];
 global.K_WIDGET_BORDER_LEFT_STYLE_PROPERTY_KEYS   = [ "borderStyleLeft",   "borderHorizontalStyle", "borderStyle" ];
 global.K_WIDGET_BORDER_TOP_STYLE_PROPERTY_KEYS    = [ "borderStyleTop",    "borderVerticalStyle",   "borderStyle" ];
 global.K_WIDGET_BORDER_RIGHT_STYLE_PROPERTY_KEYS  = [ "borderStyleRight",  "borderHorizontalStyle", "borderStyle" ];
@@ -168,7 +167,11 @@ global.K_WIDGET_BORDER_RIGHTTOP_RADIUS_PROPERTY_KEYS =    [ "borderRadiusRightTo
 global.K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS =  [ "borderRadiusLeftBottom",  "borderRadiusLeft",  "borderRadiusBottom", "borderRadius" ];
 global.K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS = [ "borderRadiusRightBottom", "borderRadiusRight", "borderRadiusBottom", "borderRadius" ];
 
-global.K_WIDGET_FONT_STYLE_DEFINITION = [
+global.K_WIDGET_APPEARANCE_STYLE_DEFINITION = [
+	[ "opacity",    "opacity",  255 ]
+];
+
+	global.K_WIDGET_FONT_STYLE_DEFINITION = [
 	[ "fontAntiAlias",    "fontAntiAlias",  true ],
 	[ "fontOutline",      "fontOutline", false ],
 	[ "fontOutlineColor", "fontOutlineColor", 0 ],
@@ -207,7 +210,7 @@ global.K_WIDGET_BORDER_STYLE_DEFNITION = [
 	[ "borderRadiusRightTop",    K_WIDGET_BORDER_RIGHTTOP_RADIUS_PROPERTY_KEYS,    0 ],
 	[ "borderRadiusLeftBottom",  K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS,  0 ],
 	[ "borderRadiusRightBottom", K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS, 0 ],
-	[ "borderColorBlending", K_WIDGET_BORDER_COLOR_BLENDING_PROPERTY_KEYS, void ]
+	[ "borderOpacity", "borderOpacity", 255 ]
 ];
 
 /*------------------------------
@@ -264,6 +267,7 @@ class KWidget extends Layer
 	var _styleChain;
 	var _notRespondToStyleModificationRefCount = 0;
 	var _styleModified = false;
+	var appearanceStyle;
 	var fontStyle;
 	var borderStyle;
 	var layoutStyle;
@@ -1043,12 +1047,6 @@ class KWidget extends Layer
 	 ----------------------------------------------------------------------*/
 	function extractBorderStyle() {
 		var borderStyle = extractStyle(K_WIDGET_BORDER_STYLE_DEFNITION);
-		if (borderStyle.borderColorBlending !== void) {
-			borderStyle.borderColorLeft = blendColor(borderStyle.borderColorBlending, borderStyle.borderColorLeft, 0.2);
-			borderStyle.borderColorTop = blendColor(borderStyle.borderColorBlending, borderStyle.borderColorTop, 0.2);
-			borderStyle.borderColorRight = blendColor(borderStyle.borderColorBlending, borderStyle.borderColorRight, 0.2);
-			borderStyle.borderColorBottom = blendColor(borderStyle.borderColorBlending, borderStyle.borderColorBottom, 0.2);
-		}
 		return borderStyle;
 	}
 
@@ -1059,6 +1057,25 @@ class KWidget extends Layer
 			return false;
 
 		borderStyle = newStyle;
+
+		return true;
+	}
+
+	/*----------------------------------------------------------------------
+	 * アピアランススタイルの適用
+	 ----------------------------------------------------------------------*/
+	function extractAppearanceStyle() {
+		var style = extractStyle(K_WIDGET_APPEARANCE_STYLE_DEFINITION);
+		return style;
+	}
+
+	function updateAppearanceStyle() {
+		var newStyle = extractAppearanceStyle();
+
+		if (equalStruct(appearanceStyle, newStyle))
+			return false;
+
+		appearanceStyle = newStyle;
 
 		return true;
 	}
@@ -1273,6 +1290,7 @@ class KWidget extends Layer
 		parentWidget.respondToStyleModification = false;
 		respondToStyleModification = false;
 		var modified = false;
+		modified ||= updateAppearanceStyle();
 		modified ||= updateBorderStyle();
 		modified ||= updateFontStyle();
 		modified ||= updateLayoutStyle();
@@ -2131,9 +2149,9 @@ class KWidget extends Layer
 		var fontColor = overrideFontColor !== void ? overrideFontColor : fontStyle.fontColor;
 		applyFontStyle(font, fontStyle);
 		if (! fontStyle.fontOutline)
-			drawText(x, y, text, fontColor, 255, fontStyle.fontAntiAlias);
+			drawText(x, y, text, fontColor, appearanceStyle.opacity, fontStyle.fontAntiAlias);
 		else
-			drawText(x, y, text, fontColor, 255, fontStyle.fontAntiAlias, 2048, fontStyle.fontOutlineColor, 2.5);
+			drawText(x, y, text, fontColor, appearanceStyle.opacity, fontStyle.fontAntiAlias, 2048, fontStyle.fontOutlineColor, 2.5);
 	}
 
 	//------------------------------
@@ -2321,7 +2339,7 @@ class KWidget extends Layer
 				var _x = dir == "left" ? (x + i) : (x + w - i - 1);
 				var _y = t;
 				var _h = b - t;
-				copyWrappedRect(_x, _y, 1, _h, borderPenLayer, 0, 0, borderPenLayer.width, borderPenLayer.height, -x, -y);
+				blendWrappedRect(_x, _y, 1, _h, borderPenLayer, 0, 0, borderPenLayer.width, borderPenLayer.height, -x, -y, appearanceStyle.opacity);
 			}
 			break;
 		}
@@ -2337,7 +2355,7 @@ class KWidget extends Layer
 				var _x = l;
 				var _y = dir == "top" ? (y + i) : (y + h - i - 1);
 				var _w = r - l;
-				copyWrappedRect(_x, _y, _w, 1, borderPenLayer, 0, 0, borderPenLayer.width, borderPenLayer.height, -x, -y);
+				blendWrappedRect(_x, _y, _w, 1, borderPenLayer, 0, 0, borderPenLayer.width, borderPenLayer.height, -x, -y, appearanceStyle.opacity);
 			}
 			break;
 		}
@@ -2372,7 +2390,7 @@ class KWidget extends Layer
 		if (r == 0)
 			return;
 		var bufLayer = borderCornerLayers[index];
-		bufLayer.operateRect(0, 0, this, l, t, r, r);
+		bufLayer.operateRect(0, 0, this, l, t, r, r, omAuto, appearanceStyle.opacity);
 		copyRect(l, t, bufLayer, 0, 0, r, r);
 	}
 

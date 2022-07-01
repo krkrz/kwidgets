@@ -182,7 +182,7 @@ class KFrameLayout extends KLayout
 				var helpIcon = findIcon("k_help");
 				var hx = int(result.x + result.w);
 				var hy = int(result.y + (fontStyle.fontHeight - helpIcon.height) / 2);
-				operateRect(hx, hy, helpIcon, 0, 0, helpIcon.width, helpIcon.height, omAuto, nodeEnabled ? 255 : 128);
+				operateRect(hx, hy, helpIcon, 0, 0, helpIcon.width, helpIcon.height, omAuto, appearanceStyle.opacity);
 				helpBounds = new KRect(hx, hy, helpIcon.width, helpIcon.height);
 			}
 		}

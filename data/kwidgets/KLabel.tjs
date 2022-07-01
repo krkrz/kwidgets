@@ -129,7 +129,6 @@ class KImageCapability
 	}
 
 	function _onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.opacity = getStyleProperty("opacity", 255);
 		widgetStyle.icon = getStyleProperty("icon", void);
 	}
 
@@ -151,7 +150,7 @@ class KImageCapability
 		if (iconLabel === void)
 			iconLabel = label;
 		var labelLayer = findIcon(getIconLabel());
-		operateRect(x + (w - labelLayer.width) / 2, y + (h - labelLayer.height) / 2, labelLayer, 0, 0, w, h, omAuto, widgetStyle.opacity);
+		operateRect(x + (w - labelLayer.width) / 2, y + (h - labelLayer.height) / 2, labelLayer, 0, 0, w, h, omAuto, appearanceStyle.opacity);
 	}
 };
 

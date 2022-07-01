@@ -2,9 +2,11 @@
 		%[
 			klass: "KWidget",
 			style: %[
+				fontColor: 0,
 				backgroundColor: 0xfff0f0f0,
+				opacity: 255,
 				nodeDisabled: %[
-					borderColorBlending: 0xfff0f0f0,
+					opacity: 128,
 				]
 			]
 		],
@@ -19,15 +21,10 @@
 		%[
 			klass: "KFrameLayout",
 			style:  %[
-				fontColor: 0,
 				borderColor: 0xffacacac,
 				borderStyle: BORDER_STYLE_SOLID,
 				borderWidth: 1,
 				padding: 1,
-				nodeDisabled: %[
-					fontColor: 0x808080,
-					borderColor: blendColor(0xffacacac, 0xfff0f0f0),
-				],
 			]
 		],
 
@@ -41,11 +38,7 @@
 		%[
 			klass: "KButton",
 			style: %[
-				fontColor: 0,
 				frameType: FRAME_RAISED,
-				nodeDisabled: %[
-					fontColor: 0x808080
-				],
 				hover: %[
 					backgroundColor: 0xfff8f8f8
 				],
@@ -75,16 +68,12 @@
 			klass: "KImageButton",
 			style: %[
 				padding: 5,
-				opacity: 255,
-				nodeDisabled: %[ opacity: 128 ]
 			]
 		],
 
 		%[
 			klass: "KToggleButton",
 			style: %[
-				fontColor: 0,
-				nodeDisabled: %[ fontColor: 0x808080 ],
 				hover: %[
 					backgroundColor: 0xfff8f8f8
 				],
@@ -127,12 +116,6 @@
 		%[
 			klass: "KCheckBox",
 			style: %[
-				fontColor: 0,
-				opacity: 255,
-				nodeDisabled: %[
-					fontColor: 0x808080,
-					opacity: 128
-				],
 				focus: %[
 					fontUnderline: true
 				],
@@ -158,20 +141,12 @@
 		%[
 			klass: "KTextLabel",
 			style:  %[
-				fontColor: 0,
-				nodeDisabled: %[
-					fontColor: 0x808080
-				],
 			]
 		],
 
 		%[
 			klass: "KImageLabel",
 			style: %[
-				opacity: 0xff,
-				nodeDisabled: %[
-					opacity: 0x80,
-				],
 			]
 		],
 
@@ -240,7 +215,6 @@
 			klass: "KTextEdit",
 			style: %[
 				backgroundColor: 0xffffffff,
-				fontColor: 0,
 				selectionBackgroundColor: WIN_SELECTED,
 				selectionFontColor: 0xffffff,
 				padding: 1,
