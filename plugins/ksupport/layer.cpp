@@ -341,11 +341,22 @@ public:
 			const unsigned char *srcBase = srcBuffer + (stop + wrap_mod(shiftTop + y,  sheight)) * srcPitch;
 			for (tjs_int x = dleft; x < dright; x++) {
 				const unsigned char *src = srcBase + (sleft + wrap_mod(shiftLeft + x, swidth)) * 4;
-				tjs_int a = src[3] * opacity / 255;
-				dst[0] = (dst[0] * (255 - a) + src[0] * a) / 255;
-				dst[1] = (dst[1] * (255 - a) + src[1] * a) / 255;
-				dst[2] = (dst[2] * (255 - a) + src[2] * a) / 255;
-				dst[3] = std::max(tjs_int((dst[3] * (255 - a) + src[3] * 255) / 255), tjs_int(255));
+				tjs_int srcA = src[3] * opacity / 255;
+				tjs_int dstA = dst[3];
+				tjs_int dstB = dst[0] * dstA / 255, dstG = dst[1] * dstA / 255, dstR = dst[2] * dstA / 255;
+				tjs_int srcB = src[0] * srcA / 255, srcG = src[1] * srcA / 255, srcR = src[2] * srcA / 255;
+				dstR = std::min((dstR * (255 - srcA) + srcR * 255) / 255, 255);
+				dstG = std::min((dstG * (255 - srcA) + srcG * 255) / 255, 255);
+				dstB = std::min((dstB * (255 - srcA) + srcB * 255) / 255, 255);
+				dstA = std::min((dstA * (255 - srcA) + srcA * 255) / 255, 255);
+				if (dstA == 0) {
+					dstR = dstG = dstB = 0;
+				} else {
+					dstR = std::min(dstR * 255 / dstA, 255);
+					dstG = std::min(dstG * 255 / dstA, 255);
+					dstB = std::min(dstB * 255 / dstA, 255);
+				}
+				dst[0] = dstB, dst[1] = dstG, dst[2] = dstR, dst[3] = dstA;
 				dst += 4;
 				src += 4;
 			}

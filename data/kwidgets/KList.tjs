@@ -1178,16 +1178,13 @@ class KList extends KVirtualWidget
 			delayMouseEvent = false;
 			inMouseSelection = false;
 			pressSelection = false;
-			return;
 		}
-//		var item = findItem(y);
-//		if (item !== void)
-		//			item.onMouseUp(x, y - item.top, button, shift);
 		if (mouseDownItem !== void
 			&& mouseDownItem isvalid) {
-			mouseDownItem.onMouseUp(x, y - mouseDownItem.top, button, shift);
-			invalidateItemStyleStates(mouseDownItem);
+			var item = mouseDownItem;
 			mouseDownItem = void;
+			item.onMouseUp(x, y - item.top, button, shift);
+			invalidateItemStyleStates(item);
 		}
 	}
 

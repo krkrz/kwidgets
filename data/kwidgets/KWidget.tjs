@@ -54,85 +54,6 @@ property defaultSpace {
 	}
 }
 
-global.K_WIDGET_FONT_STYLE_KEYS = [
-	"fontFace",
-	"fontHeight",
-	"fontColor",
-	"fontBold",
-	"fontItalic",
-	"fontStrikeout",
-	"fontUnderline",
-	"fontAntialias",
-	"fontOutline",
-	"fontOutlineColor"
-];
-
-global.K_WIDGET_LOCATE_STYLE_KEYS = [
-	"marginTop",
-	"marginLeft",
-	"marginBottom",
-	"marginRight",
-	"marginHorizontal",
-	"marginVertical",
-	"margin",
-	"alignHorizontal",
-	"alignVertical",
-	"align"
-];
-
-global.K_WIDGET_LAYOUT_STYLE_KEYS = [
-	"spaceHorizontal",
-	"spaceVertical",
-	"space"
-	"paddingTop",
-	"paddingLeft",
-	"paddingBottom",
-	"paddingRight",
-	"paddingHorizontal",
-	"paddingVertical",
-	"padding",
-	"paddingOffset",
-	"paddingOffsetHorizontal",
-	"paddingOffsetVertical",
-	"paddingInset",
-	"paddingInsetHorizontal",
-	"paddingInsetVertical",
-];
-
-global.K_WIDGET_BORDER_STYLE_KEYS = [
-	"backgroundColor",
-	"borderWidthLeft",
-	"borderWidthTop",
-	"borderWidthRight",
-	"borderWidthBottom",
-	"borderWidthWidth",
-	"borderWidthVertical",
-	"borderWidth",
-	"borderColorBlending",
-	"borderColorLeft",
-	"borderColorTop",
-	"borderColorRight",
-	"borderColorBottom",
-	"borderColorHorizontal",
-	"borderColorVertical",
-	"borderColor",
-	"borderStyleLeft",
-	"borderStyleTop",
-	"borderStyleRight",
-	"borderStyleBottom",
-	"borderStyleHorizontal",
-	"borderStyleVertical",
-	"borderStyle",
-	"borderRadiusLeftTop",
-	"borderRadiusRightTop",
-	"borderRadiusLeftBottom",
-	"borderRadiusRightBottom",
-	"borderRadiusLeft",
-	"borderRadiusTop",
-	"borderRadiusRight",
-	"borderRadiusBottom",
-	"borderRadius",
-];
 
 global.K_WIDGET_MARGIN_LEFT_PROPERTY_KEYS   = [ "marginLeft",   "marginHorizontal", "margin" ];
 global.K_WIDGET_MARGIN_TOP_PROPERTY_KEYS    = [ "marginTop",    "marginVertical",   "margin" ];
@@ -171,7 +92,7 @@ global.K_WIDGET_APPEARANCE_STYLE_DEFINITION = [
 	[ "opacity",    "opacity",  255 ]
 ];
 
-	global.K_WIDGET_FONT_STYLE_DEFINITION = [
+global.K_WIDGET_FONT_STYLE_DEFINITION = [
 	[ "fontAntiAlias",    "fontAntiAlias",  true ],
 	[ "fontOutline",      "fontOutline", false ],
 	[ "fontOutlineColor", "fontOutlineColor", 0 ],
@@ -209,8 +130,7 @@ global.K_WIDGET_BORDER_STYLE_DEFNITION = [
 	[ "borderRadiusLeftTop",     K_WIDGET_BORDER_LEFTTOP_RADIUS_PROPERTY_KEYS,     0 ],
 	[ "borderRadiusRightTop",    K_WIDGET_BORDER_RIGHTTOP_RADIUS_PROPERTY_KEYS,    0 ],
 	[ "borderRadiusLeftBottom",  K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS,  0 ],
-	[ "borderRadiusRightBottom", K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS, 0 ],
-	[ "borderOpacity", "borderOpacity", 255 ]
+	[ "borderRadiusRightBottom", K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS, 0 ]
 ];
 
 /*------------------------------
