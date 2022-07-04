@@ -744,7 +744,8 @@ class KList extends KVirtualWidget
 
 	// 描画更新
 	function onPaint() {
-		updateDrawItemList();
+		if (isAttachedToWindow)
+			updateDrawItemList();
 	}
 
 	function updateDrawItemList() {
