@@ -1,0 +1,168 @@
+class KPrimitiveIconBuilder
+{
+	var window;
+	var rectPat =       /^\$rect\((\d+),(\d+),#([0-9a-fA-F]{6})\)$/;
+	var squarePat =     /^\$square\((\d+),#([0-9a-fA-F]{6})\)$/;
+	var trianglePat =   /^\$triangle\((\d+),(\d+),(u|d|l|r),#([0-9a-fA-F]{6})\)$/;
+	var eqtrianglePat = /^\$eqtriangle\((\d+),(u|d|l|r),#([0-9a-fA-F]{6})\)$/;
+	var circlePat =     /^\$circle\((\d+),#([0-9a-fA-F]{6})\)$/;
+	var elippsePat =    /^\$elippse\((\d+),(\d+),#([0-9a-fA-F]{6})\)$/;
+	var primitiveMap = %[];
+	var definitions;
+	var bufLayer;
+
+	function KPrimitiveIconBuilder(window) {
+		this.window = window;
+		bufLayer = new global.Layer(window, window.primaryLayer);
+		definitions = [
+				%[ pat: rectPat,        func: drawRectIcon       ],
+				%[ pat: squarePat,      func: drawSquareIcon     ],
+				%[ pat: trianglePat,    func: drawTriangleIcon   ],
+				%[ pat: eqtrianglePat,  func: drawEqtriangleIcon ],
+				%[ pat: circlePat,      func: drawCircleIcon     ],
+				%[ pat: elippsePat,     func: drawElippseIcon    ]
+		];
+	}
+
+	function matchIcon(name) {
+		if (typeof(primitiveMap[name]) !== K_UNDEFINED)
+			return true;
+		for (var i = 0; i < definitions.count; i++)
+			if (definitions[i].pat.test(name))
+				return true;
+		return false;
+	}
+
+	function getIcon(name) {
+		if (typeof(primitiveMap[name]) === K_UNDEFINED) {
+			var layer = new Layer(window, window.primaryLayer);
+			drawIcon(layer, name);
+			primitiveMap[name] = layer;
+		}
+		return primitiveMap[name];
+	}
+
+	function drawIcon(layer, name) {
+		for (var i = 0; i < definitions.count; i++)
+			if (definitions[i].pat.test(name)) {
+				definitions[i].func(layer, name);
+				return;
+			}
+	}
+
+	function drawRectIcon(layer, name) {
+		var matches = rectPat.exec(name);
+		var width = +matches[1];
+		var height = +matches[2];
+		var color = +("0x" + matches[3]);
+		layer.setSize(width, height);
+		layer.fillRect(0, 0, width, height, 0xff000000 | color);
+	}
+
+	function drawSquareIcon(layer, name) {
+		var matches = squarePat.exec(name);
+		var width = +matches[1];
+		var color = +("0x" + matches[2]);
+		layer.setSize(width, width);
+		layer.fillRect(0, 0, width, width, 0xff000000 | color);
+	}
+
+	function drawTriangleIcon(layer, name) {
+		var matches = trianglePat.exec(name);
+		var width = +matches[1];
+		var height = +matches[2];
+		var dir = matches[3];
+		var color = +("0x" + matches[4]);
+		bufLayer.setSize(width * 2, height * 2);
+		bufLayer.setImageSize(width * 2, height * 2);
+		bufLayer.fillRect(0, 0, width * 2, height * 2, color);
+		drawRawTriangle(bufLayer, 0, 0, width * 2, height * 2, dir, 0xff000000 | color);
+		layer.setSize(width, height);
+		layer.stretchCopy(0, 0, width, height, bufLayer, 0, 0, bufLayer.width, bufLayer.height, stLinear);
+	}
+
+	function drawEqtriangleIcon(layer, name) {
+		var matches = eqtrianglePat.exec(name);
+		var size = +matches[1];
+		var dir = matches[2];
+		var color = +("0x" + matches[3]);
+		var width, height;
+		if (dir == "u" || dir == "d") {
+			width = size;
+			height = Math.ceil(size * Math.sqrt(3) / 2);
+		} else {
+			height = size;
+			width = Math.ceil(size * Math.sqrt(3) / 2);
+		}
+		bufLayer.setSize(width * 2, height * 2);
+		bufLayer.setImageSize(width * 2, height * 2);
+		bufLayer.fillRect(0, 0, width * 2, height * 2, color);
+		drawRawTriangle(bufLayer, 0, 0, width * 2, height * 2, dir, 0xff000000 | color);
+		layer.setSize(size, size);
+		layer.stretchCopy((size - width) / 2, (size - height) / 2, width, height, bufLayer, 0, 0, bufLayer.width, bufLayer.height, stLinear);
+	}
+
+	function drawCircleIcon(layer, name) {
+		var matches = circlePat.exec(name);
+		var width = +matches[1];
+		var color = +("0x" + matches[2]);
+		bufLayer.setSize(width * 2, width * 2);
+		bufLayer.setImageSize(width * 2, width * 2);
+		bufLayer.fillRect(0, 0, width * 2, width * 2, color);
+		drawRawCircle(bufLayer, width, width, width, 0xff000000 | color);
+		layer.setSize(width, width);
+		layer.stretchCopy(0, 0, width, width, bufLayer, 0, 0, bufLayer.width, bufLayer.height, stLinear);
+	}
+
+	function drawElippseIcon(layer, name) {
+		var matches = elippsePat.exec(name);
+		var width = +matches[1];
+		var height = +matches[2];
+		var color = +("0x" + matches[3]);
+		var r = Math.max(width, height);
+		bufLayer.setSize(r * 2, r * 2);
+		bufLayer.setImageSize(r * 2, r * 2);
+		bufLayer.fillRect(0, 0, r * 2, r * 2, color);
+		drawRawCircle(bufLayer, r, r, r, 0xff000000 | color);
+		layer.setSize(width, height);
+		layer.stretchCopy(0, 0, width, height, bufLayer, 0, 0, bufLayer.width, bufLayer.height, stLinear);
+	}
+
+	function drawRawCircle(layer, x, y, r, color) {
+		var f = r * 2 + 3;
+		var cx = r;
+		var dx = 0;
+		while (cx >= dx) {
+			layer.fillRect(x - dx, y - cx - 1, dx * 2, 1, color);
+			layer.fillRect(x - dx, y + cx, dx * 2, 1, color);
+			layer.fillRect(x - cx, y - dx - 1, cx * 2, 1, color);
+			layer.fillRect(x - cx, y + dx, cx * 2, 1, color);
+			if (f >= 0) {
+				cx--;
+				f -= cx * 4;
+			}
+			dx++;
+			f += dx * 4 + 2;
+		}
+	}
+
+	function drawRawTriangle(layer, x, y, w, h, dir, color) {
+		var cx = x + w / 2;
+		var cy = y + h / 2;
+		if (dir == "u" || dir == "d") {
+			for (var i = 0; i < h; i++) {
+				var size = Math.ceil((w / 2) * i / (h - 1));
+				layer.fillRect(cx - size, y + i, size * 2, 1, color);
+			}
+			if (dir == "d")
+				layer.flipUD();
+		} else {
+			for (var i = 0; i < w; i++) {
+				var size = Math.ceil((h / 2) * i / (w - 1));
+				layer.fillRect(x + i, cy - size, 1, size * 2, color);
+			}
+			if (dir == "r")
+				layer.flipLR();
+		}
+	}
+}
