@@ -222,7 +222,7 @@
 		],
 
 		%[
-			id: "textinput_textedit",
+			id: "textinpuot_textedit",
 			style: %[
 				backgroundColor: 0xffffffff,
 				hover: %[ backgroundColor: 0xffeaeaea ],
@@ -267,6 +267,25 @@
 			style: %[
 				backgroundColor: 0xffffffff,
 			]
+		],
+
+		%[
+			klass: "KTextInputSlider",
+			style: %[
+				textinputId: "textinputslider_textinput",
+				sliderId: "textinputslider_slider",
+				spaceHorizontal: 3,
+			]
+		],
+
+		%[
+			id: "textinputslider_textinput",
+			style: %[],
+		],
+
+		%[
+			id: "textinputslider_slider",
+			style: %[],
 		]
 ]
 

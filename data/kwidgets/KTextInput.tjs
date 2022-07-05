@@ -25,7 +25,6 @@ class KTextInputEdit extends KTextEdit
 	 * コンストラクタ
 	 ------------------------------*/
 	function KTextInputEdit(window, opts) {
-		opts.name = "text";
 		opts.lineWrapping = false;
 		super.KTextEdit(window, opts);
 
