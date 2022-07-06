@@ -164,7 +164,8 @@
 			style: %[
 				backgroundColor: WIN_LIGHTEN1,
 				frameType: FRAME_SUNKEN,
-				focus: %[ backgroundColor: WIN_HIGHLIGHT ]
+				focus: %[ backgroundColor: WIN_HIGHLIGHT ],
+				knobId: "range_pointer_2d_knob"
 			]
 		],
 
@@ -173,34 +174,75 @@
 			styleOfId: "range_pointer_2d_knob",
 		],
 
+		%[ klass: "KSlider",
+		   style: %[
+			   knobId: "slidr_knob",
+		   ]
+		 ],
 
 		%[
 			id: "scrollbar_knob",
 			styleOfId: "range_pointer_2d_knob"
 		],
+
+		%[
+			id: "scrollbar_rangepointer",
+			style: %[ knobId: "scrollbar_knob" ]
+		],
+
 		%[
 			id: "scrollbar_button",
-			style: %[ padding: 4 ]
+			style: %[ padding: 3 ]
 		],
+
+		%[
+			id: "scrollbar_upward_button",
+			styleOfId: "scrollbar_button",
+			style: %[
+				icon: "k_scroll_up"
+			]
+		],
+		%[
+			id: "scrollbar_downward_button",
+			styleOfId: "scrollbar_button",
+			style: %[
+				icon: "k_scroll_down"
+			]
+		],
+		%[
+			id: "scrollbar_leftward_button",
+			styleOfId: "scrollbar_button",
+			style: %[
+				icon: "k_scroll_left"
+			]
+		],
+		%[
+			id: "scrollbar_rightward_button",
+			styleOfId: "scrollbar_button",
+			style: %[
+				icon: "k_scroll_right"
+			]
+		],
+
 		%[
 			klass: "KScrollBar",
 			style: %[
-				buttonId: "scrollbar_button",
-				knobId: "scrollbar_knob"
+				rangepointerId: "scrollbar_rangepointer",
+				buttonStride: 10
 			]
 		],
 		%[
 			klass: "KVerticalScrollBar",
 			style: %[
-				backwardButtonLabel: "k_scroll_up",
-				forwardButtonLabel: "k_scroll_down"
+				backwardButtonId: "scrollbar_upward_button",
+				forwardButtonId: "scrollbar_downward_button",
 			]
 		],
 		%[
 			klass: "KHorizontalScrollBar",
 			style: %[
-				backwardButtonLabel: "k_scroll_left",
-				forwardButtonLabel: "k_scroll_right"
+				backwardButtonId: "scrollbar_leftward_button",
+				forwardButtonId: "scrollbar_rightward_button",
 			]
 		],
 
