@@ -69,11 +69,9 @@ class KScrollBar extends KEntity
 	// ターゲット位置更新
 	property targetPos {
 		getter {
-			touchWidets();
 			return rangePointer.value[direction];
 		}
 		setter (pos) {
-			touchWidets();
 			var pointerValue = rangePointer.value;
 			pointerValue[direction] = pos;
 			rangePointer.value = pointerValue;
@@ -83,7 +81,6 @@ class KScrollBar extends KEntity
 
 	// ターゲットサイズ更新
 	function setTargetSize(realSize, windowSize, targetPos) {
-		touchWidets();
 		targetRealSize = realSize;
 		targetWindowSize = windowSize;
 		rangePointer.updateLogicalRange(direction, 0, realSize, windowSize);
