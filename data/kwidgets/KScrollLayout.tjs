@@ -6,7 +6,7 @@
 //------------------------------
 // 定数
 global.SCROLL_BAR_MIN_WIDTH = 50;
-global.SCROLL_LAYOUT_MIN_WIDTH = 100;
+global.SCROLL_LAYOUT_MIN_WIDTH = 0;
 global.SCROLL_HANDLE_MIN_SIZE = 10;
 
 //----------------------------------------------------------------------

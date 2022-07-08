@@ -112,7 +112,7 @@ class KList extends KVirtualWidget
 	var confirmedDragTarget;
 	var curDragInfo;
 	var curDragRegion;
-	var toggleWidth;
+	var _toggleWidth;
 	var openNoticeItem;
 	var _disabledItemCapabilityMask = LIST_ITEM_CAPABILITY_MASK_FOCUS;
 	var isReadyToClick = true;
@@ -142,7 +142,7 @@ class KList extends KVirtualWidget
 		root = this;
 		marginalWidth = marginalHeight = 1000;
 		setMinMaxSize(0, 0, marginalWidth, marginalHeight);
-		toggleWidth = findIcon("k_list_open").width + 4;;
+		_toggleWidth = findIcon("k_list_open").width + 4;;
 		curDragInfo = %[ acceptType: DRAG_ACCEPT_TYPE_NONE ];
 		curDragRegion = new KRegion();
 		mouseDragThreshold = 8;
@@ -159,6 +159,7 @@ class KList extends KVirtualWidget
 	function onExtractWidgetStyle(widgetStyle) {
 		widgetStyle.slideWidth = getStyleProperty("slideWidth", 14);
 		widgetStyle.renameTextinputId = getStyleProperty("renameTextinputId");
+		widgetStyle.ignoreToggleWidth = getStyleProperty("ignoreToggleWidth", false);
 	}
 
 	property slideWidth {
@@ -188,6 +189,15 @@ class KList extends KVirtualWidget
 				color = color[index % color.count];
 			}
 			return color;
+		}
+	}
+
+	property toggleWidth {
+		getter {
+			if (widgetStyle.ignoreToggleWidth)
+				return 0;
+			else
+				return _toggleWidth;
 		}
 	}
 
@@ -1750,7 +1760,6 @@ class KListItem
 	// ウィジェット
 	var _nameCache = %[];
 	var left, top, width, height;
-	var toggleWidth;
 	var iconWidth;
 	var labelWidth;
 	var iconLayerList;
@@ -1809,6 +1818,12 @@ class KListItem
 		}
 		discardArray(childList);
 		discardArray(ownIconLayerList);
+	}
+
+	property toggleWidth {
+		getter {
+			return root.toggleWidth;
+		}
 	}
 
 	/**------------------------------
@@ -3451,9 +3466,8 @@ class KListItem
 		var prevWidth = width;
 		var prevHeight = height;
 		height = 0;
-		toggleWidth = root.findIcon("k_list_open").width + 4;;
 		height = Math.max(height, root.findIcon("k_list_open").height);
-		iconWidth = 4;
+		iconWidth = 0;
 		for (var i = 0; i < iconLayerList.count; i++) {
 			iconWidth += iconLayerList[i].width;
 			height = Math.max(iconLayerList[i].height);

@@ -140,6 +140,8 @@ class KStyleRepository
 			var style;
 			if (typeof(def.styleOfKlass) != K_UNDEFINED)
 				style = classStyleMap[def.styleOfKlass];
+			else if (typeof(def.styleOfClass) != K_UNDEFINED)
+				style = classStyleMap[def.styleOfClass];
 			else if (typeof(def.styleOfId) != K_UNDEFINED)
 				style = idStyleMap[def.styleOfId];
 			if (typeof(def.style) != K_UNDEFINED) {
@@ -153,6 +155,8 @@ class KStyleRepository
 
 			if (typeof(def.klass) != K_UNDEFINED)
 				registerClassStyle(def.klass, style);
+			else if (typeof(def["class"]) != K_UNDEFINED)
+				registerClassStyle(def["class"], style);
 			else if (typeof(def.id) != K_UNDEFINED)
 				registerIdStyle(def.id, style);
 			else

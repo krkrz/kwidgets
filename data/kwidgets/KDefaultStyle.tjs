@@ -328,6 +328,52 @@
 		%[
 			id: "textinputslider_slider",
 			style: %[],
+		],
+
+		%[
+			klass: "KComboBox",
+			style: %[
+				frameType: FRAME_SUNKEN,
+				padding: 2,
+				backgroundColor: 0xffffffff,
+				dropdownButtonId: "combobox_dropdown_button",
+				dropdownInterval: 200,
+				dispCount: 10,
+				placeButtonInsideBorder: false
+			],
+		],
+
+		%[
+			id: "combobox_dropdown_button",
+			style: %[
+				frameType: FRAME_FLATTEN,
+				icon: "$triangle(7,5,d,#000000)"
+			]
+		],
+
+		%[
+			id: "combobox_dropdown_frame",
+			style: %[
+				backgroundColor: 0xffffffff,
+				borderType: BORDER_STYLE_SOLID,
+				borderWidth: 1,
+				borderColor: 0xffacacac,
+				padding: 1,
+			]
+		],
+
+		%[
+			id: "combobox_dropdown_scroll",
+			styleOfId: "combobox_dropdown_frame"
+		],
+
+		%[
+			id: "combobox_dropdown_list",
+			style: %[
+				backgroundColor: 0xffffffff,
+				ignoreToggleWidth: true,
+				spaceVertical: 4,
+			]
 		]
 ]
 

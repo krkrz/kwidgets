@@ -2108,6 +2108,20 @@ class KWidget extends Layer
 		}
 	}
 
+	function getUITextInRange(fontStyle, w, text) {
+		if (w <= 0)
+			return %[ inRange: false, text: text ];
+		applyFontStyle(font, fontStyle);
+		var omitText = "...";
+		var omitTextWidth = font.getTextWidth(omitText);
+		var len = table_find_text_range(font, text, w, omitTextWidth);
+		if (len === void) {
+			return %[ inRange: true, text: text ];
+		} else {
+			return %[ inRange: false, text: text.substr(0, len) + omitText ];
+		}
+	}
+
 	/*------------------------------
 	 * テキストエリアを展開する
 	 ------------------------------*/
