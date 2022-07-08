@@ -74,11 +74,20 @@ class KValueEntity extends KEntity
 	 ------------------------------*/
 	function dispatch {
 		if (nodeEnabled)
-			onValueModified(value);
+			onValueModified(value, value);
 	}
 
 	function invalidateValue() {
 		dispatch();
+	}
+
+	function updateValue(newValue) {
+		if (value !== newValue) {
+			var oldValue = value;
+			value = newValue;
+			if (nodeEnabled)
+				onValueModified(newValue, oldValue);
+		}
 	}
 
 	/*------------------------------

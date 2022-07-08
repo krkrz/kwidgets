@@ -248,13 +248,13 @@ class KComboBox extends KValueEntity
 	function forwardItems() {
 		if (empty)
 			return;
-		selected = (selected + 1) % count;
+		updateValue(values[(selected + 1) % count]);
 	}
 
 	function backwardItems() {
 		if (empty)
 			return;
-		selected = (selected + 1) % count;
+		updateValue(values[(selected - 1 + count) % count]);
 	}
 
 	property curFontStyle {
@@ -417,10 +417,7 @@ class KComboTextInput extends KTextInput
 	}
 
 	function onEnter() {
-		if (owner.value !== value) {
-			owner.value = value;
-			owner.dispatch();
-		}
+		owner.updateValue(value);
 		removeSelf();
 	}
 
@@ -521,10 +518,7 @@ class KComboBoxDropdownListItem extends KListItem
 	}
 
 	function onMouseUp() {
-		if (owner.value != value) {
-			owner.value = value;
-			owner.dispatch();
-		}
+		owner.updateValue(value);
 		window.closeSelf();
 	}
 }
