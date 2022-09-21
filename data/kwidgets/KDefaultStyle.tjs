@@ -374,6 +374,14 @@
 				ignoreToggleWidth: true,
 				spaceVertical: 4,
 			]
-		]
+		],
+
+		%[ klass: "KStatusBar",
+		   style: %[
+			   fontHeight: 12,
+			   borderWidth: 1
+		   ]
+		 ]
+		   
 ]
 
