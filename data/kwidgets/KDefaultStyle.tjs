@@ -381,7 +381,14 @@
 			   fontHeight: 12,
 			   borderWidth: 1
 		   ]
+		 ],
+
+		%[ klass: "KSeparator",
+		   style: %[
+			   borderWidth: 1,
+			   borderColor: 0xfff8f8f8,
+			   borderStyle: BORDER_STYLE_INSET
+		   ],
 		 ]
-		   
 ]
 
