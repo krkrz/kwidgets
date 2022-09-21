@@ -176,7 +176,7 @@
 
 		%[ klass: "KSlider",
 		   style: %[
-			   knobId: "slidr_knob",
+			   knobId: "slider_knob",
 		   ]
 		 ],
 
