@@ -389,6 +389,55 @@
 			   borderColor: 0xfff8f8f8,
 			   borderStyle: BORDER_STYLE_INSET
 		   ],
+		 ],
+
+		%[ id: "spliter_shutter_toggle",
+		   style: %[
+			   borderWidth: 1,
+			   borderStyle: BORDER_STYLE_SOLID,
+			   borderColor: 0xffacacac,
+			   borderRadius: 3,
+			   padding: 3,
+		   ]
+		 ],
+
+		%[ klass: "KSpliterLayout",
+		   style: %[
+			   handleId: "spliter_handle",
+			   handleSize: 5,
+		   ]
+		 ],
+
+		%[ klass: "KHorizontalSpliterLayout",
+		   style: %[
+			   shutterToggleId: "horizontal_spliter_shutter_toggle",
+		   ]
+		 ],
+
+		%[ id: "spliter_handle",
+		   style: %[
+			   hover: %[ backgroundColor: 0xffacacac ]
+		   ]
+		 ],
+
+		%[ id: "horizontal_spliter_shutter_toggle",
+		   styleOfId: "spliter_shutter_toggle",
+		   style: %[ backward: %[ icon: "k_scroll_left" ],
+					 forward: %[ icon: "k_scroll_right" ],
+				   ],
+		 ],
+
+		%[ klass: "KVerticalSpliterLayout",
+		   style: %[
+			   shutterToggleId: "vertical_spliter_shutter_toggle",
+		   ]
+		 ],
+
+		%[ id: "vertical_spliter_shutter_toggle",
+		   styleOfId: "spliter_shutter_toggle",
+		   style: %[ backward: %[ icon: "k_scroll_up" ],
+					 forward: %[ icon: "k_scroll_bottom" ],
+				   ],
 		 ]
 ]
 
