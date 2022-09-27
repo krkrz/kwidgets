@@ -322,14 +322,13 @@ class KSpliterLayout extends KLayout
 				}
 			}
 		}
+		setMinMaxSize(calcMinMaxSize()*);
 	}
 
 	// 再描画
 	function onLocateLayout {
 		if (childList.count < 2)
 			return;
-
-		setMinMaxSize(calcMinMaxSize()*);
 
 		var w, l, r;
 		w = myWidth() - HANDLE_SIZE;

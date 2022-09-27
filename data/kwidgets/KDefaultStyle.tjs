@@ -438,6 +438,22 @@
 		   style: %[ backward: %[ icon: "k_scroll_up" ],
 					 forward: %[ icon: "k_scroll_bottom" ],
 				   ],
+		 ],
+
+
+		%[ klass: "KTabLayout",
+		   style: %[ tabId: "tab",
+					 padding: 2 ]
+		 ],
+
+		%[ klass: "KTab",
+		   style: %[ fontColor: 0x808080,
+					 fontHeight: 12,
+					 paddingInset: 6,
+					 selected: %[ fontColor: 0, paddingOffsetVertical: -1 ],
+					 focused: %[ fontUnderline: true ],
+					 hover: %[ paddingOffsetVertical: -1 ]
+				   ]
 		 ]
 ]
 

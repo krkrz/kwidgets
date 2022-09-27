@@ -383,6 +383,11 @@ class KWidget extends Layer
 		invalidateStyles();
 	}
 
+	function updateCustomStyleStates(states) {
+		customStyleStates = states;
+		updateStyleStates();
+		invalidateStyles();
+	}
 
 	function updateStyleStates() {
 		var prevStates = duplicateStruct(styleStates);
@@ -1504,6 +1509,23 @@ class KWidget extends Layer
 		onSizeModified(newWidth, newHeight, oldWidth, oldHeight);
 	}
 
+	property width {
+		getter {
+			return super.width;
+		}
+		setter (v) {
+			setSize(v, height);
+		}
+	}
+
+	property height {
+		getter {
+			return super.height;
+		}
+		setter (v) {
+			setSize(width, v);
+		}
+	}
 
 	/**------------------------------
 	 * ウィジェットの最小サイズ、最大サイズの更新に伴って
