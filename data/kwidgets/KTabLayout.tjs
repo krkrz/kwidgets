@@ -476,6 +476,7 @@ class KTabLayout extends KLayout
 			}
 		}
 
+		fillRect(0, 0, width, height, borderStyle.backgroundColor);
 		drawBorder(borderStyle, 0, tabH, width, height - tabH);
 
 		var tab = tabAt(tabIndex);
