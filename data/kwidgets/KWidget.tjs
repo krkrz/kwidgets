@@ -1425,6 +1425,10 @@ class KWidget extends Layer
 	 * @param maxH 最大高さ
 	 ------------------------------*/
 	function setMinMaxSize(minW, minH, maxW, maxH) {
+		minW = int(minW);
+		minH = int(minH);
+		maxW = int(maxW);
+		maxH = int(maxH);
 		maxW = int(Math.min(maxW, K_WIDGET_MAX_POSSIBLE_WIDTH));
 		maxH = int(Math.min(maxH, K_WIDGET_MAX_POSSIBLE_WIDTH));
 		// 変更があった時のみ処理
@@ -2316,6 +2320,13 @@ class KWidget extends Layer
 			break;
 		}
 		}
+	}
+
+	function hasDrawableBorder(borderStyle) {
+		return borderStyle.borderWidthLeft != 0
+			|| borderStyle.borderWidthRight != 0
+			|| borderStyle.borderWidthTop != 0
+			|| borderStyle.borderWidthBottom != 0;
 	}
 
 	function hasBorderRoundCorner(borderStyle) {
