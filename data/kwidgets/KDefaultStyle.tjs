@@ -454,6 +454,11 @@
 					 focused: %[ fontUnderline: true ],
 					 hover: %[ paddingOffsetVertical: -1 ]
 				   ]
-		 ]
+		 ],
+
+		%[ klass: "KTextBoard",
+		   style: %[ backgroundColor: 0xffffffff,
+					 fontColor: 0 ]
+		   ]
 ]
 
