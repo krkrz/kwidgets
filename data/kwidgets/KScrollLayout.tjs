@@ -369,7 +369,7 @@ class KScrollLayout extends KLayout
 
 		// パラメータ設定
 		neutralColor = WIN_BG;
-		setMarginalMinMaxSize(SCROLL_LAYOUT_MIN_WIDTH, SCROLL_LAYOUT_MIN_WIDTH, SCROLL_LAYOUT_MIN_WIDTH, SCROLL_LAYOUT_MIN_WIDTH);
+		setMarginalFixedSize(SCROLL_LAYOUT_MIN_WIDTH, SCROLL_LAYOUT_MIN_WIDTH);
 
 		var horizontal = getOption("horizontal", true);
 		var vertical = getOption("vertical", true);

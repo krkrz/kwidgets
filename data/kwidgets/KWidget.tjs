@@ -1428,6 +1428,9 @@ class KWidget extends Layer
 	 * @param maxH 最大高さ
 	 ------------------------------*/
 	function setMinMaxSize(minW, minH, maxW, maxH) {
+		// minとmaxの逆転をチェック
+		if (minW > maxW || minH > maxH)
+			throw new Exception("%s: minmax size mismatch(minw:%d,minh:%d,maxw:%d,maxh:%d".sprintf(className, minW,minH,maxW,maxH));
 		_specified.minw = int(minW);
 		_specified.minh = int(minH);
 		_specified.maxw = int(maxW);
@@ -1467,18 +1470,14 @@ class KWidget extends Layer
 	 * 最大最小サイズを更新
 	 ------------------------------*/
 	function invalidateMinMaxSize() {
-		var minw = int(Math.max(_specified.minw, _marginal.minw));
 		var maxw = int(Math.min(K_WIDGET_MAX_POSSIBLE_WIDTH, Math.max(_specified.maxw, _marginal.maxw)));
-		var minh = int(Math.max(_specified.minh, _marginal.minh));
+		var minw = int(Math.min(maxw, Math.max(_specified.minw, _marginal.minw)));
 		var maxh = int(Math.min(K_WIDGET_MAX_POSSIBLE_WIDTH, Math.max(_specified.maxh, _marginal.maxh)));
+		var minh = int(Math.min(maxh, Math.max(_specified.minh, _marginal.minh)));
 		var newer = %[ minw: minw, minh: minh, maxw: maxw, maxh: maxh ];
 		// 変更があった時のみ処理
 		if (equalStructNumericLoose(_computed, newer))
 			return;
-
-		// minとmaxの逆転をチェック
-		if (minw > maxw || minh > maxh)
-			throw new Exception("%s: minmax size mismatch(minw:%d,minh:%d,maxw:%d,maxh:%d".sprintf(className, minw,minh,maxw,maxh));
 
 		// サイズを更新
 		var older = _computed;
