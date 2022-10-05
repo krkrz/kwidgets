@@ -1,3 +1,4 @@
+
 class KTextBoard extends KVirtualWidget
 {
 	var rows = [];
