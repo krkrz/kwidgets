@@ -275,6 +275,9 @@ class KSpliterLayout extends KLayout
 
 	function onChildValueModified(child, newValue, oldValue) {
 		switch (child.name) {
+		default:
+			super.onChildValueModified(...);
+			break;
 		case "_shutterToggle":
 			shutterOpened = ! shutterOpened;
 			break;
