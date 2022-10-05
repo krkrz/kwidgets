@@ -347,7 +347,6 @@ class KScrollLayout extends KLayout
 	var horizontalBarMinW, horizontalBarMinH, horizontalBarMaxW, horizontalBarMaxH;
 	var verticalBarMinW, verticalBarMinH, verticalBarMaxW, verticalBarMaxH;
 	var minW, minH, maxW, maxH;
-	var marginalWidth, marginalHeight;
 	var _hideHorizontalBar, _hideVerticalBar;
 	// カーソルによるスクロール
 	var _cursorToScroll = false;
@@ -369,9 +368,8 @@ class KScrollLayout extends KLayout
 		super.KLayout(win, opts);
 
 		// パラメータ設定
-//		hasImage = false;
 		neutralColor = WIN_BG;
-		marginalWidth = marginalHeight = SCROLL_LAYOUT_MIN_WIDTH;
+		setMarginalMinMaxSize(SCROLL_LAYOUT_MIN_WIDTH, SCROLL_LAYOUT_MIN_WIDTH, SCROLL_LAYOUT_MIN_WIDTH, SCROLL_LAYOUT_MIN_WIDTH);
 
 		var horizontal = getOption("horizontal", true);
 		var vertical = getOption("vertical", true);
@@ -391,22 +389,6 @@ class KScrollLayout extends KLayout
 		// 子ウィジェットを格納するフレーム
 		frame = new KScrollFrame(window);
 		frame.parent = this;
-	}
-
-	/**------------------------------
-	 * 最低限のサイズを設定する
-	 *
-	 * リスト項目が少なくても最低限広げられる
-	 * 「最低最大サイズ」を決定する。
-	 * デフォルト値は100x100
-	 *
-	 * @param w 幅
-	 * @param h 高さ
-	 ------------------------------*/
-	function setMarginalSize(w, h) {
-		marginalWidth = w;
-		marginalHeight = h;
-		redrawContents();
 	}
 
 	/**------------------------------
@@ -601,25 +583,21 @@ class KScrollLayout extends KLayout
 
 		// ボックス(フレーム格納領域)のレンジを計算
 		if (horizontal) {
-			boxMinW = marginalWidth;
+			boxMinW = 0;
 			boxMaxW = child.maxWidth + child.marginHorizontal;
 			boxMaxW = int(Math.max(boxMinW, boxMaxW));
 		} else {
 			boxMinW = child.minWidth + child.marginHorizontal;
 			boxMaxW = child.maxWidth + child.marginHorizontal;
-			if (boxMinW <= marginalWidth && marginalWidth <= boxMaxW)
-				boxMinW = marginalWidth;
 		}
 
 		if (vertical) {
-			boxMinH = marginalHeight;
+			boxMinH = 0;
 			boxMaxH = child.maxHeight + child.marginVertical;
 			boxMaxH = int(Math.max(boxMinH, boxMaxH));
 		} else {
 			boxMinH = child.minHeight + child.marginVertical;
 			boxMaxH = child.maxHeight + child.marginVertical;
-			if (boxMinH <= marginalHeight && marginalHeight <= boxMaxH)
-				boxMinH = marginalHeight;
 		}
 
 		boxMinW += borderPaddingWidth;

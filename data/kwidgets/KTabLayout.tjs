@@ -455,7 +455,7 @@ class KTabLayout extends KLayout
 				if (i == tabIndex)
 					curIndexRowCount = row;
 			}
-			y += tabAt(0).height;
+			y += tabAt(0).minHeight;
 
 			if (tabH != y) {
 				tabH = y;

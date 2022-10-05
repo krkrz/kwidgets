@@ -10,7 +10,6 @@
 class KSpiralLayout extends KLayout
 {
 	var childList;
-	var _marginalWidth, _marginalHeight;
 	var layoutRequired;
 
 	/**------------------------------
@@ -22,26 +21,9 @@ class KSpiralLayout extends KLayout
 	function KSpiralLayout(window, name) {
 		super.KLayout(window, name);
 		childList = [];
-		_marginalWidth = _marginalHeight = K_WIDGET_MAX_POSSIBLE_WIDTH;
 		hasImage = false;
-		setMinMaxSize(0, 0, _marginalWidth, _marginalHeight);
+		setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
 		hitThreshold = 0;
-	}
-
-	/**------------------------------
-	 * 最低限のサイズを設定する
-	 *
-	 * 項目が少なくても最低限広げられる
-	 * 「最低最大サイズ」を決定する。
-	 * デフォルト値は1000x1000
-	 *
-	 * @param w 幅
-	 * @param h 高さ
-	 ------------------------------*/
-	function setMarginalSize(w, h) {
-		_marginalWidth = w;
-		_marginalHeight = h;
-		redrawContents();
 	}
 
 	/**------------------------------
@@ -137,10 +119,7 @@ class KSpiralLayout extends KLayout
 
 		maxH += spaceVertical * (childList.count - 1);
 
-		maxW = Math.max(minW, _marginalWidth);
-		maxH = Math.max(maxH, _marginalHeight);
-
-		setMinMaxSize(minW, minH, maxW, maxH);
+		setMinMaxSize(minW, minH, minW, minH);
 	}
 
 	/*------------------------------

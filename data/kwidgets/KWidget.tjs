@@ -160,10 +160,10 @@ class KPacket
  ----------------------------------------------------------------------*/
 class KWidget extends Layer
 {
-	// ウィジェットの最小サイズ
-	var _minWidth, _minHeight;
-	// ウィジェットの最大サイズ
-	var _maxWidth, _maxHeight;
+	// ウィジェットの最小、最大サイズ
+	var _computed = %[];
+	var _marginal = %[];
+	var _specified = %[];
 	// ウィジェットの上下左右のマージン
 	var _marginLeft, _marginTop, _marginRight, _marginBottom;
 	// ウィジェットのアライメント
@@ -261,8 +261,11 @@ class KWidget extends Layer
 		// 名前を設定
 		_name = getOption("name", void);
 		// 最小・最大サイズを暫定サイズに決定
-		_minWidth = _maxWidth = width;
-		_minHeight = _maxHeight = height;
+		_marginal = %[ minw: 0, maxw: 0, minh: 0, maxh: 0 ];
+		_computed.minw = _specified.minw = width;
+		_computed.maxw = _specified.maxw = width;
+		_computed.minh = _specified.minh = height;
+		_computed.maxh = _specified.maxh = height;
 		// マージンを暫定値に決定
 		_marginLeft = win.defaultMarginLeft;
 		_marginTop = win.defaultMarginTop;
@@ -1320,11 +1323,11 @@ class KWidget extends Layer
 	 ------------------------------*/
 	property minWidth {
 		getter {
-			return _minWidth;
+			return _computed.minw;
 		}
 
 		setter(w) {
-			setMinMaxSize(w, _minHeight, _maxWidth, _maxHeight);
+			setMinMaxSize(w, _specified.minh, _specifeid.maxw, _specified.maxh);
 		}
 	}
 
@@ -1336,11 +1339,11 @@ class KWidget extends Layer
 	 ------------------------------*/
 	property minHeight {
 		getter {
-			return _minHeight;
+			return _computed.minh;
 		}
 
 		setter(h) {
-			setMinMaxSize(_minWidth, h, _maxWidth, _maxHeight);
+			setMinMaxSize(_specified.minw, h, _specified.maxw, _specified.maxh);
 		}
 	}
 
@@ -1351,7 +1354,7 @@ class KWidget extends Layer
 	 * @param h 最小高さ
 	 ------------------------------*/
 	function setMinSize(w, h) {
-		setMinMaxSize(w, h, _maxWidth, _maxHeight);
+		setMinMaxSize(w, h, _specified.maxw, _specified.maxh);
 	}
 
 	/**------------------------------
@@ -1362,11 +1365,11 @@ class KWidget extends Layer
 	 ------------------------------*/
 	property maxWidth {
 		getter {
-			return _maxWidth;
+			return _computed.maxw;
 		}
 
 		setter(w) {
-			setMinMaxSize(_minWidth, _minHeight, w, _maxHeight);
+			setMinMaxSize(_specified.minw, _specified.minh, w, _specified.maxh);
 		}
 	}
 
@@ -1378,11 +1381,11 @@ class KWidget extends Layer
 	 ------------------------------*/
 	property maxHeight {
 		getter {
-			return _maxHeight;
+			return _computed.maxh;
 		}
 
 		setter(h) {
-			setMinMaxSize(_minWidth, _minHeight, _maxWidth, h);
+			setMinMaxSize(_specified.minw, _specified.minh, _specified.maxw, h);
 		}
 	}
 
@@ -1393,7 +1396,7 @@ class KWidget extends Layer
 	 * @param h 最大高さ
 	 */
 	function setMaxSize(w, h) {
-		setMinMaxSize(_minWidth, _minHeight, w, h);
+		setMinMaxSize(_specified.minw, _specified.minh, w, h);
 	}
 
 	/**------------------------------
@@ -1425,40 +1428,58 @@ class KWidget extends Layer
 	 * @param maxH 最大高さ
 	 ------------------------------*/
 	function setMinMaxSize(minW, minH, maxW, maxH) {
-		minW = int(minW);
-		minH = int(minH);
-		maxW = int(maxW);
-		maxH = int(maxH);
-		maxW = int(Math.min(maxW, K_WIDGET_MAX_POSSIBLE_WIDTH));
-		maxH = int(Math.min(maxH, K_WIDGET_MAX_POSSIBLE_WIDTH));
+		_specified.minw = int(minW);
+		_specified.minh = int(minH);
+		_specified.maxw = int(maxW);
+		_specified.maxh = int(maxH);
+		invalidateMinMaxSize();
+	}
+
+	/*------------------------------
+	 * 「最低限度の」「最大サイズと最小サイズを同時設定
+	 *
+	 * @param minW 最小幅
+	 * @param minH 最小高さ
+	 * @param maxW 最大幅
+	 * @param maxH 最大高さ
+	 ------------------------------*/
+	function setMarginalMinMaxSize(minW, minH, maxW, maxH) {
+		_marginal.minw = int(minW);
+		_marginal.minh = int(minH);
+		_marginal.maxw = int(maxW);
+		_marginal.maxh = int(maxH);
+		invalidateMinMaxSize();
+	}
+
+	function setMarginalFixedSize(w, h) {
+		setMarginalMinMaxSize(w, h, w, h);
+	}
+
+	/*------------------------------
+	 * 最大最小サイズを更新
+	 ------------------------------*/
+	function invalidateMinMaxSize() {
+		var minw = int(Math.max(_specified.minw, _marginal.minw));
+		var maxw = int(Math.min(K_WIDGET_MAX_POSSIBLE_WIDTH, Math.max(_specified.maxw, _marginal.maxw)));
+		var minh = int(Math.max(_specified.minh, _marginal.minh));
+		var maxh = int(Math.min(K_WIDGET_MAX_POSSIBLE_WIDTH, Math.max(_specified.maxh, _marginal.maxh)));
+		var newer = %[ minw: minw, minh: minh, maxw: maxw, maxh: maxh ];
 		// 変更があった時のみ処理
-		if (_minWidth == minW
-			&& _minHeight == minH
-			&& _maxWidth == maxW
-			&& _maxHeight == maxH)
+		if (equalStructNumericLoose(_computed, newer))
 			return;
 
 		// minとmaxの逆転をチェック
-		if (minW > maxW || minH > maxH)
-			throw new Exception("%s: minmax size mismatch(minW:%d,minH:%d,maxW:%d,maxH:%d".sprintf(className, minW,minH,maxW,maxH));
-
-		// 旧サイズを記録
-		var oldMinWidth, oldMinHeight, oldMaxWidth, oldMaxHeight;
-		oldMinWidth = _minWidth;
-		oldMinHeight = _minHeight;
-		oldMaxWidth = _maxWidth;
-		oldMaxHeight = _maxHeight;
+		if (minw > maxw || minh > maxh)
+			throw new Exception("%s: minmax size mismatch(minw:%d,minh:%d,maxw:%d,maxh:%d".sprintf(className, minw,minh,maxw,maxh));
 
 		// サイズを更新
-		_minWidth = minW;
-		_minHeight = minH;
-		_maxWidth = maxW;
-		_maxHeight = maxH;
+		var older = _computed;
+		_computed = newer;
 		// サイズ変更を親に通知
 		if (isInWidgetTree)
 			parentWidget.onChildMinMaxSizeModified(this,
-												   _minWidth, _minHeight, _maxWidth, _maxHeight,
-												   oldMinWidth, oldMinHeight, oldMaxWidth, oldMaxHeight);
+												   newer.minw, newer.minh, newer.maxw, newer.maxh,
+												   older.minw, older.minh, older.maxw, older.maxh);
 		// サイズ変更
 		invalidateSize();
 	}
@@ -1495,8 +1516,8 @@ class KWidget extends Layer
 
 	function setSize(newWidth, newHeight) {
 		// 最小サイズと最大サイズを元に現在のサイズを丸め込み
-		newWidth = int(Math.min(_maxWidth, Math.max(_minWidth, newWidth)));
-		newHeight = int(Math.min(_maxHeight, Math.max(_minHeight, newHeight)));
+		newWidth = int(Math.min(_computed.maxw, Math.max(_computed.minw, newWidth)));
+		newHeight = int(Math.min(_computed.maxh, Math.max(_computed.minh, newHeight)));
 
 		// サイズが変更された時のみ処理を行う
 		if (newWidth == width

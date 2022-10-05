@@ -92,7 +92,6 @@ class KList extends KVirtualWidget
 	var mouseDownTargetX, mouseDownTargetY, mouseDownTargetButton, mouseDownTargetShift;
 	var mouseDownTargetSelectedItemList;
 	var labelEdit = void;
-	var marginalWidth, marginalHeight;
 	var _focusOnSelect;
 	var _curPointItem = void;
 	var relocateRequired = false;
@@ -140,8 +139,7 @@ class KList extends KVirtualWidget
 		traceUnfocusableItem = getOption("traceUnfocusableItem", false);
 		hitThreshold = 0;
 		root = this;
-		marginalWidth = marginalHeight = 10000;
-		setMinMaxSize(0, 0, marginalWidth, marginalHeight);
+		setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
 		_toggleWidth = findIcon("k_list_open").width + 4;;
 		curDragInfo = %[ acceptType: DRAG_ACCEPT_TYPE_NONE ];
 		curDragRegion = new KRegion();
@@ -199,22 +197,6 @@ class KList extends KVirtualWidget
 			else
 				return _toggleWidth;
 		}
-	}
-
-	/**------------------------------
-	 * 最低限のサイズを設定する
-	 *
-	 * リスト項目が少なくても最低限広げられる
-	 * 「最低最大サイズ」を決定する。
-	 * デフォルト値は1000x1000
-	 *
-	 * @param w 幅
-	 * @param h 高さ
-	 ------------------------------*/
-	function setMarginalSize(w, h) {
-		marginalWidth = w;
-		marginalHeight = h;
-		requireResize();
 	}
 
 	/**------------------------------
@@ -790,11 +772,8 @@ class KList extends KVirtualWidget
 		}
 
 		// サイズを再設定
-		if (resizeRequired) {
-			setMinMaxSize(treeWidth, treeHeight,
-						  Math.max(marginalWidth, treeWidth),
-						  Math.max(marginalHeight, treeHeight));
-		}
+		if (resizeRequired) 
+			setMinMaxSize(treeWidth, treeHeight, treeWidth, treeHeight);
 
 		// リストを開いた場合その子を注視
 		if (openNoticeItem !== void
