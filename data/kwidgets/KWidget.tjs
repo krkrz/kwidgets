@@ -1451,6 +1451,14 @@ class KWidget extends Layer
 		invalidateMinMaxSize();
 	}
 
+	function setMarginalMinSize(w, h) {
+		setMarginalMinMaxSize(w, h, _marginal.maxw, _marginal.maxh);
+	}
+
+	function setMarginalMaxSize(w, h) {
+		setMarginalMinMaxSize(_marginal.minw, _marginal.minh, w, h);
+	}
+
 	function setMarginalFixedSize(w, h) {
 		setMarginalMinMaxSize(w, h, w, h);
 	}
