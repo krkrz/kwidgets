@@ -487,7 +487,7 @@ class KTabLayout extends KLayout
 			var lastTab = tabAt(childCount - 1);
 			slitLeft = Math.max(slitLeft, lastTab.left + lastTab.width);
 		}
-		if (slitLeft < slitRight) 
+		if (slitLeft < slitRight)
 			fillRect(slitLeft, tabH, slitRight - slitLeft, borderStyle.borderWidthTop, borderStyle.backgroundColor);
 
 		for (var i = 0; i < childList.count; i++) {
@@ -501,6 +501,11 @@ class KTabLayout extends KLayout
 						  height - tabH - child.marginVertical - borderPaddingHeight);
 			locateChild(borderPaddingLeft, tabH + borderPaddingTop, width - borderPaddingWidth, height - tabH - borderPaddingHeight, child);
 		}
+	}
+
+	function onAttachedToWindow() {
+		redrawAllTabs();
+		redrawContents();
 	}
 
 	// フォーカスを検知
