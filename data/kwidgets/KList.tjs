@@ -158,6 +158,10 @@ class KList extends KVirtualWidget
 		widgetStyle.slideWidth = getStyleProperty("slideWidth", 14);
 		widgetStyle.renameTextinputId = getStyleProperty("renameTextinputId");
 		widgetStyle.ignoreToggleWidth = getStyleProperty("ignoreToggleWidth", false);
+		widgetStyle.frameColor = getStyleProperty("frameColor");
+		widgetStyle.focusFrameColor = getStyleProperty("focusFrameColor");
+		widgetStyle.dragFrameColor = getStyleProperty("dragFrameColor");
+		widgetStyle.selectionColor = getStyleProperty("selectionColor");
 	}
 
 	property slideWidth {
@@ -607,19 +611,19 @@ class KList extends KVirtualWidget
 
 		if (pointed
 			|| focused)
-			fillColor = edgeColor = WIN_SELECTED & 0xFFFFFF;
+			fillColor = edgeColor = widgetStyle.focusFrameColor;
 		else
-			fillColor = edgeColor = System.toActualColor(clActiveBorder);
+			fillColor = edgeColor = widgetStyle.frameColor;
 
 		// パケットをドラッグ中なら色を変える
 		if (curDragInfo.acceptType == DRAG_ACCEPT_TYPE_DIRECT
 			&& curDragInfo.item === item) {
-			fillColor = edgeColor = 0xFF0000;
+			fillColor = edgeColor = widgetStyle.dragFrameColor;
 			fillAlpha = 2;
 			edgeAlpha = 2;
 		} else if (curDragInfo.acceptType == DRAG_ACCEPT_TYPE_CHILD
 				   && curDragInfo.item === item) {
-			edgeColor = 0xFF0000;
+			edgeColor = widgetStyle.dragFrameColor;
 			edgeAlpha = 2;
 		}
 		// 描画
@@ -638,7 +642,7 @@ class KList extends KVirtualWidget
 			|| curMouseSelectionRect === void)
 			return;
 		var range = curMouseSelectionRect;
-		var color = WIN_SELECTED & 0xFFFFFF;
+		var color = widgetStyle.selectionColor;
 		var edgeAlpha = 192;
 		var fillAlpha = 64;
 		if (range.width * range.height == 0)

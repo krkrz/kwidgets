@@ -147,7 +147,7 @@ class KStyleRepository
 			if (typeof(def.style) != K_UNDEFINED) {
 				if (style === void)
 					style = %[];
-				style = unionDictionary(def.style, style, true);
+				style = unionDictionary(style, def.style, true);
 			}
 
 			if (style === void)

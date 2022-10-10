@@ -264,7 +264,7 @@
 		],
 
 		%[
-			id: "textinpuot_textedit",
+			id: "textinput_textedit",
 			style: %[
 				backgroundColor: 0xffffffff,
 				hover: %[ backgroundColor: 0xffeaeaea ],
@@ -288,6 +288,10 @@
 				slideWidth: 14,
 				backgroundColor: 0xffffffff,
 				renameTextinputId: "list_rename_textinput",
+				frameColor: 0xb4b4b4,
+				focusFrameColor: 0x0078d7,
+				dragFrameColor: 0xff0000,
+				selectionColor: 0x0078d7,
 			],
 		],
 
@@ -459,6 +463,59 @@
 		%[ klass: "KTextBoard",
 		   style: %[ backgroundColor: 0xffffffff,
 					 fontColor: 0 ]
-		   ]
+		 ],
+
+		%[ id: "table_view_basis",
+		   style: %[ backgroundColor: 0xffffffff,
+					 fontColor: 0xffffff,
+					 fontHeight: 14,
+					 spaceHorizontal: 10,
+					 spaceVertical: 6,
+					 gridBorderColor: 0xffe0e0e0,
+					 tabBorderColor: 0xffc0c0c0,
+					 frameColor: 0xb4b4b4,
+					 focusFrameColor: 0x0078d7,
+					 dragFrameColor: 0xff0000,
+					 selectionColor: 0x0078d7,
+				   ]
+		 ],
+
+		%[ id: "table_row_tab",
+		   styleOfId: "table_view_basis",
+		   style: %[ fontBold: true,
+					 spaceHorizontal: 14 ]
+		 ],
+
+		%[ id: "table_column_tab",
+		   styleOfId: "table_view_basis",
+		   style: %[ fontBold: true,
+					 spaceVertical: 12 ],
+		 ],
+
+		%[ id: "table_lefttop_corner",
+		   styleOfId: "table_view_basis",
+		   style: %[ fontBold: true,
+					 spaceHorizontal: 14,
+					 spaceVertical: 12 ],
+		 ],
+
+		%[ id: "table_main_view",
+		   styleOfId: "table_view_basis",
+		 ],
+
+		%[ id: "table_textedit_frame",
+		   style: %[ borderStyle: BORDER_STYLE_INSET,
+					 borderColor: 0xffacacac,
+					 borderWidth: 1 ]
+		 ],
+
+		%[ klass: "KTable",
+		   style: %[ leftTopCornerId: "table_lefttop_corner",
+					 rowTabId: "table_row_tab",
+					 columnTabId: "table_column_tab",
+					 mainViewId: "table_main_view",
+					 textEditFrameId: "table_textedit_frame",
+				   ]
+		 ]
 ]
 

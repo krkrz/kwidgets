@@ -2137,7 +2137,7 @@ class KWidget extends Layer
 		return omitTextWidth;
 	}
 
-	function drawUITextInRange(fontStyle, x, y, w, text, alignment, fill = false, textWidth = void, textOmitLength = void) {
+	function drawUITextInRange(fontStyle, x, y, w, text, alignment, fill = false, textWidth = void, textOmitLength = void, overrideFontColor = void) {
 		if (w <= 0)
 			return %[ inRange: false, x: x, y: y, width: w ];
 		var omitText = "...";
@@ -2152,12 +2152,12 @@ class KWidget extends Layer
 			}
 			if (fill)
 				fillRect(x, y, tw, font.height, borderStyle.backgroundColor);
-			drawUIText(fontStyle, x, y, text);
+			drawUIText(fontStyle, x, y, text, overrideFontColor);
 			return %[ inRange: true, x: x, y: y, w: tw ];
 		} else {
 			if (fill)
 				fillRect(x, y, w, font.height, borderStyle.backgroundColor);
-			drawUIText(fontStyle, x, y, text.substr(0, len) + omitText);
+			drawUIText(fontStyle, x, y, text.substr(0, len) + omitText, overrideFontColor);
 			return %[ inRange: false, x: x, y: y, w: w ];
 		}
 	}

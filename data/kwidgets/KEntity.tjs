@@ -9,11 +9,6 @@ class KEntity extends KWidget
 		super.KWidget(...);
 	}
 
-	function invalidateEntityStyle() {
-		onEntityStyleModified();
-		redrawContents();
-	}
-
 	function onStyleModified() {
 		redrawContents();
 	}
@@ -50,6 +45,7 @@ class KEntity extends KWidget
 class KValueEntity extends KEntity
 {
 	var dictKey;
+	var avoidValueDictionaryRegistration = false;
 
 	function KValueEntity() {
 		super.KEntity(...);
@@ -97,12 +93,22 @@ class KValueEntity extends KEntity
 		if ( ! hasEffectiveName)
 			return;
 		dictKey = window.name + "_" + name;
-		value = dict.init(dictKey, value);
+		if (! avoidValueDictionaryRegistration)
+			value = dict.init(dictKey, value);
+		onBindAdditionalField(dictKey, dict);
+	}
+
+	function onBindAdditionalField(dictKey, dict) {
 	}
 
 	function onUnbindPersistentDictionary(dict) {
 		if ( ! hasEffectiveName)
 			return;
-		dict.set(dictKey, value);
+		if (! avoidValueDictionaryRegistration)
+			dict.set(dictKey, value);
+		onUnbindAdditionalField(dictKey, dict);
+	}
+
+	function onUnbindAdditionalField(dictKey, dict) {
 	}
 }
