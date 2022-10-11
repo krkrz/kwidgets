@@ -288,7 +288,7 @@ class KSpliterLayout extends KLayout
 	function embedChild(x, y, w, h, child) {
 		if (child instanceof "KSpliterLayout") {
 			child.setSize(w - child.marginHorizontal, h - child.marginVertical);
-			locateChild(0, 0, w, h, child);
+			locateChild(x, y, w, h, child);
 		} else {
 			super.embedChild(...);
 		}
