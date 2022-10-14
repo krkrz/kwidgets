@@ -516,6 +516,79 @@
 					 mainViewId: "table_main_view",
 					 textEditFrameId: "table_textedit_frame",
 				   ]
+		 ],
+
+
+		%[ klass: "KTimeLineControl",
+		   style: %[ layerListId: "timeline_layer_list",
+					 layerViewId: "timeline_layer_view",
+					 timeLocatorId: "timeline_time_locator",
+					 titleLabelId: "timeline_title_label",
+					 statusBarId: "timeline_status_bar",
+					 frameTextId: "timeline_frame_text",
+				   ]
+		 ],
+
+		%[ id: "timeline_view_basis",
+		   style: %[ fontHeight: 12,
+					 spaceVertical: 4,
+					 fontColor: 0,
+					 backgroundColor: 0xffffffff ],
+		 ],
+
+		%[ id: "timeline_layer_list",
+		   styleOfId: "timeline_view_basis"
+		 ],
+
+		%[ id: "timeline_layer_view",
+		   styleOfId: "timeline_view_basis",
+		   style: %[ singleFrameColor: 0xffbfffff,
+					 continuousFrameColor: 0xffbfffff,
+					 tweenFrameColor: 0xffffbfbf,
+					 oneSecondFrameBgColor: 0xffffe0f2,
+					 halfSecondFrameBgColor: 0xffe0ffff,
+					 fifthFrameBgColor: 0xffe3e3e3,
+					 normalFrameBgColor: 0xffffffff,
+					 frameBorderColor: 0xffadadad,
+					 frameSignColor: 0xff696969,
+					 loopSingleFrameColor: 0xff0000,
+					 loopContinuousFrameColor: 0xff8080,
+					 cursorColor: 0xFFFF0000,
+					 focus: %[ cursorColor: 0xFF0000FF ],
+				   ]
+		 ],
+
+		%[ id: "timeline_time_locator",
+		   style: %[ fontHeight: 12,
+					 fontBold: true,
+					 spaceVertical: 8,
+					 frameBorderColor: 0xffadadad,
+					 activeColor: 0xffff0000,
+				   ],
+		 ],
+
+		%[ id: "timeline_title_label",
+		   style: %[ fontHeight: 14,
+					 fontBold: true,
+					 margin: 3,
+					 isVariableWidth: true ]
+		 ],
+
+		%[ id: "timeline_status_bar",
+		   style: %[ isVariableWidth: true,
+					 marginVertical: 4,
+					 fontBold: true,
+					 fontHeight: 10 ]
+		 ],
+
+		%[ id: "timeline_frame_text",
+		   style: %[ width: 25, height: 14,
+					 frameType: void,
+					 borderStyle: BORDER_STYLE_INSET,
+					 borderColor: 0xffacacac,
+					 borderWidth: 1,
+					 padding: 1,
+				   ]
 		 ]
 ]
 

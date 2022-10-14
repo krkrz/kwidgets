@@ -700,7 +700,7 @@ class KTableColumnTab extends KTableVirtualWidget
 		setFixedSize(0, 0);
 	}
 
-	function beforeDrawContents() {
+	function beforeFullUpdate() {
 		var h = fontStyle.fontHeight + layoutStyle.spaceVertical;
 		setMarginalMinMaxSize(0, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);
 	}

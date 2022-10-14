@@ -612,6 +612,42 @@ tTJSVariant sliceArray(tTJSVariant v, tjs_int from, tjs_int size)
 }
 
 //----------------------------------------------------------------------
+// 配列の連結
+tTJSVariant concatArray(tTJSVariant a1, tTJSVariant a2)
+{
+	tTJSVariant result = createArray();
+	tTJSVariantClosure &dst = result.AsObjectClosureNoAddRef();
+	tjs_int dstCount = 0;
+
+	{
+		tTJSVariantClosure &src = a1.AsObjectClosureNoAddRef();
+		tTJSVariant srcCount;
+		(void)src.PropGet(0, L"count", &countHint, &srcCount, NULL);
+		tjs_int count = srcCount;
+
+		tTJSVariant value;
+		for (tjs_int i = 0; i < count; i++) {
+			(void)src.PropGetByNum(TJS_IGNOREPROP, i, &value, NULL);
+			(void)dst.PropSetByNum(0, dstCount++, &value, NULL);
+		}
+	}
+	{
+		tTJSVariantClosure &src = a2.AsObjectClosureNoAddRef();
+		tTJSVariant srcCount;
+		(void)src.PropGet(0, L"count", &countHint, &srcCount, NULL);
+		tjs_int count = srcCount;
+
+		tTJSVariant value;
+		for (tjs_int i = 0; i < count; i++) {
+			(void)src.PropGetByNum(TJS_IGNOREPROP, i, &value, NULL);
+			(void)dst.PropSetByNum(0, dstCount++, &value, NULL);
+		}
+	}
+
+	return result;
+}
+
+//----------------------------------------------------------------------
 // 全配列巡回
 tjs_error TJS_INTF_METHOD eachArray(tTJSVariant *result,
 									tjs_int numparams,
@@ -843,6 +879,7 @@ NCB_REGISTER_FUNCTION(unionSet, unionSet);
 NCB_REGISTER_FUNCTION(intersectionSet, intersectionSet);
 NCB_REGISTER_FUNCTION(differenceSet, differenceSet);
 NCB_REGISTER_FUNCTION(sliceArray, sliceArray);
+NCB_REGISTER_FUNCTION(concatArray, concatArray);
 NCB_REGISTER_FUNCTION(eachArray, eachArray);
 NCB_REGISTER_FUNCTION(eachDictionary, eachDictionary);
 NCB_REGISTER_FUNCTION(getPropertyFromStyle, getPropertyFromStyle);

@@ -991,19 +991,15 @@ class KVirtualWidget extends KEntity
 	 * 以下、内部処理
 	 ----------------------------------------------------------------------*/
 	function onDrawContents() {
-		beforeDrawContents();
+		beforeFullUpdate();
 		if (isWindowed) {
 			onDraw(_site.left, _site.top, _site.width, _site.height);
 		} else {
 			forceUpdate();
 		}
-		afterDrawContents();
 	}
 
-	function beforeDrawContents() {
-	}
-
-	function afterDrawContents() {
+	function beforeFullUpdate() {
 	}
 
 	/*------------------------------
@@ -1037,6 +1033,7 @@ class KVirtualWidget extends KEntity
 	}
 
 	function resetSite() {
+		beforeFullUpdate();
 		_site = new KRect(0, 0, 0, 0);
 	}
 

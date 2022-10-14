@@ -261,7 +261,10 @@ class KWidget extends Layer
 		// 名前を設定
 		_name = getOption("name", void);
 		// 最小・最大サイズを暫定サイズに決定
-		_marginal = %[ minw: 0, maxw: 0, minh: 0, maxh: 0 ];
+		_marginal = %[ minw: getOption("marginalMinWidth", 0),
+					   maxw: getOption("marginalMinHeight", 0),
+					   minh: getOption("marginalMaxWidth", 0),
+					   maxh: getOption("marginalMaxHeight", 0) ];
 		_computed.minw = _specified.minw = width;
 		_computed.maxw = _specified.maxw = width;
 		_computed.minh = _specified.minh = height;
@@ -501,18 +504,22 @@ class KWidget extends Layer
 		if (includeSelf)
 			list.insert(0, this);
 
+		var idStyles = [];
+		var classStyles = [];
 		for (var i = 0; i < list.count; i++) {
 			var widget = list[i];
 			if (widget._idStyleKeys.find(_id) >= 0)
-				result.add(widget._style.isId[_id]);
+				idStyles.add(widget._style.isId[_id]);
 			if (intersectionSet(widget._classStyleKeys, classes).count > 0)
 				for (var j = 0; j < classes.count; j++) {
 					var klass = classes[j];
 					if (typeof(widget._style.isClass[klass]) != K_UNDEFINED) {
-						result.add(widget._style.isClass[klass]);
+						classStyles.add(widget._style.isClass[klass]);
 					}
 				}
 		}
+		result = concatArray(result, idStyles);
+		result = concatArray(result, classStyles);
 		return result;
 	}
 

@@ -369,7 +369,10 @@ class KScrollLayout extends KLayout
 
 		// パラメータ設定
 		neutralColor = WIN_BG;
-		setMarginalFixedSize(SCROLL_LAYOUT_MIN_WIDTH, SCROLL_LAYOUT_MIN_WIDTH);
+		setMarginalMinMaxSize(getOption("marginalMinWidth", SCROLL_LAYOUT_MIN_WIDTH),
+							  getOption("marginalMinHeight", SCROLL_LAYOUT_MIN_WIDTH),
+							  getOption("marginalMaxWidth", SCROLL_LAYOUT_MIN_WIDTH),
+							  getOption("marginalMaxHeight", SCROLL_LAYOUT_MIN_WIDTH));
 
 		var horizontal = getOption("horizontal", true);
 		var vertical = getOption("vertical", true);
@@ -378,13 +381,13 @@ class KScrollLayout extends KLayout
 		horizontalBar = new KHorizontalScrollBar(win, %[ name: "_horizontal"]);
 		horizontalBar.parent = this;
 		horizontalBar.visible = horizontal;
-		_hideHorizontalBar = false;
+		_hideHorizontalBar = getOption("hideHorizontalBar", false);
 
 		// 垂直バー
 		verticalBar = new KVerticalScrollBar(win, %[ name: "_vertical" ]);
 		verticalBar.parent = this;
 		verticalBar.visible = vertical;
-		_hideVerticalBar = false;
+		_hideVerticalBar = getOption("hideVerticalBar", false);
 
 		// 子ウィジェットを格納するフレーム
 		frame = new KScrollFrame(window);

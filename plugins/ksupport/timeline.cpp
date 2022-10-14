@@ -8,7 +8,7 @@
 
 ///----------------------------------------------------------------------
 /// •Ï”
-tjs_uint32 timeHint, typeHint ,timeLineFrameWidthHint, timelineFrameHeightHint, fillRectHint, winDarken2Hint, winDarken1Hint, winLighten1Hint, winWhiteHint, canvasHint, fontHeightHint, getTextWidthHint, drawTextHint, frameListHint, drawFrameHint, selectionHint, colorRectHint, layerHint, topHint, oneSecondFrameBgLayerHint, halfSecondFrameBgLayerHint, fifthFrameBgLayerHint, normalFrameBgLayerHint, copyRectHint, operateRectHint, widthHint, heightHint, frameLeftMarkerLayerHint, frameRightMarkerLayerHint, dashLineAppHint, drawLineHint, fontHint, rootHint, ownerHint, framePerSecondHint, fillGradientRectLRHint, setClipHint;
+tjs_uint32 timeHint, typeHint ,timeLineFrameWidthHint, timelineFrameHeightHint, fillRectHint, winDarken2Hint, winDarken1Hint, winLighten1Hint, winWhiteHint, canvasHint, fontHeightHint, getTextWidthHint, drawTextHint, frameListHint, drawFrameHint, selectionHint, colorRectHint, layerHint, topHint, oneSecondFrameBgLayerHint, halfSecondFrameBgLayerHint, fifthFrameBgLayerHint, normalFrameBgLayerHint, copyRectHint, operateRectHint, widthHint, heightHint, frameLeftMarkerLayerHint, frameRightMarkerLayerHint, dashLineAppHint, drawLineHint, fontHint, rootHint, ownerHint, framePerSecondHint, fillGradientRectLRHint, setClipHint, frameSignColorHint, fontStyleHint, applyFontStyleHint, drawUITextHint;
 
 tjs_uint32 _singleFrameLeftColorHint, _tweenFrameLeftColorHint, _continuousFrameLeftColorHint;
 tjs_uint32 _singleFrameRightColorHint, _tweenFrameRightColorHint, _continuousFrameRightColorHint;
@@ -96,8 +96,8 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
   ncbPropAccessor globalObj(global);
   global->Release();
 
-  tjs_int TIMELINE_FRAME_WIDTH = itemObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
-  tjs_int TIMELINE_FRAME_HEIGHT = globalObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
+  tjs_int TIMELINE_FRAME_WIDTH = viewObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
+  tjs_int TIMELINE_FRAME_HEIGHT = viewObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
 
   tTJSVariant oneSecondFrameBgLayer, halfSecondFrameBgLayer, fifthFrameBgLayer, normalFrameBgLayer;
 
@@ -140,8 +140,8 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int y, tTJSVari
   global->Release();
 
   tjs_int WIN_DARKEN2 = globalObj.GetValue(L"WIN_DARKEN2", ncbTypedefs::Tag<tjs_uint>(), 0, &winDarken2Hint);
-  tjs_int TIMELINE_FRAME_WIDTH = itemObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
-  tjs_int TIMELINE_FRAME_HEIGHT = globalObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
+  tjs_int TIMELINE_FRAME_WIDTH = viewObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
+  tjs_int TIMELINE_FRAME_HEIGHT = viewObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
   tjs_int frameType = frameObj.GetValue(L"type", ncbTypedefs::Tag<tjs_int>(), 0, &typeHint);
   tjs_int frameTime = frameObj.GetValue(L"time", ncbTypedefs::Tag<tjs_int>(), 0, &timeHint);
 
@@ -152,8 +152,8 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int y, tTJSVari
   case TIMELINE_FRAME_TYPE_SINGLE: {
 
     timeline_draw_bg(item, view, y, frameTime + 1, frameTime + length);
-    tjs_int singleFrameLeftColor  = itemObj.GetValue(L"_singleFrameLeftColor", ncbTypedefs::Tag<tjs_int>(), 0, &_singleFrameLeftColorHint);
-    tjs_int singleFrameRightColor  = itemObj.GetValue(L"_singleFrameRightColor", ncbTypedefs::Tag<tjs_int>(), 0, &_singleFrameRightColorHint);
+    tjs_int singleFrameLeftColor  = itemObj.GetValue(L"singleFrameLeftColor", ncbTypedefs::Tag<tjs_int>(), 0, &_singleFrameLeftColorHint);
+    tjs_int singleFrameRightColor  = itemObj.GetValue(L"singleFrameRightColor", ncbTypedefs::Tag<tjs_int>(), 0, &_singleFrameRightColorHint);
     singleFrameLeftColor |= 0xFF000000;
     singleFrameRightColor |= 0xFF000000;
     viewObj.FuncCall(0, L"fillGradientRectLR", &fillGradientRectLRHint, NULL, 
@@ -164,11 +164,11 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int y, tTJSVari
   case TIMELINE_FRAME_TYPE_TWEEN: {
     tjs_int leftColor, rightColor;
     if (frameType == TIMELINE_FRAME_TYPE_CONTINUOUS) {
-      leftColor = itemObj.GetValue(L"_continuousFrameLeftColor", ncbTypedefs::Tag<tjs_int>(), 0, &_continuousFrameLeftColorHint);
-      rightColor = itemObj.GetValue(L"_continuousFrameRightColor", ncbTypedefs::Tag<tjs_int>(), 0, &_continuousFrameRightColorHint);
+      leftColor = itemObj.GetValue(L"continuousFrameLeftColor", ncbTypedefs::Tag<tjs_int>(), 0, &_continuousFrameLeftColorHint);
+      rightColor = itemObj.GetValue(L"continuousFrameRightColor", ncbTypedefs::Tag<tjs_int>(), 0, &_continuousFrameRightColorHint);
     } else {
-      leftColor = itemObj.GetValue(L"_tweenFrameLeftColor", ncbTypedefs::Tag<tjs_int>(), 0, &_tweenFrameLeftColorHint);
-      rightColor = itemObj.GetValue(L"_tweenFrameRightColor", ncbTypedefs::Tag<tjs_int>(), 0, &_tweenFrameRightColorHint);
+      leftColor = itemObj.GetValue(L"tweenFrameLeftColor", ncbTypedefs::Tag<tjs_int>(), 0, &_tweenFrameLeftColorHint);
+      rightColor = itemObj.GetValue(L"tweenFrameRightColor", ncbTypedefs::Tag<tjs_int>(), 0, &_tweenFrameRightColorHint);
     }
     leftColor |= 0xFF000000;
     rightColor |= 0xFF000000;
@@ -210,27 +210,29 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int y, tTJSVari
     tjs_int fromTime = frameTime + (leftMarker ? 1 : 0), toTime = frameTime + length - (rightMarker ? 1 : 0);
     if (frameType == TIMELINE_FRAME_TYPE_TWEEN) {
       tTJSVariant dashLineApp = viewObj.GetValue(L"dashLineApp", ncbTypedefs::Tag<tTJSVariant>(), 0, &dashLineAppHint);
+	  tjs_int frameSignColor = viewObj.GetValue(L"frameSignColor", ncbTypedefs::Tag<tjs_int>(), 0, &frameSignColorHint);
       if (dashLineApp.Type() != tvtVoid) {
         viewObj.FuncCall(0, L"drawLine", &drawLineHint, NULL,
                          dashLineApp, fromTime * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1, toTime * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1);
       } else {
         for (tjs_int i = fromTime; i < toTime; i++) {
           viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
-                           i * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1, TIMELINE_FRAME_WIDTH / 2 - 2, 1, WIN_DARKEN2);
+                           i * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1, TIMELINE_FRAME_WIDTH / 2 - 2, 1, frameSignColor);
           viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
-                           i * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2, y + TIMELINE_FRAME_HEIGHT / 2 - 1, TIMELINE_FRAME_WIDTH / 2 - 2, 1, WIN_DARKEN2);
+                           i * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2, y + TIMELINE_FRAME_HEIGHT / 2 - 1, TIMELINE_FRAME_WIDTH / 2 - 2, 1, frameSignColor);
         }
       }
     }
     // ƒtƒŒ[ƒ€”•`‰æ
     if (length > 2) {
-      tTJSVariant canvas = viewObj.GetValue(L"canvas", ncbTypedefs::Tag<tTJSVariant>(), 0, &canvasHint);
-      ncbPropAccessor canvasObj(canvas);
-      tjs_int fontHeight = TIMELINE_FRAME_HEIGHT - 4;
-      canvasObj.SetValue(L"fontHeight", fontHeight, 0, &fontHeightHint);
+	  tjs_int frameSignColor = viewObj.GetValue(L"frameSignColor", ncbTypedefs::Tag<tjs_int>(), 0, &frameSignColorHint);
+	  tTJSVariant fontStyle = viewObj.GetValue(L"fontStyle", ncbTypedefs::Tag<tTJSVariant>(), 0, &fontStyleHint);
+	  tTJSVariant font = viewObj.GetValue(L"font", ncbTypedefs::Tag<tTJSVariant>(), 0, &fontHint);
+	  ncbPropAccessor fontStyleObj(fontStyle);
+	  tjs_int fontHeight = fontStyleObj.GetValue(L"fontHeight", ncbTypedefs::Tag<tjs_int>(), 0, &fontHeightHint);
+	  viewObj.FuncCall(0, L"applyFontStyle", &applyFontStyleHint, NULL, font, fontStyle);
       ttstr text(length);
       tTJSVariant textWidth;
-      tTJSVariant font = canvasObj.GetValue(L"font", ncbTypedefs::Tag<tTJSVariant>(), 0, &fontHint);
       ncbPropAccessor fontObj(font);
       fontObj.FuncCall(0, L"getTextWidth", &getTextWidthHint, &textWidth,
                        text);
@@ -244,8 +246,8 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int y, tTJSVari
                        TIMELINE_FRAME_HEIGHT - 1,
                        leftColor, rightColor);
       viewObj.FuncCall(0, L"setClip", &setClipHint, NULL); 
-      viewObj.FuncCall(0, L"drawText", &drawTextHint, NULL,
-		       l, t, text, tjs_int(WIN_DARKEN2 & 0xFFFFFF));
+      viewObj.FuncCall(0, L"drawUIText", &drawUITextHint, NULL,
+					   fontStyle, l, t, text, tjs_int(frameSignColor & 0xFFFFFF));
     }
     return;
   }
@@ -307,8 +309,8 @@ void timeline_draw_timeline(tTJSVariant item, tTJSVariant view, tjs_int fromTime
   // ‘I‘ð”ÍˆÍ•`‰æ
   tTJSVariant selection = itemObj.GetValue(L"selection", ncbTypedefs::Tag<tTJSVariant>(), 0, &selectionHint);
   if (selection.Type() != tvtVoid) {
-    tjs_int TIMELINE_FRAME_WIDTH = itemObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
-    tjs_int TIMELINE_FRAME_HEIGHT = globalObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
+    tjs_int TIMELINE_FRAME_WIDTH = viewObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
+    tjs_int TIMELINE_FRAME_HEIGHT = viewObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
 
     ncbPropAccessor selectionObj(selection);
     viewObj.FuncCall(0, L"colorRect", &colorRectHint, NULL,

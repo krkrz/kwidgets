@@ -261,6 +261,7 @@ class KTextInput extends KValueEntity
 
 	function onExtractWidgetStyle(widgetStyle) {
 		widgetStyle.width = getStyleProperty("width", void);
+		widgetStyle.height = getStyleProperty("height", void);
 	}
 
 	/*------------------------------
@@ -362,7 +363,9 @@ class KTextInput extends KValueEntity
 		w = widgetStyle.width;
 		if (w === void)
 			w = getOption("width");
-		h = getOption("height", void);
+		h = widgetStyle.height;
+		if (h === void)
+			h = getOption("height", void);
 		text.id = getStyleProperty("texteditId");
 		if (h === void)
 			h = text.fontStyle.fontHeight + borderPaddingHeight;
