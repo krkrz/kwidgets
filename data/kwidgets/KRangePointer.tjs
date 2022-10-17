@@ -6,322 +6,347 @@
 // 2Dレンジポインタ
 class KRangePointer2D extends KValueEntity
 {
-  var hParams, vParams;
-  var paramsPair;
-  var knob;
-  var knobDragging = false;
-  var dragBeganPos;
-  var dragBeganValue;
-  var autoDispatchStartInterval = void;
-  var autoDispatchRepeatInterval = void;
-  var autoDispatchTimer = void;
+	var hParams, vParams;
+	var paramsPair;
+	var knob;
+	var knobDragging = false;
+	var dragBeganPos;
+	var dragBeganValue;
+	var autoDispatchStartInterval = void;
+	var autoDispatchRepeatInterval = void;
+	var autoDispatchTimer = void;
+	var interp;
 
-  //------------------------------
-  // コンストラクタ
-  //------------------------------
-  function KRangePointer2D(window, opts = %[]) {
-    super.KValueEntity(window, opts);
+	//------------------------------
+	// コンストラクタ
+	//------------------------------
+	function KRangePointer2D(window, opts = %[]) {
+		super.KValueEntity(window, opts);
 
-    hParams = %[];
-    vParams = %[];
-    paramsPair = [ hParams, vParams ];
-    var prefixes = [ "h", "v" ];
+		hParams = %[];
+		vParams = %[];
+		paramsPair = [ hParams, vParams ];
+		var prefixes = [ "h", "v" ];
 
-    for (var i = 0; i < paramsPair.count; i++) {
-      var params = paramsPair[i];
-      var prefix = prefixes[i];
-      params.baseLogicalLeft = getOption(prefix + "Left", 0);
-      params.baseLogicalRight = getOption(prefix + "Right", 1);
-      params.baseLogicalMin = Math.min(params.baseLogicalLeft, params.baseLogicalRight);
-      params.baseLogicalMax = Math.max(params.baseLogicalLeft, params.baseLogicalRight);
-      params.baseLogicalSize = params.baseLogicalMax - params.baseLogicalMin;
-      params.baseLogicalSign = (params.baseLogicalRight - params.baseLogicalLeft) / params.baseLogicalSize;
+		for (var i = 0; i < paramsPair.count; i++) {
+			var params = paramsPair[i];
+			var prefix = prefixes[i];
+			params.baseLogicalLeft = getOption(prefix + "Left", 0);
+			params.baseLogicalRight = getOption(prefix + "Right", 1);
+			params.baseLogicalMin = Math.min(params.baseLogicalLeft, params.baseLogicalRight);
+			params.baseLogicalMax = Math.max(params.baseLogicalLeft, params.baseLogicalRight);
+			params.baseLogicalSize = params.baseLogicalMax - params.baseLogicalMin;
+			params.baseLogicalSign = (params.baseLogicalRight - params.baseLogicalLeft) / params.baseLogicalSize;
 
-      params.knobLogicalSize = getOption(prefix + "KnobSize", params.baseLogicalSize);
-      params.knobLogicalStride = getOption(prefix + "KnobStride", 0);
-      params.knobLogicalBlockStride = getOption(prefix + "KnobBlockStride", int((params.knobLogicalSize * 0.9) / params.knobLogicalStride) * params.knobLogicalStride);
-      params.knobFixedPixelSize = getOption(prefix + "KnobPixelSize", void);
+			params.knobLogicalSize = getOption(prefix + "KnobSize", params.baseLogicalSize);
+			params.knobLogicalStride = getOption(prefix + "KnobStride", 0);
+			params.knobLogicalBlockStride = getOption(prefix + "KnobBlockStride", int((params.knobLogicalSize * 0.9) / params.knobLogicalStride) * params.knobLogicalStride);
+			params.knobFixedPixelSize = getOption(prefix + "KnobPixelSize", void);
 
-      params.knobLogicalLeft = params.baseLogicalLeft;
-      params.knobLogicalRight = params.baseLogicalLeft + params.baseLogicalSign * (params.baseLogicalSize - params.knobLogicalSize);
-      params.knobLogicalMin = Math.min(params.knobLogicalLeft, params.knobLogicalRight);
-      params.knobLogicalMax = Math.max(params.knobLogicalLeft, params.knobLogicalRight);
-      params.isIntValue
-        = int(params.baseLogicalMin) == params.baseLogicalMin
-        && int(params.baseLogicalMax) == params.baseLogicalMax
-        && int(params.knobLogicalStride) == params.knobLogicalStride;
-      params.pointerValue = params.baseLogicalLeft;
-    }
-    
-    autoDispatchStartInterval = getOption("autoDispatchStartInterval", 200);
-    autoDispatchRepeatInterval = getOption("autoDispatchRepeatInterval", 16);
+			params.knobLogicalLeft = params.baseLogicalLeft;
+			params.knobLogicalRight = params.baseLogicalLeft + params.baseLogicalSign * (params.baseLogicalSize - params.knobLogicalSize);
+			params.knobLogicalMin = Math.min(params.knobLogicalLeft, params.knobLogicalRight);
+			params.knobLogicalMax = Math.max(params.knobLogicalLeft, params.knobLogicalRight);
+			params.isIntValue
+				= int(params.baseLogicalMin) == params.baseLogicalMin
+				&& int(params.baseLogicalMax) == params.baseLogicalMax
+				&& int(params.knobLogicalStride) == params.knobLogicalStride;
+			params.pointerValue = params.baseLogicalLeft;
+		}
 
-    if (autoDispatchStartInterval !== void
-        && autoDispatchRepeatInterval !== void) {
-      autoDispatchTimer = new Timer(this, "dispatchMouseDownEvent");
-      autoDispatchTimer.capcaity = 1;
-    }
-    
-    var knobId = getOption("knobId", "range_pointer_2d_knob");
-    knob = new KSpacer(window);
-    knob.parent = this;
-    knob.onSpacerMouseUp = onKnobMouseUp;
-    knob.onSpacerMouseMove = onKnobMouseMove;
-    knob.onSpacerMouseDown = onKnobMouseDown;
-  }
+		autoDispatchStartInterval = getOption("autoDispatchStartInterval", 200);
+		autoDispatchRepeatInterval = getOption("autoDispatchRepeatInterval", 16);
 
-  function finalize {
-    invalidate autoDispatchTimer;
-    super.finalize();
-  }
+		if (autoDispatchStartInterval !== void
+			&& autoDispatchRepeatInterval !== void) {
+			autoDispatchTimer = new Timer(this, "dispatchMouseDownEvent");
+			autoDispatchTimer.capcaity = 1;
+		}
+
+		var knobId = getOption("knobId", "range_pointer_2d_knob");
+		knob = new KSpacer(window);
+		knob.parent = this;
+		knob.onSpacerMouseUp = onKnobMouseUp;
+		knob.onSpacerMouseMove = onKnobMouseMove;
+		knob.onSpacerMouseDown = onKnobMouseDown;
+
+		if (getOption("interpolation", false))
+			interp = new KInterpolateDispatcher(this, %[ lerpFunction: function(a, b, t) { return %[ h: a.h + (b.h - a.h) * t, v: a.v + (b.v - a.v) * t ]; } ]);
+	}
+
+	function finalize {
+		invalidate autoDispatchTimer;
+		invalidate interp;
+		super.finalize();
+	}
 
 	function onExtractWidgetStyle(widgetStyle) {
 		widgetStyle.knobId = getStyleProperty("knobId");
 	}
 
-  property pointerValue {
-    getter {
-      return %[ h: hParams.pointerValue, v: vParams.pointerValue ];
-    }
-    setter (val) {
-      hParams.newPointerValue = val.h;
-      vParams.newPointerValue = val.v;
-      standarizeNewPointerValue(hParams);
-      standarizeNewPointerValue(vParams);
-      val = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
-      if (equalStructNumericLoose(pointerValue, val))
-        return;
-      hParams.pointerValue = val.h;
-      vParams.pointerValue = val.v;
-      redrawContents();
-    }
-  }
+	property pointerValue {
+		getter {
+			return %[ h: hParams.pointerValue, v: vParams.pointerValue ];
+		}
+		setter (val) {
+			hParams.newPointerValue = val.h;
+			vParams.newPointerValue = val.v;
+			standarizeNewPointerValue(hParams);
+			standarizeNewPointerValue(vParams);
+			val = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
+			if (equalStructNumericLoose(pointerValue, val))
+				return;
+			hParams.pointerValue = val.h;
+			vParams.pointerValue = val.v;
+			redrawContents();
+		}
+	}
 
-  property value {
-    getter {
-      return pointerValue;
-    }
-    setter(v) {
-      pointerValue = v;
-    }
-  }
+	property value {
+		getter {
+			return pointerValue;
+		}
+		setter(v) {
+			pointerValue = v;
+		}
+	}
 
-  //------------------------------
-  // レンジの更新
-  //------------------------------
-  function updateLogicalRange(prefix, baseLeft, baseRight, knobSize) {
-    var params;
-    switch (prefix) {
-    case "h": params = hParams; break;
-    case "v": params = vParams; break;
-    }
-    params.baseLogicalLeft = baseLeft;
-    params.baseLogicalRight = baseRight;
-    params.knobLogicalSize = knobSize;
-    params.baseLogicalMin = Math.min(params.baseLogicalLeft, params.baseLogicalRight);
-    params.baseLogicalMax = Math.max(params.baseLogicalLeft, params.baseLogicalRight);
-    params.baseLogicalSize = params.baseLogicalMax - params.baseLogicalMin;
-    params.baseLogicalSign = (params.baseLogicalRight - params.baseLogicalLeft) / params.baseLogicalSize;
-    params.knobLogicalLeft = params.baseLogicalLeft;
-    params.knobLogicalRight = params.baseLogicalLeft + params.baseLogicalSign * (params.baseLogicalSize - params.knobLogicalSize);
-    params.knobLogicalMin = Math.min(params.knobLogicalLeft, params.knobLogicalRight);
-    params.knobLogicalMax = Math.max(params.knobLogicalLeft, params.knobLogicalRight);
-    params.knobLogicalBlockStride = getOption(prefix + "KnobBlockStride", int((params.knobLogicalSize * 0.9) / params.knobLogicalStride) * params.knobLogicalStride);
-    params.isIntValue
-      = int(params.baseLogicalMin) == params.baseLogicalMin
-      && int(params.baseLogicalMax) == params.baseLogicalMax
-      && int(params.knobLogicalStride) == params.knobLogicalStride;
+	function interpolate(value) {
+		interp.interpolate(value);
+	}
 
-    params.newPointerValue = params.pointerValue;
-    standarizeNewPointerValue(params);
-    params.pointerValue = params.newPointerValue;
+	property completedValue {
+		getter {
+			return interp.completedValue;
+		}
+	}
 
-    redrawContents();
-  }
+	//------------------------------
+	// レンジの更新
+	//------------------------------
+	function updateLogicalRange(prefix, baseLeft, baseRight, knobSize) {
+		var params;
+		switch (prefix) {
+		case "h": params = hParams; break;
+		case "v": params = vParams; break;
+		}
+		params.baseLogicalLeft = baseLeft;
+		params.baseLogicalRight = baseRight;
+		params.knobLogicalSize = knobSize;
+		params.baseLogicalMin = Math.min(params.baseLogicalLeft, params.baseLogicalRight);
+		params.baseLogicalMax = Math.max(params.baseLogicalLeft, params.baseLogicalRight);
+		params.baseLogicalSize = params.baseLogicalMax - params.baseLogicalMin;
+		params.baseLogicalSign = (params.baseLogicalRight - params.baseLogicalLeft) / params.baseLogicalSize;
+		params.knobLogicalLeft = params.baseLogicalLeft;
+		params.knobLogicalRight = params.baseLogicalLeft + params.baseLogicalSign * (params.baseLogicalSize - params.knobLogicalSize);
+		params.knobLogicalMin = Math.min(params.knobLogicalLeft, params.knobLogicalRight);
+		params.knobLogicalMax = Math.max(params.knobLogicalLeft, params.knobLogicalRight);
+		params.knobLogicalBlockStride = getOption(prefix + "KnobBlockStride", int((params.knobLogicalSize * 0.9) / params.knobLogicalStride) * params.knobLogicalStride);
+		params.isIntValue
+			= int(params.baseLogicalMin) == params.baseLogicalMin
+			&& int(params.baseLogicalMax) == params.baseLogicalMax
+			&& int(params.knobLogicalStride) == params.knobLogicalStride;
 
-  //---------------------------------------
-  // パラメータ丸め込み
-  //---------------------------------------
-  function standarizeNewPointerValue(params) {
-    var newValue = params.newPointerValue;
-    newValue = Math.max(params.knobLogicalMin, Math.min(params.knobLogicalMax, newValue));
-    newValue = Math.round(newValue / params.knobLogicalStride) * params.knobLogicalStride;
-    if (params.isIntValue)
-      newValue = int(newValue);
-    params.newPointerValue = newValue;
-  }
-  
-  //------------------------------
-  // 描画
-  //------------------------------
-  function onDrawContents() {
-	  knob.id = widgetStyle.knobId;
+		params.newPointerValue = params.pointerValue;
+		standarizeNewPointerValue(params);
+		params.pointerValue = params.newPointerValue;
 
-	  drawBorder(borderStyle, 0, 0, width, height);
+		redrawContents();
+	}
 
-    hParams.rangePixelMin = borderPaddingLeft;
-    hParams.rangePixelSize = width - borderPaddingWidth;
-    vParams.rangePixelMin = borderPaddingTop;
-    vParams.rangePixelSize = height - borderPaddingHeight;
+	//---------------------------------------
+	// パラメータ丸め込み
+	//---------------------------------------
+	function standarizeNewPointerValue(params) {
+		var newValue = params.newPointerValue;
+		newValue = Math.max(params.knobLogicalMin, Math.min(params.knobLogicalMax, newValue));
+		newValue = Math.round(newValue / params.knobLogicalStride) * params.knobLogicalStride;
+		if (params.isIntValue)
+			newValue = int(newValue);
+		params.newPointerValue = newValue;
+	}
+	
+	//------------------------------
+	// 描画
+	//------------------------------
+	function onDrawContents() {
+		knob.id = widgetStyle.knobId;
 
-    for (var i = 0; i < paramsPair.count; i++) {
-      var params = paramsPair[i];
-      
-      params.knobPixelSize = (params.knobFixedPixelSize !== void)
-        ? params.knobFixedPixelSize
-        : int(params.rangePixelSize * params.knobLogicalSize / params.baseLogicalSize);
+		drawBorder(borderStyle, 0, 0, width, height);
 
-      params.knobPixelOperationAreaSize = params.rangePixelSize - params.knobPixelSize;
+		hParams.rangePixelMin = borderPaddingLeft;
+		hParams.rangePixelSize = width - borderPaddingWidth;
+		vParams.rangePixelMin = borderPaddingTop;
+		vParams.rangePixelSize = height - borderPaddingHeight;
 
-      params.knobPixelPos = params.rangePixelMin;
-      if (params.knobPixelOperationAreaSize > 0) {
-        params.knobPixelPos +=
-          params.knobPixelOperationAreaSize  
-          * (params.pointerValue - params.knobLogicalLeft)
-          / (params.knobLogicalRight - params.knobLogicalLeft);
-      }
-    }
+		for (var i = 0; i < paramsPair.count; i++) {
+			var params = paramsPair[i];
+			
+			params.knobPixelSize = (params.knobFixedPixelSize !== void)
+				? params.knobFixedPixelSize
+				: int(params.rangePixelSize * params.knobLogicalSize / params.baseLogicalSize);
 
-    knob.setPos(hParams.knobPixelPos, vParams.knobPixelPos);
-    knob.setFixedSize(hParams.knobPixelSize, vParams.knobPixelSize);
-  }
+			params.knobPixelOperationAreaSize = params.rangePixelSize - params.knobPixelSize;
 
-  //------------------------------
-  // オートディスパッチを処理する
-  // ------------------------------
-  function fireAutoDispatch() {
-    if (autoDispatchTimer !== void) {
-      if (! autoDispatchTimer.enabled) {
-        autoDispatchTimer.interval = autoDispatchStartInterval;
-        autoDispatchTimer.enabled = true;
-      } else {
-        autoDispatchTimer.interval = autoDispatchRepeatInterval;
-      }
-    }
-  }
+			params.knobPixelPos = params.rangePixelMin;
+			if (params.knobPixelOperationAreaSize > 0) {
+				params.knobPixelPos +=
+					params.knobPixelOperationAreaSize  
+					* (params.pointerValue - params.knobLogicalLeft)
+					/ (params.knobLogicalRight - params.knobLogicalLeft);
+			}
+		}
 
-  function stopAutoDispatch() {
-    if (autoDispatchTimer !== void)
-      autoDispatchTimer.enabled = false;
-  }    
+		knob.setPos(hParams.knobPixelPos, vParams.knobPixelPos);
+		knob.setFixedSize(hParams.knobPixelSize, vParams.knobPixelSize);
+	}
 
-  //------------------------------
-  // マウスイベント
-  //------------------------------
-  function onKnobMouseUp(x, y) {
-    if (! knobDragging)
-      return;
-    knobDragging = false;
-  }
+	//------------------------------
+	// オートディスパッチを処理する
+	// ------------------------------
+	function fireAutoDispatch() {
+		if (autoDispatchTimer !== void) {
+			if (! autoDispatchTimer.enabled) {
+				autoDispatchTimer.interval = autoDispatchStartInterval;
+				autoDispatchTimer.enabled = true;
+			} else {
+				autoDispatchTimer.interval = autoDispatchRepeatInterval;
+			}
+		}
+	}
 
-  function onMouseDown(x, y) {
-    super.onMouseDown(...);
+	function stopAutoDispatch() {
+		if (autoDispatchTimer !== void)
+			autoDispatchTimer.enabled = false;
+	}    
 
-    focus();
-    dispatchMouseDownEvent();
-  }
+	//------------------------------
+	// マウスイベント
+	//------------------------------
+	function onKnobMouseUp(x, y) {
+		if (! knobDragging)
+			return;
+		knobDragging = false;
+	}
 
-  function onMouseUp() {
-    super.onMouseUp(...);
-    stopAutoDispatch();
-  }
+	function onMouseDown(x, y) {
+		super.onMouseDown(...);
 
-  //------------------------------
-  // マウス押下イベントを発火する
-  //------------------------------
-  function dispatchMouseDownEvent() {
-    fireAutoDispatch();
+		focus();
+		dispatchMouseDownEvent();
+	}
 
-    hParams.cursor = cursorX;
-    vParams.cursor = cursorY;
+	function onMouseUp() {
+		super.onMouseUp(...);
+		stopAutoDispatch();
+	}
 
-    hParams.newPointerValue = hParams.pointerValue;
-    vParams.newPointerValue = vParams.pointerValue;
+	//------------------------------
+	// マウス押下イベントを発火する
+	//------------------------------
+	function dispatchMouseDownEvent() {
+		fireAutoDispatch();
 
-    for (var i = 0; i < paramsPair.count; i++) {
-      var params = paramsPair[i];
-      if (params.knobPixelOperationAreaSize > 0) {
-        if (params.cursor < params.knobPixelPos) 
-          params.newPointerValue -= params.baseLogicalSign * params.knobLogicalBlockStride;
-        else if (params.cursor >= params.knobPixelPos + params.knobPixelSize)
-          params.newPointerValue += params.baseLogicalSign * params.knobLogicalBlockStride;
-        standarizeNewPointerValue(params);
-      }      
-    }
-    
-    var newPointerValue = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
+		hParams.cursor = cursorX;
+		vParams.cursor = cursorY;
 
-    if (equalStructNumericLoose(newPointerValue, pointerValue)) {
-      stopAutoDispatch();
-      return;
-    }
-    
-    pointerValue = newPointerValue;
-    dispatch();
-  }
+		if (interp === void) {
+			hParams.newPointerValue = hParams.pointerValue;
+			vParams.newPointerValue = vParams.pointerValue;
+		} else {
+			var comp = completedValue;
+			hParams.newPointerValue = comp.h;
+			vParams.newPointerValue = comp.v;
+		}
 
-  //------------------------------
-  // ノブのマウスイベント
-  //------------------------------
-  function onKnobMouseDown(x, y) {
-    focus();
-    knobDragging = true;
-    hParams.dragBeganCursor = x + knob.left;
-    vParams.dragBeganCursor = y + knob.top;
-    dragBeganValue = pointerValue;
-  }
+		for (var i = 0; i < paramsPair.count; i++) {
+			var params = paramsPair[i];
+			if (params.knobPixelOperationAreaSize > 0) {
+				if (params.cursor < params.knobPixelPos) 
+					params.newPointerValue -= params.baseLogicalSign * params.knobLogicalBlockStride;
+				else if (params.cursor >= params.knobPixelPos + params.knobPixelSize)
+					params.newPointerValue += params.baseLogicalSign * params.knobLogicalBlockStride;
+				standarizeNewPointerValue(params);
+			} 
+		}
 
-  function onKnobMouseMove(x, y) {
-    if (! knobDragging)
-      return;
+		var newPointerValue = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
 
-    hParams.cursor = x + knob.left;
-    vParams.cursor = y + knob.top;
+		if (equalStructNumericLoose(newPointerValue, pointerValue)) {
+			stopAutoDispatch();
+			return;
+		}
 
-    hParams.newPointerValue = dragBeganValue.h;
-    vParams.newPointerValue = dragBeganValue.v;
+		if (interp === void) {
+			pointerValue = newPointerValue;
+			dispatch();
+		} else {
+			interpolate(newPointerValue);
+		}
+	}
 
-    for (var i = 0; i < paramsPair.count; i++) {
-      var params = paramsPair[i];
+	//------------------------------
+	// ノブのマウスイベント
+	//------------------------------
+	function onKnobMouseDown(x, y) {
+		focus();
+		knobDragging = true;
+		hParams.dragBeganCursor = x + knob.left;
+		vParams.dragBeganCursor = y + knob.top;
+		dragBeganValue = pointerValue;
+	}
 
-      if (params.knobPixelOperationAreaSize > 0) {
-        var ofst = params.cursor - params.dragBeganCursor;
-        params.newPointerValue += params.baseLogicalSign * (ofst / params.knobPixelOperationAreaSize) * (params.baseLogicalSize - params.knobLogicalSize);
-        standarizeNewPointerValue(params);
-      }
-    }
+	function onKnobMouseMove(x, y) {
+		if (! knobDragging)
+			return;
 
-    pointerValue = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
-    dispatch();
-  }
+		hParams.cursor = x + knob.left;
+		vParams.cursor = y + knob.top;
 
-  //------------------------------
-  // キーダウンイベント
-  //------------------------------
-  function onKeyDown(key, shift) {
-    var operations = [
-        %[ key: VK_LEFT,  params: hParams, dir: -1 ],
-        %[ key: VK_RIGHT, params: hParams, dir: +1 ],
-        %[ key: VK_UP,    params: vParams, dir: -1 ],
-        %[ key: VK_DOWN,  params: vParams, dir: +1 ]
-    ];
+		hParams.newPointerValue = dragBeganValue.h;
+		vParams.newPointerValue = dragBeganValue.v;
 
-    for (var i = 0; i < operations.count; i++) {
-      var operation = operations[i];
-      var params = operation.params;
-      if (key == operation.key
-          && params.knobPixelOperationAreaSize > 0) {
-        params.newPointerValue = params.pointerValue + operation.dir * params.baseLogicalSign * params.knobLogicalStride;
-        standarizeNewPointerValue(params);
-        if (params.pointerValue != params.newPointerValue) {
-          params.pointerValue = params.newPointerValue;
-          redrawContents();
-          dispatch();
-        }
-        return;
-      }
-    }
+		for (var i = 0; i < paramsPair.count; i++) {
+			var params = paramsPair[i];
 
-    super.onKeyDown(...);
-  }
+			if (params.knobPixelOperationAreaSize > 0) {
+				var ofst = params.cursor - params.dragBeganCursor;
+				params.newPointerValue += params.baseLogicalSign * (ofst / params.knobPixelOperationAreaSize) * (params.baseLogicalSize - params.knobLogicalSize);
+				standarizeNewPointerValue(params);
+			}
+		}
+
+		pointerValue = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
+		dispatch();
+	}
+
+	//------------------------------
+	// キーダウンイベント
+	//------------------------------
+	function onKeyDown(key, shift) {
+		var operations = [
+				%[ key: VK_LEFT,  params: hParams, dir: -1 ],
+				%[ key: VK_RIGHT, params: hParams, dir: +1 ],
+				%[ key: VK_UP,    params: vParams, dir: -1 ],
+				%[ key: VK_DOWN,  params: vParams, dir: +1 ]
+		];
+
+		for (var i = 0; i < operations.count; i++) {
+			var operation = operations[i];
+			var params = operation.params;
+			if (key == operation.key
+				&& params.knobPixelOperationAreaSize > 0) {
+				params.newPointerValue = params.pointerValue + operation.dir * params.baseLogicalSign * params.knobLogicalStride;
+				standarizeNewPointerValue(params);
+				if (params.pointerValue != params.newPointerValue) {
+					params.pointerValue = params.newPointerValue;
+					redrawContents();
+					dispatch();
+				}
+				return;
+			}
+		}
+
+		super.onKeyDown(...);
+	}
 };
