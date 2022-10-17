@@ -504,22 +504,25 @@ class KWidget extends Layer
 		if (includeSelf)
 			list.insert(0, this);
 
-		var idStyles = [];
-		var classStyles = [];
+		var idInsertionIndex, classInsertionIndex;
+		idInsertionIndex = classInsertionIndex = result.count;
+
 		for (var i = 0; i < list.count; i++) {
 			var widget = list[i];
-			if (widget._idStyleKeys.find(_id) >= 0)
-				idStyles.add(widget._style.isId[_id]);
+			if (widget._idStyleKeys.find(_id) >= 0) {
+				result.insert(idInsertionIndex, widget._style.isId[_id]);
+				idInsertionIndex++;
+				classInsertionIndex++;
+			}
 			if (intersectionSet(widget._classStyleKeys, classes).count > 0)
 				for (var j = 0; j < classes.count; j++) {
 					var klass = classes[j];
 					if (typeof(widget._style.isClass[klass]) != K_UNDEFINED) {
-						classStyles.add(widget._style.isClass[klass]);
+						result.insert(classInsertionIndex, widget._style.isClass[klass]);
+						classInsertionIndex++;
 					}
 				}
 		}
-		result = concatArray(result, idStyles);
-		result = concatArray(result, classStyles);
 		return result;
 	}
 
