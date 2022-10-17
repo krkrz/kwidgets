@@ -181,6 +181,7 @@ class KColorBox extends KValueEntity
 	}
 
 	function onBindPersistentDictionary(dict) {
+		super.onBindPersistentDictionary(...);
 		if (_pickerDict === void)
 			_pickerDict = dict;
 	}

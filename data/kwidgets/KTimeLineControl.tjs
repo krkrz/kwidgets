@@ -2662,9 +2662,6 @@ class KTimeLineControl extends KEntity
 	 * ファイナライザ
 	 ------------------------------*/
 	function finalize {
-		if (dict !== void) {
-			dict.set(name + "_view_width", viewWidth);
-		}
 		discard(_playTimer);
 		super.finalize(...);
 	}
@@ -2701,9 +2698,12 @@ class KTimeLineControl extends KEntity
 	/*------------------------------
 	 * 辞書登録
 	 ------------------------------*/
-	function bindPersistentDictionary(dict) {
-		super.bindPersistentDictionary(dict);
-		viewWidth = dict.init(name + "_view_width", viewWidth);
+	function onUnserialize(dict, key) {
+		viewWidth = dict.init(key + "_view_width", viewWidth);
+	}
+
+	function onSerialize(dict, key) {
+			dict.set(key + "_view_width", viewWidth);
 	}
 
 	/*------------------------------

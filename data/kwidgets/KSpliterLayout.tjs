@@ -86,7 +86,6 @@ class KSpliterLayout extends KLayout
 	var _shutterEnabled = false;
 	var _shutterOpened = true;
 	var _shutterIndex = 0;
-	var dictKey;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -111,27 +110,14 @@ class KSpliterLayout extends KLayout
 	/*------------------------------
 	 * 辞書登録
 	 ------------------------------*/
-	property hasEffectiveName {
-		getter {
-			return name !== void
-				&& name !== ""
-				&& name.substr(0, 1) != "_";
-		}
+	function onUnserialize(dict, key) {
+		splitRatio =    dict.init(key + "_split_ratio", splitRatio);
+		shutterOpened = dict.init(key + "_shutter_opened", true);
 	}
 
-	function onBindPersistentDictionary(dict) {
-		if ( ! hasEffectiveName)
-			return;
-		dictKey = window.name + "_" + name;
-		splitRatio = dict.init(dictKey, splitRatio);
-		shutterOpened = dict.init(dictKey + "_shutter_opened", true);
-	}
-
-	function onUnbindPersistentDictionary(dict) {
-		if ( ! hasEffectiveName)
-			return;
-		dict.set(dictKey, splitRatio);
-		dict.set(dictKey + "_shutter_opened", shutterOpened);
+	function onSerialize(dict, key) {
+		dict.set(key + "_split_ratio", splitRatio);
+		dict.set(key + "_shutter_opened", shutterOpened);
 	}
 
 	/**------------------------------

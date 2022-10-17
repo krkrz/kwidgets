@@ -2178,7 +2178,7 @@ global.KTableArgsFormat =
 			%[ key: "defaultColumnOptions", defaultValue: %[] ]
 	];
 
-class KTable extends KValueEntity
+class KTable extends KEntity
 {
 	var _enableColumnKeyRowSort = true;
 	var _enableColumnTabOrderExchange = true;
@@ -2195,7 +2195,6 @@ class KTable extends KValueEntity
 	var keydownSelectionBeginPoint;
 	var dragPoint;
 	var respondToValueModification = false;
-	var dict;
 	var defaultColumnOptions;
 
 	/**------------------------------
@@ -2224,7 +2223,6 @@ class KTable extends KValueEntity
 		respondToValueModification = getOption("respondToValueModification", false);
 
 		var attrList = getOption("attributes");
-		avoidValueDictionaryRegistration = true;
 		neutralColor = 0xffffffff;
 		fillRect(0, 0, width, height, neutralColor);
 		focusable = getOption("focusable", window.defaultFocusable);
@@ -2285,13 +2283,13 @@ class KTable extends KValueEntity
 	}
 
 	// ファイナライザ
-	function onUnbindAdditionalField(dictKey, dict) {
+	function onUnserialize(dict, key) {
 		var orderList = [];
 		for (var i = 0; i < columnList.count; i++) {
 			var column = columnList[i];
 			orderList.add(%[ key: column.key, size: column.size ]);
 		}
-		dict.set(dictKey + "_column_order", orderList);
+		dict.set(key + "_column_order", orderList);
 	}
 
 	/**------------------------------
@@ -2300,8 +2298,8 @@ class KTable extends KValueEntity
 	 *
 	 * @param dict 辞書
 	 ------------------------------*/
-	function onBindAdditionalField(dictKey, dict) {
-		var orderList = dict.get(dictKey + "_column_order", []);
+	function onSerialize(dict, key) {
+		var orderList = dict.get(key + "_column_order", []);
 		if (orderList === void)
 			return;
 

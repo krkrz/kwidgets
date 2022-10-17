@@ -1,8 +1,11 @@
+global.K_ENTITY_EFFECTIVE_DICT_NAME_PAT = /^[^_]+/;
+
 /*------------------------------
  * 表示要素を持つエンティティの基底クラス
 ------------------------------*/
 class KEntity extends KWidget
 {
+	var dictKey;
 	var isDrawing = false;
 
 	function KEntity(win, style) {
@@ -36,6 +39,37 @@ class KEntity extends KWidget
 
 	function onDrawContents() {
 	}
+
+	/*------------------------------
+	 * 保存に適した名前を持っているか？
+	 ------------------------------*/
+	property hasEffectiveName {
+		getter {
+			return K_ENTITY_EFFECTIVE_DICT_NAME_PAT.match(name);
+		}
+	}
+
+	/*------------------------------
+	 * 永続化辞書を値にバインドする
+	 ------------------------------*/
+	function onBindPersistentDictionary(dict) {
+		if ( ! hasEffectiveName)
+			return;
+		dictKey = window.name + "_" + name;
+		onUnserialize(dict, dictKey);
+	}
+
+	function onUnserialize(dict, key) {
+	}
+
+	function onUnbindPersistentDictionary(dict) {
+		if ( ! hasEffectiveName)
+			return;
+		onSerialize(dict, dictKey);
+	}
+
+	function onSerialize(dict, key) {
+	}
 }
 
 
@@ -45,22 +79,10 @@ class KEntity extends KWidget
 class KValueEntity extends KEntity
 {
 	var dictKey;
-	var avoidValueDictionaryRegistration = false;
 
 	function KValueEntity() {
 		super.KEntity(...);
 		_allowChildDictionaryRegistration = false;
-	}
-
-	/*------------------------------
-	 * 保存に適した名前を持っているか？
-	 ------------------------------*/
-	property hasEffectiveName {
-		getter {
-			return name !== void
-				&& name !== ""
-				&& name.substr(0, 1) != "_";
-		}
 	}
 
 	/**------------------------------
@@ -86,29 +108,11 @@ class KValueEntity extends KEntity
 		}
 	}
 
-	/*------------------------------
-	 * 永続化辞書を値にバインドする
-	 ------------------------------*/
-	function onBindPersistentDictionary(dict) {
-		if ( ! hasEffectiveName)
-			return;
-		dictKey = window.name + "_" + name;
-		if (! avoidValueDictionaryRegistration)
-			value = dict.init(dictKey, value);
-		onBindAdditionalField(dictKey, dict);
+	function onUnserialize(dict, key) {
+		value = dict.init(key, value);
 	}
 
-	function onBindAdditionalField(dictKey, dict) {
-	}
-
-	function onUnbindPersistentDictionary(dict) {
-		if ( ! hasEffectiveName)
-			return;
-		if (! avoidValueDictionaryRegistration)
-			dict.set(dictKey, value);
-		onUnbindAdditionalField(dictKey, dict);
-	}
-
-	function onUnbindAdditionalField(dictKey, dict) {
+	function onSerialize(dict, key) {
+		dict.set(key, value);
 	}
 }
