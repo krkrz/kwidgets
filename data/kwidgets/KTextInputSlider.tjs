@@ -52,7 +52,9 @@ class KTextInputSlider extends KValueEntity
 										right: right,
 										stride: stride,
 										focusable: false,
-										value: v ]);
+										value: v,
+										interpolation: getOption("interpolation", false)
+									  ]);
 
 		textInput.parent = this;
 		slider.parent = this;
