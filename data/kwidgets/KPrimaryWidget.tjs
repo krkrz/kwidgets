@@ -83,6 +83,9 @@ class KPrimaryWidget extends KLayout
 	function clearIconCache() {
 		eachDictionary(iconDepot, function(key, value) { invalidate value; });
 		iconDepot = %[];
+		invalidate dummyIcon;
+		dummyIcon = new global.Layer(window, this);
+		dummyIcon.setSize(1, 1);
 	}
 
 	/**------------------------------
