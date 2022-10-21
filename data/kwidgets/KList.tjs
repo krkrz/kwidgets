@@ -111,7 +111,6 @@ class KList extends KVirtualWidget
 	var confirmedDragTarget;
 	var curDragInfo;
 	var curDragRegion;
-	var _toggleWidth;
 	var openNoticeItem;
 	var _disabledItemCapabilityMask = LIST_ITEM_CAPABILITY_MASK_FOCUS;
 	var isReadyToClick = true;
@@ -140,7 +139,6 @@ class KList extends KVirtualWidget
 		hitThreshold = 0;
 		root = this;
 		setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
-		_toggleWidth = findIcon("k_list_open").width + 4;;
 		curDragInfo = %[ acceptType: DRAG_ACCEPT_TYPE_NONE ];
 		curDragRegion = new KRegion();
 		mouseDragThreshold = 8;
@@ -199,7 +197,7 @@ class KList extends KVirtualWidget
 			if (widgetStyle.ignoreToggleWidth)
 				return 0;
 			else
-				return _toggleWidth;
+				return findIcon("k_list_open").width + 4;
 		}
 	}
 

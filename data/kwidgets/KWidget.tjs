@@ -181,9 +181,11 @@ class KWidget extends Layer
 	// オプション
 	var _options;
 	// スタイル
-	var _style;
+	var _theme;
+	var _style, _styleArch;
 	var _idStyleKeys = [];
 	var _classStyleKeys = [];
+	var _classWeakStyleKeys = [];
 	var _styleChain;
 	var _notRespondToStyleModificationRefCount = 0;
 	var _styleModified = false;
@@ -230,7 +232,7 @@ class KWidget extends Layer
 	var dragHover = false;
 	// 辞書
 	var _dict;
-	
+
 	/**------------------------------
 	 * コンストラクタ
 	 *
@@ -255,7 +257,8 @@ class KWidget extends Layer
 		_options = options;
 
 		// スタイルを取得
-		_style = styleRepository.normalizeStyle(getOption("style", %[]));
+		_theme = getOption("theme", "");
+		_styleArch = styleRepository.normalizeStyle(getOption("style", %[]));
 		// IDを設定
 		_id = getOption("id", "");
 		// 名前を設定
@@ -301,6 +304,7 @@ class KWidget extends Layer
 		// missing を有効にする
 		Scripts.setCallMissing(this);
 
+		updateTheme();
 		updateStyleKeys();
 		updateStyleChain();
 		updateFontStyle();
@@ -476,6 +480,10 @@ class KWidget extends Layer
 		return style;
 	}
 
+	function updateTheme() {
+		_style = unionDictionary(styleRepository.findTheme(_theme), _styleArch, true);
+	}
+
 	function updateStyleKeys() {
 		if (typeof(_style.isId) == K_UNDEFINED)
 			_idStyleKeys = [];
@@ -486,6 +494,11 @@ class KWidget extends Layer
 			_classStyleKeys = [];
 		else
 			_classStyleKeys = dictionaryKeys(_style.isClass);
+
+		if (typeof(_style.isClassWeak) == K_UNDEFINED)
+			_classWeakStyleKeys = [];
+		else
+			_classWeakStyleKeys = dictionaryKeys(_style.isClassWeak);
 	}
 
 	function extractStyleChain(includeSelf = false, classes = classTrees) {
@@ -504,8 +517,8 @@ class KWidget extends Layer
 		if (includeSelf)
 			list.insert(0, this);
 
-		var idInsertionIndex, classInsertionIndex;
-		idInsertionIndex = classInsertionIndex = result.count;
+		var idInsertionIndex, classInsertionIndex, classWeakInsertionIndex;
+		idInsertionIndex = classInsertionIndex = classWeakInsertionIndex = result.count;
 
 		for (var i = 0; i < list.count; i++) {
 			var widget = list[i];
@@ -513,6 +526,7 @@ class KWidget extends Layer
 				result.insert(idInsertionIndex, widget._style.isId[_id]);
 				idInsertionIndex++;
 				classInsertionIndex++;
+				classWeakInsertionIndex++;
 			}
 			if (intersectionSet(widget._classStyleKeys, classes).count > 0)
 				for (var j = 0; j < classes.count; j++) {
@@ -520,6 +534,15 @@ class KWidget extends Layer
 					if (typeof(widget._style.isClass[klass]) != K_UNDEFINED) {
 						result.insert(classInsertionIndex, widget._style.isClass[klass]);
 						classInsertionIndex++;
+						classWeakInsertionIndex++;
+					}
+				}
+			if (intersectionSet(widget._classWeakStyleKeys, classes).count > 0)
+				for (var j = 0; j < classes.count; j++) {
+					var klass = classes[j];
+					if (typeof(widget._style.isClassWeak[klass]) != K_UNDEFINED) {
+						result.insert(classWeakInsertionIndex, widget._style.isClassWeak[klass]);
+						classWeakInsertionIndex++;
 					}
 				}
 		}
@@ -1192,7 +1215,7 @@ class KWidget extends Layer
 	//------------------------------
 	// スタイルの更新チェックを子へ波及させる
 	//------------------------------
-	function invalidateStylesToDescendants() {
+	function invalidateStylesToDescendants(fullUpdate = false) {
 		parentWidget.respondToStyleModification = false;
 
 		var widgets = widgetDescendants;
@@ -1207,6 +1230,10 @@ class KWidget extends Layer
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
+			if (fullUpdate) {
+				widget.updateTheme();
+				widget.updateStyleKeys();
+			}
 			widget.updateStyleChain();
 			widget.invalidateStyles();
 			widget.onUpdateAscendantStyle();

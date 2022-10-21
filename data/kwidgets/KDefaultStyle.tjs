@@ -589,6 +589,18 @@
 					 borderWidth: 1,
 					 padding: 1,
 				   ]
+		 ],
+
+		%[ theme: "debug_frame",
+		   style: %[
+			   isClassWeak: %[
+				   KWidget: %[
+					   borderStyle: BORDER_STYLE_SOLID,
+					   borderWidth: 1,
+					   borderColor: 0xffff00000,
+				   ]
+			   ]
+		   ]
 		 ]
 ]
 

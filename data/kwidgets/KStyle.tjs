@@ -38,15 +38,23 @@ global.K_WIDGET_DEFAULT_FRAME_TYPE_BORDER_STYLES =
 class KStyleRepository
 {
 	var classStyleMap = %[];
+	var classWeakStyleMap = %[];
 	var idStyleMap = %[];
 	var _style;
 	var _idStyleKeys = [];
 	var _classStyleKeys = [];
+	var _classWeakStyleKeys = [];
 	var className = "KStyleRepository";
+
+	var themeMap = %[];
+	var styleNotficationLockCount = 0;
+	var styleModified = false;
 
 	function KStyleRepository() {
 		_style = %[ isId: idStyleMap,
-					isClass: classStyleMap ];
+					isClass: classStyleMap,
+					isClassWeak: classWeakStyleMap,
+				  ];
 	}
 
 	function registerClassStyle(className, style) {
@@ -63,6 +71,20 @@ class KStyleRepository
 		invalidateStyles();
 	}
 
+	function registerClassWeakStyle(className, style) {
+		classWeakStyleMap[className] = normalizeStyle(style);
+		_classWeakStyleKeys = dictionaryKeys(classWeakStyleMap);
+		invalidateStyles();
+	}
+
+	function overwriteClassWeakStyle(className, style) {
+		if (typeof(classWeakStyleMap[className]) === K_UNDEFINED)
+			registerClassWeakStyle(...);
+		else
+			(Dictionary.assign incontextof classWeakStyleMap[className])(style, false);
+		invalidateStyles();
+	}
+
 	function registerIdStyle(idName, style) {
 		idStyleMap[idName] = normalizeStyle(style);
 		_idStyleKeys = dictionaryKeys(idStyleMap);
@@ -74,13 +96,43 @@ class KStyleRepository
 			registerIdStyle(...);
 		else
 			(Dictionary.assign incontextof idStyleMap[idMame])(style, false);
-		invalidateStyles();
+		 invalidateStyles();
 	}
 
-	function invalidateStyles() {
+	function registerTheme(themeName, style) {
+		themeMap[themeName] = normalizeStyle(style);
+		invalidateStyles(true);
+	}
+
+	function findTheme(themeName) {
+		if (themeName != ""
+			&& typeof(themeMap[themeName]) != K_UNDEFINED)
+			return themeMap[themeName];
+		else
+			return %[];
+	}
+
+	function lockStyleNotification() {
+		styleNotficationLockCount++;
+	}
+
+	function unlockStyleNotification(fullUpdate) {
+		if (--styleNotficationLockCount == 0) {
+			if (styleModified) {
+				styleModified = false;
+				invalidateStyles(fullUpdate);
+			}
+		}
+	}
+
+	function invalidateStyles(fullUpdate = false) {
+		if (styleNotficationLockCount) {
+			styleModified = true;
+			return;
+		}
 		for (var i = 0; i < _existentWindowList.count; i++) {
 			var window = _existentWindowList[i];
-			window.invalidateStylesToDescendants();
+			window.invalidateStylesToDescendants(fullUpdate);
 		}
 	}
 
@@ -134,6 +186,8 @@ class KStyleRepository
 	}
 
 	function loadStyles(defs) {
+		lockStyleNotification();
+
 		for (var i = 0; i < defs.count; i++) {
 			var def = defs[i];
 
@@ -157,11 +211,19 @@ class KStyleRepository
 				registerClassStyle(def.klass, style);
 			else if (typeof(def["class"]) != K_UNDEFINED)
 				registerClassStyle(def["class"], style);
+			else if (typeof(def.klassWeak) != K_UNDEFINED)
+				registerClassStyle(def.klassWeak, style);
+			else if (typeof(def["classWeak"]) != K_UNDEFINED)
+				registerClassStyle(def["classWeak"], style);
 			else if (typeof(def.id) != K_UNDEFINED)
 				registerIdStyle(def.id, style);
+			else if (typeof(def.theme) != K_UNDEFINED)
+				registerTheme(def.theme, style);
 			else
 				throw new Exception("no effective identifier found in style definition.");
 		}
+
+		unlockStyleNotification(true);
 	}
 
 	function loadStylesStorage(filename) {

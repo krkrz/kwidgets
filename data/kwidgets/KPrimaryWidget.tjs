@@ -71,6 +71,13 @@ class KPrimaryWidget extends KLayout
 		return iconDepot[filename];
 	}
 
+	//------------------------------
+	// アイコンキャッシュをクリアする
+	function clearIconCache() {
+		eachDictionary(iconDepot, function(key, value) { invalidate value; });
+		iconDepot = %[];
+	}
+
 	/**------------------------------
 	 * 子ウィジェットをはめ込む
 	 *
