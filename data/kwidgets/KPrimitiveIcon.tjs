@@ -7,6 +7,8 @@ class KPrimitiveIconBuilder
 	var eqtrianglePat = /^\$eqtriangle\((\d+),(u|d|l|r),#([0-9a-fA-F]{6})\)$/;
 	var circlePat =     /^\$circle\((\d+),#([0-9a-fA-F]{6})\)$/;
 	var elippsePat =    /^\$elippse\((\d+),(\d+),#([0-9a-fA-F]{6})\)$/;
+	var compositePat =  /^\$composite\((.+)\)$/;
+	var multipleArgsPat = /^(\$.+?\))((,\$.+?\))*)$/;
 	var primitiveMap = %[];
 	var definitions;
 	var bufLayer;
@@ -25,6 +27,9 @@ class KPrimitiveIconBuilder
 	}
 
 	function matchIcon(name) {
+		if (compositePat.test(name))
+			return matchCompositePat(name);
+
 		if (typeof(primitiveMap[name]) !== K_UNDEFINED)
 			return true;
 		for (var i = 0; i < definitions.count; i++)
@@ -43,6 +48,11 @@ class KPrimitiveIconBuilder
 	}
 
 	function drawIcon(layer, name) {
+		if (compositePat.test(name)) {
+			drawCompositeIcon(layer, name);
+			return;
+		}
+
 		for (var i = 0; i < definitions.count; i++)
 			if (definitions[i].pat.test(name)) {
 				definitions[i].func(layer, name);
@@ -163,6 +173,48 @@ class KPrimitiveIconBuilder
 			}
 			if (dir == "r")
 				layer.flipLR();
+		}
+	}
+
+	function parseCompositePat(name) {
+		if (! compositePat.test(name))
+			return void;
+		var argsExp = compositePat.matches[1];
+		var args = [];
+		do {
+			if (! multipleArgsPat.test(argsExp)) 
+				return void;
+			args.add(multipleArgsPat.matches[1]);
+			argsExp = multipleArgsPat.matches[2].substr(1);
+		} while (argsExp != "");
+		for (var i = 0; i < args.count; i++)
+			if (! matchIcon(args[i]))
+				return void;
+		return args;
+	}
+
+	function matchCompositePat(name) {
+		return parseCompositePat(name) !== void;
+	}
+
+	function drawCompositeIcon(layer, name) {
+		var args = parseCompositePat(name);
+		var iconLayers = [];
+		var w = 0, h = 0;
+		for (var i = 0; i < args.count; i++) {
+			var iconLayer = new Layer(window, window.primaryLayer);
+			drawIcon(iconLayer, args[i]);
+			iconLayers.add(iconLayer);
+			w = Math.max(w, iconLayer.width);
+			h = Math.max(h, iconLayer.height);
+		}
+		layer.setSize(w, h);
+		layer.fillRect(0, 0, w, h, 0);
+		for (var i = 0; i < iconLayers.count; i++) {
+			var iconLayer = iconLayers[i];
+			layer.operateRect((w - iconLayer.width) / 2, (h - iconLayer.height) / 2,
+							  iconLayer, 0, 0, iconLayer.width, iconLayer.height);
+			invalidate iconLayer;
 		}
 	}
 }
