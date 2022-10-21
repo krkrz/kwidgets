@@ -49,26 +49,33 @@ class KPrimaryWidget extends KLayout
 	//------------------------------
 	// アイコンをロードしてキャッシュする
 	function findIcon(filename) {
-		if (filename == "")
+		var key = filename;
+
+		if (key == "")
 			return dummyIcon;
-		if (typeof(iconDepot[filename]) !== K_UNDEFINED)
-			return iconDepot[filename];
-		if (primitiveIconBuilder.matchIcon(filename))
-			return primitiveIconBuilder.getIcon(filename);
+		if (typeof(iconDepot[key]) !== K_UNDEFINED)
+			return iconDepot[key];
+
+		var filename = styleRepository.resolveAlias("icon", filename);
 
 		var layer = new global.Layer(window, this);
+
 		try {
-			layer.loadImages(filename);
-			layer.setSizeToImageSize();
-			iconDepot[filename] = layer;
+			if (primitiveIconBuilder.matchIcon(filename)) {
+				primitiveIconBuilder.drawIcon(layer, filename);
+			} else {
+				layer.loadImages(filename);
+				layer.setSizeToImageSize();
+			}
+			iconDepot[key] = layer;
 		}
 		catch(e) {
 			Debug.message(e.message);
 			Debug.message(e.trace);
 			invalidate layer;
-			iconDepot[filename] = dummyIcon;
+			iconDepot[key] = dummyIcon;
 		}
-		return iconDepot[filename];
+		return iconDepot[key];
 	}
 
 	//------------------------------

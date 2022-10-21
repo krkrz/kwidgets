@@ -45,8 +45,8 @@ class KStyleRepository
 	var _classStyleKeys = [];
 	var _classWeakStyleKeys = [];
 	var className = "KStyleRepository";
-
 	var themeMap = %[];
+	var aliasMap = %[];
 	var styleNotficationLockCount = 0;
 	var styleModified = false;
 
@@ -67,7 +67,7 @@ class KStyleRepository
 		if (typeof(classStyleMap[className]) === K_UNDEFINED)
 			registerClassStyle(...);
 		else
-			(Dictionary.assign incontextof classStyleMap[className])(style, false);
+			(Dictionary.assign incontextof classStyleMap[className])(normalizeStyle(style), false);
 		invalidateStyles();
 	}
 
@@ -81,7 +81,7 @@ class KStyleRepository
 		if (typeof(classWeakStyleMap[className]) === K_UNDEFINED)
 			registerClassWeakStyle(...);
 		else
-			(Dictionary.assign incontextof classWeakStyleMap[className])(style, false);
+			(Dictionary.assign incontextof classWeakStyleMap[className])(normalizeStyle(style), false);
 		invalidateStyles();
 	}
 
@@ -95,12 +95,20 @@ class KStyleRepository
 		if (typeof(idStyleMap[idName]) === K_UNDEFINED)
 			registerIdStyle(...);
 		else
-			(Dictionary.assign incontextof idStyleMap[idMame])(style, false);
+			(Dictionary.assign incontextof idStyleMap[idMame])(normalizeStyle(style), false);
 		 invalidateStyles();
 	}
 
 	function registerTheme(themeName, style) {
 		themeMap[themeName] = normalizeStyle(style);
+		invalidateStyles(true);
+	}
+
+	function overwriteTheme(themeName, style) {
+		if (typeof(themeMap[themeName]) == K_UNDEFINED)
+			registerTheme(...);
+		else
+			(Dictionary.assign incontextof themeMap[themeMame])(normalizeStyle(style), false);
 		invalidateStyles(true);
 	}
 
@@ -110,6 +118,28 @@ class KStyleRepository
 			return themeMap[themeName];
 		else
 			return %[];
+	}
+
+	function registerAlias(category, map) {
+		aliasMap[category] = map;
+		invalidateStyles(true);
+	}
+
+	function overwriteAlias(category, map) {
+		if (typeof(aliasMap[category]) == K_UNDEFINED)
+			registerAlias(...);
+		else
+			(Dictionary.assign incontextof aliasMap[category])(map, false);
+		invalidateStyles(true);
+	}
+
+	function resolveAlias(category, key) {
+		while(true) {
+			if (typeof(aliasMap[category]) == K_UNDEFINED
+				|| typeof(aliasMap[category][key]) == K_UNDEFINED)
+				return key;
+			key = aliasMap[category][key];
+		}
 	}
 
 	function lockStyleNotification() {
@@ -190,6 +220,13 @@ class KStyleRepository
 
 		for (var i = 0; i < defs.count; i++) {
 			var def = defs[i];
+
+			if (typeof(def.alias) != K_UNDEFINED) {
+				if (typeof(def.map) == K_UNDEFINED)
+					throw new Exception("no effective map found in alias definition.");
+				registerAlias(def.alias, def.map);
+				continue;
+			}
 
 			var style;
 			if (typeof(def.styleOfKlass) != K_UNDEFINED)
