@@ -69,6 +69,24 @@ class KTextEditRow
 	}
 
 	/*------------------------------
+	 * 縦スペース
+	 ------------------------------*/
+	property spaceVertical {
+		getter {
+			return owner.spaceVertical;
+		}
+	}
+
+	/*------------------------------
+	 * 縦スペース
+	 ------------------------------*/
+	property rowHeight {
+		getter {
+			return font.height + spaceVertical;
+		}
+	}
+
+	/*------------------------------
 	 * テキストを隠す？
 	 ------------------------------*/
 	property hideText {
@@ -192,7 +210,7 @@ class KTextEditRow
 		if (tail) {
 			for (var i = 0; i < rowRange.count; i++) {
 				if (rowRange[i][1] == index)
-					return [ left + rowRange[i][2], top + i * font.height ];
+					return [ left + rowRange[i][2], top + i * rowHeight ];
 			}
 		}
 
@@ -206,7 +224,7 @@ class KTextEditRow
 	function nearestChar(x, y) {
 		x -= left;
 		y -= top;
-		y /= font.height;
+		y /= rowHeight;
 		y = int(Math.max(0, Math.min(y, rowRange.count - 1)));
 		var from, to, w;
 		from = rowRange[y][0];
@@ -290,7 +308,7 @@ class KTextEditRow
 					w = rowRange[i][2] - charX[from];
 				else
 					w = charX[to] - charX[from];
-				owner.fillRect(left + charX[from], top + charY[from], w, font.height, owner.widgetStyle.selectionBackgroundColor);
+				owner.fillRect(left + charX[from], top + charY[from], w, rowHeight, owner.widgetStyle.selectionBackgroundColor);
 				owner.drawRowText(left + charX[from], top + charY[from], charViewList.substr(from, to - from), owner.widgetStyle.selectionFontColor);
 			}
 		}
@@ -325,7 +343,7 @@ class KTextEditRow
 				// 行情報を記録
 				rowRange.add([ n, i, x ]);
 				// 改行
-				y += font.height;
+				y += rowHeight;
 				x = 0;
 				n = i;
 			}
@@ -339,7 +357,7 @@ class KTextEditRow
 		charY[i] = y;
 		// 最終行の情報を記録
 		rowRange.add([ n, i, x ]);
-		h = y + font.height;
+		h = y + rowHeight;
 		// サイズ設定
 		setSize(w, h);
 	}
@@ -666,6 +684,15 @@ class KTextEdit extends KVirtualWidget
 	}
 
 	/**------------------------------
+	 *　行高さ
+	 */
+	property rowHeight {
+		getter {
+			return font.height + spaceVertical;
+		}
+	}
+
+	/**------------------------------
 	 * キーバインドをクリアする
 	 ------------------------------*/
 	function clearKeyBind {
@@ -849,24 +876,24 @@ class KTextEdit extends KVirtualWidget
 
 	// 上へ移動
 	function moveUp {
-		setPointerPos(Math.max(pointerX, pointerMoveBaseX), pointerY - font.height);
+		setPointerPos(Math.max(pointerX, pointerMoveBaseX), pointerY - rowHeight);
 	}
 
 	// 下へ移動
 	function moveDown {
-		setPointerPos(Math.max(pointerX, pointerMoveBaseX), pointerY + font.height);
+		setPointerPos(Math.max(pointerX, pointerMoveBaseX), pointerY + rowHeight);
 	}
 
 	// ページアップ
 	function pageUp {
 		var rect = viewingRect;
-		setPointerPos(Math.max(pointerX, pointerMoveBaseX), Math.min(pointerY - font.height, rect.top - rect.height + font.height * 2));
+		setPointerPos(Math.max(pointerX, pointerMoveBaseX), Math.min(pointerY - rowHeight, rect.top - rect.height + rowHeight * 2));
 	}
 
 	// ページダウン
 	function pageDown {
 		var rect = viewingRect;
-		setPointerPos(Math.max(pointerX, pointerMoveBaseX), Math.max(pointerY + font.height, rect.bottom + rect.height - font.height * 2));
+		setPointerPos(Math.max(pointerX, pointerMoveBaseX), Math.max(pointerY + rowHeight, rect.bottom + rect.height - rowHeight * 2));
 	}
 
 	// 文頭
@@ -1427,7 +1454,7 @@ class KTextEdit extends KVirtualWidget
 		var split = parseWordSplit(row.str);
 		for (var i = 1; i < split.count; i++) {
 			var pointerPos = row.pointerPos(split[i]);
-			if (y <= pointerPos[1] + font.height
+			if (y <= pointerPos[1] + rowHeight
 				&& x <= pointerPos[0]) {
 				return [ new KTextEditPoint(rowIndex, split[i - 1]),
 						 new KTextEditPoint(rowIndex, split[i]) ];
@@ -1572,7 +1599,7 @@ class KTextEdit extends KVirtualWidget
 			charCount += Math.max(1, rowLayer.count);
 			minW = Math.max(minW, rowLayer.minWidth);
 		}
-		minH = font.height;
+		minH = rowHeight;
 		// サイズを仮決定
 		setMinMaxSize(minW, minH, Math.max(minW, _marginalWidth), Math.max(minH, _marginalHeight));
 		// レイアウトを行う
@@ -1652,7 +1679,7 @@ class KTextEdit extends KVirtualWidget
 		pointerX = pos[0], pointerY = pos[1];
 		pointerLayer.setPos(pointerX - 1, pointerY);
 		setAttentionPos(pointerX, pointerY);
-		noticeRect(pointerX - 1, pointerY, 2, font.height);
+		noticeRect(pointerX - 1, pointerY, 2, rowHeight);
 		onPointAt(row, col);
 	}
 

@@ -69,33 +69,38 @@ class KCheckBox extends KValueEntity
 	function onDrawContents() {
 		// アイコンの設定
 		var iconLayer = findIcon(widgetStyle.icon);
-		var iconWidth = iconLayer.width;
-		var iconHeight = iconLayer.height;
+		var iconWidth = iconLayer.width + borderPaddingWidth;
+		var iconHeight = iconLayer.height + borderPaddingHeight;
 
 		// テキストエリアのサイズを計算
 		var textArea = extractTextArea(fontStyle, _label, widgetStyle.lineSpacing);
 
-		var minW = borderPaddingWidth + textArea.width + iconWidth + spaceHorizontal;
-		var minH = borderPaddingHeight + Math.max(textArea.height, iconHeight);
+		var minW = textArea.width + iconWidth + spaceHorizontal;
+		var minH = Math.max(textArea.height, iconHeight);
 
 		if (! isVariableWidth)
 			setFixedSize(minW, minH);
 		else
 			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, K_WIDGET_MAX_POSSIBLE_WIDTH, minH);
 
+		fillRect(0, 0, width, height, 0);
+
 		// ボーダー描画
-		drawBorder(borderStyle, 0, 0, width, height);
+		var iconLeft = 0;
+		var iconTop = (height - iconHeight) / 2;
+		drawBorder(borderStyle, 0, iconTop, iconWidth, iconHeight);
 
 		// アイコン描画
-		operateRect(borderPaddingLeft, borderPaddingTop + int((height - borderPaddingTop - iconHeight) / 2),
+		operateRect(iconLeft + borderPaddingLeft, iconTop + borderPaddingTop,
 					iconLayer, 0, 0, iconLayer.width, iconLayer.height,
 					omAuto, appearanceStyle.opacity);
 
+		var textLeft = iconLeft + iconWidth + spaceHorizontal;
+		var textTop = (height - textArea.height) / 2;
 		// テキスト描画
 		drawTextArea(fontStyle,
-					 borderPaddingLeft + iconWidth + spaceHorizontal,
-					 borderPaddingTop + int((height - borderPaddingTop - textArea.height) / 2),
-					 width - (borderPaddingWidth + iconWidth + spaceHorizontal), widgetStyle.lineSpacing,
+					 textLeft, textTop,
+					 width - textLeft, widgetStyle.lineSpacing,
 					 textArea.texts, textArea.textWidths, widgetStyle.textAlign);
 	}
 

@@ -616,13 +616,10 @@ class KWidget extends Layer
 	 ------------------------------*/
 	function overwriteStyle(newStyle) {
 		newStyle = styleRepository.normalizeStyle(newStyle);
-		(Dictionary.assign incontextof _style)(newStyle, false) ;
-		if (! isStyleHasInheritAttributes)
-			invalidateStyles();
-		else {
-			updateStyleKeys();
-			invalidateStylesToDescendants();
-		}
+		(Dictionary.assign incontextof _styleArch)(newStyle, false) ;
+		updateTheme();
+		updateStyleKeys();
+		invalidateStylesToDescendants();
 	}
 
 	/**------------------------------
@@ -1231,6 +1228,7 @@ class KWidget extends Layer
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
 			if (fullUpdate) {
+				widget.onFullUpdate();
 				widget.updateTheme();
 				widget.updateStyleKeys();
 			}
@@ -1241,6 +1239,9 @@ class KWidget extends Layer
 		}
 
 		parentWidget.respondToStyleModification = true;
+	}
+
+	function onFullUpdate() {
 	}
 
 	function onUpdateAscendantStyle() {
@@ -2450,22 +2451,30 @@ class KWidget extends Layer
 		drawBorderEdge(borderStyle, "right", x + w - borderStyle.borderWidthRight, y, borderStyle.borderWidthRight, h);
 		drawBorderEdge(borderStyle, "bottom", x, y + h - borderStyle.borderWidthBottom, w, borderStyle.borderWidthBottom);
 
-		if (borderStyle.borderRadiusLeftTop)
+		if (borderStyle.borderRadiusLeftTop) {
+			var r = Math.min(int(width / 2), Math.min(int(height / 2), borderStyle.borderRadiusLeftTop));
 			roundRect(x, y,
-					  borderStyle.borderRadiusLeftTop, borderStyle.borderRadiusLeftTop,
-					  x + borderStyle.borderRadiusLeftTop - 1, y + borderStyle.borderRadiusLeftTop - 1);
-		if (borderStyle.borderRadiusRightTop)
-			roundRect(x + w - borderStyle.borderRadiusRightTop, y,
-					  borderStyle.borderRadiusRightTop, borderStyle.borderRadiusRightTop,
-					  x + w - borderStyle.borderRadiusRightTop, y + borderStyle.borderRadiusRightTop - 1);
-		if (borderStyle.borderRadiusLeftBottom)
-			roundRect(x, y + h - borderStyle.borderRadiusLeftBottom,
-					  borderStyle.borderRadiusLeftBottom, borderStyle.borderRadiusLeftBottom,
-					  x + borderStyle.borderRadiusLeftBottom - 1, y + h - borderStyle.borderRadiusLeftBottom);
-		if (borderStyle.borderRadiusRightBottom)
-			roundRect(x + w - borderStyle.borderRadiusRightBottom, y + h - borderStyle.borderRadiusRightBottom,
-					  borderStyle.borderRadiusRightBottom, borderStyle.borderRadiusRightBottom,
-					  x + w - borderStyle.borderRadiusRightBottom, y + h - borderStyle.borderRadiusRightBottom);
+					  r, r,
+					  x + r - 1, y + r - 1);
+		}
+		if (borderStyle.borderRadiusRightTop) {
+			var r = Math.min(int(width / 2), Math.min(int(height / 2), borderStyle.borderRadiusRightTop));
+			roundRect(x + w - r, y,
+					  r, r,
+					  x + w - r, y + r - 1);
+		}
+		if (borderStyle.borderRadiusLeftBottom) {
+			var r = Math.min(int(width / 2), Math.min(int(height / 2), borderStyle.borderRadiusLeftBottom));
+			roundRect(x, y + h - r,
+					  r, r,
+					  x + r - 1, y + h - r);
+		}
+		if (borderStyle.borderRadiusRightBottom) {
+			var r = Math.min(int(width / 2), Math.min(int(height / 2), borderStyle.borderRadiusRightBottom));
+			roundRect(x + w - r, y + h - r,
+					  r, r,
+					  x + w - r, y + h - r);
+		}
 
 		if (blendCorner)
 			restoreBorderCorner(borderStyle, x, y, w, h);

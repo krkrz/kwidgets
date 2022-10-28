@@ -2210,7 +2210,7 @@ class KTable extends KEntity
 	 */
 	function KTable(window, *) {
 		var options = parseOldStyleWidgetArgs(KTableArgsFormat, *);
-		super.KValueEntity(window, options);
+		super.KEntity(window, options);
 
 		defaultColumnOptions = getOption("defaultColumnOptions");
 		_showVerticalGrid = getOption("showVerticalGrid", true);

@@ -342,7 +342,7 @@ class KWindow extends Window
 			updateStyleKeys();
 			primaryWidget.clearIconCache();
 		}
-		primaryWidget.invalidateStylesToDescendants();
+		primaryWidget.invalidateStylesToDescendants(fullUpdate);
 	}
 
 	/**------------------------------

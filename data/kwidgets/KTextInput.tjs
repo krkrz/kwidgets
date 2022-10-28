@@ -199,6 +199,10 @@ class KTextInputFrame extends KEntity
 	function onChildMinMaxSizeModified(child) {
 		child.setSize(width, height);
 	}
+
+	function onSizeModified() {
+		children[0].setSize(width, height);
+	}
 }
 
 

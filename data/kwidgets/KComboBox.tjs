@@ -31,7 +31,7 @@ class KComboBox extends KValueEntity
 
 		focusable = getOption("focusable", window.defaultFocusable);
 		_type = getOption("type", COMBO_STYLE_DROPDOWNLIST);
-		_values = getOption("items", []);
+		_values = getOption("values", []);
 		_captions = getOption("captions", []);
 		var items = getOption("items", []);
 		for (var i = 0; i < items.count; i += 2) {
@@ -287,7 +287,6 @@ class KComboBox extends KValueEntity
 			dropdownButton.overwriteStyle(%[ width: buttonSize, height: buttonSize]);
 			dropdownButton.setPos(width - borderPaddingRight - buttonSize, borderPaddingTop);
 			drawBorder(borderStyle, 0, 0, width, height);
-			Debug.message(borderStyle, 0, 0, width, height);
 		} else {
 			var buttonSize = h;
 			dropdownButton.overwriteStyle(%[ width: buttonSize, height: buttonSize]);
@@ -304,6 +303,7 @@ class KComboBox extends KValueEntity
 	function onChildValueModified(child, newValue) {
 		switch (child.name) {
 		case "_dropdownButton":
+			focus();
 			openDropdownList();
 		}
 	}

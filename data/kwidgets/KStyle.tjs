@@ -57,6 +57,21 @@ class KStyleRepository
 				  ];
 	}
 
+	function clear() {
+		idStyleMap = %[];
+		classStyleMap = %[];
+		classWeakStyleMap = %[];
+		_idStyleKeys = [];
+		_classStyleKeys = [];
+		_classWeakStyleKeys = [];
+		themeMap = %[];
+		aliasMap = %[];
+		_style = %[ isId: idStyleMap,
+					isClass: classStyleMap,
+					isClassWeak: classWeakStyleMap,
+				  ];
+	}
+
 	function registerClassStyle(className, style) {
 		classStyleMap[className] = normalizeStyle(style);
 		_classStyleKeys = dictionaryKeys(classStyleMap);
@@ -265,6 +280,15 @@ class KStyleRepository
 
 	function loadStylesStorage(filename) {
 		loadStyles(Scripts.evalStorage(filename));
+	}
+
+	function initStyles(defs) {
+		clear();
+		loadStyles(defs);
+	}
+
+	function initStylesStorage(filename) {
+		initStyles(Scripts.evalStorage(filename));
 	}
 };
 

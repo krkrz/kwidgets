@@ -1,6 +1,7 @@
 class KPrimitiveIconBuilder
 {
 	var window;
+	var framePat =      /^\$frame\((\d+),(\d+)\)$/;
 	var rectPat =       /^\$rect\((\d+),(\d+),#([0-9a-fA-F]{6})\)$/;
 	var squarePat =     /^\$square\((\d+),#([0-9a-fA-F]{6})\)$/;
 	var trianglePat =   /^\$triangle\((\d+),(\d+),(u|d|l|r),#([0-9a-fA-F]{6})\)$/;
@@ -17,6 +18,7 @@ class KPrimitiveIconBuilder
 		this.window = window;
 		bufLayer = new global.Layer(window, window.primaryLayer);
 		definitions = [
+				%[ pat: framePat,       func: drawFrameIcon      ],
 				%[ pat: rectPat,        func: drawRectIcon       ],
 				%[ pat: squarePat,      func: drawSquareIcon     ],
 				%[ pat: trianglePat,    func: drawTriangleIcon   ],
@@ -58,6 +60,14 @@ class KPrimitiveIconBuilder
 				definitions[i].func(layer, name);
 				return;
 			}
+	}
+
+	function drawFrameIcon(layer, name) {
+		var matches = framePat.exec(name);
+		var width = +matches[1];
+		var height = +matches[2];
+		layer.setSize(width, height);
+		layer.fillRect(0, 0, width, height, 0);
 	}
 
 	function drawRectIcon(layer, name) {

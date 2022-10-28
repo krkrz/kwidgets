@@ -150,7 +150,7 @@ class KColorBox extends KValueEntity
 		var w = width - borderPaddingWidth;
 		var h = height - borderPaddingHeight;
 		if (hasAlpha) {
-			drawChecker(l, t, w, h, w < 16 ? int(w / 2) : 8, 0xFFFFFFFF, 0xFFc0c0c0, -width/2, -height/2);
+			drawChecker(l, t, w, h, w < 16 ? int(w / 2) : 8, 0xFFFFFFFF, 0xFFc0c0c0, int(-width/2), int(-height/2));
 			colorRect(l, t, w, h, _value & 0xFFFFFF, (_value >> 24) & 0xFF);
 		} else {
 			fillRect(l, t, w, h, _value | 0xFF000000);
@@ -180,8 +180,8 @@ class KColorBox extends KValueEntity
 		}
 	}
 
-	function onBindPersistentDictionary(dict) {
-		super.onBindPersistentDictionary(...);
+	function onUnserialize(dict, dictKey) {
+		super.onUnserialize(...);
 		if (_pickerDict === void)
 			_pickerDict = dict;
 	}

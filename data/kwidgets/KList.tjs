@@ -153,13 +153,16 @@ class KList extends KVirtualWidget
 	}
 
 	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.slideWidth = getStyleProperty("slideWidth", 14);
+		widgetStyle.slideWidth = getStyleProperty("slideWidth", getStyleProperty("stride", 14));
 		widgetStyle.renameTextinputId = getStyleProperty("renameTextinputId");
 		widgetStyle.ignoreToggleWidth = getStyleProperty("ignoreToggleWidth", false);
 		widgetStyle.frameColor = getStyleProperty("frameColor");
 		widgetStyle.focusFrameColor = getStyleProperty("focusFrameColor");
 		widgetStyle.dragFrameColor = getStyleProperty("dragFrameColor");
 		widgetStyle.selectionColor = getStyleProperty("selectionColor");
+		widgetStyle.toggleOpenIcon = getStyleProperty("toggleOpenIcon");
+		widgetStyle.toggleCloseIcon = getStyleProperty("toggleCloseIcon");
+		widgetStyle.toggleInvisbleIcon = getStyleProperty("toggleInvislbeIcon");
 	}
 
 	property slideWidth {
@@ -197,7 +200,7 @@ class KList extends KVirtualWidget
 			if (widgetStyle.ignoreToggleWidth)
 				return 0;
 			else
-				return findIcon("k_list_open").width + 4;
+				return findIcon(root.widgetStyle.toggleOpenIcon).width + 4;
 		}
 	}
 
@@ -451,6 +454,14 @@ class KList extends KVirtualWidget
 		}
 	}
 
+	function onFullUpdate() {
+		for (var i = 0; i < childList.count; i++) {
+			var child = childList[i];
+			child.updateIconLayerList();
+			listItemStyleChainCache = %[];
+		}
+	}
+
 	function onStyleModified() {
 		super.onStyleModified();
 		if (prevSlideWidth != slideWidth) {
@@ -627,6 +638,10 @@ class KList extends KVirtualWidget
 		// 描画
 		fillAlpha *= 32;
 		edgeAlpha *= 64;
+		fillAlpha = (fillColor >> 24) * fillAlpha / 255;
+		edgeAlpha = (edgeColor >> 24) * edgeAlpha / 255;
+		fillColor &= 0xffffff;
+		edgeColor &= 0xffffff;
 		colorRect(1, item.top, width - 2, 1, edgeColor, edgeAlpha);
 		colorRect(1, item.top + item.height - 1, width - 2, 1, edgeColor, edgeAlpha);
 		colorRect(0, item.top + 1, 1, item.height - 2, edgeColor, edgeAlpha);
@@ -643,6 +658,9 @@ class KList extends KVirtualWidget
 		var color = widgetStyle.selectionColor;
 		var edgeAlpha = 192;
 		var fillAlpha = 64;
+		fillAlpha = (color >> 24) * fillAlpha / 255;
+		edgeAlpha = (color >> 24) * edgeAlpha / 255;
+		color &= 0xffffff;
 		if (range.width * range.height == 0)
 			return;
 		if (range.width == 1 || range.height == 1) {
@@ -661,8 +679,10 @@ class KList extends KVirtualWidget
 		if (curDragInfo.acceptType != DRAG_ACCEPT_TYPE_CHILD)
 			return;
 		var y = curDragInfo.item.getChildInsertionY(curDragInfo.insertionIndex);
-		var edgeColor = 0xFF0000;
+		var edgeColor = widgetStyle.dragFrameColor;
 		var edgeAlpha = 2 * 64;
+		edgeAlpha = (edgeColor >> 24) * edgeAlpha / 255;
+		edgeColor &= 0xffffff;
 		var x = curDragInfo.item.getChildInsertionX();
 		colorRect(x + 3, y - 1, width, 2, edgeColor, edgeAlpha);
 		for (var i = 2; i <= 5; i++)
@@ -1718,6 +1738,7 @@ global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
 	[ "icon", "icon", void ],
 	[ "icons", "icons", [] ],
 	[ "backgroundColor", "backgroundColor", void ],
+	[ "itemColor", "itemColor", void ],
 	[ "spaceVertical", "spaceVertical", void ],
 	[ "lineSpacing", "lineSpacing", 0 ]
 ];
@@ -2025,9 +2046,18 @@ class KListItem
 		}
 	}
 
+	property itemColor {
+		getter {
+			if (appearanceStyle.itemColor !== void)
+				return appearanceStyle.itemColor;
+			else
+				return backgroundColor;
+		}
+	}
+
 	property fillColor {
 		getter {
-			var color = backgroundColor;
+			var color = itemColor;
 			if (color instanceof "Array") {
 				var index = root.drawItemList.find(this);
 				color = color[index % color.count];
@@ -3447,7 +3477,7 @@ class KListItem
 		var prevWidth = width;
 		var prevHeight = height;
 		height = 0;
-		height = Math.max(height, root.findIcon("k_list_open").height);
+		height = Math.max(height, root.findIcon(root.widgetStyle.toggleOpenIcon).height);
 		iconWidth = 0;
 		for (var i = 0; i < iconLayerList.count; i++) {
 			iconWidth += iconLayerList[i].width;
@@ -3665,9 +3695,11 @@ class KListItem
 		if (childCount) {
 			var toggle;
 			if (hasVisibleChild)
-				toggle = root.findIcon(opened ? "k_list_close" : "k_list_open");
+				toggle = root.findIcon(opened
+									   ? root.widgetStyle.toggleCloseIcon
+									   : root.widgetStyle.toggleOpenIcon);
 			else
-				toggle = root.findIcon("k_list_invisible");
+				toggle = root.findIcon(root.widgetStyle.toggleInvisibleIcon);
 			root.operateRect(left + 2, int(top + (height- toggle.height) / 2),
 							 toggle,
 							 0, 0,

@@ -286,10 +286,10 @@ public:
   }
 
   tjs_int wrap_mod(tjs_int num, int denom) const {
-    if (num >= 0)
-      return num % denom;
-    else
-      return num - (num / denom - 1) * denom;
+	  if (num >= 0)
+		  return num % denom;
+	  else
+		  return (num % denom + denom) % denom;
   }
 
   void copyWrappedRect(tjs_int dleft, tjs_int dtop, tjs_int dwidth, tjs_int dheight,

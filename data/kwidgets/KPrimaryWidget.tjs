@@ -28,11 +28,9 @@ class KPrimaryWidget extends KLayout
 		// 親呼び出し
 		super.KLayout(win, %[ name: "", primary: true ]);
 		// イメージを持たない
-		hasImage = false;
 		// 子はまだ無し
 		child = void;
 		// BGカラーは灰色
-		neutralColor = WIN_BG;
 		// ウィジェットの一時置き場
 		widgetDepot = new global.Layer(win, this);
 		// ダミーレイヤ
@@ -128,8 +126,10 @@ class KPrimaryWidget extends KLayout
 	function onLocateLayout() {
 		if (child === void)
 			return;
+		fillRect(0, 0, width, height, borderStyle.backgroundColor);
 		child.setPos(child.marginLeft, child.marginRight);
 		child.setSize(width - child.marginHorizontal,
 					  height - child.marginVertical);
 	}
+
 };

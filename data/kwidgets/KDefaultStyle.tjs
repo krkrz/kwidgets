@@ -1,5 +1,14 @@
 [
 		%[
+			alias: "icon",
+			map: %[
+				"k_dropdown" => "k_scroll_down",
+				"k_list_check_on" => "k_check_button_on",
+				"k_list_check_off" => "k_check_button_off",
+			]
+		],
+
+		%[
 			klass: "KWidget",
 			style: %[
 				fontColor: 0,
@@ -289,9 +298,12 @@
 				backgroundColor: 0xffffffff,
 				renameTextinputId: "list_rename_textinput",
 				frameColor: 0xb4b4b4,
-				focusFrameColor: 0x0078d7,
-				dragFrameColor: 0xff0000,
-				selectionColor: 0x0078d7,
+				focusFrameColor: 0xff0078d7,
+				dragFrameColor: 0xffff0000,
+				selectionColor: 0xff0078d7,
+				toggleOpenIcon: "k_list_open",
+				toggleCloseIcon: "k_list_close",
+				toggleInvisibleIcon: "k_list_invisible",
 			],
 		],
 

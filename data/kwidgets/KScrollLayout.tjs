@@ -684,7 +684,7 @@ class KScrollLayout extends KLayout
 		boxW = width - ((vertical && ! hideVerticalBar) ? verticalBar.width : 0);
 		boxH = height - ((horizontal && ! hideHorizontalBar) ? horizontalBar.height : 0);
 		// box描画
-		drawBorder(borderStyle, 0, 0, boxW, boxH);
+		drawBorder(borderStyle, 0, 0, width, height);
 		// フレーム再配置
 		var frameW, frameH;
 		frameW = boxW - child.marginHorizontal - borderPaddingWidth;
@@ -698,19 +698,19 @@ class KScrollLayout extends KLayout
 
 		// 水平バー再配置
 		if (horizontal) {
-			horizontalBar.setSize(boxW, horizontalBar.buttonWidth);
-			horizontalBar.setPos(0, boxH);
+			horizontalBar.setSize(frameW, horizontalBar.buttonWidth);
+			horizontalBar.setPos(borderPaddingLeft, height - borderPaddingBottom - horizontalBar.height);
 			horizontalBar.setTargetSize(child.width,
 										int(Math.min(child.width, frame.width)),
 										- child.left);
 		}
 		// 垂直バー再配置
 		if (vertical) {
-			verticalBar.setSize(verticalBar.buttonWidth, boxH);
+			verticalBar.setSize(verticalBar.buttonWidth, frameH);
 			verticalBar.setTargetSize(child.height,
 									  int(Math.min(child.height, frame.height)),
 									  - child.top);
-			verticalBar.setPos(boxW, 0);
+			verticalBar.setPos(width - borderPaddingRight - verticalBar.width, borderPaddingTop);
 		}
 
 		/*
