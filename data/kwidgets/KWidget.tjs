@@ -308,6 +308,7 @@ class KWidget extends Layer
 		updateStyleKeys();
 		updateStyleChain();
 		updateFontStyle();
+		updateAppearanceStyle();
 		updateBorderStyle();
 		updateLayoutStyle();
 		updateLocateStyle();
@@ -2698,6 +2699,27 @@ class KWidget extends Layer
 		var ch = h - borderPaddingHeight;
 		child.setSize(cw - child.marginHorizontal, ch - child.marginVertical);
 		locateChild(x + borderPaddingLeft, y + borderPaddingTop, cw, ch, child);
+	}
+
+	function getChildBoundsWithoutPadding(child) {
+		var mh = child.marginHorizontal;
+		var mv = child.marginVertical;
+		var bpw = layoutStyle.borderLeft + layoutStyle.borderRight;
+		var bph = layoutStyle.borderTop + layoutStyle.borderBottom;
+		return %[ minWidth: child.minWidth + mh + bpw,
+				  maxWidth: child.maxWidth + mh + bpw,
+				  minHeight: child.minHeight + mv + bph,
+				  maxHeight: child.maxHeight + mv + bph ];
+	}
+
+	function embedChildWithoutPadding(x, y, w, h, child, clear = false) {
+		drawBorder(borderStyle, x, y, w, h, clear);
+		var bpw = layoutStyle.borderLeft + layoutStyle.borderRight;
+		var bph = layoutStyle.borderTop + layoutStyle.borderBottom;
+		var cw = w - bpw;
+		var ch = h - bph;
+		child.setSize(cw - child.marginHorizontal, ch - child.marginVertical);
+		locateChild(x + layoutStyle.borderLeft, y + layoutStyle.borderTop, cw, ch, child);
 	}
 
 		/*------------------------------

@@ -4,7 +4,7 @@
 
 // 二重起動回避
 if (! System.createAppLock("kwidgets_sample"))
-  System.exit();
+	System.exit();
 // デバッグコンソールを表示
 @if (!kirikiriz)
 Debug.console.visible = true;
@@ -40,146 +40,156 @@ class SampleLauncher extends KWindow
 	var styleFiles = [ "KDefaultStyle.tjs", "KDarkFlatStyle.tjs" ];
 
 	// コンストラクタ
-  function SampleLauncher {
-    super.KWindow("sample_launcher");
+	function SampleLauncher {
+		super.KWindow(%[ namme: "sample_launcher",
+						 theme: "dialog",
+						 style: %[
+							 isClassWeak: %[
+								 KWidget: %[
+									 alignHorizontal: ALIGN_CENTER
+								 ]
+							 ],
+							 isClass: %[
+								 KToggleButton: %[
+									 width: 130,
+									 textAlign: ALIGN_CENTER,
+								 ]
+							 ]
+						 ]
+					   ]);
 
-    // キャプション等設定
-    borderStyle = bsDialog;
-    System.title = caption = "kwidgetsサンプル";
+		// キャプション等設定
+		borderStyle = bsDialog;
+		System.title = caption = "kwidgetsサンプル";
 
-    // デフォルト値を設定
-    defaultSpace = 2;
-    defaultMargin = 3;
-    defaultAlignHorizontal = ALIGN_CENTER;
-    defaultAlignVertical = ALIGN_CENTER;
+		// デフォルト値を設定
+		// グリッドを作成、ボタンを配置
+		var grid = new KGridLayout(this, %[ id: "widget_grid" ]);
+		grid.add(0, 0, new KComboBox(this, %[ name: "styleType", width: 100, captions: styleCaptions, values: styleIndices ]));
+		grid.add(0, 1, new KTextToggleButton(this, "ウィジェットサンプル", "widget_sample"));
+		grid.add(0, 2, new KTextToggleButton(this, "スクロールサンプル", "scroll_sample"));
+		grid.add(0, 3, new KTextToggleButton(this, "リストサンプル", "list_sample"));
+		grid.add(0, 4, new KTextToggleButton(this, "リストサンプル2", "list_sample_2"));
+		grid.add(0, 5, new KTextToggleButton(this, "テーブルサンプル", "table_sample"));
+		grid.add(0, 6, new KTextToggleButton(this, "テーブルサンプル2", "table_sample2"));
+		grid.add(0, 7, new KTextToggleButton(this, "ドラッグ＆ドロップサンプル", "dragdrop_sample"));
+		grid.add(0, 8, new KTextToggleButton(this, "スパイラルサンプル", "spiral_sample"));
+		grid.add(0, 9, new KTextToggleButton(this, "タイムラインサンプル", "timeline_sample"));
 
-    // グリッドを作成、ボタンを配置
-    var grid = new KGridLayout(this);
-	  grid.add(0, 0, new KComboBox(this, %[ name: "styleType", width: 100, captions: styleCaptions, values: styleIndices ]));
-      grid.add(0, 1, new KTextToggleButton(this, "ウィジェットサンプル", "widget_sample"));
-    grid.add(0, 2, new KTextToggleButton(this, "スクロールサンプル", "scroll_sample"));
-    grid.add(0, 3, new KTextToggleButton(this, "リストサンプル", "list_sample"));
-    grid.add(0, 4, new KTextToggleButton(this, "リストサンプル2", "list_sample_2"));
-    grid.add(0, 5, new KTextToggleButton(this, "テーブルサンプル", "table_sample"));
-    grid.add(0, 6, new KTextToggleButton(this, "テーブルサンプル2", "table_sample2"));
-    grid.add(0, 7, new KTextToggleButton(this, "ドラッグ＆ドロップサンプル", "dragdrop_sample"));
-    grid.add(0, 8, new KTextToggleButton(this, "スパイラルサンプル", "spiral_sample"));
-    grid.add(0, 9, new KTextToggleButton(this, "タイムラインサンプル", "timeline_sample"));
 
- 
-	  //グリッドを配置
-    primaryWidget.add(grid);
+		//グリッドを配置
+		primaryWidget.add(grid);
 
-	  styleType.value = 0;
-  
-    // 永続化辞書の作成
-    var dict = new KPersistentDictionary(System.dataPath + "samlelauncher_dict.txt");
-    // ウィンドウの管理オブジェクトに辞書を追加して、
-    // finalize時に自動的に内容がセーブされるようにする。
-    add(dict);
-    // ウィンドウ内の名前を持っているウィジェットと辞書をバインドする。
-    // これにより、アプリ終了時のウィジェットの値が次回起動時に持ち越される。
-    // ウィンドウ自身のサイズと座標も辞書に記録される。
-    bindPersistentDictionary(dict);
+		styleType.value = 0;
 
-	  styleType.dispatch();
-	  
-    // 辞書よりロードした値に基き、サンプルの初期表示を行う
-    if (widget_sample.value)
-      showWidgetSample();
-    if (scroll_sample.value)
-      showScrollSample();
-    if (list_sample.value)
-      showListSample();
-    if (list_sample_2.value)
-      showListSample2();
-    if (table_sample.value)
-      showTableSample();
-    if (table_sample2.value)
-      showTableSample2();
-    if (dragdrop_sample.value)
-      showDragDropSample();
-    if (spiral_sample.value)
-      showSpiralSample();
-    if (timeline_sample.value)
-      showTimeLineSample();
+		// 永続化辞書の作成
+		var dict = new KPersistentDictionary(System.dataPath + "samlelauncher_dict.txt");
+		// ウィンドウの管理オブジェクトに辞書を追加して、
+		// finalize時に自動的に内容がセーブされるようにする。
+		add(dict);
+		// ウィンドウ内の名前を持っているウィジェットと辞書をバインドする。
+		// これにより、アプリ終了時のウィジェットの値が次回起動時に持ち越される。
+		// ウィンドウ自身のサイズと座標も辞書に記録される。
+		bindPersistentDictionary(dict);
 
-    visible = true;
-  }
+		styleType.dispatch();
 
-  // 子の値の変更を検知
-  function onChildValueModified(child, value) {
-    // サンプルの表示状態を切り替える。
-    switch (child.name) {
+		// 辞書よりロードした値に基き、サンプルの初期表示を行う
+		if (widget_sample.value)
+			showWidgetSample();
+		if (scroll_sample.value)
+			showScrollSample();
+		if (list_sample.value)
+			showListSample();
+		if (list_sample_2.value)
+			showListSample2();
+		if (table_sample.value)
+			showTableSample();
+		if (table_sample2.value)
+			showTableSample2();
+		if (dragdrop_sample.value)
+			showDragDropSample();
+		if (spiral_sample.value)
+			showSpiralSample();
+		if (timeline_sample.value)
+			showTimeLineSample();
 
-	case "styleType":
-		styleRepository.initStylesStorage(styleFiles[value]);
-		break;
-		
-    case "widget_sample": 
-      if (value)
-        showWidgetSample();
-      else
-        hideWidgetSample();
-      break;
+		visible = true;
+	}
 
-    case "scroll_sample": 
-      if (value)
-        showScrollSample();
-      else
-        hideScrollSample();
-      break;
+	// 子の値の変更を検知
+	function onChildValueModified(child, value) {
+		// サンプルの表示状態を切り替える。
+		switch (child.name) {
 
-    case "list_sample": 
-      if (value)
-        showListSample();
-      else
-        hideListSample();
-      break;
+		case "styleType":
+			styleRepository.initStylesStorage(styleFiles[value]);
+			break;
 
-    case "list_sample_2": 
-      if (value)
-        showListSample2();
-      else
-        hideListSample2();
-      break;
+		case "widget_sample":
+			if (value)
+				showWidgetSample();
+			else
+				hideWidgetSample();
+			break;
 
-    case "table_sample": 
-      if (value)
-        showTableSample();
-      else
-        hideTableSample();
-      break;
+		case "scroll_sample":
+			if (value)
+				showScrollSample();
+			else
+				hideScrollSample();
+			break;
 
-    case "table_sample2": 
-      if (value)
-        showTableSample2();
-      else
-        hideTableSample2();
-      break;
+		case "list_sample":
+			if (value)
+				showListSample();
+			else
+				hideListSample();
+			break;
 
-    case "dragdrop_sample":
-      if (value)
-        showDragDropSample();
-      else
-        hideDragDropSample();
-      break;
+		case "list_sample_2":
+			if (value)
+				showListSample2();
+			else
+				hideListSample2();
+			break;
 
-    case "spiral_sample":
-      if (value)
-        showSpiralSample();
-      else
-        hideSpiralSample();
-      break;
+		case "table_sample":
+			if (value)
+				showTableSample();
+			else
+				hideTableSample();
+			break;
 
-    case "timeline_sample":
-      if (value)
-        showTimeLineSample();
-      else
-        hideTimeLineSample();
-      break;
-    }
-  }
+		case "table_sample2":
+			if (value)
+				showTableSample2();
+			else
+				hideTableSample2();
+			break;
+
+		case "dragdrop_sample":
+			if (value)
+				showDragDropSample();
+			else
+				hideDragDropSample();
+			break;
+
+		case "spiral_sample":
+			if (value)
+				showSpiralSample();
+			else
+				hideSpiralSample();
+			break;
+
+		case "timeline_sample":
+			if (value)
+				showTimeLineSample();
+			else
+				hideTimeLineSample();
+			break;
+		}
+	}
 }
 
 global.launcher = new SampleLauncher();

@@ -20,9 +20,13 @@ class KFrameLayout extends KLayout
 	var _type;
 	var _label;
 	var _helpText = "";
+	var _checkable;
+	var _checked = true;
 	var labelBounds;
 	var helpBounds;
-
+	var checkBounds;
+	var checkButtonPress = false;
+	
 	/**------------------------------
 	 * コンストラクタ
 	 *
@@ -42,11 +46,26 @@ class KFrameLayout extends KLayout
 		_type = getOption("type", void);
 		_label = getOption("label", "");
 		_helpText = getOption("helpText", "");
+		_checkable = getOption("checkable", false);
+		_checked = getOption("cheecked", true);
+		focusable = getOption("focusable", window.defaultFocusable);
 		overwriteStyle(%[ frameType: _type ]);
+		addCustomStyleState("checkOn");
 	}
 
 	function onExtractWidgetStyle(widgetStyle) {
 		widgetStyle.textAlign = getStyleProperty("textAlign", ALIGN_CENTER);
+		widgetStyle.checkIcon = getStyleProperty("checkIcon", "");
+	}
+
+	function onUnserialize(dict, key) {
+		if (_checkable)
+			checked = dict.init(key + "_checked", true);
+	}
+
+	function onSerialize(dict, key) {
+		if (_checkable)
+			dict.set(key + "_checked", checked);
 	}
 
 	/**------------------------------
@@ -104,6 +123,41 @@ class KFrameLayout extends KLayout
 		}
 	}
 
+	/*------------------------------
+	 * チェック
+	 ------------------------------*/
+	property checked {
+		getter {
+			return _checked;
+		}
+		setter(v) {
+			if (_checked == v)
+				return;
+			_checked = v;
+			if (child !== void)
+				child.enabled = v;
+			invalidateCustomStates();
+		}
+	}
+
+	function invalidateCustomStates() {
+		var checkState = (focused ? "focusC" : "c") + (checked ? "heckOn" : "heckOff");
+		updateCustomStyleStates([ checkState ]);
+	}
+
+	/*------------------------------
+	 * フォーカス
+	 ------------------------------*/
+	function onFocus {
+		super.onFocus();
+		invalidateCustomStates();
+	}
+
+	function onBlur {
+		super.onBlur();
+		invalidateCustomStates();
+	}
+
 	/**------------------------------
 	 * 子ウィジェットを配置する
 	 *
@@ -112,6 +166,7 @@ class KFrameLayout extends KLayout
 	function add(child) {
 		this.child = child;
 		child.parent = this;
+		child.enabled = _checked;
 		redrawContents();
 	}
 
@@ -168,19 +223,32 @@ class KFrameLayout extends KLayout
 
 		if (label != "") {
 			applyFontStyle(font, fontStyle);
-			var lx = fontStyle.fontHeight / 2;
+			var lx = fontStyle.fontHeight;
 			var ly = 0;
-			var lw = width - fontStyle.fontHeight;
+			var lw = width - fontStyle.fontHeight * 2;
+			if (_checkable) {
+				var checkIcon = findIcon(widgetStyle.checkIcon);
+				lw -= checkIcon.width + spaceHorizontal;
+				lx += checkIcon.width + spaceHorizontal;
+			}
 			if (helpText != "")
-				lw -= findIcon("k_help").width;
+				lw -= findIcon("k_help").width + spaceHorizontal;
 			var result = drawUITextInRange(fontStyle,
-										   fontStyle.fontHeight / 2, 0, lw,
+										   lx, 0, lw,
 										   label, widgetStyle.textAlign, true);
 			if (! result.inRange)
 				labelBounds = new KRect(result.x, result.y, result.w, fontStyle.fontHeight);
+			if (_checkable) {
+				var checkIcon = findIcon(widgetStyle.checkIcon);
+				var cx = int(result.x - checkIcon.width - spaceHorizontal);
+				var cy = int(result.y + (fontStyle.fontHeight - checkIcon.height) / 2);
+				operateRect(cx, cy, checkIcon, 0, 0, checkIcon.width, checkIcon.height, omAuto, appearanceStyle.opacity);
+				checkBounds = new KRect(cx, cy, checkIcon.width, checkIcon.height);
+				checkBounds.unionWith(new KRect(result.x, result.y, result.w, fontStyle.fontHeight));
+			}
 			if (helpText != "") {
 				var helpIcon = findIcon("k_help");
-				var hx = int(result.x + result.w);
+				var hx = int(result.x + result.w + spaceHorizontal);
 				var hy = int(result.y + (fontStyle.fontHeight - helpIcon.height) / 2);
 				operateRect(hx, hy, helpIcon, 0, 0, helpIcon.width, helpIcon.height, omAuto, appearanceStyle.opacity);
 				helpBounds = new KRect(hx, hy, helpIcon.width, helpIcon.height);
@@ -205,5 +273,31 @@ class KFrameLayout extends KLayout
 			hint = helpText;
 		else
 			hint = "";
+	}
+
+	function onMouseDown(x, y) {
+		super.onMouseDown(...);
+		if (_checkable
+			&& checkBounds.contains(x, y))	{
+			focus();
+			checkButtonPress = true;
+		}
+	}
+
+	function onMouseUp(x, y) {
+		super.onMouseUp(...);
+		if (checkButtonPress) {
+			checkButtonPress = false;
+			if (checkBounds.contains(x, y))
+				checked = ! checked;
+		}
+	}
+
+	function onKeyDown(key, shift) {
+		if (key == VK_SPACE || key == VK_RETURN) {
+			checked = ! checked;
+		} else {
+			super.onKeyDown(...);
+		}
 	}
 }

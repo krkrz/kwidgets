@@ -41,7 +41,7 @@ class KPrimaryWidget extends KLayout
 		// プリミティブアイコンビルダ
 		primitiveIconBuilder = new KPrimitiveIconBuilder(window);
 		// ウィンドウにはアタッチ済み
-		_isAttachedToWindow = true;
+		attachToWindow();
 	}
 
 	//------------------------------
@@ -117,19 +117,15 @@ class KPrimaryWidget extends KLayout
 	function onCalculateLayout {
 		if (child === void)
 			return;
-		setMinMaxSize(child.minWidth + child.marginHorizontal,
-					  child.minHeight + child.marginVertical,
-					  child.maxWidth + child.marginHorizontal,
-					  child.maxHeight + child.marginVertical);
+		setMinMaxSize(borderPaddingWidth + child.minWidth + child.marginHorizontal,
+					  borderPaddingHeight + child.minHeight + child.marginVertical,
+					  borderPaddingWidth + child.maxWidth + child.marginHorizontal,
+					  borderPaddingHeight + child.maxHeight + child.marginVertical);
 	}
 
 	function onLocateLayout() {
 		if (child === void)
 			return;
-		fillRect(0, 0, width, height, borderStyle.backgroundColor);
-		child.setPos(child.marginLeft, child.marginRight);
-		child.setSize(width - child.marginHorizontal,
-					  height - child.marginVertical);
+		embedChild(0, 0, width, height, child, true);
 	}
-
 };

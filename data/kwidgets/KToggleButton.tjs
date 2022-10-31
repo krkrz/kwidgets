@@ -65,7 +65,8 @@ class KToggleButton extends KValueEntity
 		// ラベルサイズを計算
 		onCalcLabelSize();
 
-		var minW = borderPaddingWidth + labelWidth, minH = borderPaddingHeight + labelHeight;
+		var minW = widgetStyle.width ? widgetStyle.width : getOption("width", borderPaddingWidth + labelWidth);
+		var minH = widgetStyle.height ? widgetStyle.height : getOption("height", borderPaddingHeight + labelHeight);
 
 		if (! widgetStyle.isVariableWidth) 
 			setFixedSize(minW, minH);
@@ -134,6 +135,8 @@ class KToggleButton extends KValueEntity
 	// ウィジェットスタイル展開
 	function onExtractWidgetStyle(widgetStyle) {
 		widgetStyle.isVariableWidth = getStyleProperty("isVariableWidth", false);
+		widgetStyle.width = getStyleProperty("width");
+		widgetStyle.height = getStyleProperty("height");
 		_onExtractWidgetStyle(widgetStyle);
 	}
 }

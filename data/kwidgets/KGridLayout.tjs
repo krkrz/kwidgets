@@ -130,7 +130,7 @@ class KGridLayout extends KLayout
 					continue;
 				var revItem, colspan, rowspan;
 				revItem = revItems[child], colspan = revItem[2], rowspan = revItem[3];
-				var cb = getChildBounds(child);
+				var cb = getChildBoundsWithoutPadding(child);
 				if (colspan == 1) {
 					minWidthForColumn[x] = Math.max(minWidthForColumn[x], cb.minWidth);
 					maxWidthForColumn[x] = Math.max(maxWidthForColumn[x], cb.maxWidth);
@@ -149,7 +149,7 @@ class KGridLayout extends KLayout
 				var revItem, colspan, rowspan;
 				revItem = revItems[child], colspan = revItem[2], rowspan = revItem[3];
 				if (colspan > 1) {
-					var cb = getChildBounds(child);
+					var cb = getChildBoundsWithoutPadding(child);
 					var minW, maxW, w;
 					minW = Math.max(0, cb.minWidth - spaceHorizontal * (colspan - 1));
 					w = 0; for (var i = 0; i < colspan; i++) w += minWidthForColumn[x + i];
@@ -159,7 +159,7 @@ class KGridLayout extends KLayout
 					if (w < maxW) for (var i = 0; i < colspan; i++) maxWidthForColumn[x + i] += int((maxW - w) * (i + 1) / colspan) - int((maxW - w) * i / colspan);
 				}
 				if (rowspan > 1) {
-					var cb = getChildBounds(child);
+					var cb = getChildBoundsWithoutPadding(child);
 					var minH, maxH, h;
 					minH = Math.max(0, cb.minHeight - spaceVertical * (rowspan - 1));
 					h = 0; for (var i = 0; i < rowspan; i++) h += minHeightForRow[y + i];
@@ -173,13 +173,13 @@ class KGridLayout extends KLayout
 		// グリッド全体の最大・最小サイズを決定する
 		var minW, minH, maxW, maxH;
 
-		minW = maxW = spaceHorizontal * (xcount - 1);
+		minW = maxW = spaceHorizontal * (xcount - 1) + layoutStyle.paddingLeft + layoutStyle.paddingRight;
 		for (var x = 0; x < xcount; x++) {
 			minW += minWidthForColumn[x];
 			maxW += maxWidthForColumn[x];
 		}
 
-		minH = maxH = spaceVertical * (ycount - 1);
+		minH = maxH = spaceVertical * (ycount - 1) + layoutStyle.paddingTop + layoutStyle.paddingBottom;
 		for (var y = 0; y < ycount; y++) {
 			minH += minHeightForRow[y];
 			maxH += maxHeightForRow[y];
@@ -231,7 +231,7 @@ class KGridLayout extends KLayout
 		}
 
 		var xpos, ypos;
-		xpos = 0;
+		xpos = layoutStyle.paddingLeft;
 
 		var d = 0;
 		for (var i = 0; i < widthForColumn.count; i++) {
@@ -246,7 +246,7 @@ class KGridLayout extends KLayout
 		}
 
 		for (var x = 0; x < xcount; x++) {
-			ypos = 0;
+			ypos = layoutStyle.paddingTop;
 			for (var y = 0; y < ycount; y++) {
 				var child = childAt(x, y);
 				if (child) {
@@ -259,7 +259,7 @@ class KGridLayout extends KLayout
 						w += widthForColumn[x + i];
 					for (var i = 0; i < rowspan; i++)
 						h += heightForRow[y + i];
-					embedChild(xpos, ypos, w, h, child);
+					embedChildWithoutPadding(xpos, ypos, w, h, child);
 				}
 				ypos += heightForRow[y] + spaceVertical;
 			}

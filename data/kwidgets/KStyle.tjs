@@ -128,7 +128,12 @@ class KStyleRepository
 	}
 
 	function findTheme(themeName) {
-		if (themeName != ""
+		if (themeName instanceof "Array") {
+			var result = %[];
+			for (var i = 0; i < themeName.count; i++) 
+				result = unionDictionary(result, findTheme(themeName[i]), true);
+			return result;
+		} else if (themeName != ""
 			&& typeof(themeMap[themeName]) != K_UNDEFINED)
 			return themeMap[themeName];
 		else

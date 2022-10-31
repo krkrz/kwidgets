@@ -31,17 +31,17 @@ class KCustomDialog extends KWindow
   function KCustomDialog(owner, dict, def) {
     this.def = def;
     this.owner = owner;
-    super.KWindow(getValue(def, "name", "k_simple_dialog"));
+      super.KWindow(%[ name: getValue(def, "name", "k_simple_dialog"), theme: "dialog", style: %[ isClass:  %[ KTextLabel: %[ alignVertical: ALIGN_CENTER ] ] ] ]);
 
     caption = getValue(def, "caption", "Simple Dialog");
     borderStyle = bsDialog;
 
     defaultFocusable = true;
-    defaultAlignHorizontal = ALIGN_LEFT;
+ //   defaultAlignHorizontal = ALIGN_LEFT;
 
-    primaryLayer.add(new KGridLayout(this, "rootGrid"));
-    rootGrid.margin = 5;
-    rootGrid.space = 5;
+      primaryLayer.add(new KGridLayout(this, %[ name: "rootGrid", id: "widget_grid" ]));
+//    rootGrid.margin = 5;
+//    rootGrid.space = 5;
 
     widgetDefList = getValue(def, "widgetList", []);
     widgetList = [];
@@ -62,9 +62,9 @@ class KCustomDialog extends KWindow
         rootGrid.add(0, y++, widget, 2);
         break;
       case DIALOG_WIDGET_TYPE_TEXTINPUT:
-        label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
-        widget = new KTextInput(this, 120, 20, getValue(widgetDef, "textType", TEXT_ANY), widgetName);
-        switch (widget.type) {
+          label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
+          widget = new KTextInput(this, %[ width: 120, type: getValue(widgetDef, "textType", TEXT_ANY), name: widgetName ]);
+          switch (widget.type) {
         default: 
           widget.value = getValue(widgetDef, "defaultValue", "");
           break;
@@ -84,17 +84,17 @@ class KCustomDialog extends KWindow
       }
       case DIALOG_WIDGET_TYPE_TEXTAREA: {
         label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
-        var frame = new KFrameLayout(this, FRAME_FLATTEN);
-        var scroll = new KScrollLayout(this, false, true);
+//        var frame = new KFrameLayout(this, FRAME_FLATTEN);
+          var scroll = new KScrollLayout(this, %[ horizontal: false, vertical: true, id: "focusable_frame" ]);
         var textarea = new KTextEdit(this, widgetName);
-        frame.add(scroll);
+//        frame.add(scroll);
         scroll.setMarginalFixedSize(getValue(widgetDef, "marginalWidth", 100), getValue(widgetDef, "marginalHeight",60));
         scroll.add(textarea);
         textarea._marginalHeight = 100;
         widget = textarea;
         widget.value = getValue(widgetDef, "defaultValue", "");
         rootGrid.add(0, y, label);
-        rootGrid.add(1, y, frame);
+        rootGrid.add(1, y, scroll);
         y++;
         break;
       }
@@ -115,7 +115,7 @@ class KCustomDialog extends KWindow
       }      
       case DIALOG_WIDGET_TYPE_DROPDOWNLIST:
         label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
-        widget = new KComboBox(this, 150, 20, COMBO_STYLE_DROPDOWNLIST, widgetName);
+          widget = new KComboBox(this, %[ width: 150, type: COMBO_STYLE_DROPDOWNLIST, name: widgetName ]);
         var items = getValue(widgetDef, "listItems", []);
         for (var j = 0; j < items.count; j++) {
           var item = items[j];
@@ -143,13 +143,13 @@ class KCustomDialog extends KWindow
     response = getValue(def, "response", DIALOG_RESPONSE_OK | DIALOG_RESPONSE_CANCEL);
 
     defaultAlignHorizontal = ALIGN_CENTER;
-    rootGrid.add(0, y, new KGridLayout(this, "buttonGrid"), 2);
-    buttonGrid.marign = 20;
-    buttonGrid.space = 10;
+      rootGrid.add(0, y, new KGridLayout(this, %[ name: "buttonGrid", id: "button_grid" ]), 2);
+//    buttonGrid.marign = 20;
+//    buttonGrid.space = 10;
 
     var x = 0;
     if (response & DIALOG_RESPONSE_OK) 
-      buttonGrid.add(x++, 0, new KTextButton(this, "OK", "okButton"));
+		buttonGrid.add(x++, 0, new KTextButton(this, %[ label: "OK", name: "okButton", id: "primary_button" ]));
     if (response & DIALOG_RESPONSE_CANCEL) 
       buttonGrid.add(x++, 0, new KTextButton(this, "キャンセル", "cancelButton"));
     invalidateLayout();

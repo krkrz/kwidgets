@@ -29,7 +29,7 @@ class KWindow extends Window
 	var defaultAlignVertical;
 	var defaultAlignHorizontal;
 	/// デフォルトのフォーカス能
-	var defaultFocusable;
+	var _defaultFocusable;
 	/// 名前
 	var name;
 	/// 辞書
@@ -64,7 +64,10 @@ class KWindow extends Window
 	var _classStyleKeys = [];
 	var _classWeakStyleKeys = [];
 	var _theme = "";
-
+	var windowStyle = %[];
+	var _id = "";
+	var _styleChain;
+	
 	/**------------------------------
 	 * コンストラクタ
 	 *
@@ -107,10 +110,13 @@ class KWindow extends Window
 
 		// 名前
 		this.name = getOption("name", "");
+		_id = getOption("id", "");
 		_theme = getOption("theme", "");
 		_styleArch = styleRepository.normalizeStyle(getOption("style", %[]));
 		updateTheme();
 		updateStyleKeys();
+		updateStyleChain();
+		updateWindowStyles();
 
 		caption = getOption("caption", caption);
 		borderStyle = getOption("borderStyle", borderStyle);
@@ -135,7 +141,7 @@ class KWindow extends Window
 		defaultSpaceVertical = global.defaultSpaceVertical;
 		defaultAlignHorizontal = global.defaultAlignHorizontal;
 		defaultAlignVertical = global.defaultAlignVertical;
-		defaultFocusable = global.defaultFocusable;
+		_defaultFocusable = global.defaultFocusable;
 
 		// windowExプラグインのイベントを有効にする
 		registerExEvent();
@@ -279,6 +285,18 @@ class KWindow extends Window
 		}
 	}
 
+	property defaultFocusable {
+		getter {
+			if (windowStyle.defaultFocusable !== void)
+				return windowStyle.defaultFocusable;
+			else
+				return _defaultFocusable;
+		}
+		setter(v) {
+			_defaultFocusable = v;
+		}
+	}
+
 	/**------------------------------
 	 * ウィジェットオプションを取得
 	 ------------------------------*/
@@ -304,10 +322,14 @@ class KWindow extends Window
 	 ------------------------------*/
 	function overwriteStyle(newStyle) {
 		(Dictionary.assign incontextof _style)(newStyle, false) ;
-		if (! isStyleHasInheritAttributes)
+		if (! isStyleHasInheritAttributes) {
 			invalidateStyles();
-		else {
+			updateStyleChain();
+			updateWindowStyles();
+		} else {
 			updateStyleKeys();
+			updateStyleChain();
+			updateWindowStyles();
 			invalidateStylesToDescendants();
 		}
 	}
@@ -333,6 +355,60 @@ class KWindow extends Window
 			_classWeakStyleKeys = dictionaryKeys(_style.isClassWeak);
 	}
 
+	function updateStyleChain() {
+		_styleChain = extractStyleChain();
+	}
+
+	function extractStyleChain(includeSelf = false, classes = classTrees) {
+		var result =  [ _style ];
+
+		var list;
+		list = [ styleRepository ];
+
+		if (includeSelf)
+			list.insert(0, this);
+
+		var idInsertionIndex, classInsertionIndex, classWeakInsertionIndex;
+		idInsertionIndex = classInsertionIndex = classWeakInsertionIndex = result.count;
+
+		for (var i = 0; i < list.count; i++) {
+			var widget = list[i];
+			if (widget._idStyleKeys.find(_id) >= 0) {
+				result.insert(idInsertionIndex, widget._style.isId[_id]);
+				idInsertionIndex++;
+				classInsertionIndex++;
+				classWeakInsertionIndex++;
+			}
+			if (intersectionSet(widget._classStyleKeys, classes).count > 0)
+				for (var j = 0; j < classes.count; j++) {
+					var klass = classes[j];
+					if (typeof(widget._style.isClass[klass]) != K_UNDEFINED) {
+						result.insert(classInsertionIndex, widget._style.isClass[klass]);
+						classInsertionIndex++;
+						classWeakInsertionIndex++;
+					}
+				}
+			if (intersectionSet(widget._classWeakStyleKeys, classes).count > 0)
+				for (var j = 0; j < classes.count; j++) {
+					var klass = classes[j];
+					if (typeof(widget._style.isClassWeak[klass]) != K_UNDEFINED) {
+						result.insert(classWeakInsertionIndex, widget._style.isClassWeak[klass]);
+						classWeakInsertionIndex++;
+					}
+				}
+		}
+		return result;
+	}
+
+	function getStyleProperty(key, defaultValue = void) {
+		return styleRepository.getPropertyFromStyleChain(_styleChain, [], key, defaultValue);
+	}
+
+	function updateWindowStyles() {
+		windowStyle = %[];
+		windowStyle.defaultFocusable = getStyleProperty("defaultFocusable", void);
+	}
+
 	function invalidateStyles() {
 	}
 
@@ -340,6 +416,8 @@ class KWindow extends Window
 		if (fullUpdate) {
 			updateTheme();
 			updateStyleKeys();
+			updateStyleChain();
+			updateWindowStyles();
 			primaryWidget.clearIconCache();
 		}
 		primaryWidget.invalidateStylesToDescendants(fullUpdate);
@@ -526,6 +604,9 @@ class KWindow extends Window
 	 * @param oldValue 変更前の値
 	 ------------------------------*/
 	function onChildValueModified(child, newValue, oldValue) {
+	}
+
+	function onChildLocateStyleModified() {
 	}
 
 	/**----------------------------------------------------------------------

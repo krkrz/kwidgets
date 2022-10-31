@@ -9,6 +9,8 @@ class KPrimitiveIconBuilder
 	var circlePat =     /^\$circle\((\d+),#([0-9a-fA-F]{6})\)$/;
 	var elippsePat =    /^\$elippse\((\d+),(\d+),#([0-9a-fA-F]{6})\)$/;
 	var compositePat =  /^\$composite\((.+)\)$/;
+	var borderPat =     /^\$border\((\d+),(\d+),#([0-9a-fA-F]{6}),(none|solid|double|dashed|groove|ridge|inset|outset),#([0-9a-fA-F]{6}),(\d+),(\d+)\)$/;
+	var imagePat =      /^\$image\((.+)\)$/;
 	var multipleArgsPat = /^(\$.+?\))((,\$.+?\))*)$/;
 	var primitiveMap = %[];
 	var definitions;
@@ -24,7 +26,9 @@ class KPrimitiveIconBuilder
 				%[ pat: trianglePat,    func: drawTriangleIcon   ],
 				%[ pat: eqtrianglePat,  func: drawEqtriangleIcon ],
 				%[ pat: circlePat,      func: drawCircleIcon     ],
-				%[ pat: elippsePat,     func: drawElippseIcon    ]
+				%[ pat: elippsePat,     func: drawElippseIcon    ],
+				%[ pat: borderPat,      func: drawBorderIcon     ],
+				%[ pat: imagePat,       func: drawImageIcon      ]
 		];
 	}
 
@@ -226,5 +230,35 @@ class KPrimitiveIconBuilder
 							  iconLayer, 0, 0, iconLayer.width, iconLayer.height);
 			invalidate iconLayer;
 		}
+	}
+
+	function drawBorderIcon(layer, name) {
+		var matches = borderPat.exec(name);
+		var width = +matches[1];
+		var height = +matches[2];
+		var backgroundColor = 0xff000000 | +("0x" + matches[3]);
+		var borderStyle = Scripts.eval("BORDER_STYLE_" + matches[4].toUpperCase());
+		var borderColor = 0xff000000 | +("0x" + matches[5]);
+		var borderWidth = +matches[6];
+		var borderRadius = +matches[7];
+		var style = %[ backgroundColor: backgroundColor,
+					   borderStyle: borderStyle,
+					   borderWidth: borderWidth,
+					   borderColor: borderColor,
+					   borderRadius: borderRadius ];
+		var widget = new KWidget(window, %[ style: style ]);
+		widget.setFixedSize(width, height);
+		widget.fillRect(0, 0, width, height, 0);
+		widget.drawBorder(widget.borderStyle, 0, 0, width, height);
+		layer.setSize(width, height);
+		layer.copyRect(0, 0, widget, 0, 0, width, height);
+		invalidate widget;
+	}
+
+	function drawImageIcon(layer, name) {
+		var matches = imagePat.exec(name);
+		var filename = matches[1];
+		layer.loadImages(filename);
+		layer.setSizeToImageSize();
 	}
 }
