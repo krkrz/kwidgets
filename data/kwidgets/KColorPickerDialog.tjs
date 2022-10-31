@@ -319,7 +319,7 @@ class KColorPickerDialog extends KWindow
 		colorGrid.add(0, 0, new KColorPickerColorBox(this, 64, 32, "newColor"));
 		colorGrid.add(0, 1, new KColorPickerColorBox(this, 64, 32, "oldColor"));
  
-		rootGrid.add(1, 1, new KGridLayout(this, %[ name: "paramGrid", id: "widget_grid" ]));
+		rootGrid.add(1, 1, new KGridLayout(this, %[ name: "paramGrid", id: "widget_grid_narrow" ]));
 		defaultAlignVertical = ALIGN_CENTER;
 		paramGrid.add(0, 0, new KRadioButton(this, %[ label: "H:", name: "hSelect" ]));
 		paramGrid.add(1, 0, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "hInput" ]));

@@ -33,7 +33,7 @@
 					],
 
 					"KPrimaryWidget" => %[
-						padding: 12,
+						padding: 16,
 					],
 				],
 				isId: %[
@@ -44,11 +44,17 @@
 						],
 					],
 					"widget_grid" => %[
-						space: 6,
+						space: 12,
+					],
+					"widget_grid_narrow" => %[
+						space: 8,
 					],
 					"button_grid" => %[
-						padding: 8,
-						space: 8,
+						padding: 12,
+						space: 12,
+					],
+					"group_frame" => %[
+						padding: 12,
 					],
 					"focusable_frame" => %[
 						borderStyle: BORDER_STYLE_SOLID,
@@ -543,7 +549,7 @@
 
 		%[ klass: "KTabLayout",
 		   style: %[ tabId: "tab",
-					 padding: 2 ]
+					 padding: 12 ]
 		 ],
 
 		%[ klass: "KTab",

@@ -96,7 +96,16 @@ class WidgetSample extends KWindow
 {
 	// コンストラクタ
 	function WidgetSample() {
-		super.KWindow(%[ name: "widgetsample_window" ]);
+		super.KWindow(%[ name: "widgetsample_window",
+						 theme: "dialog",
+						 style: %[
+							 isClass: %[
+								 KWidget: %[
+									 align: ALIGN_CENTER
+								 ]
+							 ]
+						 ]
+					   ]);
 
 		// ウィンドウ初期設定
 		caption = 'ウィジェットサンプル';
@@ -107,11 +116,11 @@ class WidgetSample extends KWindow
 //		alwaysSetToMinSize = true;
 
 		// ウィンドウ内のウィジェットの初期値を設定
-		defaultSpace = 4;
-		defaultMargin = 6;
-		defaultAlignHorizontal = ALIGN_CENTER;
-		defaultAlignVertical = ALIGN_CENTER;
-		defaultFocusable = true;
+//		defaultSpace = 4;
+//		defaultMargin = 6;
+//		defaultAlignHorizontal = ALIGN_CENTER;
+//		defaultAlignVertical = ALIGN_CENTER;
+//		defaultFocusable = true;
 
 		// メニューを作成、配置
 		menu.addItem("メニュー", "menuTop");
@@ -167,15 +176,15 @@ class WidgetSample extends KWindow
 //		tabs = new KTabLayout(this, FRAME_RAISED, "tabs");
 
 		// ボタンのサンプル
-		tabGrid = new KGridLayout(this);
-		widgetFrame = new KFrameLayout(this, %[ label: "ノーマルボタン", name: "normalButtonFrame" ]);
-		widgetGrid = new KGridLayout(this);
+		tabGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
+		widgetFrame = new KFrameLayout(this, %[ label: "ノーマルボタン", name: "normalButtonFrame", id: "group_frame" ]);
+		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextButton(this, "ボタン", "textbutton"));
 		widgetGrid.add(1, 0, new KImageButton(this, "gotta_mail", "imagebutton"));
 		widgetFrame.add(widgetGrid);
 		tabGrid.add(0, 0, widgetFrame);
-		widgetFrame = new KFrameLayout(this, %[ label: "トグルボタン" ]);
-		widgetGrid = new KGridLayout(this);
+		widgetFrame = new KFrameLayout(this, %[ label: "トグルボタン", id: "group_frame" ]);
+		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextToggleButton(this, "ボタン", "texttogglebutton"));
 		widgetGrid.add(1, 0, new KImageToggleButton(this, "gotta_mail", "imagetogglebutton"));
 		widgetFrame.add(widgetGrid);
@@ -184,17 +193,17 @@ class WidgetSample extends KWindow
 		tabs.add("ボタン", tabGrid);
 
 		// ラジオボタンのサンプル
-		tabGrid = new KGridLayout(this);
-		widgetFrame = new KFrameLayout(this, %[ label: "ラジオボタン" ]);
-		widgetGrid = new KRadioLayout(this, %[ name: "radio1", value: 3]);
+		tabGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
+		widgetFrame = new KFrameLayout(this, %[ label: "ラジオボタン", id: "group_frame" ]);
+		widgetGrid = new KRadioLayout(this, %[ name: "radio1", value: 3, id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KRadioButton(this, %[ label: "項目1", choice: 1 ]));
 		widgetGrid.add(1, 0, new KRadioButton(this, %[ label: "項目2", choice: 2 ]));
 		widgetGrid.add(0, 1, new KRadioButton(this, %[ label: "項目3", choice: 3 ]));
 		widgetGrid.add(1, 1, new KRadioButton(this, %[ label: "項目4", choice: 4 ]));
 		widgetFrame.add(widgetGrid);
 		tabGrid.add(0, 0, widgetFrame);
-		widgetFrame = new KFrameLayout(this, %[ label: "異種混合" ]);
-		widgetGrid = new KRadioLayout(this, "radio2");
+		widgetFrame = new KFrameLayout(this, %[ label: "異種混合", id: "group_frame" ]);
+		widgetGrid = new KRadioLayout(this, %[ name: "radio2", id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KRadioButton(this, %[ label: "項目1", choice: 1 ]));
 		widgetGrid.add(1, 0, new KCheckBox(this, %[ label: "項目2", choice: 2 ]));
 		widgetGrid.add(0, 1, new KTextToggleButton(this, %[ label: "項目3", choice: 3 ]));
@@ -205,9 +214,9 @@ class WidgetSample extends KWindow
 		tabs.add("ラジオボタン", tabGrid);
 
 		// スライダーのサンプル
-		tabGrid = new KGridLayout(this);
-		widgetFrame = new KFrameLayout(this, %[ label: "スライダー" ]);
-		widgetGrid = new KGridLayout(this);
+		tabGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
+		widgetFrame = new KFrameLayout(this, %[ label: "スライダー", id: "group_frame" ]);
+		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextLabel(this, "0〜100"));
 		widgetGrid.add(1, 0, new KSlider(this, SLIDER_ADAPTIVE_WIDTH, 20, 0, 100, 1, "slider1"));
 		widgetGrid.add(0, 1, new KTextLabel(this, "-1000〜1000"));
@@ -216,8 +225,8 @@ class WidgetSample extends KWindow
 		widgetGrid.add(1, 2, new KSlider(this, 200, 20, 24, 34, 1, "slider3"));
 		widgetFrame.add(widgetGrid);
 		tabGrid.add(0, 0, widgetFrame);
-		widgetFrame = new KFrameLayout(this, %[ label: "テキストスライダー" ]);
-		widgetGrid = new KGridLayout(this);
+		widgetFrame = new KFrameLayout(this, %[ label: "テキストスライダー", id: "group_frame" ]);
+		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextLabel(this, "0〜10(0.1刻み)"));
 		widgetGrid.add(1, 0, new KTextInputSlider(this, SLIDER_ADAPTIVE_WIDTH, 22, 0, 10, 0.1, "textinputslider"));
 		widgetFrame.add(widgetGrid);
@@ -226,9 +235,9 @@ class WidgetSample extends KWindow
 		tabs.add("スライダー", tabGrid);
 
 		// コンボボックスのサンプル
-		tabGrid = new KGridLayout(this);
-		widgetFrame = new KFrameLayout(this, %[ label: "コンボボックス" ]);
-		widgetGrid = new KGridLayout(this);
+		tabGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
+		widgetFrame = new KFrameLayout(this, %[ label: "コンボボックス", id: "group_frame" ]);
+		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KComboBox(this, %[ width: 200, type: COMBO_STYLE_DROPDOWN, name: "combobox1" ]));
 		widgetGrid.add(0, 1, new KComboBox(this, %[ width: 200, type: COMBO_STYLE_DROPDOWNLIST, name: "combobox2" ]));
 		widgetFrame.add(widgetGrid);
@@ -237,23 +246,23 @@ class WidgetSample extends KWindow
 		tabs.add("コンボボックス", tabGrid);
 
 		// テキスト入力のサンプル
-		tabGrid = new KGridLayout(this);
-		widgetFrame = new KFrameLayout(this, %[ label: "テキストインプット" ]);
-		widgetGrid = new KGridLayout(this);
+		tabGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
+		widgetFrame = new KFrameLayout(this, %[ label: "テキストインプット", id: "group_frame" ]);
+		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextLabel(this, "英数字のみ"));
 		widgetGrid.add(1, 0, new KTextInput(this, %[ width: 100, type: TEXT_SYMBOL, name: "textinput1" ]));
 		widgetGrid.add(0, 1, new KTextLabel(this, "整数のみ"));
 		widgetGrid.add(1, 1, new KTextInput(this, %[ width: 100, type: TEXT_DIGIT, name: "textinput2" ]));
-		widgetGrid.add(0, 3, new KTextLabel(this, "少数のみ"));
-		widgetGrid.add(1, 3, new KTextInput(this, %[ width: 100, type: TEXT_REAL, name: "textinput3" ]));
-		widgetGrid.add(0, 4, new KTextLabel(this, "なんでも"));
-		widgetGrid.add(1, 4, new KTextInput(this, %[ width: 100, type: TEXT_ANY, name: "textinput4" ]));
+		widgetGrid.add(0, 2, new KTextLabel(this, "少数のみ"));
+		widgetGrid.add(1, 2, new KTextInput(this, %[ width: 100, type: TEXT_REAL, name: "textinput3" ]));
+		widgetGrid.add(0, 3, new KTextLabel(this, "なんでも"));
+		widgetGrid.add(1, 3, new KTextInput(this, %[ width: 100, type: TEXT_ANY, name: "textinput4" ]));
 		widgetFrame.add(widgetGrid);
 		tabGrid.add(0, 0, widgetFrame, 2);
-		widgetFrame = new KFrameLayout(this, %[ label: "テキストエディット" ]);
-		widgetGrid = new KGridLayout(this);
+		widgetFrame = new KFrameLayout(this, %[ label: "テキストエディット", id: "group_frame" ]);
+		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.margin = 0;
-		var radioGrid = new KRadioLayout(this, "textedit_keybind");
+		var radioGrid = new KRadioLayout(this, %[ name: "textedit_keybind", id: "widget_grid" ]);
 		radioGrid.add(0, 0, new KCheckBox(this, "WINバインド", "windows_bind"));
 		radioGrid.add(1, 0, new KCheckBox(this, "emacsバインド", "emacs_bind"));
 		radioGrid.onValueModified = function(value) {
@@ -263,14 +272,14 @@ class WidgetSample extends KWindow
 			}
 		} incontextof(radioGrid);
 		widgetGrid.add(0, 0, radioGrid);
-		scroll = new KScrollLayout(this, false, true, "textscroll");
+		scroll = new KScrollLayout(this, %[ horizontal: false, vertical: true, name: "textscroll", id: "focusable_frame" ]);
 		scroll.add(new TagTextEdit(this, %[ name: "textedit" ]));
 		scroll.textedit.margin = 0;
 		widgetGrid.add(0, 1, scroll);
 		widgetFrame.add(widgetGrid);
 		tabGrid.add(0, 1, widgetFrame);
-		widgetFrame = new KFrameLayout(this, %[ label: "テキストボード" ]);
-		scroll = new KScrollLayout(this, true, true);
+		widgetFrame = new KFrameLayout(this, %[ label: "テキストボード", id: "group_frame" ]);
+		scroll = new KScrollLayout(this, %[ horizontal: true, vertical: true, id: "focusable_frame" ]);
 		scroll.add(new KTextBoard(this, "textboard"));
 		scroll.textboard.margin = 0;
 		widgetFrame.add(scroll);
@@ -279,13 +288,24 @@ class WidgetSample extends KWindow
 		tabs.add("テキスト", tabGrid);
 
 		// カラーボックスのサンプル
-		tabGrid = new KGridLayout(this);
-		widgetFrame = new KFrameLayout(this, %[ label: "カラー(α無し)" ]);
-		colorGrid = new KGridLayout(this);
-		colorGrid.space = 5;
+		tabGrid = new KGridLayout(this, %[ id: "widget_grid",
+										   style: %[
+											   isClass: %[
+												   KColorBox: %[
+													   borderWidth: 1,
+													   borderColor: 0xffacacac,
+													   borderStyle: BORDER_STYLE_SOLID,
+													   borderRadius: 3,
+													   padding: 1,
+												   ],
+											   ]
+										   ]
+										 ]);
+		widgetFrame = new KFrameLayout(this, %[ label: "カラー(α無し)", id: "group_frame" ]);
+		colorGrid = new KGridLayout(this, %[ style: %[ space: 5 ] ]);
 		for (var y = 0; y < 5; y++)
 			for (var x = 0; x < 10; x++) {
-				var colorBox = new KColorBox(this, %[ width: 20, height: 20, name: "color" + x + y, style: %[borderWidth: 1, borderColor: 0xffacacac, borderStyle: BORDER_STYLE_SOLID, borderRadius: 3, padding: 1] ]);
+				var colorBox = new KColorBox(this, %[ width: 20, height: 20, name: "color" + x + y ]);
 				var rgb = Layer.HSV2RGB(x * 360 / 10, y * 100 / 4, 100);
 				colorBox.value = (rgb.r << 16) | (rgb.g << 8) | (rgb.b);
 				colorBox.margin = 0;
@@ -293,12 +313,11 @@ class WidgetSample extends KWindow
 			}
 		widgetFrame.add(colorGrid);
 		tabGrid.add(0, 0, widgetFrame);
-		widgetFrame = new KFrameLayout(this, %[ label: "カラー(α有り)" ]);
-		colorGrid = new KGridLayout(this);
-		colorGrid.space = 5;
+		widgetFrame = new KFrameLayout(this, %[ label: "カラー(α有り)", id: "group_frame" ]);
+		colorGrid = new KGridLayout(this, %[ style: %[ space: 5 ] ]);
 		for (var y = 0; y < 5; y++)
 			for (var x = 0; x < 10; x++) {
-				var colorBox = new KColorBox(this, %[ hasAlpha: true, width: 20, height: 20, name: "alpha" + x + y, style: %[borderWidth: 1, borderColor: 0xffacacac, borderStyle: BORDER_STYLE_SOLID, borderRadius: 3, padding: 1] ]);
+				var colorBox = new KColorBox(this, %[ hasAlpha: true, width: 20, height: 20, name: "alpha" + x + y ]);
 				var rgb = Layer.HSV2RGB(x * 360 / 10, y * 100 / 4, 100);
 				colorBox.value = 0x80000000 | (rgb.r << 16) | (rgb.g << 8) | (rgb.b);
 				colorBox.margin = 0;
@@ -327,13 +346,10 @@ class WidgetSample extends KWindow
 		tabs.testInnerGrid.add(0, 1, new KVerticalSeparator(this));
 		tabs.testInnerGrid.add(1, 0, new KHorizontalSeparator(this));
 
-		defaultMargin = 0;
-		defaultSpace = 0;
-		var rootGrid = new KGridLayout(this);
+		var rootGrid = new KGridLayout(this, %[ id: "widget_grid_narrow" ]);
 		rootGrid.add(0, 0, tabs);
 		rootGrid.add(0, 1, new KVerticalSeparator(this));
 		rootGrid.add(0, 2, new KStatusBar(this));
-		statusBar.margin = 3;
 
 		// プライマリウィジェットにタブを登録
 		primaryWidget.add(rootGrid);
