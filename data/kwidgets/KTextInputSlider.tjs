@@ -35,8 +35,8 @@ class KTextInputSlider extends KValueEntity
 
 		super.KValueEntity(window, options);
 
-		var w = getOption("width");
-		var h = getOption("height");
+		var w = getOption("width", SLIDER_ADAPTIVE_WIDTH);
+		var h = getOption("height", 20);
 		var stride = getOption("stride");
 		var left = getOption("left");
 		var right = getOption("right");
@@ -66,10 +66,11 @@ class KTextInputSlider extends KValueEntity
 	 * ウィジェットスタイルを展開
 	 ------------------------------*/
 	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.textInputId = getOption("textinputId");
-		widgetStyle.sliderId = getOption("sliderId");
+		widgetStyle.textInputId = getStyleProperty("textinputId");
+		widgetStyle.sliderId = getStyleProperty("sliderId");
+		widgetStyle.width = getStyleProperty("width");
+		widgetStyle.height = getStyleProperty("height");
 	}
-
 
 	/**------------------------------
 	 * 値を設定する
@@ -102,8 +103,22 @@ class KTextInputSlider extends KValueEntity
 	function onDrawContents() {
 		textInput.id = widgetStyle.textInputId;
 		slider.id = widgetStyle.sliderId;
-		var w = textInput.width + spaceHorizontal + slider.width;
-		var h = Math.max(textInput.height, slider.height);
+
+		var w = widgetStyle.width !== void ? widgetStyle.width : getOption("width", SLIDER_ADAPTIVE_WIDTH);
+		var h = widgetStyle.height !== void ? widgetStyle.height : getOption("height", void);
+		if (h === void)
+			h = textInput.height;
+		textInput.overwriteStyle(%[ height: h ]);
+		slider.overwriteStyle(%[ height: h ]);
+
+		var fontHeight = textInput.fontStyle.fontHeight;
+		textInput.overwriteStyle(%[ width: fontHeight * 3]);
+
+		if (w == SLIDER_ADAPTIVE_WIDTH)
+			w = slider.width + spaceHorizontal + textInput.width;
+
+		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width ]);
+
 		setFixedSize(w, h);
 		textInput.setPos(0, (h - textInput.height) / 2);
 		slider.setPos(textInput.width + spaceHorizontal, (h - slider.height) / 2);

@@ -69,9 +69,15 @@ class KSlider extends KRangePointer2D
 		}
 	}
 
+	function onExtractWidgetStyle(widgetStyle) {
+		super.onExtractWidgetStyle(...);
+		widgetStyle.width = getStyleProperty("width", void);
+		widgetStyle.height = getStyleProperty("height", void);
+	}
+
 	function onDrawContents() {
-		var w = getOption("width", SLIDER_ADAPTIVE_WIDTH);
-		var h = getOption("height", 20);
+		var w = widgetStyle.width ? widgetStyle.width : getOption("width", SLIDER_ADAPTIVE_WIDTH);
+		var h = widgetStyle.height ? widgetStyle.height : getOption("height", 20);
 
 		if (w == SLIDER_ADAPTIVE_WIDTH)
 			w = adaptiveWidth;
