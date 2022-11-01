@@ -99,10 +99,11 @@
 				borderWidth: 1,
 				spaceHorizontal: 4,
 				padding: 1,
-				checkOn: %[ checkIcon: "k_framed_check_on" ],
-				checkOff: %[ checkIcon: "k_framed_check_off" ],
-				focusCheckOn: %[ checkIcon: "k_focus_framed_check_on" ],
-				focusCheckOff: %[ checkIcon: "k_focus_framed_check_off" ],
+				compositeState: [ "focus", "checked" ],
+				                 checkIcon: "k_framed_check_off",
+				checked:      %[ checkIcon: "k_framed_check_on" ],
+				focus:        %[ checkIcon: "k_focus_framed_check_off" ],
+				focusChecked: %[ checkIcon: "k_focus_framed_check_on" ],
 			]
 		],
 

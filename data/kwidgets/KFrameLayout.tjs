@@ -50,7 +50,7 @@ class KFrameLayout extends KLayout
 		_checked = getOption("cheecked", true);
 		focusable = getOption("focusable", window.defaultFocusable);
 		overwriteStyle(%[ frameType: _type ]);
-		addCustomStyleState("checkOn");
+		addCustomStyleState("checked");
 	}
 
 	function onExtractWidgetStyle(widgetStyle) {
@@ -136,26 +136,11 @@ class KFrameLayout extends KLayout
 			_checked = v;
 			if (child !== void)
 				child.enabled = v;
-			invalidateCustomStates();
+			if (v)
+				addCustomStyleState("checked");
+			else
+				removeCustomStyleState("checked");
 		}
-	}
-
-	function invalidateCustomStates() {
-		var checkState = (focused ? "focusC" : "c") + (checked ? "heckOn" : "heckOff");
-		updateCustomStyleStates([ checkState ]);
-	}
-
-	/*------------------------------
-	 * フォーカス
-	 ------------------------------*/
-	function onFocus {
-		super.onFocus();
-		invalidateCustomStates();
-	}
-
-	function onBlur {
-		super.onBlur();
-		invalidateCustomStates();
 	}
 
 	/**------------------------------

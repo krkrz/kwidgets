@@ -89,6 +89,7 @@ global.K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS =  [ "borderRadiusLeftBot
 global.K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS = [ "borderRadiusRightBottom", "borderRadiusRight", "borderRadiusBottom", "borderRadius" ];
 
 global.K_WIDGET_APPEARANCE_STYLE_DEFINITION = [
+	[ "compositeState", "compositeState", [] ],
 	[ "opacity",    "opacity",  255 ]
 ];
 
@@ -435,7 +436,34 @@ class KWidget extends Layer
 			if (window.focusedLayer.focused)
 				styleStates.add("descendantFocus");
 		}
+
+		resolveCompositeState(styleStates);
+
 		return ! equalStruct(prevStates, styleStates);
+	}
+
+	function resolveCompositeState(states) {
+		var compositeState = appearanceStyle.compositeState;
+		if (compositeState.count == 0)
+			return;
+		var insertionIndex = states.count;
+		var foundStates = [];
+		for (var i = 0; i < compositeState.count; i++) {
+			var target = compositeState[i];
+			var index = states.find(target);
+			if (index < 0)
+				continue;
+			insertionIndex = Math.min(index, insertionIndex);
+			foundStates.add(target);
+		}
+		if (foundStates.count <= 1)
+			return;
+		var result = foundStates[0];
+		for (var i = 1; i < foundStates.count; i++) {
+			var state = foundStates[i];
+			result += state[0].toUpperCase() + state.substr(1);
+		}
+		states.insert(insertionIndex, result);
 	}
 
 	function updateAncestorsStates() {
