@@ -1,4 +1,6 @@
 [
+		%[ include: "KCommonThemeStyle.tjs" ],
+
 		%[
 			alias: "icon",
 			map: %[
@@ -459,7 +461,7 @@
 
 		%[ klass: "KTabLayout",
 		   style: %[ tabId: "tab",
-					 padding: 2 ]
+					 padding: 12 ]
 		 ],
 
 		%[ klass: "KTab",

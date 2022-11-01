@@ -1,4 +1,6 @@
 [
+		%[ include: "KCommonThemeStyle.tjs" ],
+
 		%[
 			alias: "icon",
 			map: %[
