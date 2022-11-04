@@ -35,6 +35,8 @@ class KTextInputSlider extends KValueEntity
 
 		super.KValueEntity(window, options);
 
+		hasImage = false;
+
 		var w = getOption("width", SLIDER_ADAPTIVE_WIDTH);
 		var h = getOption("height", 20);
 		var stride = getOption("stride");
@@ -114,8 +116,10 @@ class KTextInputSlider extends KValueEntity
 		var fontHeight = textInput.fontStyle.fontHeight;
 		textInput.overwriteStyle(%[ width: fontHeight * 3]);
 
-		if (w == SLIDER_ADAPTIVE_WIDTH)
+		if (w == SLIDER_ADAPTIVE_WIDTH) {
+			slider.overwriteStyle(%[ width: w ]);
 			w = slider.width + spaceHorizontal + textInput.width;
+		}
 
 		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width ]);
 

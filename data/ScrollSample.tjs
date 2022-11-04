@@ -98,16 +98,7 @@ class ScrollSample extends KWindow
     abs.add(scroll);
 
     // RGBグリッド
-    var rgbGrid = new KGridLayout(this);
-    rgbGrid.marginLeft = 20;
-    rgbGrid.marginTop = 20;
-    rgbGrid.space = 5;
-    rgbGrid.type = ltOpaque;
-    rgbGrid.neutralColor = WIN_BG;
-    rgbGrid.fillRect(0, 0, rgbGrid.width, rgbGrid.height, WIN_BG);
-
-    defaultAlignHorizontal = ALIGN_CENTER;
-    defaultAlignVertical = ALIGN_CENTER;
+      var rgbGrid = new KGridLayout(this, %[ style: %[ backgroundColor: "normal_bg", padding: 6, space: 5, isClass: %[ KWidget: %[ align: ALIGN_CENTER ] ] ] ]);
 
     rgbGrid.add(0, 0, new KTextLabel(this, "R"));
     rgbGrid.add(1, 0, new KTextInputSlider(this, 0, 20, 0, 90, 1, "r"));
@@ -115,8 +106,11 @@ class ScrollSample extends KWindow
     rgbGrid.add(1, 1, new KTextInputSlider(this, 0, 20, 0, 90, 1, "g"));
     rgbGrid.add(0, 2, new KTextLabel(this, "B"));
     rgbGrid.add(1, 2, new KTextInputSlider(this, 0, 20, 0, 90, 1, "b"));
+
+	  var rgbFrame = new KFrameLayout(this, %[ style: %[ borderStyle: BORDER_STYLE_SOLID, boredrWidth: 1, margin: 15, borderColor: "textedit_border", borderRadius: 4 ] ]);
+	  rgbFrame.add(rgbGrid);
  
-    abs.add(rgbGrid);
+    abs.add(rgbFrame);
     frame = new KFrameLayout(this);
     frame.add(abs);
     hspliter.add(frame);
