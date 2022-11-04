@@ -41,6 +41,8 @@
 				"tab_bg_inactive" => 0xff424242,
 				"tab_bg_hover" => 0xff4f4f4f,
 				"tab_bg_mousedown" => 0xff383838,
+				"primary_button_border_focus" =>  0xff3c5ba2,
+				"primary_button_bg_mousedown" => 0xffe1e1e1,
 			]
 		],
 
@@ -271,6 +273,10 @@
 		%[
 			id: "scrollbar_rangepointer",
 			style: %[ backgroundColor: "scrollbar_bg",
+					  borderColor: "scrollbar_bg",
+					  borderStyle: BORDER_STYLE_SOLID,
+					  borderWidth: 1,
+					  borderRadius: 0,
 					  knobId: "scrollbar_knob" ]
 		],
 

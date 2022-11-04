@@ -16,7 +16,10 @@
 					"primary_button" => %[
 						borderColor: 0xffaeaeae,
 						focus: %[
-							borderColor: 0xff3c5ba2,
+							borderColor: "primary_button_border_focus",
+						],
+						mouseDown: %[
+							backgroundColor: "primary_button_bg_mousedown",
 						],
 					],
 					"widget_grid" => %[
