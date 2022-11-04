@@ -90,6 +90,7 @@ global.K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS = [ "borderRadiusRightBo
 
 global.K_WIDGET_APPEARANCE_STYLE_DEFINITION = [
 	[ "compositeState", "compositeState", [] ],
+	[ "statePriority", "statePriority", [] ],
 	[ "opacity",    "opacity",  255 ]
 ];
 
@@ -115,15 +116,15 @@ global.K_WIDGET_LAYOUT_STYLE_DEFINITION = [
 ];
 
 global.K_WIDGET_BORDER_STYLE_DEFNITION = [
-	[ "backgroundColor", "backgroundColor", 0xfff0f0f0 ],
+	[ "backgroundColor", "backgroundColor", 0xfff0f0f0, "resolveColor" ],
 	[ "borderWidthLeft",   K_WIDGET_BORDER_LEFT_WIDTH_PROPERTY_KEYS, 0 ],
 	[ "borderWidthTop",    K_WIDGET_BORDER_TOP_WIDTH_PROPERTY_KEYS,    0 ],
 	[ "borderWidthRight",  K_WIDGET_BORDER_RIGHT_WIDTH_PROPERTY_KEYS,  0 ],
 	[ "borderWidthBottom", K_WIDGET_BORDER_BOTTOM_WIDTH_PROPERTY_KEYS, 0 ],
-	[ "borderColorLeft",   K_WIDGET_BORDER_LEFT_COLOR_PROPERTY_KEYS,   0 ],
-	[ "borderColorTop",    K_WIDGET_BORDER_TOP_COLOR_PROPERTY_KEYS,    0 ],
-	[ "borderColorRight",  K_WIDGET_BORDER_RIGHT_COLOR_PROPERTY_KEYS,  0 ],
-	[ "borderColorBottom", K_WIDGET_BORDER_BOTTOM_COLOR_PROPERTY_KEYS, 0 ],
+	[ "borderColorLeft",   K_WIDGET_BORDER_LEFT_COLOR_PROPERTY_KEYS,   0, "resolveColor" ],
+	[ "borderColorTop",    K_WIDGET_BORDER_TOP_COLOR_PROPERTY_KEYS,    0, "resolveColor" ],
+	[ "borderColorRight",  K_WIDGET_BORDER_RIGHT_COLOR_PROPERTY_KEYS,  0, "resolveColor" ],
+	[ "borderColorBottom", K_WIDGET_BORDER_BOTTOM_COLOR_PROPERTY_KEYS, 0, "resolveColor" ],
 	[ "borderStyleLeft",   K_WIDGET_BORDER_LEFT_STYLE_PROPERTY_KEYS,   BORDER_STYLE_NONE ],
 	[ "borderStyleTop",    K_WIDGET_BORDER_TOP_STYLE_PROPERTY_KEYS,    BORDER_STYLE_NONE ],
 	[ "borderStyleRight",  K_WIDGET_BORDER_RIGHT_STYLE_PROPERTY_KEYS,  BORDER_STYLE_NONE ],
@@ -205,6 +206,7 @@ class KWidget extends Layer
 	var _isAvoidDictionaryRegistration = false;
 	var _allowChildDictionaryRegistration = true;
 	// Ｄ＆Ｄ
+	var _pressing = false;
 	var isReadyToDrag, isDragging;
 	var myDraggingPacket;
 	var mouseDownX, mouseDownY;
@@ -233,6 +235,8 @@ class KWidget extends Layer
 	var dragHover = false;
 	// 辞書
 	var _dict;
+
+	var debugPrint = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -356,6 +360,15 @@ class KWidget extends Layer
 		return style;
 	}
 
+	/*------------------------------
+	 * カラーを解決する
+	 ------------------------------*/
+	function resolveColor(exp) {
+		if (exp instanceof "Number")
+			return exp;
+		return styleRepository.resolveAlias("color", exp);
+	}
+
 	/**------------------------------
 	 * スタイルプロパティを取得
 	 ------------------------------*/
@@ -410,16 +423,13 @@ class KWidget extends Layer
 			styleStates.add("drag");
 		var leftButton = System.getKeyState(VK_LBUTTON);
 		var rightButton = System.getKeyState(VK_RBUTTON);
-		{
-			var x = cursorX, y = cursorY;
-			if (x >= 0 && y >= 0 && x < width && y < height) {
-				if (leftButton)
-					styleStates.add("mouseDownLeft");
-				if (rightButton)
-					styleStates.add("mouseDownRight");
-				if (leftButton || rightButton)
-					styleStates.add("mouseDown");
-			}
+		if (_pressing) {
+			if (leftButton)
+				styleStates.add("mouseDownLeft");
+			if (rightButton)
+				styleStates.add("mouseDownRight");
+			if (leftButton || rightButton)
+				styleStates.add("mouseDown");
 		}
 		if (hover)
 			styleStates.add("hover");
@@ -438,6 +448,7 @@ class KWidget extends Layer
 		}
 
 		resolveCompositeState(styleStates);
+		resolveStatePriority(styleStates);
 
 		return ! equalStruct(prevStates, styleStates);
 	}
@@ -464,6 +475,35 @@ class KWidget extends Layer
 			result += state[0].toUpperCase() + state.substr(1);
 		}
 		states.insert(insertionIndex, result);
+	}
+
+	function resolveStatePriority(states) {
+		var statePriority = appearanceStyle.statePriority;
+		if (statePriority.count <= 1)
+			return;
+
+		var matched = [];
+		for (var i = 0; i < statePriority.count; i++) {
+			var state = statePriority[i];
+			if (states.find(state) >= 0)
+				matched.add(state);
+		}
+
+		if (matched.count <= 1)
+			return;
+
+		for (var i = 0; i < matched.count - 1; i++) {
+			var priorState = matched[i];
+			var priorStateIndex = states.find(priorState);
+			for (var j = i + 1; j < matched.count; j++) {
+				var comparedState = matched[j];
+				var comparedStateIndex = states.find(comparedState);
+				if (comparedStateIndex < priorStateIndex) {
+					states.insert(priorStateIndex + 1, comparedState);
+					states.erase(comparedStateIndex);
+				}
+			}
+		}
 	}
 
 	function updateAncestorsStates() {
@@ -496,7 +536,16 @@ class KWidget extends Layer
 	}
 
 	function extractStyleWithChain(chain, states, definition) {
-		return global.extractStyleWithChain(...);
+		var result = global.extractStyleWithChain(...);
+		for (var i = 0; i < definition.count; i++) {
+			var def = definition[i];
+			var resolveFunction = def[3];
+			if (resolveFunction === void)
+				continue;
+			var memberKey = def[0];
+			result[memberKey] = this[resolveFunction](result[memberKey]);
+		}
+		return result;
 
 		var style = %[];
 		for (var i = 0; i < definition.count; i++) {
@@ -504,7 +553,10 @@ class KWidget extends Layer
 			var memberKey = def[0];
 			var styleKey = def[1];
 			var defaultValue = def[2];
+			var resolveFunction = def[3];
 			style[memberKey] = styleRepository.getPropertyFromStyleChain(chain, states, styleKey, defaultValue);
+			if (resolveFunction !== void)
+				style[memberKey] = this[resolveFunction](style[memberKey]);
 		}
 		return style;
 	}
@@ -2188,11 +2240,16 @@ class KWidget extends Layer
 	 ------------------------------*/
 	function drawUIText(fontStyle, x, y, text, overrideFontColor = void) {
 		var fontColor = overrideFontColor !== void ? overrideFontColor : fontStyle.fontColor;
+		var opacity = appearanceStyle.opacity;
+		if ((fontColor & 0xff000000) != 0) {
+			opacity = opacity * (fontColor >> 24) / 255;
+			fontColor &= 0xff000000;
+		}
 		applyFontStyle(font, fontStyle);
 		if (! fontStyle.fontOutline)
-			drawText(x, y, text, fontColor, appearanceStyle.opacity, fontStyle.fontAntiAlias);
+			drawText(x, y, text, fontColor, opacity, fontStyle.fontAntiAlias);
 		else
-			drawText(x, y, text, fontColor, appearanceStyle.opacity, fontStyle.fontAntiAlias, 2048, fontStyle.fontOutlineColor, 2.5);
+			drawText(x, y, text, fontColor, opacity, fontStyle.fontAntiAlias, 2048, fontStyle.fontOutlineColor, 2.5);
 	}
 
 	//------------------------------
@@ -2793,6 +2850,7 @@ class KWidget extends Layer
 	 * Ｄ＆Ｄ関連の制御を行う
 	 ------------------------------*/
 	function onMouseDown(x, y, button, shift) {
+		_pressing = true;
 		updateStyleStates();
 		invalidateStyles();
 		// 左クリックでドラッグ準備開始
@@ -2891,6 +2949,7 @@ class KWidget extends Layer
 	}
 
 	function onMouseUp(x, y, button, shift) {
+		_pressing = false;
 		updateStyleStates();
 		invalidateStyles();
 		if (button == mbLeft) {

@@ -160,18 +160,7 @@ class WidgetSample extends KWindow
 		var tabs, tabGrid, widgetFrame, widgetGrid, scroll, colorGrid;
 
 		tabs = new KTabLayout(this, %[ name: "tabs",
-									   tabWrapping: true,
-									   style: %[ borderStyle: BORDER_STYLE_SOLID,
-												 borderWidth: 1,
-												 borderColor: 0xffacacac,
-												 borderRadius: 5,
-												 isClass: %[
-													 KTab: %[ borderStyle: BORDER_STYLE_SOLID,
-															  borderWidth: 1,
-															  borderColor: 0xffacacac,
-															  borderRadius: 5 ]
-												 ]
-											   ]  ]);
+									   tabWrapping: true ]);
 
 //		tabs = new KTabLayout(this, FRAME_RAISED, "tabs");
 

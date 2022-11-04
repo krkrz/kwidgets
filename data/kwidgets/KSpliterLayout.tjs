@@ -37,28 +37,30 @@ class KSpliterShutterToggle extends KImageButton
  ----------------------------------------------------------------------*/
 class KSpliterHandle extends KEntity
 {
-	var hover = false;
-
 	function KSpliterHandle() {
 		super.KEntity(...);
 		hitThreshold = 0;
 	}
 
 	function onMouseDown(x, y, button, shift) {
+		super.onMouseDown(...);
 		parent.onHandleMouseDown(x + left, y + top, button, shift);
 	}
 
 	function onMouseMove(x, y, shift) {
+		super.onMouseMove(...);
 		parent.onHandleMouseMove(x + left, y + top, shift);
 	}
 
 	function onMouseUp(x, y, button, shift)  {
+		super.onMouseUp(...);
 		parent.onHandleMouseUp(x + left, y + top, button, shift);
 	}
 
 	function onDrawContents() {
 		drawBorder(borderStyle, 0, 0, width, height);
 	}
+
 }
 
 /**----------------------------------------------------------------------

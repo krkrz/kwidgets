@@ -1954,7 +1954,7 @@ class KTextEdit extends KVirtualWidget
 	}
 
 	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.selectionBackgroundColor = getStyleProperty("selectionBackgroundColor", WIN_SELECTED);
-		widgetStyle.selectionFontColor = getStyleProperty("selectionFontColor", 0xffffff);
+		widgetStyle.selectionBackgroundColor = resolveColor(getStyleProperty("selectionBackgroundColor", WIN_SELECTED));
+		widgetStyle.selectionFontColor = resolveColor(getStyleProperty("selectionFontColor", 0xffffff));
 	}
 }

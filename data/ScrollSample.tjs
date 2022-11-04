@@ -54,7 +54,7 @@ class KVirtualImage extends KVirtualWidget
 class ScrollSample extends KWindow
 {
   function ScrollSample {
-    super.KWindow("scrollsample");
+      super.KWindow(%[ name: "scrollsample", style: %[ isClass: %[ KPrimaryWidget: %[ padding: 4 ] ] ] ]);
 
     // ウィンドウ初期設定
     caption = 'スクロールサンプル';
@@ -76,13 +76,13 @@ class ScrollSample extends KWindow
     hspliter.add(vspliter);
 
     // スプリッタにスクロールバーつきイメージラベルを詰め込み
-      frame = new KFrameLayout(this, FRAME_SUNKEN);
+      frame = new KFrameLayout(this);
       scroll = new KScrollLayout(this, %[ name: "scroll1" ]);
         scroll.add(new KImageLabel(this, "cg02"));
       frame.add(scroll);
     vspliter.add(frame);
 
-       frame = new KFrameLayout(this, FRAME_SUNKEN);
+       frame = new KFrameLayout(this);
       scroll = new KScrollLayout(this, %[ name: "scroll2" ]);
            rel = new KRelativeLayout(this);
            rel.add(new KVirtualImage(this, "cg03"));
@@ -115,18 +115,14 @@ class ScrollSample extends KWindow
     rgbGrid.add(1, 1, new KTextInputSlider(this, 0, 20, 0, 90, 1, "g"));
     rgbGrid.add(0, 2, new KTextLabel(this, "B"));
     rgbGrid.add(1, 2, new KTextInputSlider(this, 0, 20, 0, 90, 1, "b"));
-    
+ 
     abs.add(rgbGrid);
-    frame = new KFrameLayout(this, FRAME_SUNKEN);
+    frame = new KFrameLayout(this);
     frame.add(abs);
     hspliter.add(frame);
 
     var grid = new KGridLayout(this);
     grid.add(0, 0, hspliter);
-    var resizeHandle = new KWindowResizeHandle(this);
-    resizeHandle.alignHorizontal = ALIGN_RIGHT;
-    resizeHandle.setFixedSize(20, 20);
-    grid.add(0, 1, resizeHandle);
 
     primaryWidget.add(grid);
 

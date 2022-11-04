@@ -67,6 +67,8 @@ class KTab extends KEntity
 			states.add("selected");
 			if (parent.focused)
 				states.add("focused");
+		} else {
+			states.add("notSelected");
 		}
 		updateCustomStyleStates(states);
 	}

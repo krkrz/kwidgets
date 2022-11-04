@@ -156,7 +156,8 @@ class KStyleRepository
 
 	function resolveAlias(category, key) {
 		while(true) {
-			if (typeof(aliasMap[category]) == K_UNDEFINED
+			if (! key instanceof "String"
+				|| typeof(aliasMap[category]) == K_UNDEFINED
 				|| typeof(aliasMap[category][key]) == K_UNDEFINED)
 				return key;
 			key = aliasMap[category][key];

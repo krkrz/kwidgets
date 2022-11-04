@@ -2,6 +2,47 @@
 		%[ include: "KCommonThemeStyle.tjs" ],
 
 		%[
+			alias: "color",
+			map: %[
+				"transparent" => 0,
+				"normal_bg" => 0xff535353,
+				"highlight_bg" => 0xff7d7d7d,
+				"editable_bg" => 0xff454545,
+				"textedit_bg" => "editable_bg",
+				"button_bg" => "editable_bg",
+				"button_bg_active" => 0xffd4d4d4,
+				"widget_border" => 0xff898989,
+				"widget_border_focus" => 0xff3c5ba2,
+				"pointer_knob" => 0xff696969,
+				"textedit_border" => 0xff696969,
+				"textedit_border_focus" => 0xff0f64d2,
+				"scroll_button_auto" => 0xff1a1a1a,
+				"textedit_bg_selection" => 0xff0078d7,
+				"textedit_font_selection" => 0xfff0f0f0,
+				"list_frame" => "transparent",
+				"list_frame_focus" => "transparent",
+				"list_frame_drag" => 0xff1cc2ff,
+				"list_selection" => 0xff0f64d2,
+				"list_item_focus" => 0xff6b6b6b,
+				"menu_border" => 0xffaeaeae,
+				"menu_frame_focus" => 0xffc0c0c0,
+				"separator" => 0xff3e3e3e,
+				"spliter" => 0xff474747,
+				"toggle_bg" => "normal_bg",
+				"toggle_bg_hover" => 0xff474747,
+				"toggle_bg_active" => 0xff383838,
+				"toggle_border" => "normal_bg",
+				"toggle_border_hover" => 0xff636363,
+				"toggle_border_active" => 0xff636363,
+				"tab_border" => 0xff383838,
+				"tab_bg" => "normal_bg",
+				"tab_bg_inactive" => 0xff424242,
+				"tab_bg_hover" => 0xff4f4f4f,
+				"tab_bg_mousedown" => 0xff383838,
+			]
+		],
+
+		%[
 			alias: "icon",
 			map: %[
 				"k_scroll_up"    => "$composite($frame(8,8),$triangle(8,4,u,#7c7c7c))",
@@ -26,57 +67,12 @@
 		],
 
 		%[
-			theme: "dialog",
-			style: %[
-				defaultFocusable: true,
-				isClass: %[
-					"KWidget" => %[
-						focusable: true
-					],
-
-					"KPrimaryWidget" => %[
-						padding: 16,
-					],
-				],
-				isId: %[
-					"primary_button" => %[
-						borderColor: 0xffaeaeae,
-						focus: %[
-							borderColor: 0xff3c5ba2,
-						],
-					],
-					"widget_grid" => %[
-						space: 12,
-					],
-					"widget_grid_narrow" => %[
-						space: 8,
-					],
-					"button_grid" => %[
-						padding: 12,
-						space: 12,
-					],
-					"group_frame" => %[
-						padding: 12,
-					],
-					"focusable_frame" => %[
-						borderStyle: BORDER_STYLE_SOLID,
-						borderWidth: 1,
-						borderRadius: 3,
-						borderColor: 0xff666666,
-						padding: 2,
-						descendantFocus: %[ borderColor: 0xff0f64d2 ],
-					]
-				]
-			]
-		],
-
-		%[
 			klass: "KWidget",
 			style: %[
-				fontColor: 0xf0f0f0,
+				fontColor: 0xfff0f0f0,
 				fontHeight: 12,
 				fontAntiAlias: false,
-				backgroundColor: 0xff535353,
+				backgroundColor: "normal_bg",
 				opacity: 255,
 				nodeDisabled: %[
 					opacity: 128,
@@ -87,14 +83,14 @@
 		%[
 			klass: "KSpacer",
 			style: %[
-				backgroundColor: 0
+				backgroundColor: "transparent",
 			]
 		],
 
 		%[
 			klass: "KFrameLayout",
 			style:  %[
-				borderColor: 0x424242,
+				borderColor: 0xff424242,
 				borderStyle: BORDER_STYLE_SOLID,
 				borderWidth: 1,
 				spaceHorizontal: 4,
@@ -125,10 +121,10 @@
 				borderRadius: 18,
 				padding: 10,
 				focus: %[
-					borderColor: 0xff3c5ba2,
+					borderColor: "widget_border_focus",
 				],
 				mouseDown: %[
-					backgroundColor: 0xff7d7d7d,
+					backgroundColor: "highlight_bg",
 					fontColor: 0x323232,
 				],
 			],
@@ -152,15 +148,16 @@
 				borderStyle: BORDER_STYLE_SOLID,
 				borderWidth: 1,
 				borderRadius: 4,
-				borderColor: 0xff535353,
+				borderColor: "toggle_border",
+				backgroundColor: "toggle_bg",
 				padding: 10,
 				hover: %[
-					backgroundColor: 0xff474747,
-					borderColor: 0xff636363,
+					backgroundColor: "toggle_bg_hover",
+					borderColor: "toggle_border_hover",
 				],
 				toggleOn: %[
-					backgroundColor: 0xff383838,
-					borderColor: 0xff636363,
+					backgroundColor: "toggle_bg_active",
+					borderColor: "toggle_border_active",
 				],
 			]
 		],
@@ -192,14 +189,14 @@
 			klass: "KCheckBox",
 			style: %[
 				borderStyle: BORDER_STYLE_SOLID,
-				borderColor: 0xff898989,
+				borderColor: "widget_border",
 				borderWidth: 1,
 				borderRadius: 3,
 				spaceHorizontal: 6,
-				backgroundColor: 0xff474747,
+				backgroundColor: "button_bg",
 				padding: 1,
-				focus: %[ borderColor: 0xff3c5ba2 ],
-				checkOn: %[ icon: "k_check_button_on", backgroundColor: 0xffd4d4d4 ],
+				focus: %[ borderColor: "widget_border_focus" ],
+				checkOn: %[ icon: "k_check_button_on", backgroundColor: "button_bg_active" ],
 				checkOff: %[ icon: "k_check_button_off" ],
 			]
 		],
@@ -228,9 +225,9 @@
 		%[
 			id: "range_pointer_2d_knob",
 			style: %[
-				backgroundColor: 0xff696969,
+				backgroundColor: "pointer_knob",
 				borderStyle: BORDER_STYLE_SOLID,
-				borderColor: 0xff696969,
+				borderColor: "pointer_knob",
 				borderWidth: 1,
 				borderRadius: 3,
 			]
@@ -239,9 +236,9 @@
 		%[
 			klass: "KRangePointer2D",
 			style: %[
-				backgroundColor: 0xff4a4a4a,
+				backgroundColor: "textedit_bg",
 				borderStyle: BORDER_STYLE_SOLID,
-				borderColor: 0xff4a4a4a,
+				borderColor: "textedit_bg",
 				borderWidth: 2,
 				knobId: "range_pointer_2d_knob"
 			]
@@ -256,10 +253,10 @@
 		   style: %[
 			   borderStyle: BORDER_STYLE_SOLID,
 			   borderWidth: 1,
-			   borderColor: 0xff666666,
+			   borderColor: "textedit_border",
 			   borderRadius: 2,
 			   padding: 1,
-			   focus: %[ borderColor: 0xff0f64d2 ],
+			   focus: %[ borderColor: "textedit_border_focus" ],
 			   knobId: "slider_knob",
 		   ]
 		 ],
@@ -280,8 +277,8 @@
 				borderStyle: BORDER_STYLE_NONE,
 				borderWidth: 0,
 				borderRadius: 0,
-				backgroundColor: 0xff4a4a4a,
-				mouseDown: %[ backgroundColor: 0xff1a1a1a ],
+				backgroundColor: "editable_bg",
+				mouseDown: %[ backgroundColor: "scroll_button_auto" ],
 				padding: 4 ]
 		],
 
@@ -346,9 +343,9 @@
 		%[
 			klass: "KTextEdit",
 			style: %[
-				backgroundColor: 0xff454545,
-				selectionBackgroundColor: 0xff0078d7,
-				selectionFontColor: 0xf0f0f0,
+				backgroundColor: "textedit_bg",
+				selectionBackgroundColor: "textedit_bg_selection",
+				selectionFontColor: "textedit_font_selection",
 				spaceVertical: 4,
 			],
 		],
@@ -363,13 +360,13 @@
 			klass: "KTextInput",
 			style: %[
 				borderStyle: BORDER_STYLE_SOLID,
-				borderColor: 0xff666666,
+				borderColor: "textedit_border",
 				borderWidth: 1,
 				borderRadius: 3,
 				paddingVertical: 3,
 				paddingHorizontal: 2,
-				backgroundColor: 0xff454545,
-				descendantFocus: %[ borderColor: 0xff0f64d2 ],
+				backgroundColor: "textedit_bg",
+				descendantFocus: %[ borderColor: "textedit_border_focus" ],
 				texteditId: "textinput_textedit",
 			],
 		],
@@ -380,10 +377,10 @@
 				stride: 14,
 				spaceVertical: 6,
 				renameTextinputId: "list_rename_textinput",
-				frameColor: 0,
-				focusFrameColor: 0,
-				dragFrameColor: 0xff1cc2ff,
-				selectionColor: 0xff0f64d2,
+				frameColor: "list_frame",
+				focusFrameColor: "list_frame_focus",
+				dragFrameColor: "list_frame_drag",
+				selectionColor: "list_selection",
 				toggleOpenIcon: "k_list_open",
 				toggleCloseIcon: "k_list_close",
 				toggleInvisibleIcon: "k_list_invisible",
@@ -393,7 +390,7 @@
 		%[
 			id: "list_rename_textinput",
 			style: %[
-				descendantFocus: %[ borderColor: 0xff666666 ],
+				descendantFocus: %[ borderColor: "textedit_border" ],
 				texteditId: "list_rename_textinput_textedit",
 			],
 		],
@@ -403,6 +400,13 @@
 			style: %[
 			]
 		],
+
+		%[ klass: "KListItem",
+		   style: %[
+			   focus: %[ itemColor: "list_item_focus" ],
+			   selected: %[ itemColor: "list_item_focus" ],
+		   ]
+		 ],
 
 		%[
 			klass: "KTextInputSlider",
@@ -427,13 +431,13 @@
 			klass: "KComboBox",
 			style: %[
 				borderStyle: BORDER_STYLE_SOLID,
-				borderColor: 0xff666666,
+				borderColor: "textedit_border",
 				borderWidth: 1,
 				borderRadius: 3,
 				paddingVertical: 3,
 				paddingHorizontal: 2,
-				backgroundColor: 0xff454545,
-				descendantFocus: %[ borderColor: 0xff0f64d2 ],
+				backgroundColor: "textedit_bg",
+				descendantFocus: %[ borderColor: "textedit_border_focus" ],
 				dropdownButtonId: "combobox_dropdown_button",
 				dropdownInterval: 200,
 				dispCount: 20,
@@ -444,8 +448,8 @@
 		%[
 			id: "combobox_dropdown_button",
 			style: %[
-				backgroundColor: 0xff454545,
-				mouseDown: %[ backgroundColor: 0xff454545 ],
+				backgroundColor: "textedit_bg",
+				mouseDown: %[ backgroundColor: "textedit_bg" ],
 				borderStyle: BORDER_STYLE_NONE,
 				borderWidth: 0,
 				borderRadius: 0,
@@ -459,7 +463,7 @@
 			style: %[
 				borderType: BORDER_STYLE_SOLID,
 				borderWidth: 1,
-				borderColor: 0xffaeaeae,
+				borderColor: "menu_border",
 				padding: 1,
 			]
 		],
@@ -473,7 +477,7 @@
 			id: "combobox_dropdown_list",
 			style: %[
 				ignoreToggleWidth: true,
-				focusFrameColor: 0xffc0c0c0,
+				focusFrameColor: "menu_frame_focus",
 				spaceVertical: 4,
 			]
 		],
@@ -488,8 +492,8 @@
 		%[ klass: "KSeparator",
 		   style: %[
 			   borderWidth: 1,
-			   borderColor: 0xfff8f8f8,
-			   borderStyle: BORDER_STYLE_INSET
+			   borderColor: "separator",
+			   borderStyle: BORDER_STYLE_SOLID,
 		   ],
 		 ],
 
@@ -497,23 +501,18 @@
 		   style: %[
 			   borderWidth: 1,
 			   borderStyle: BORDER_STYLE_SOLID,
-			   borderColor: 0xffacacac,
 			   borderRadius: 3,
-			   padding: 3,
+			   padding: 2,
+			   hover: %[ backgroundColor: "toggle_bg_hover",
+						 borderRadius: "toggle_border_hover" ],
+			   mouseDown: %[ backgroundColor: "highlight_bg" ],
 		   ]
 		 ],
 
-		%[ klass: "KListItem",
-		   style: %[ 
-			   focus: %[ itemColor: 0xff6b6b6b ],
-			   selected: %[ itemColor: 0xff6b6b6b ],
-		   ]
-		 ],
- 
 		%[ klass: "KSpliterLayout",
 		   style: %[
 			   handleId: "spliter_handle",
-			   handleSize: 5,
+			   handleSize: 3,
 		   ]
 		 ],
 
@@ -525,7 +524,7 @@
 
 		%[ id: "spliter_handle",
 		   style: %[
-			   hover: %[ backgroundColor: 0xffacacac ]
+			   mouseDown: %[ backgroundColor: "highlight_bg" ]
 		   ]
 		 ],
 
@@ -552,22 +551,31 @@
 
 		%[ klass: "KTabLayout",
 		   style: %[ tabId: "tab",
+					 borderStyle: BORDER_STYLE_SOLID,
+					 borderColor: "tab_border",
+					 borderWidth: 1,
+					 borderRadiusBottom: 4,
 					 padding: 12 ]
 		 ],
 
 		%[ klass: "KTab",
-		   style: %[ fontColor: 0x808080,
-					 fontHeight: 12,
-					 paddingInset: 6,
-					 selected: %[ fontColor: 0, paddingOffsetVertical: -1 ],
+		   style: %[ padding: 8,
+					 borderStyle: BORDER_STYLE_SOLID,
+					 borderColor: "tab_border",
+					 borderWidth: 1,
+					 borderRadius: 4,
+					 backgroundColor: "tab_bg",
+					 notSelected: %[ backgroundColor: "tab_bg_inactive" ],
 					 focused: %[ fontUnderline: true ],
-					 hover: %[ paddingOffsetVertical: -1 ]
+					 hover: %[ backgroundColor: "tab_bg_hover" ],
+					 mouseDown: %[ backgroundColor: "tab_bg_mousedown" ],
+					 statePriority: [ "mouseDown", "hover", "notSelected" ]
 				   ]
 		 ],
 
 		%[ klass: "KTextBoard",
 		   style: %[
-			   backgroundColor: 0xff454545,
+			   backgroundColor: "textedit_bg",
 			   spaceVertical: 4
 		   ]
 		 ],
@@ -696,18 +704,6 @@
 					 borderWidth: 1,
 					 padding: 1,
 				   ]
-		 ],
-
-		%[ theme: "debug_frame",
-		   style: %[
-			   isClassWeak: %[
-				   KWidget: %[
-					   borderStyle: BORDER_STYLE_SOLID,
-					   borderWidth: 1,
-					   borderColor: 0xffff00000,
-				   ]
-			   ]
-		   ]
 		 ]
 ]
 

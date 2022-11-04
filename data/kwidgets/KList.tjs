@@ -156,10 +156,10 @@ class KList extends KVirtualWidget
 		widgetStyle.slideWidth = getStyleProperty("slideWidth", getStyleProperty("stride", 14));
 		widgetStyle.renameTextinputId = getStyleProperty("renameTextinputId");
 		widgetStyle.ignoreToggleWidth = getStyleProperty("ignoreToggleWidth", false);
-		widgetStyle.frameColor = getStyleProperty("frameColor");
-		widgetStyle.focusFrameColor = getStyleProperty("focusFrameColor");
-		widgetStyle.dragFrameColor = getStyleProperty("dragFrameColor");
-		widgetStyle.selectionColor = getStyleProperty("selectionColor");
+		widgetStyle.frameColor = resolveColor(getStyleProperty("frameColor"));
+		widgetStyle.focusFrameColor = resolveColor(getStyleProperty("focusFrameColor"));
+		widgetStyle.dragFrameColor = resolveColor(getStyleProperty("dragFrameColor"));
+		widgetStyle.selectionColor = resolveColor(getStyleProperty("selectionColor"));
 		widgetStyle.toggleOpenIcon = getStyleProperty("toggleOpenIcon");
 		widgetStyle.toggleCloseIcon = getStyleProperty("toggleCloseIcon");
 		widgetStyle.toggleInvisbleIcon = getStyleProperty("toggleInvislbeIcon");
@@ -1737,8 +1737,8 @@ global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
 	[ "toggleEnabled", "toggleEnabled", true ],
 	[ "icon", "icon", void ],
 	[ "icons", "icons", [] ],
-	[ "backgroundColor", "backgroundColor", void ],
-	[ "itemColor", "itemColor", void ],
+	[ "backgroundColor", "backgroundColor", void, "resolveColor" ],
+	[ "itemColor", "itemColor", void, "resolveColor" ],
 	[ "spaceVertical", "spaceVertical", void ],
 	[ "lineSpacing", "lineSpacing", 0 ]
 ];
@@ -1838,6 +1838,15 @@ class KListItem
 			return defaultValue;
 	}
 
+	/*------------------------------
+	 * カラーを解決する
+	 ------------------------------*/
+	function resolveColor(exp) {
+		if (exp instanceof "Number")
+			return exp;
+		return styleRepository.resolveAlias("color", exp);
+	}
+
 	function updateStyleStates() {
 		var prevStates = duplicateStruct(styleStates);
 		styleStates.assign(customStyleStates);
@@ -1912,7 +1921,16 @@ class KListItem
 	}
 
 	function extractStyleWithChain(chain, states, definition) {
-		return global.extractStyleWithChain(...);
+		var result = global.extractStyleWithChain(...);
+		for (var i = 0; i < definition.count; i++) {
+			var def = definition[i];
+			var resolveFunction = def[3];
+			if (resolveFunction === void)
+				continue;
+			var memberKey = def[0];
+			result[memberKey] = this[resolveFunction](result[memberKey]);
+		}
+		return result;
 	}
 
 	function invalidateStyles(forceUpdate = true) {
