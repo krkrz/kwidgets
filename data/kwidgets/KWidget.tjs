@@ -536,29 +536,36 @@ class KWidget extends Layer
 	}
 
 	function extractStyleWithChain(chain, states, definition) {
-		var result = global.extractStyleWithChain(...);
-		for (var i = 0; i < definition.count; i++) {
-			var def = definition[i];
-			var resolveFunction = def[3];
-			if (resolveFunction === void)
-				continue;
-			var memberKey = def[0];
-			result[memberKey] = this[resolveFunction](result[memberKey]);
-		}
-		return result;
+		var style = global.extractStyleWithChain(...);
+		applyAdditionalFunction(style, definition);
+		return style;
 
+		// this is reference implementation.
 		var style = %[];
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
 			var memberKey = def[0];
 			var styleKey = def[1];
 			var defaultValue = def[2];
-			var resolveFunction = def[3];
 			style[memberKey] = styleRepository.getPropertyFromStyleChain(chain, states, styleKey, defaultValue);
-			if (resolveFunction !== void)
-				style[memberKey] = this[resolveFunction](style[memberKey]);
 		}
+		applyAdditionalFunction(style, definition);
 		return style;
+	}
+
+	function applyAdditionalFunction(style, definition) {
+		global.applyAdditionalFunction(this, style, definition);
+		return;
+
+		// this is reference implementation.
+		for (var i = 0; i < definition.count; i++) {
+			var def = definition[i];
+			var resolveFunction = def[3];
+			if (resolveFunction === void)
+				continue;
+			var memberKey = def[0];
+			style[memberKey] = this[resolveFunction](style[memberKey]);
+		}
 	}
 
 	function updateTheme() {

@@ -1921,16 +1921,36 @@ class KListItem
 	}
 
 	function extractStyleWithChain(chain, states, definition) {
-		var result = global.extractStyleWithChain(...);
+		var style = global.extractStyleWithChain(...);
+		applyAdditionalFunction(style, definition);
+		return style;
+
+		// this is reference implementation.
+		var style = %[];
+		for (var i = 0; i < definition.count; i++) {
+			var def = definition[i];
+			var memberKey = def[0];
+			var styleKey = def[1];
+			var defaultValue = def[2];
+			style[memberKey] = styleRepository.getPropertyFromStyleChain(chain, states, styleKey, defaultValue);
+		}
+		applyAdditionalFunction(style, definition);
+		return style;
+	}
+
+	function applyAdditionalFunction(style, definition) {
+		global.applyAdditionalFunction(this, style, definition);
+		return;
+
+		// this is reference implementation.
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
 			var resolveFunction = def[3];
 			if (resolveFunction === void)
 				continue;
 			var memberKey = def[0];
-			result[memberKey] = this[resolveFunction](result[memberKey]);
+			style[memberKey] = this[resolveFunction](style[memberKey]);
 		}
-		return result;
 	}
 
 	function invalidateStyles(forceUpdate = true) {
