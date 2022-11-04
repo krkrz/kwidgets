@@ -461,6 +461,10 @@
 
 		%[ klass: "KTabLayout",
 		   style: %[ tabId: "tab",
+					 borderStyle: BORDER_STYLE_SOLID,
+					 borderWidth: 1,
+					 borderColor: 0xffacacac,
+					 borderRadius: 5,
 					 padding: 12 ]
 		 ],
 
@@ -468,6 +472,10 @@
 		   style: %[ fontColor: 0x808080,
 					 fontHeight: 12,
 					 paddingInset: 6,
+					 borderStyle: BORDER_STYLE_SOLID,
+					 borderWidth: 1,
+					 borderColor: 0xffacacac,
+					 borderRadius: 5,
 					 selected: %[ fontColor: 0, paddingOffsetVertical: -1 ],
 					 focused: %[ fontUnderline: true ],
 					 hover: %[ paddingOffsetVertical: -1 ]
