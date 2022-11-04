@@ -7,6 +7,7 @@
 				"transparent" => 0,
 				"normal_bg" => 0xff535353,
 				"highlight_bg" => 0xff7d7d7d,
+				"scrollbar_bg" => 0xff4a4a4a,
 				"editable_bg" => 0xff454545,
 				"textedit_bg" => "editable_bg",
 				"button_bg" => "editable_bg",
@@ -17,6 +18,7 @@
 				"textedit_border" => 0xff696969,
 				"textedit_border_focus" => 0xff0f64d2,
 				"scroll_button_auto" => 0xff1a1a1a,
+				"scroll_border" => 0xff383838,
 				"textedit_bg_selection" => 0xff0078d7,
 				"textedit_font_selection" => 0xfff0f0f0,
 				"list_frame" => "transparent",
@@ -107,7 +109,7 @@
 			klass: "KScrollLayout",
 			style: %[
 				borderStyle: BORDER_STYLE_SOLID,
-				borderColor: 0xff383838,
+				borderColor: "scroll_border",
 				borderWidth: 1,
 			],
 		],
@@ -268,7 +270,8 @@
 
 		%[
 			id: "scrollbar_rangepointer",
-			style: %[ knobId: "scrollbar_knob" ]
+			style: %[ backgroundColor: "scrollbar_bg",
+					  knobId: "scrollbar_knob" ]
 		],
 
 		%[
@@ -277,7 +280,7 @@
 				borderStyle: BORDER_STYLE_NONE,
 				borderWidth: 0,
 				borderRadius: 0,
-				backgroundColor: "editable_bg",
+				backgroundColor: "scrollbar_bg",
 				mouseDown: %[ backgroundColor: "scroll_button_auto" ],
 				padding: 4 ]
 		],
