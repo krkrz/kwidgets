@@ -14,6 +14,8 @@
 			klass: "KWidget",
 			style: %[
 				fontColor: 0,
+				fontHeight: 14,
+				fontAntiAlias: true,
 				backgroundColor: 0xfff0f0f0,
 				opacity: 255,
 				nodeDisabled: %[
