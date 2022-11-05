@@ -747,25 +747,9 @@ tjs_error TJS_INTF_METHOD eachDictionary(tTJSVariant *result,
 
 //----------------------------------------------------------------------
 // プロパティ取得
-bool getPropertyFromStyle(tTJSVariant style, tTJSVariant states, tTJSVariant key, tTJSVariant result)
+bool getPropertyFromStyle(tTJSVariant style, tTJSVariant key, tTJSVariant result)
 {
 	ncbPropAccessor styleObj(style);
-
-	if (states.Type() != tvtVoid) {
-		auto statesCount = countArray(states);
-		ncbPropAccessor statesObj(states);
-		for (tjs_uint i = 0; i < statesCount; i++) {
-			ttstr state = statesObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
-			if (styleObj.HasValue(state.c_str())) {
-				tTJSVariant nullObject;
-				if (getPropertyFromStyle(styleObj.GetValue(state.c_str(), ncbTypedefs::Tag<tTJSVariant>()),
-										 nullObject,
-										 key,
-										 result))
-					return true;
-			}
-		}
-	}
 
 	if (key.Type() == tvtString) {
 		ttstr keyString = key;
@@ -795,12 +779,29 @@ bool getPropertyFromStyle(tTJSVariant style, tTJSVariant states, tTJSVariant key
 tTJSVariant getPropertyFromStyleChain(tTJSVariant styleChain, tTJSVariant states, tTJSVariant key, tTJSVariant defaultValue)
 {
 	tTJSVariant result = createArray();
-
 	tjs_uint styleChainCount = countArray(styleChain);
 	ncbPropAccessor styleChainObj(styleChain);
+
+	if (states.Type() != tvtVoid) {
+		auto statesCount = countArray(states);
+		ncbPropAccessor statesObj(states);
+		for (tjs_uint i = 0; i < statesCount; i++) {
+			ttstr state = statesObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
+			for (tjs_uint j = 0; j < styleChainCount; j++) {
+				tTJSVariant style = styleChainObj.GetValue(j, ncbTypedefs::Tag<tTJSVariant>());
+				ncbPropAccessor styleObj(style);
+				if (styleObj.HasValue(state.c_str())) {
+						tTJSVariant stateStyle = styleObj.GetValue(state.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+						if (getPropertyFromStyle(stateStyle, key, result))
+							return ncbPropAccessor(result).GetValue(tjs_int(0), ncbTypedefs::Tag<tTJSVariant>());
+				}
+			}
+		}
+	}
+
 	for (tjs_uint i = 0; i < styleChainCount; i++) {
 		tTJSVariant style = styleChainObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
-		if (getPropertyFromStyle(style, states, key, result))
+		if (getPropertyFromStyle(style, key, result))
 			return ncbPropAccessor(result).GetValue(tjs_int(0), ncbTypedefs::Tag<tTJSVariant>());
 	}
 	return defaultValue;

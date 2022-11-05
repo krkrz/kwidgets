@@ -1925,7 +1925,8 @@ class KListItem
 		applyAdditionalFunction(style, definition);
 		return style;
 
-		// this is reference implementation.
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		var style = %[];
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
@@ -1936,13 +1937,15 @@ class KListItem
 		}
 		applyAdditionalFunction(style, definition);
 		return style;
+		// END  reference implementation.
 	}
 
 	function applyAdditionalFunction(style, definition) {
 		global.applyAdditionalFunction(this, style, definition);
 		return;
 
-		// this is reference implementation.
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
 			var resolveFunction = def[3];
@@ -1951,6 +1954,7 @@ class KListItem
 			var memberKey = def[0];
 			style[memberKey] = this[resolveFunction](style[memberKey]);
 		}
+		// END  reference implementation.
 	}
 
 	function invalidateStyles(forceUpdate = true) {

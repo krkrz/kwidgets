@@ -5,7 +5,7 @@ global.K_WIDGET_DEFAULT_FRAME_TYPE_BORDER_STYLES =
 				borderColor: 0xffacacac,
 				borderStyle: BORDER_STYLE_SOLID,
 				borderWidth: 1,
-				padding: 1,
+				paddingInset: 1,
 			],
 		// FRAME_SUNKEN
 			%[
@@ -18,7 +18,7 @@ global.K_WIDGET_DEFAULT_FRAME_TYPE_BORDER_STYLES =
 				borderColorBottom: 0xffffffff,
 				borderStyleBottom: BORDER_STYLE_GROOVE,
 				borderWidth: 2,
-				padding: 0,
+				paddingInset: 0,
 			],
 		// FRAME_RAISED
 			%[
@@ -31,7 +31,7 @@ global.K_WIDGET_DEFAULT_FRAME_TYPE_BORDER_STYLES =
 				borderColorTop: 0xffffffff,
 				borderStyleTop: BORDER_STYLE_RIDGE,
 				borderWidth: 2,
-				padding: 0,
+				paddingInset: 0,
 			],
 	];
 
@@ -197,17 +197,9 @@ class KStyleRepository
 		return style;
 	}
 
-	function getPropertyFromStyle(style, states, key, result) {
-		return global.getPropertyFromStyle(style, states, key, result);
-
-		if (states !== void)
-			for (var i = 0; i < states.count; i++) {
-				var state = states[i];
-				if (typeof(style[state]) != K_UNDEFINED
-					&& getPropertyFromStyle(style[state], void, key, result))
-					return true;
-			}
-
+	function getPropertyFromStyle(style, key, result) {
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		if (key instanceof "String") {
 			if (key != ""
 				&& typeof(style[key]) != K_UNDEFINED) {
@@ -226,16 +218,32 @@ class KStyleRepository
 			}
 		}
 		return false;
+		// END  reference implementation.
 	}
 
 	function getPropertyFromStyleChain(styleChain, states, key, defaultValue) {
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		var result = [];
+		if (states !== void) {
+			for (var i = 0; i < states.count; i++) {
+				var state = states[i];
+				for (var j = 0; j < styleChain.count; j++) {
+					var style = styleChain[j];
+					if (typeof(style[state]) != K_UNDEFINED) {
+						if (getPropertyFromStyle(style[state], key, result))
+							return result[0];
+					}
+				}
+			}
+		}
 		for (var i = 0; i < styleChain.count; i++) {
 			var style = styleChain[i];
-			if (getPropertyFromStyle(style, states, key, result))
+			if (getPropertyFromStyle(style, key, result))
 				return result[0];
 		}
 		return defaultValue;
+		// END  reference implementation.
 	}
 
 	function loadStyles(defs) {

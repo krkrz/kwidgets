@@ -56,7 +56,7 @@
 				mouseDown: %[
 					backgroundColor: 0xffffffff,
 					paddingOffset: 1,
-					paddingInset: 1,
+					padding: 1,
 					borderStyle: BORDER_STYLE_SOLID,
 					borderWidth: 1,
 					borderColor: 0xffacacac,
@@ -471,7 +471,7 @@
 		%[ klass: "KTab",
 		   style: %[ fontColor: 0x808080,
 					 fontHeight: 12,
-					 paddingInset: 6,
+					 padding: 6,
 					 borderStyle: BORDER_STYLE_SOLID,
 					 borderWidth: 1,
 					 borderColor: 0xffacacac,
