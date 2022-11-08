@@ -19,8 +19,6 @@ global.KSliderArgsFormat =
 
 class KSlider extends KRangePointer2D
 {
-	var adaptiveWidth;
-
 	/**------------------------------
 	 * コンストラクタ
 	 *
@@ -53,8 +51,6 @@ class KSlider extends KRangePointer2D
 		this.minValue = int(Math.min(this.leftValue, this.rightValue));
 		this.maxValue = int(Math.max(this.leftValue, this.rightValue));
 
-		adaptiveWidth = maxValue - minValue + opts.hKnobPixelSize + 1;
-
 		super.KRangePointer2D(window, opts);
 
 		focusable = getOption("focusable", window.defaultFocusable);
@@ -69,13 +65,23 @@ class KSlider extends KRangePointer2D
 		}
 	}
 
+	property adaptiveWidth {
+		getter {
+			return maxValue - minValue + knobFixedWidth + 1;
+		}
+	}
+
 	function onExtractWidgetStyle(widgetStyle) {
 		super.onExtractWidgetStyle(...);
 		widgetStyle.width = getStyleProperty("width", void);
 		widgetStyle.height = getStyleProperty("height", void);
+		widgetStyle.knobWidth = getStyleProperty("knobWidth", void);
 	}
 
 	function onDrawContents() {
+		if (widgetStyle.knobWidth !== void)
+			knobFixedWidth = widgetStyle.knobWidth;
+
 		var w = widgetStyle.width ? widgetStyle.width : getOption("width", SLIDER_ADAPTIVE_WIDTH);
 		var h = widgetStyle.height ? widgetStyle.height : getOption("height", 20);
 

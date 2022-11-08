@@ -190,6 +190,7 @@
 		%[ klass: "KSlider",
 		   style: %[
 			   knobId: "slider_knob",
+			   knobWidth: 8,
 		   ]
 		 ],
 

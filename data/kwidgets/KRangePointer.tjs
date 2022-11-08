@@ -174,9 +174,35 @@ class KRangePointer2D extends KValueEntity
 	}
 	
 	//------------------------------
+	// ノブサイズを更新
+	//------------------------------
+	property knobFixedWidth {
+		getter {
+			return hParams.knobFixedPixelSize;
+		}
+		setter(v) {
+			hParams.knobFixedPixelSize = v;
+		}
+	}
+
+	property knobFixedHeight {
+		getter {
+			return vParams.knobFixedPixelSize;
+		}
+		setter(v) {
+			vParams.knobFixedPixelSize = v;
+		}
+	}
+
+	//------------------------------
 	// 描画
 	//------------------------------
 	function onDrawContents() {
+		if (widgetStyle.knobWidth !== void)
+			hParams.knobFixedPixelSize = widgetStyle.knobWidth;
+		if (widgetStyle.knobHeight !== void)
+			vParams.knobFixedPixelSize = widgetStyle.knobHeight;
+
 		knob.id = widgetStyle.knobId;
 
 		drawBorder(borderStyle, 0, 0, width, height);
