@@ -11,6 +11,18 @@ global.KTextInputSliderArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+class KTextInputSliderEmbededSlider extends KSlider
+{
+	function KTextInputSliderEmbededSlider() {
+		super.KSlider(...);
+	}
+
+	function onMouseDown() {
+		super.onMouseDown(...);
+		parent.textInput.focus();
+	}
+}
+
 class KTextInputSlider extends KValueEntity
 {
 	var _value;
@@ -48,15 +60,15 @@ class KTextInputSlider extends KValueEntity
 											  height: h,
 											  type: stride == int(stride) ? TEXT_DIGIT : TEXT_REAL,
 											  value: string(v) ]);
-		slider = new KSlider(window, %[ width: w,
-										height: h,
-										left: left,
-										right: right,
-										stride: stride,
-										focusable: false,
-										value: v,
-										interpolation: getOption("interpolation", false)
-									  ]);
+		slider = new KTextInputSliderEmbededSlider(window, %[ width: w,
+															  height: h,
+															  left: left,
+															  right: right,
+															  stride: stride,
+															  focusable: false,
+															  value: v,
+															  interpolation: getOption("interpolation", false)
+															]);
 
 		textInput.parent = this;
 		slider.parent = this;
