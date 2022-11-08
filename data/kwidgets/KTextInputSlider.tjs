@@ -17,8 +17,7 @@ class KTextInputSliderEmbededSlider extends KSlider
 		super.KSlider(...);
 	}
 
-	function onMouseDown() {
-		super.onMouseDown(...);
+	function focus() {
 		parent.textInput.focus();
 	}
 }
