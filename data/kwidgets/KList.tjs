@@ -447,19 +447,15 @@ class KList extends KVirtualWidget
 
 	function onUpdateAscendantStyle() {
 		clearStyleChainCacheForListItem();
-		for (var i = 0; i < childList.count; i++) {
-			var child = childList[i];
+		var items = descendants;
+		for (var i = 0; i < items.count; i++) {
+			var child = items[i];
 			child.updateStyleChain();
 			child.invalidateStyles();
 		}
 	}
 
 	function onFullUpdate() {
-		for (var i = 0; i < childList.count; i++) {
-			var child = childList[i];
-			child.updateIconLayerList();
-			listItemStyleChainCache = %[];
-		}
 	}
 
 	function onStyleModified() {
@@ -468,8 +464,9 @@ class KList extends KVirtualWidget
 			prevSlideWidth = slideWidth;
 			requireRelocate();
 		}
-		for (var i = 0; i < childList.count; i++) {
-			var child = childList[i];
+		var items = descendants;
+		for (var i = 0; i < items.count; i++) {
+			var child = items[i];
 			if (child.itemVisible) {
 				if (child.updateSize()) {
 					child.requireRelocate();
