@@ -445,7 +445,7 @@ class KList extends KVirtualWidget
 		return listItemStyleChainCache[itemClassName];
 	}
 
-	function onUpdateAscendantStyle() {
+	function afterStyleFullUpdate() {
 		clearStyleChainCacheForListItem();
 		var items = descendants;
 		for (var i = 0; i < items.count; i++) {
@@ -453,9 +453,6 @@ class KList extends KVirtualWidget
 			child.updateStyleChain();
 			child.invalidateStyles();
 		}
-	}
-
-	function onFullUpdate() {
 	}
 
 	function onStyleModified() {

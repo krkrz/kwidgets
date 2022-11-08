@@ -7,6 +7,8 @@
 				"k_dropdown" => "k_scroll_down",
 				"k_list_check_on" => "k_check_button_on",
 				"k_list_check_off" => "k_check_button_off",
+				"k_table_check_on" => "k_check_button_on",
+				"k_table_check_off" => "k_check_button_off",
 			]
 		],
 
@@ -540,6 +542,8 @@
 					 columnTabId: "table_column_tab",
 					 mainViewId: "table_main_view",
 					 textEditFrameId: "table_textedit_frame",
+					 checkboxOnIcon: "k_table_check_on",
+					 checkboxOffIcon: "k_table_check_off",
 				   ]
 		 ],
 

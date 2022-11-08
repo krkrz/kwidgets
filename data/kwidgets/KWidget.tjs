@@ -1320,24 +1320,26 @@ class KWidget extends Layer
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
 			if (fullUpdate) {
-				widget.onFullUpdate();
+				widget.beforeStyleFullUpdate();
 				widget.updateTheme();
 				widget.updateStyleKeys();
 			}
 			widget.updateStyleChain();
 			widget.invalidateStyles();
-			widget.onUpdateAscendantStyle();
+			if (fullUpdate)
+				widget.afterStyleFullUpdate();
 			widget.respondToStyleModification = true;
 		}
 
 		parentWidget.respondToStyleModification = true;
 	}
 
-	function onFullUpdate() {
+	function beforeStyleFullUpdate() {
 	}
 
-	function onUpdateAscendantStyle() {
+	function afterStyleFullUpdate() {
 	}
+
 
 	//------------------------------
 	// スタイルの更新チェック

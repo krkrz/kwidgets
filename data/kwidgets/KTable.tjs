@@ -992,7 +992,7 @@ class KTableRowTab extends KTableVirtualWidget
 		}
 	}
 
-	function beforeDrawContents() {
+	function beforeFullUpdate() {
 		applyFontStyle(font, fontStyle);
 		var w = font.getTextWidth("00000") + layoutStyle.spaceHorizontal;
 		setMarginalMinMaxSize(w, 0, w, K_WIDGET_MAX_POSSIBLE_WIDTH);
@@ -2393,6 +2393,8 @@ class KTable extends KEntity
 		widgetStyle.columnTabId = getStyleProperty("columnTabId", "");
 		widgetStyle.mainViewId = getStyleProperty("mainViewId", "");
 		widgetStyle.textEditFrameId = getStyleProperty("textEditFrameId", ""); 
+		widgetStyle.checkboxOnIcon = getStyleProperty("checkboxOnIcon", "");
+		widgetStyle.checkboxOffIcon = getStyleProperty("checkboxOffIcon", "");
 	}
 
 	function onDrawContents() {
@@ -2438,6 +2440,10 @@ class KTable extends KEntity
 	function notifyValueModification() {
 		if (respondToValueModification)
 			onValueModified(value);
+	}
+
+	function onAttachedToWindow() {
+		afterStyleFullUpdate();
 	}
 
 	/*------------------------------
@@ -3908,16 +3914,26 @@ class KRealTableColumn extends KNumberTableColumn
  ----------------------------------------------------------------------*/
 class KCheckBoxTableColumn extends KTableColumn
 {
-	var icon_on, icon_off;
+//	var icon_on, icon_off;
 
 	/**
 	 * チェックボックスカラム
 	 */
 	function KCheckBoxTableColumn(owner, label, key, opts = %[]) {
 		super.KTableColumn(...);
-		icon_on = owner.findIcon("k_check_button_on");
-		icon_off = owner.findIcon("k_check_button_off");
-		fixedWidth = icon_on.width + 10; // owner.spaceHorizontal;
+		fixedWidth = 24;
+	}
+
+	property icon_on {
+		getter {
+			return owner.findIcon(owner.widgetStyle.checkboxOnIcon);
+		}
+	}
+
+	property icon_off {
+		getter {
+			return owner.findIcon(owner.widgetStyle.checkboxOffIcon);
+		}
 	}
 
 	// 初期値

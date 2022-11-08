@@ -68,6 +68,8 @@
 				"k_list_check_on" => "k_framed_check_on",
 				"k_list_check_off" => "k_framed_check_off",
 				"k_slider_knob" => "$composite($triangle(10,9,u,#212121),$triangle(8,7,u,#f0f0f0))",
+				"k_table_check_on" => "k_framed_check_on",
+				"k_table_check_off" => "k_framed_check_off",
 			]
 		],
 
@@ -670,6 +672,8 @@
 					 columnTabId: "table_column_tab",
 					 mainViewId: "table_main_view",
 					 textEditFrameId: "table_textedit_frame",
+					 checkboxOnIcon: "k_table_check_on",
+					 checkboxOffIcon: "k_table_check_off",
 				   ]
 		 ],
 
