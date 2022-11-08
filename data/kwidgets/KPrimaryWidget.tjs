@@ -35,7 +35,7 @@ class KPrimaryWidget extends KLayout
 		widgetDepot = new global.Layer(win, this);
 		// ダミーレイヤ
 		dummyIcon = new global.Layer(win, this);
-		dummyIcon.setSize(1, 1);
+		dummyIcon.setSize(0, 0);
 		// アイコンの一時置き場
 		iconDepot = %[];
 		// プリミティブアイコンビルダ

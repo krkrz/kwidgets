@@ -72,6 +72,7 @@ class KTextInputSlider extends KValueEntity
 		widgetStyle.sliderId = getStyleProperty("sliderId");
 		widgetStyle.width = getStyleProperty("width");
 		widgetStyle.height = getStyleProperty("height");
+		widgetStyle.placeTextOnRightsideOfSlider = getStyleProperty("placeTextOnRightsideOfSlider", false);
 	}
 
 	/**------------------------------
@@ -124,7 +125,12 @@ class KTextInputSlider extends KValueEntity
 		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width ]);
 
 		setFixedSize(w, h);
-		textInput.setPos(0, (h - textInput.height) / 2);
-		slider.setPos(textInput.width + spaceHorizontal, (h - slider.height) / 2);
+		if (! widgetStyle.placeTextOnRightsideOfSlider) {
+			textInput.setPos(0, (h - textInput.height) / 2);
+			slider.setPos(textInput.width + spaceHorizontal, (h - slider.height) / 2);
+		} else {
+			textInput.setPos(slider.width + spaceHorizontal, (h - textInput.height) / 2);
+			slider.setPos(0, (h - slider.height) / 2);
+		}
 	}
 };

@@ -67,6 +67,7 @@
 				"k_focus_framed_check_off" => "$border(12,12,#474747,solid,#3c5ba2,1,3)",
 				"k_list_check_on" => "k_framed_check_on",
 				"k_list_check_off" => "k_framed_check_off",
+				"k_slider_knob" => "$composite($triangle(10,9,u,#212121),$triangle(8,7,u,#f0f0f0))",
 			]
 		],
 
@@ -250,18 +251,47 @@
 
 		%[
 			id: "slider_knob",
-			styleOfId: "range_pointer_2d_knob",
+			style: %[
+				backgroundColor: 0
+			],
+		],
+
+		%[
+			id: "slider_inner_bg",
+			style: %[
+				backgroundColor: "textedit_bg",
+				borderStyle: BORDER_STYLE_SOLID,
+				borderWidth: 1,
+				borderColor: "textedit_border",
+				borderRadius: 3,
+				marginHorizontal: 4,
+				marginVertical: 6,
+				focus: %[ borderColor: "textedit_border_focus" ],
+			]
+		],
+
+		%[
+			id: "slider_inner_knob",
+			style: %[
+				backgroundColor: 0,
+				borderStyle: BORDER_STYLE_NONE,
+				borderWidth: 0,
+				borderColor: 0,
+				borderWidth: 0,
+				padding: 0,
+				paddingTop: 8,
+				icon: "k_slider_knob",
+			]
 		],
 
 		%[ klass: "KSlider",
 		   style: %[
-			   borderStyle: BORDER_STYLE_SOLID,
-			   borderWidth: 1,
-			   borderColor: "textedit_border",
-			   borderRadius: 2,
-			   padding: 1,
-			   focus: %[ borderColor: "textedit_border_focus" ],
+			   backgroundColor: 0,
+			   borderStyle: BORDER_STYLE_NONE,
+			   borderWidth: 0,
 			   knobId: "slider_knob",
+			   innerBgId: "slider_inner_bg",
+			   innerKnobId: "slider_inner_knob",
 		   ]
 		 ],
 
@@ -423,6 +453,7 @@
 				textinputId: "textinputslider_textinput",
 				sliderId: "textinputslider_slider",
 				spaceHorizontal: 3,
+				placeTextOnRightsideOfSlider: true,
 			]
 		],
 

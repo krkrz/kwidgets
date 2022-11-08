@@ -16,12 +16,16 @@ class KRangePointer2D extends KValueEntity
 	var autoDispatchRepeatInterval = void;
 	var autoDispatchTimer = void;
 	var interp;
+	var innerBg;
+	var innerKnob;
 
 	//------------------------------
 	// コンストラクタ
 	//------------------------------
 	function KRangePointer2D(window, opts = %[]) {
 		super.KValueEntity(window, opts);
+
+		hitThreshold = 0;
 
 		hParams = %[];
 		vParams = %[];
@@ -65,6 +69,7 @@ class KRangePointer2D extends KValueEntity
 
 		var knobId = getOption("knobId", "range_pointer_2d_knob");
 		knob = new KSpacer(window);
+		knob.hitThreshold = 0;
 		knob.parent = this;
 		knob.onSpacerMouseUp = onKnobMouseUp;
 		knob.onSpacerMouseMove = onKnobMouseMove;
@@ -82,6 +87,8 @@ class KRangePointer2D extends KValueEntity
 
 	function onExtractWidgetStyle(widgetStyle) {
 		widgetStyle.knobId = getStyleProperty("knobId");
+		widgetStyle.innerBgId = getStyleProperty("innerBgId", "");
+		widgetStyle.innerKnobId = getStyleProperty("innerKnobId", "");
 	}
 
 	property pointerValue {
@@ -199,6 +206,38 @@ class KRangePointer2D extends KValueEntity
 
 		knob.setPos(hParams.knobPixelPos, vParams.knobPixelPos);
 		knob.setFixedSize(hParams.knobPixelSize, vParams.knobPixelSize);
+
+		if (widgetStyle.innerBgId == "") {
+			if (innerBg !== void)
+				innerBg.visible = false;
+		} else {
+			if (innerBg === void){
+				innerBg = new KSpacer(window, %[ id: widgetStyle.innerBgId ]);
+				innerBg.setMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
+				innerBg.hitThreshold = 256;
+				innerBg.parent = this;
+				innerBg.absolute = -1;
+			}
+			innerBg.id = widgetStyle.innerBgId;
+			innerBg.visible = true;
+			embedChild(0, 0, width, height, innerBg);
+		}
+
+		if (widgetStyle.innerKnobId == "") {
+			if (innerKnob !== void)
+				innerKnob.visible = false;
+		}else {
+			if (innerKnob === void) {
+				innerKnob = new KImageLabel(window, %[ id: widgetStyle.innerKnobId ]);
+				innerKnob.hitThreshold = 256;
+				innerKnob.parent = this;
+				innerKnob.absolute = 2;
+			}
+			innerKnob.id = widgetStyle.innerKnobId;
+			innerKnob.visible = true;
+			innerKnob.setPos(knob.left + knob.width / 2 - innerKnob.width / 2,
+							 knob.top + knob.height / 2 - innerKnob.height / 2);
+		}
 	}
 
 	//------------------------------
@@ -349,4 +388,20 @@ class KRangePointer2D extends KValueEntity
 
 		super.onKeyDown(...);
 	}
+
+	//------------------------------
+	// フォーカスイベント
+	//------------------------------
+	function onFocus() {
+		super.onFocus();
+		if (innerBg !== void)
+			innerBg.addCustomStyleState("focus");
+	}
+
+	function onBlur() {
+		super.onBlur();
+		if (innerBg !== void)
+			innerBg.removeCustomStyleState("focus");
+	}
+
 };
