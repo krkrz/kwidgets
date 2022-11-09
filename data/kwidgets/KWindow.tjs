@@ -223,10 +223,10 @@ class KWindow extends Window
 
 		if (k_kirikiriz) {
 			// ヒントレイヤを用意
-			hintLayer = new Layer(this, primaryLayer);
+			hintLayer = new KTextLabel(this, %[ id: "hint" ]);
+			hintLayer.parent = primaryLayer;
 			hintLayer.visible = false;
 			hintLayer.ignoreHintSensing = true;
-			hintLayer.font.height = 14;
 			hintLayer.hitThreshold = 256;
 		}
 		if (! ignoreGlobalZoom)
@@ -721,39 +721,16 @@ class KWindow extends Window
 		if( isshow ) {
 			x *= zoomDenom / zoomNumer;
 			y *= zoomDenom / zoomNumer;
-			y += 32;
-			var lines = text.split(/(\r|\n|\r\n)/);
-			var w = 0, h = 0;
-			for (var i = 0; i < lines.count; i++) {
-				w = Math.max(w, hintLayer.font.getTextWidth(lines[i]));
-				h += hintLayer.font.getTextHeight(lines[i]);
-			}
-			w += 6;
-			h += 4 + 4;
-			hintLayer.bringToFront();
-			hintLayer.setImageSize( w, h );
-			hintLayer.setSizeToImageSize();
-
+			y += 20;
+			hintLayer.label = text;
 			var iw = innerWidth * zoomDenom / zoomNumer;
 			var ih = innerHeight * zoomDenom / zoomNumer;
-
+			var w = hintLayer.width;
+			var h = hintLayer.height;
 			if( (x+w) > iw ) { x = iw - w; }
 			if( (y+h) > ih ) { y = ih - h; }
+			hintLayer.bringToFront();
 			hintLayer.setPos( x, y );
-
-			hintLayer.fillRect( 0, 0, w, h, 0 );
-			hintLayer.colorRect( 0, 0, w, h, clInfoBk, 196 );
-
-			hintLayer.colorRect( 0, 0, 1, h, 0xFFFFFF );
-			hintLayer.colorRect( 0, 0, w, 1, 0xFFFFFF );
-			hintLayer.colorRect( w-1, 0, 1, h, 0xFFFFFF );
-			hintLayer.colorRect( 0, h-1, w, 1, 0xFFFFFF );
-
-			var tx = 2, ty = 2;
-			for (var i = 0; i < lines.count; i++) {
-				hintLayer.drawText( tx, ty, lines[i], clInfoText, 220 );
-				ty += hintLayer.font.getTextHeight(lines[0]);
-			}
 			hintLayer.visible = true;
 		} else {
 			hintLayer.visible = false;

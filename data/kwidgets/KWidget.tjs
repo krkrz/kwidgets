@@ -1137,7 +1137,7 @@ class KWidget extends Layer
 		var fontStyle = extractStyle(K_WIDGET_FONT_STYLE_DEFINITION);
 		fontStyle.fontFace   = getStyleProperty("fontFace",   _fontFace);
 		fontStyle.fontHeight = getStyleProperty("fontHeight", font.height);
-		fontStyle.fontColor  = getStyleProperty("fontColor",  _fontColor);
+		fontStyle.fontColor  = resolveColor(getStyleProperty("fontColor",  _fontColor));
 		return fontStyle;
 	}
 

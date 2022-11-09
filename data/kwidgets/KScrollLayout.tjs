@@ -713,19 +713,6 @@ class KScrollLayout extends KLayout
 			verticalBar.setPos(width - borderPaddingRight - verticalBar.width, borderPaddingTop);
 		}
 
-		/*
-		// 水平・垂直バーの双方を表示し、
-		// resize表示指定がある時のみ、
-		// リサイズハンドルを右下に表示する
-		if (horizontal
-        && vertical
-        && _resize) {
-		_resizeHandle.visible = true;
-		_resizeHandle.setPos(boxW, boxH);
-		} else {
-		_resizeHandle.visible = false;
-		}
-		*/
 		onChildViewModified(childViewLeft, childViewTop, childViewWidth, childViewHeight, childWidth, childHeight);
 	}
 

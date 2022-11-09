@@ -10,8 +10,12 @@
 				"scrollbar_bg" => 0xff4a4a4a,
 				"editable_bg" => 0xff454545,
 				"textedit_bg" => "editable_bg",
+				"textboard_bg" => 0xff686868,
 				"button_bg" => "editable_bg",
 				"button_bg_active" => 0xffd4d4d4,
+				"hint_bg" => 0xc0c9c9c0,
+				"hint_border" => 0xff383838,
+				"hint_font" => 0x404040,
 				"widget_border" => 0xff898989,
 				"widget_border_focus" => 0xff3c5ba2,
 				"pointer_knob" => 0xff696969,
@@ -26,6 +30,13 @@
 				"list_frame_drag" => 0xff1cc2ff,
 				"list_selection" => 0xff0f64d2,
 				"list_item_focus" => 0xff6b6b6b,
+				"table_frame" => 0xff6b6b6b,
+				"table_frame_focus" => 0xff909090,
+				"table_frame_drag" => 0xff1cc2ff,
+				"table_selection" => 0xff0f64d2,
+				"table_grid_border" => 0xff5e5e5e,
+				"table_tab_border" => 0xff7e7e7e,
+				"table_inner_split" => 0xff505050,
 				"menu_border" => 0xffaeaeae,
 				"menu_frame_focus" => 0xffc0c0c0,
 				"separator" => 0xff3e3e3e,
@@ -74,6 +85,30 @@
 		],
 
 		%[
+			id: "no_border",
+			style: %[
+				borderStyle: BORDER_STYLE_NONE,
+				borderWidth: 0,
+				borderRadius: 0,
+				borderColor: 0
+			]
+		],
+
+		%[
+			id: "hint",
+			style: %[
+				backgroundColor: "hint_bg",
+				borderColor: "hint_border",
+				borderStyle: BORDER_STYLE_SOLID,
+				borderWidth: 1,
+				borderRadius: 4,
+				lineSpacing: 4,
+				padding: 6,
+				fontColor: "hint_font",
+			],
+		],
+
+		%[
 			klass: "KWidget",
 			style: %[
 				fontColor: 0xfff0f0f0,
@@ -102,6 +137,7 @@
 				borderWidth: 1,
 				spaceHorizontal: 4,
 				padding: 1,
+				helpIcon: "k_help",
 				compositeState: [ "focus", "checked" ],
 				                 checkIcon: "k_framed_check_off",
 				checked:      %[ checkIcon: "k_framed_check_on" ],
@@ -172,10 +208,6 @@
 		%[
 			klass: "KTextToggleButton",
 			style: %[
-				focus:
-					%[
-						fontUnderline: true
-					],
 				paddingHorizontal: 15,
 				paddingVertical: 10 ]
 		],
@@ -617,23 +649,22 @@
 
 		%[ klass: "KTextBoard",
 		   style: %[
-			   backgroundColor: "textedit_bg",
+			   backgroundColor: "textboard_bg",
 			   spaceVertical: 4
 		   ]
 		 ],
 
 		%[ id: "table_view_basis",
-		   style: %[ backgroundColor: 0xffffffff,
-					 fontColor: 0xffffff,
-					 fontHeight: 14,
+		   style: %[ backgroundColor: "textedit_bg",
 					 spaceHorizontal: 10,
 					 spaceVertical: 6,
-					 gridBorderColor: 0xffe0e0e0,
-					 tabBorderColor: 0xffc0c0c0,
-					 frameColor: 0xb4b4b4,
-					 focusFrameColor: 0x0078d7,
-					 dragFrameColor: 0xff0000,
-					 selectionColor: 0x0078d7,
+					 gridBorderColor: "table_grid_border",
+					 tabBorderColor: "table_tab_border",
+					 innerSplitColor: "table_inner_split",
+					 frameColor: "table_frame",
+					 focusFrameColor: "table_frame_focus",
+					 dragFrameColor: "table_frame_drag",
+					 selectionColor: "table_selection",
 				   ]
 		 ],
 

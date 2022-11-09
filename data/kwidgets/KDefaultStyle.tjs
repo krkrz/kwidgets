@@ -13,6 +13,29 @@
 		],
 
 		%[
+			alias: "color",
+			map: %[
+				"hint_bg" => 0xc0ffffe1,
+				"hint_border" => 0xff000000,
+				"hint_font" => 0,
+			],
+		],
+
+		%[
+			id: "hint",
+			style: %[
+				backgroundColor: "hint_bg",
+				borderColor: "hint_border",
+				borderStyle: BORDER_STYLE_SOLID,
+				borderWidth: 1,
+				borderRadius: 4,
+				lineSpacing: 4,
+				padding: 6,
+				fontColor: "hint_font",
+			],
+		],
+
+		%[
 			klass: "KWidget",
 			style: %[
 				fontColor: 0,
@@ -40,6 +63,9 @@
 				borderStyle: BORDER_STYLE_SOLID,
 				borderWidth: 1,
 				padding: 1,
+				helpIcon: "k_help",
+				checkIcon: "k_check_button_off",
+				checked: %[ checkIcon: "k_check_button_on" ]
 			]
 		],
 
@@ -494,16 +520,17 @@
 
 		%[ id: "table_view_basis",
 		   style: %[ backgroundColor: 0xffffffff,
-					 fontColor: 0xffffff,
+					 fontColor: 0,
 					 fontHeight: 14,
 					 spaceHorizontal: 10,
 					 spaceVertical: 6,
 					 gridBorderColor: 0xffe0e0e0,
+					 innerSplitColor: 0xffd0d0d0,
 					 tabBorderColor: 0xffc0c0c0,
-					 frameColor: 0xb4b4b4,
-					 focusFrameColor: 0x0078d7,
-					 dragFrameColor: 0xff0000,
-					 selectionColor: 0x0078d7,
+					 frameColor: 0xffb4b4b4,
+					 focusFrameColor: 0xff0078d7,
+					 dragFrameColor: 0xffff0000,
+					 selectionColor: 0xff0078d7,
 				   ]
 		 ],
 

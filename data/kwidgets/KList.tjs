@@ -445,8 +445,16 @@ class KList extends KVirtualWidget
 		return listItemStyleChainCache[itemClassName];
 	}
 
-	function afterStyleFullUpdate() {
+	function beforeStyleFullUpdate() {
 		clearStyleChainCacheForListItem();
+		var items = descendants;
+		for (var i = 0; i < items.count; i++) {
+			var child = items[i];
+			child.updateIconLayerList();
+		}
+	}
+
+	function afterStyleFullUpdate() {
 		var items = descendants;
 		for (var i = 0; i < items.count; i++) {
 			var child = items[i];

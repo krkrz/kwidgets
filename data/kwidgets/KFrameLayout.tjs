@@ -26,7 +26,8 @@ class KFrameLayout extends KLayout
 	var helpBounds;
 	var checkBounds;
 	var checkButtonPress = false;
-	
+	var labelFieldHeight = 0;
+
 	/**------------------------------
 	 * コンストラクタ
 	 *
@@ -56,6 +57,7 @@ class KFrameLayout extends KLayout
 	function onExtractWidgetStyle(widgetStyle) {
 		widgetStyle.textAlign = getStyleProperty("textAlign", ALIGN_CENTER);
 		widgetStyle.checkIcon = getStyleProperty("checkIcon", "");
+		widgetStyle.helpIcon = getStyleProperty("helpIcon", "");
 	}
 
 	function onUnserialize(dict, key) {
@@ -184,9 +186,15 @@ class KFrameLayout extends KLayout
 			maxH += child.maxHeight + child.marginVertical;
 		}
 
+
 		if (label != "") {
-			minH += fontStyle.fontHeight;
-			maxH += fontStyle.fontHeight;
+			labelFieldHeight = fontStyle.fontHeight;
+			if (_checkable)
+				labelFieldHeight = Math.max(labelFieldHeight, findIcon(widgetStyle.checkIcon).height);
+			if (helpText != "")
+				labelFieldHeight = Math.max(labelFieldHeight, findIcon(widgetStyle.helpIcon).height);
+			minH += labelFieldHeight;
+			maxH += labelFieldHeight;
 		}
 
 		setMinMaxSize(minW, minH, maxW, maxH);
@@ -198,7 +206,7 @@ class KFrameLayout extends KLayout
 	function onLocateLayout {
 		var contentTop = 0;
 		if (label != "")
-			contentTop = fontStyle.fontHeight;
+			contentTop = labelFieldHeight;
 
 		fillRect(0, 0, width, height, borderStyle.backgroundColor);
 		drawBorder(borderStyle, 0, contentTop / 2, width, height - contentTop / 2);
@@ -217,24 +225,24 @@ class KFrameLayout extends KLayout
 				lx += checkIcon.width + spaceHorizontal;
 			}
 			if (helpText != "")
-				lw -= findIcon("k_help").width + spaceHorizontal;
+				lw -= findIcon(widgetStyle.helpIcon).width + spaceHorizontal;
 			var result = drawUITextInRange(fontStyle,
-										   lx, 0, lw,
+										   lx, (labelFieldHeight - fontStyle.fontHeight) / 2, lw,
 										   label, widgetStyle.textAlign, true);
 			if (! result.inRange)
 				labelBounds = new KRect(result.x, result.y, result.w, fontStyle.fontHeight);
 			if (_checkable) {
 				var checkIcon = findIcon(widgetStyle.checkIcon);
 				var cx = int(result.x - checkIcon.width - spaceHorizontal);
-				var cy = int(result.y + (fontStyle.fontHeight - checkIcon.height) / 2);
+				var cy = int((labelFieldHeight - checkIcon.height) / 2);
 				operateRect(cx, cy, checkIcon, 0, 0, checkIcon.width, checkIcon.height, omAuto, appearanceStyle.opacity);
 				checkBounds = new KRect(cx, cy, checkIcon.width, checkIcon.height);
 				checkBounds.unionWith(new KRect(result.x, result.y, result.w, fontStyle.fontHeight));
 			}
 			if (helpText != "") {
-				var helpIcon = findIcon("k_help");
+				var helpIcon = findIcon(widgetStyle.helpIcon);
 				var hx = int(result.x + result.w + spaceHorizontal);
-				var hy = int(result.y + (fontStyle.fontHeight - helpIcon.height) / 2);
+				var hy = int((labelFieldHeight - helpIcon.height) / 2);
 				operateRect(hx, hy, helpIcon, 0, 0, helpIcon.width, helpIcon.height, omAuto, appearanceStyle.opacity);
 				helpBounds = new KRect(hx, hy, helpIcon.width, helpIcon.height);
 			}
