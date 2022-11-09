@@ -601,7 +601,7 @@ class KTimeLineLayerView extends KVirtualWidget
 			if (y < list.drawItemList.count) {
 				list.drawItemList[y].drawTimeLine(this, fromX, toX);
 			} else {
-				fillRect(0, y * TIMELINE_FRAME_HEIGHT, width, TIMELINE_FRAME_HEIGHT, WIN_WHITE);
+				fillRect(0, y * TIMELINE_FRAME_HEIGHT, width, TIMELINE_FRAME_HEIGHT, borderStyle.backgroundColor);
 			}
 		}
 	}
