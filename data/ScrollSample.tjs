@@ -94,7 +94,7 @@ class ScrollSample extends KWindow
     // ガンマ補正の走査対象になるイメージを「image」の名前で詰め込み
     abs = new KAbsoluteLayout(this);
       scroll = new KScrollLayout(this, %[ name: "scroll3" ]);
-      scroll.add(new KImageLabel(this, "cg01", "image"));
+      scroll.add(new KImageLabel(this, %[ icon: "cg01", name: "image", middleButtonDrag: true ]));
     abs.add(scroll);
 
     // RGBグリッド

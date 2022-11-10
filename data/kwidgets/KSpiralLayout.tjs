@@ -6,6 +6,10 @@
 /**----------------------------------------------------------------------
  * スパイラルレイアウト(左から右、上から下にウィジェットを並べるレイアウト
  ----------------------------------------------------------------------*/
+global.KSpiralLayoutArgsFormat =
+	[
+			%[ key: "name", defaultValue: "" ]
+	];
 
 class KSpiralLayout extends KLayout
 {
@@ -18,8 +22,10 @@ class KSpiralLayout extends KLayout
 	 * @param window ウィンドウ
 	 * @param name 名前
 	 ------------------------------*/
-	function KSpiralLayout(window, name) {
-		super.KLayout(window, name);
+	function KSpiralLayout(window, *) {
+		var options = parseOldStyleWidgetArgs(KSpiralLayoutArgsFormat, *);
+		options.middleButtonDrag = true;
+		super.KLayout(window, options);
 		childList = [];
 		hasImage = false;
 		setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);

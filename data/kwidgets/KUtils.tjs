@@ -323,10 +323,14 @@ class KInterpolateDispatcher {
 	var beginTick;
 	var interval;
 	var lerpFunction;
-
+	var valueName;
+	var dispatchName;
+	
 	function KInterpolateDispatcher(owner, options = %[]) {
 		this.owner = owner;
 		this.options = options;
+		valueName = getOption("valueName", "value");
+		dispatchName = getOption("dispatchName", "dispatch");
 		lerpFunction = getOption("lerpFunction",
 								 function(a, b, t) {
 									 return a + (b - a) * t;
@@ -346,7 +350,7 @@ class KInterpolateDispatcher {
 	}
 
 	function interpolate(toValue, interval = getOption("interval", 120)) {
-		this.fromValue = owner._value;
+		this.fromValue = owner[valueName];
 		this.toValue = toValue;
 		this.interval = interval;
 		beginTick = System.getTickCount();
@@ -357,10 +361,8 @@ class KInterpolateDispatcher {
 		getter {
 			if (running)
 				return toValue;
-			else if (typeof(owner["_value"]) !== K_UNDEFINED)
-				return owner._value;
-			else
-				return owner.value;
+			else if (typeof(owner[valueName]) !== K_UNDEFINED)
+				return owner[valueName];
 		}
 	}
 
@@ -385,13 +387,13 @@ class KInterpolateDispatcher {
 		var lapsTime = System.getTickCount() - beginTick;
 		if (lapsTime >= interval) {
 			stopTick();
-			owner._value = toValue;
-			owner.dispatch();
+			owner[valueName] = toValue;
+			owner[dispatchName]();
 		} else {
 			var t = lapsTime / interval;
 			t = Math.pow(t, getOption("exponent", 0.5));
-			owner._value = lerpFunction(fromValue, toValue, t);
-			owner.dispatch();
+			owner[valueName] = lerpFunction(fromValue, toValue, t);
+			owner[dispatchName]();
 		}
 	}
 

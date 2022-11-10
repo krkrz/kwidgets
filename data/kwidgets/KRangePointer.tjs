@@ -76,7 +76,8 @@ class KRangePointer2D extends KValueEntity
 		knob.onSpacerMouseDown = onKnobMouseDown;
 
 		if (getOption("interpolation", false)) {
-			interp = new KInterpolateDispatcher(this, %[ lerpFunction: function(a, b, t) { return %[ h: a.h + (b.h - a.h) * t, v: a.v + (b.v - a.v) * t ]; } ]);
+			interp = new KInterpolateDispatcher(this, %[ valueName: "_value",
+														 lerpFunction: function(a, b, t) { return %[ h: a.h + (b.h - a.h) * t, v: a.v + (b.v - a.v) * t ]; } ]);
 			interp.onStart = _onStartInterpolation;
 			interp.onStop = _onStopInterpolation;
 		}

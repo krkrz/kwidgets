@@ -292,9 +292,10 @@ class KWidget extends Layer
 		_fontFace = font.face = win.defaultFontFace;
 		_fontHeight = font.height = win.defaultFontHeight;
 		_fontColor = win.defaultFontColor;
+		// ミドルボタンドラッグ
+		_middleButtonDrag = getOption("middleButtonDrag", false);
 		// 可視
 		visible = true;
-		// 有効
 		// ドラッグ初期化
 		isDragging = isReadyToDrag = false;
 		curDragTargetAcceptPacket = false;
@@ -325,6 +326,7 @@ class KWidget extends Layer
 	 * 自動的に、自分が保持している子レイヤーを全てinvalidateする。
 	 ------------------------------*/
 	function finalize {
+		invalidate(_middleButtonDragInterp);
 		// 辞書を解除
 		if (_dict !== void)
 			onUnbindPersistentDictionary(_dict);
@@ -385,6 +387,10 @@ class KWidget extends Layer
 		updateStyleStates();
 		invalidateStyles();
 		updateAncestorsStates();
+	}
+
+	function hasStyleState(state) {
+		return styleStates.find(state) >= 0;
 	}
 
 	function addCustomStyleState(state, onlyAdd = false) {
@@ -2820,6 +2826,26 @@ class KWidget extends Layer
 		locateChild(x + layoutStyle.borderLeft, y + layoutStyle.borderTop, cw, ch, child);
 	}
 
+	function getChildBoundsWithoutBorderPadding(child) {
+		var mh = child.marginHorizontal;
+		var mv = child.marginVertical;
+		var bpw = 0;
+		var bph = 0;
+		return %[ minWidth: child.minWidth + mh + bpw,
+				  maxWidth: child.maxWidth + mh + bpw,
+				  minHeight: child.minHeight + mv + bph,
+				  maxHeight: child.maxHeight + mv + bph ];
+	}
+
+	function embedChildWithoutBorderPadding(x, y, w, h, child, clear = false) {
+		var bpw = 0;
+		var bph = 0;
+		var cw = w - bpw;
+		var ch = h - bph;
+		child.setSize(cw - child.marginHorizontal, ch - child.marginVertical);
+		locateChild(x + layoutStyle.borderLeft, y + layoutStyle.borderTop, cw, ch, child);
+	}
+	
 		/*------------------------------
 	 * 外部からファイルがドロップされた
 	 *
@@ -2879,10 +2905,17 @@ class KWidget extends Layer
 				   && ! isDragging) {
 			// 右クリックなら onRightClick を呼ぶ
 			onRightClick(x, y, shift);
+		} else if (button == mbMiddle) {
+			var target = findMiddleButtonDragTarget();
+			if (target !== void)
+				startMiddleButtonDrag(target);
 		}
 	}
 
 	function onMouseMove(x, y, shift) {
+		// 中ボタンドラッグ
+		if (_middleButtonDragging)
+			progressMiddleButonDrag();
 		// ドラッグ中なら onDragMove を呼び出す
 		if (isDragging) {
 			onDragMove(x, y, shift);
@@ -2965,6 +2998,9 @@ class KWidget extends Layer
 		_pressing = false;
 		updateStyleStates();
 		invalidateStyles();
+		// 中ボタンドラッグ
+		if (_middleButtonDragging)
+			stopMiddleButtonDrag();
 		if (button == mbLeft) {
 			// ドラッグ中であれば、ドラッグの終了を通知
 			if (isDragging) {
@@ -3035,6 +3071,74 @@ class KWidget extends Layer
 			if (window.statusBar !== void)
 				window.statusBar.label = "";
 		}
+	}
+
+	/*------------------------------
+	 * ミドルボタンドラッグ
+	 ------------------------------*/
+	var _middleButtonDrag = false;
+	var _middleButtonDragTarget = void;
+	var _middleButtonDragging = false;
+	var _middleButtonDragBaseX = 0;
+	var _middleButtonDragBaseY = 0;
+	var _middleButtonDragInterp;
+	var _middleButtonDragNextTarget;
+
+	function findMiddleButtonDragTarget() {
+		for (var widget = this;
+			 widget instanceof "KWidget";
+			 widget = widget.parent) {
+			if (widget._middleButtonDrag)
+				return widget;
+		}
+		return void;
+	}
+
+	function startMiddleButtonDrag(target) {
+		_middleButtonDragging = true;
+		_middleButtonDragTarget = target;
+		_middleButtonDragBaseX = window.primaryWidget.cursorX;
+		_middleButtonDragBaseY = window.primaryWidget.cursorY;
+		if (_middleButtonDragInterp === void)
+			_middleButtonDragInterp =
+			new KInterpolateDispatcher(this,
+									   %[ valueName: "middleButtonDragTargetValue",
+										  dispatchName: "dispatchMiddleButtonDrag",
+										  lerpFunction: function(a, b, t)
+										  { return %[ left: a.left + (b.left - a.left) * t,
+													  top: a.top + (b.top - a.top) * t ]; } ]);
+	}
+
+	function progressMiddleButonDrag() {
+		var ofstx = -(window.primaryWidget.cursorX - _middleButtonDragBaseX);
+		var ofsty = -(window.primaryWidget.cursorY - _middleButtonDragBaseY);
+		_middleButtonDragBaseX = window.primaryWidget.cursorX;
+		_middleButtonDragBaseY = window.primaryWidget.cursorY;
+		var completedValue = _middleButtonDragInterp.completedValue;
+		_middleButtonDragInterp.interpolate(%[ left: completedValue.left + ofstx,
+											   top: completedValue.top + ofsty ]);
+	}
+
+	function stopMiddleButtonDrag() {
+		_middleButtonDragging = false;
+	}
+
+	property middleButtonDragTargetValue {
+		getter {
+			var rect = _middleButtonDragTarget.viewingRect;
+			return %[ left: rect.left, top: rect.top ];
+		}
+		setter(v) {
+			_middleButtonDragNextTarget = v;
+		}
+	}
+
+	function dispatchMiddleButtonDrag() {
+		var rect = _middleButtonDragTarget.viewingRect;
+		_middleButtonDragTarget.noticeRect(_middleButtonDragNextTarget.left,
+										   _middleButtonDragNextTarget.top,
+										   rect.width,
+										   rect.height);
 	}
 
 	/**------------------------------

@@ -1256,7 +1256,7 @@ class KTableView extends KTableVirtualWidget
 
 	// テーブルビュー
 	function KTableView(window, owner, name) {
-		super.KTableVirtualWidget(...);
+		super.KTableVirtualWidget(window, owner, %[ name: name, middleButtonDrag: true ]);
 		curDragInfo = %[ acceptType: DRAG_ACCEPT_TYPE_NONE ];
 		curDragRegion = new KRegion();
 		setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);

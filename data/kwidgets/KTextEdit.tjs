@@ -436,6 +436,11 @@ class KTextEditPoint
 /**----------------------------------------------------------------------
  * テキストエディット
  ----------------------------------------------------------------------*/
+global.KTextEditArgsFormat =
+	[
+			%[ key: "name", defaultValue: "" ]
+	];
+
 class KTextEdit extends KVirtualWidget
 {
 	// 最小限サイズ
@@ -501,8 +506,10 @@ class KTextEdit extends KVirtualWidget
 	 * @param window
 	 * @param name 名前
 	 ------------------------------*/
-	function KTextEdit(window, opts) {
-		super.KVirtualWidget(...);
+	function KTextEdit(window, *) {
+		var options = parseOldStyleWidgetArgs(KTextEditArgsFormat, *);
+		options.middleButtonDrag = true;
+		super.KVirtualWidget(window, options);
 		// ウィンドウ初期化
 		focusable = getOption("focusable", true);
 		hitThreshold = 0;

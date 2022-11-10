@@ -1,11 +1,17 @@
+global.KTextBoardArgsFormat =
+	[
+			%[ key: "name", defaultValue: "" ]
+	];
 
 class KTextBoard extends KVirtualWidget
 {
 	var rows = [];
 	var linefeedPat = new RegExp("\r\n|\r|\n");
 
-	function KTextBoard(window, name) {
-		super.KVirtualWidget(...);
+	function KTextBoard(window, *) {
+		var options = parseOldStyleWidgetArgs(KTextBoardArgsFormat, *);
+		options.middleButtonDrag = true;
+		super.KVirtualWidget(window, options);
 		setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
 	}
 

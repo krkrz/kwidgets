@@ -78,6 +78,11 @@ class KLabelEdit extends KTextInput {
 /**----------------------------------------------------------------------
  * リストビュー
  ----------------------------------------------------------------------*/
+global.KListArgsFormat =
+	[
+			%[ key: "name", defaultValue: "" ]
+	];
+
 class KList extends KVirtualWidget
 {
 	var isRoot = true;
@@ -128,7 +133,9 @@ class KList extends KVirtualWidget
 	 * @param window ウィンドウ
 	 * @param name 名前
 	 ------------------------------*/
-	function KList(window, options = %[]) {
+	function KList(window, *) {
+		var options = parseOldStyleWidgetArgs(KListArgsFormat, *);
+		options.middleButtonDrag = true;
 		super.KVirtualWidget(window, options);
 		focusable = getOption("focusable", window.defaultFocusable);
 		_focusOnSelect = getOption("focusOnSelect", true);

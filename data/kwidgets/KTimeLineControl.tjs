@@ -372,6 +372,9 @@ class KTimeLineTimeLocator extends KVirtualWidget
 	function onNodeDisabled {
 		_canvas.opacity = 64;
 	}
+
+	function onHoverMouseWheel {
+	}
 }
 
 /*----------------------------------------------------------------------
@@ -429,7 +432,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	// コンストラクタ
 	function KTimeLineLayerView(window, owner, name) {
-		super.KVirtualWidget(window, name);
+		super.KVirtualWidget(window, %[ name: name, middleButtonDrag: true ]);
 		this.owner = owner;
 		list = owner._layerList;
 		setMinMaxSize(2000, list.minHeight, 2000, list.maxHeight);
@@ -699,6 +702,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	// マウスダウン
 	function onMouseDown(x, y, button, shift) {
+		super.onMouseDown(...);
 		focus();
 
 		// オーナーが再生中なら即停止
@@ -783,6 +787,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	// マウスムーブ
 	function onMouseMove(x, y, shift) {
+		super.onMouseMove(...);
 		// 境界ドラッグ中ならその処理
 		if (boundaryDragMoving) {
 			var item = list.drawItemList[boundaryDragLayer];
@@ -865,6 +870,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	// マウスアップ
 	function onMouseUp(x, y, button, shift) {
+		super.onMouseUp(...);
 		// 境界ドラッグ終了
 		if (boundaryDragMoving) {
 			boundaryDragMoving = false;

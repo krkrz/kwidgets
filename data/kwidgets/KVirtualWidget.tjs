@@ -7,6 +7,10 @@
  * 仮想ウィジェット
  ----------------------------------------------------------------------*/
 global._virtualWidgetDelegates = [];
+global.KVirtualWidgetArgsFormat =
+	[
+			%[ key: "name", defaultValue: "" ]
+	];
 
 class KVirtualWidget extends KEntity
 {
@@ -35,8 +39,9 @@ class KVirtualWidget extends KEntity
 	 * @param win ウィンドウ
 	 * @param name 名前
 	 ------------------------------*/
-	function KVirtualWidget(win, opts) {
-		super.KEntity(win, opts);
+	function KVirtualWidget(win, *) {
+		var options = parseOldStyleWidgetArgs(KVirtualWidgetArgsFormat, *);
+		super.KEntity(win, options);
 		_avoidSiteUpdateDrawing = false;
 		_site = new KRect(0, 0, 0, 0);
 		hasImage = false;
