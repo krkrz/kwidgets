@@ -346,7 +346,7 @@ class KInterpolateDispatcher {
 	}
 
 	function interpolate(toValue, interval = getOption("interval", 120)) {
-		this.fromValue = owner.value;
+		this.fromValue = owner._value;
 		this.toValue = toValue;
 		this.interval = interval;
 		beginTick = System.getTickCount();
@@ -357,19 +357,27 @@ class KInterpolateDispatcher {
 		getter {
 			if (running)
 				return toValue;
+			else if (typeof(owner["_value"]) !== K_UNDEFINED)
+				return owner._value;
 			else
 				return owner.value;
 		}
 	}
 
 	function startTick() {
+		if (running)
+			return;
 		System.addContinuousHandler(this.onTick);
 		running = true;
+		onStart();
 	}
 
 	function stopTick() {
+		if (! running)
+			return;
 		System.removeContinuousHandler(this.onTick);
 		running = false;
+		onStop();
 	}
 
 	function onTick() {
@@ -377,13 +385,19 @@ class KInterpolateDispatcher {
 		var lapsTime = System.getTickCount() - beginTick;
 		if (lapsTime >= interval) {
 			stopTick();
-			owner.value = toValue;
+			owner._value = toValue;
 			owner.dispatch();
 		} else {
 			var t = lapsTime / interval;
 			t = Math.pow(t, getOption("exponent", 0.5));
-			owner.value = lerpFunction(fromValue, toValue, t);
+			owner._value = lerpFunction(fromValue, toValue, t);
 			owner.dispatch();
 		}
+	}
+
+	function onStart() {
+	}
+
+	function onStop() {
 	}
 };

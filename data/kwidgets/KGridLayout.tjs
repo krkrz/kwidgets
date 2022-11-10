@@ -113,6 +113,13 @@ class KGridLayout extends KLayout
 	}
 
 	/*------------------------------
+	 * ウィジェットスタイル
+	 ------------------------------*/
+	function onExtractWidgetStyle(widgetStyle) {
+		widgetStyle.drawBordersAroundIndividualWidgets = getStyleProperty("drawBordersAroundIndividualWidgets", false);
+	}
+
+	/*------------------------------
 	 * レイアウトを計算する
 	 ------------------------------*/
 	function onCalculateLayout {
@@ -130,7 +137,11 @@ class KGridLayout extends KLayout
 					continue;
 				var revItem, colspan, rowspan;
 				revItem = revItems[child], colspan = revItem[2], rowspan = revItem[3];
-				var cb = getChildBoundsWithoutPadding(child);
+				var cb;
+				if (widgetStyle.drawBordersAroundIndividualWidgets)
+					cb = getChildBoundsWithoutPadding(child);
+				else
+					cb = getChildBoundsWithoutBorderPadding(child);
 				if (colspan == 1) {
 					minWidthForColumn[x] = Math.max(minWidthForColumn[x], cb.minWidth);
 					maxWidthForColumn[x] = Math.max(maxWidthForColumn[x], cb.maxWidth);
@@ -149,7 +160,11 @@ class KGridLayout extends KLayout
 				var revItem, colspan, rowspan;
 				revItem = revItems[child], colspan = revItem[2], rowspan = revItem[3];
 				if (colspan > 1) {
-					var cb = getChildBoundsWithoutPadding(child);
+					var cb;
+					if (widgetStyle.drawBordersAroundIndividualWidgets)
+						cb = getChildBoundsWithoutPadding(child);
+					else
+						cb = getChildBoundsWithoutBorderPadding(child);
 					var minW, maxW, w;
 					minW = Math.max(0, cb.minWidth - spaceHorizontal * (colspan - 1));
 					w = 0; for (var i = 0; i < colspan; i++) w += minWidthForColumn[x + i];
@@ -173,13 +188,15 @@ class KGridLayout extends KLayout
 		// グリッド全体の最大・最小サイズを決定する
 		var minW, minH, maxW, maxH;
 
-		minW = maxW = spaceHorizontal * (xcount - 1) + layoutStyle.paddingLeft + layoutStyle.paddingRight;
+		var wofst = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingLeft + layoutStyle.paddingRight : borderPaddingWidth;
+		minW = maxW = spaceHorizontal * (xcount - 1) + wofst;
 		for (var x = 0; x < xcount; x++) {
 			minW += minWidthForColumn[x];
 			maxW += maxWidthForColumn[x];
 		}
 
-		minH = maxH = spaceVertical * (ycount - 1) + layoutStyle.paddingTop + layoutStyle.paddingBottom;
+		var hofst = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingTop + layoutStyle.paddingBottom : borderPaddingHeight;
+		minH = maxH = spaceVertical * (ycount - 1) + hofst;
 		for (var y = 0; y < ycount; y++) {
 			minH += minHeightForRow[y];
 			maxH += maxHeightForRow[y];
@@ -195,7 +212,10 @@ class KGridLayout extends KLayout
 	 * レイアウトに従ってウィジェットを配置する
 	 ------------------------------*/
 	function onLocateLayout {
-		fillRect(0, 0, width, height, borderStyle.backgroundColor);
+		if (widgetStyle.drawBordersAroundIndividualWidgets)
+			fillRect(0, 0, width, height, borderStyle.backgroundColor);
+		else
+			drawBorder(borderStyle, 0, 0, width, height);
 
 		// 行、列ごとのサイズを決定する
 		widthForColumn = [];
@@ -231,7 +251,7 @@ class KGridLayout extends KLayout
 		}
 
 		var xpos, ypos;
-		xpos = layoutStyle.paddingLeft;
+		xpos = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingLeft : borderPaddingLeft;
 
 		var d = 0;
 		for (var i = 0; i < widthForColumn.count; i++) {
@@ -246,7 +266,7 @@ class KGridLayout extends KLayout
 		}
 
 		for (var x = 0; x < xcount; x++) {
-			ypos = layoutStyle.paddingTop;
+			ypos = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingTop : borderPaddingTop;
 			for (var y = 0; y < ycount; y++) {
 				var child = childAt(x, y);
 				if (child) {
@@ -259,7 +279,10 @@ class KGridLayout extends KLayout
 						w += widthForColumn[x + i];
 					for (var i = 0; i < rowspan; i++)
 						h += heightForRow[y + i];
-					embedChildWithoutPadding(xpos, ypos, w, h, child);
+					if (widgetStyle.drawBordersAroundIndividualWidgets)
+						embedChildWithoutPadding(xpos, ypos, w, h, child);
+					else
+						embedChildWithoutBorderPadding(xpos, ypos, w, h, child);
 				}
 				ypos += heightForRow[y] + spaceVertical;
 			}

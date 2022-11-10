@@ -54,6 +54,7 @@
 					   borderStyle: BORDER_STYLE_SOLID,
 					   borderWidth: 1,
 					   borderColor: 0xffff00000,
+					   drawBordersAroundIndividualWidgets: true,
 				   ]
 			   ]
 		   ]

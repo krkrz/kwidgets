@@ -75,8 +75,11 @@ class KRangePointer2D extends KValueEntity
 		knob.onSpacerMouseMove = onKnobMouseMove;
 		knob.onSpacerMouseDown = onKnobMouseDown;
 
-		if (getOption("interpolation", false))
+		if (getOption("interpolation", false)) {
 			interp = new KInterpolateDispatcher(this, %[ lerpFunction: function(a, b, t) { return %[ h: a.h + (b.h - a.h) * t, v: a.v + (b.v - a.v) * t ]; } ]);
+			interp.onStart = _onStartInterpolation;
+			interp.onStop = _onStopInterpolation;
+		}
 	}
 
 	function finalize {
@@ -109,7 +112,7 @@ class KRangePointer2D extends KValueEntity
 		}
 	}
 
-	property value {
+	property _value {
 		getter {
 			return pointerValue;
 		}
@@ -118,14 +121,47 @@ class KRangePointer2D extends KValueEntity
 		}
 	}
 
-	function interpolate(value) {
+	property value {
+		getter {
+			return _value;
+		}
+		setter (v) {
+			_value = v;
+		}
+	}
+
+	function _interpolate(value) {
 		interp.interpolate(value);
+	}
+
+	function interpolate(value) {
+		_interpolate(value);
+	}
+
+	property _completedValue {
+		getter {
+			return interp.completedValue;
+		}
 	}
 
 	property completedValue {
 		getter {
-			return interp.completedValue;
+			return _completedValue;
 		}
+	}
+
+	function _onStartInterpolation() {
+		onStartInterpolation();
+	}
+
+	function _onStopInterpolation() {
+		onStopInterpolation();
+	}
+
+	function onStartInterpolation() {
+	}
+
+	function onStopInterpolation() {
 	}
 
 	//------------------------------
@@ -319,7 +355,7 @@ class KRangePointer2D extends KValueEntity
 			hParams.newPointerValue = hParams.pointerValue;
 			vParams.newPointerValue = vParams.pointerValue;
 		} else {
-			var comp = completedValue;
+			var comp = _completedValue;
 			hParams.newPointerValue = comp.h;
 			vParams.newPointerValue = comp.v;
 		}
@@ -346,7 +382,7 @@ class KRangePointer2D extends KValueEntity
 			pointerValue = newPointerValue;
 			dispatch();
 		} else {
-			interpolate(newPointerValue);
+			_interpolate(newPointerValue);
 		}
 	}
 

@@ -207,7 +207,7 @@ class WidgetSample extends KWindow
 		widgetFrame = new KFrameLayout(this, %[ label: "スライダー", id: "group_frame" ]);
 		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextLabel(this, "0〜100"));
-		widgetGrid.add(1, 0, new KSlider(this, SLIDER_ADAPTIVE_WIDTH, 20, 0, 100, 1, "slider1"));
+		widgetGrid.add(1, 0, new KSlider(this, %[ width: SLIDER_ADAPTIVE_WIDTH, height: 20, left: 0, right: 100, stride: 1, name: "slider1", interpolation: true ]));
 		widgetGrid.add(0, 1, new KTextLabel(this, "-1000〜1000"));
 		widgetGrid.add(1, 1, new KSlider(this, 200, 20, -1000, 1000, 1, "slider2"));
 		widgetGrid.add(0, 2, new KTextLabel(this, "24〜34"));

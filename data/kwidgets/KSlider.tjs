@@ -65,6 +65,18 @@ class KSlider extends KRangePointer2D
 		}
 	}
 
+	property completedValue {
+		getter {
+			return _completedValue.h;
+		}
+	}
+
+	function interpolate(value) {
+		var pv = pointerValue;
+		pv.h = value;
+		super._interpolate(pv);
+	}
+
 	property adaptiveWidth {
 		getter {
 			return maxValue - minValue + knobFixedWidth + 1;

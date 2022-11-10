@@ -68,6 +68,8 @@ class KTextInputSlider extends KValueEntity
 															  value: v,
 															  interpolation: getOption("interpolation", false)
 															]);
+		slider.onStartInterpolation = _onStartInterpolation;
+		slider.onStopInterpolation = _onStopInterpolation;
 
 		textInput.parent = this;
 		slider.parent = this;
@@ -101,6 +103,30 @@ class KTextInputSlider extends KValueEntity
 			_value = slider.value;
 			textInput.value = string(_value);
 		}
+	}
+
+	property completedValue {
+		getter {
+			return slider.completedValue;
+		}
+	}
+
+	function interpolate(value) {
+		slider.interpolate(value);
+	}
+
+	function _onStartInterpolation() {
+		onStartInterpolation();
+	}
+
+	function _onStopInterpolation() {
+		onStopInterpolation();
+	}
+
+	function onStartInterpolation() {
+	}
+
+	function onStopInterpolation() {
 	}
 
 	/**------------------------------
