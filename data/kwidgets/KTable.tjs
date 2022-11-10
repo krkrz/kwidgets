@@ -2434,6 +2434,13 @@ class KTable extends KEntity
 
 	// MinMaxサイズを整える
 	function updateMinMaxSize() {
+		if (columnList.count == 0
+			|| rowList.count == 0) {
+			columnTab.setMinMaxSize(0, 0, 0, 0);
+			rowTab.setMinMaxSize(0, 0, 0, 0);
+			view.setMinMaxSize(0, 0, 0, 0);
+			return;
+		}
 		var minW, minH, maxW, maxH;
 		var w = lastColumn.tail;
 		var h = lastRow.tail;
@@ -2922,11 +2929,6 @@ class KTable extends KEntity
 	// ポイント配列を選択
 	function selectPointList(pointList, value = true) {
 		view.selectPointList(...);
-	}
-
-	// マウスホイール処理
-	function onHoverMouseWheel() {
-		view.onHoverMouseWheel(...);
 	}
 
 	function onFocus {
