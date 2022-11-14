@@ -11,6 +11,14 @@ global.SCROLL_HANDLE_MIN_SIZE = 10;
 
 //----------------------------------------------------------------------
 // スクロールバー
+global.KScrollBarWidgetStyleDefinition =
+	[
+		[ "backwardButtonId", "backwardButtonId" ],
+		[ "forwardButtonId", "forwardButtonId" ],
+		[ "rangepointerId", "rangepointerId" ],
+		[ "buttonStride", "buttonStride" ]
+	];
+
 class KScrollBar extends KEntity
 {
 	var widgetTouched = false;
@@ -23,18 +31,13 @@ class KScrollBar extends KEntity
 	function KScrollBar(window, opts) {
 		super.KEntity(window, opts);
 
+		addWidgetStyleDefinition(KScrollBarWidgetStyleDefinition);
+
 		// レイヤパラメータ設定
 		hasImage = false;
 		hitThreshold = 0;
 
 		initWidgets();
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.backwardButtonId = getStyleProperty("backwardButtonId");
-		widgetStyle.forwardButtonId = getStyleProperty("forwardButtonId");
-		widgetStyle.rangepointerId = getStyleProperty("rangepointerId");
-		widgetStyle.buttonStride = getStyleProperty("buttonStride");
 	}
 
 	// ボタン作成

@@ -217,6 +217,12 @@ global.KTextInputArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KTextInputWidgetStyleDefinition =
+	[
+		[ "width", "width", void ],
+		[ "height", "height", void ]
+	];
+
 class KTextInput extends KValueEntity
 {
 	// フレームレイヤ
@@ -240,6 +246,8 @@ class KTextInput extends KValueEntity
 
 		super.KValueEntity(window, opts);
 
+		addWidgetStyleDefinition(KTextInputWidgetStyleDefinition);
+
 		// イメージは持たず
 		hasImage = true;
 
@@ -261,11 +269,6 @@ class KTextInput extends KValueEntity
 
 		// いったん描画
 		redrawContents();
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.width = getStyleProperty("width", void);
-		widgetStyle.height = getStyleProperty("height", void);
 	}
 
 	/*------------------------------

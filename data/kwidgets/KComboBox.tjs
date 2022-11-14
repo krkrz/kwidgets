@@ -11,6 +11,14 @@ global.KComboBoxArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KComboBoxWidgetStyleDefinition =
+	[
+		[ "dropdownButtonId", "dropdownButtonId" ],
+		[ "placeButtonInsideBorder", "placeButtonInsideBorder" ],
+		[ "dropdownInterval", "dropdownInterval" ],
+		[ "dispCount", "dispCount", 10 ]
+	];
+
 class KComboBox extends KValueEntity
 {
 	var _selected = -1;
@@ -28,6 +36,8 @@ class KComboBox extends KValueEntity
 		var options = parseOldStyleWidgetArgs(KComboBoxArgsFormat, *);
 
 		super.KValueEntity(window, options);
+
+		addWidgetStyleDefinition(KComboBoxWidgetStyleDefinition);
 
 		focusable = getOption("focusable", window.defaultFocusable);
 		_type = getOption("type", COMBO_STYLE_DROPDOWNLIST);
@@ -48,13 +58,6 @@ class KComboBox extends KValueEntity
 
 		_dropdownTimer = new Timer(openDropdownList, "");
 		_dropdownTimer.enabled = false;
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.dropdownButtonId = getStyleProperty("dropdownButtonId");
-		widgetStyle.placeButtonInsideBorder = getStyleProperty("placeButtonInsideBorder");
-		widgetStyle.dropdownInterval = getStyleProperty("dropdownInterval");
-		widgetStyle.dispCount = getStyleProperty("dispCount", 10);
 	}
 
 	function finalize {

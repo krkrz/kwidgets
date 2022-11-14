@@ -461,6 +461,17 @@ class KTableTextEdit extends KTextInput {
 /*----------------------------------------------------------------------
  * テキストエリア編集用のテキストエディット
  ----------------------------------------------------------------------*/
+global.KTableTextAreaEditWidgetStyleDefinition =
+	[
+		[ "gridBorderColor", "gridBorderColor", void, "resolveColor" ],
+		[ "tabBorderColor", "tabBorderColor", void, "resolveColor" ],
+		[ "innerSplitColor", "innerSplitColor" ,void, "resolveColor" ],
+		[ "frameColor", "frameColor", void, "resolveColor" ],
+		[ "focusFrameColor", "focusFrameColor", void, "resolveColor" ],
+		[ "dragFrameColor", "dragFrameColor", void, "resolveColor" ],
+		[ "selectionColor", "selectionColor", void, "resolveColor" ]
+	];
+
 class KTableTextAreaEdit extends KFrameLayout
 {
 	var table;
@@ -482,6 +493,8 @@ class KTableTextAreaEdit extends KFrameLayout
 		textStyle.spaceVertical = 0;
 		super.KFrameLayout(table.window, %[ id: table.widgetStyle.textEditFrameId,
 											style: %[ backgroundColor: view.borderStyle.backgroundColor ] ]);
+		addWidgetStyleDefinition(KTableTextAreaEditWidgetStyleDefinition);
+
 		add(new KTextEdit(table.window, %[ style: textStyle, name: "textedit" ]));
 		setPos(rect.left, rect.top);
 		setFixedSize(rect.width, rect.height);
@@ -563,16 +576,6 @@ class KTableVirtualWidget extends KVirtualWidget
 	function KTableVirtualWidget(window, owner, name) {
 		super.KVirtualWidget(window, name);
 		this.owner = owner;
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.gridBorderColor = resolveColor(getStyleProperty("gridBorderColor"));
-		widgetStyle.tabBorderColor = resolveColor(getStyleProperty("tabBorderColor"));
-		widgetStyle.innerSplitColor = resolveColor(getStyleProperty("innerSplitColor"));
-		widgetStyle.frameColor = resolveColor(getStyleProperty("frameColor"));
-		widgetStyle.focusFrameColor = resolveColor(getStyleProperty("focusFrameColor"));
-		widgetStyle.dragFrameColor = resolveColor(getStyleProperty("dragFrameColor"));
-		widgetStyle.selectionColor = resolveColor(getStyleProperty("selectionColor"));
 	}
 
 	function onDrawContents() {
@@ -2188,6 +2191,17 @@ global.KTableArgsFormat =
 			%[ key: "defaultColumnOptions", defaultValue: %[] ]
 	];
 
+global.KTableWidgetStyleDefinition =
+	[
+		[ "leftTopCornerId", "leftTopCornerId", "" ],
+		[ "rowTabId", "rowTabId", "" ],
+		[ "columnTabId", "columnTabId", "" ],
+		[ "mainViewId", "mainViewId", "" ],
+		[ "textEditFrameId", "textEditFrameId", "" ],
+		[ "checkboxOnIcon", "checkboxOnIcon", "" ],
+		[ "checkboxOffIcon", "checkboxOffIcon", "" ]
+	];
+
 class KTable extends KEntity
 {
 	var _enableColumnKeyRowSort = true;
@@ -2221,6 +2235,8 @@ class KTable extends KEntity
 	function KTable(window, *) {
 		var options = parseOldStyleWidgetArgs(KTableArgsFormat, *);
 		super.KEntity(window, options);
+
+		addWidgetStyleDefinition(KTableWidgetStyleDefinition);
 
 		defaultColumnOptions = getOption("defaultColumnOptions");
 		_showVerticalGrid = getOption("showVerticalGrid", true);
@@ -2395,16 +2411,6 @@ class KTable extends KEntity
 
 	// 子ウィネットの変更通知をここで食い取る
 	function onChildValueModified() {
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.leftTopCornerId = getStyleProperty("leftTopCornerId", "");
-		widgetStyle.rowTabId = getStyleProperty("rowTabId", "");
-		widgetStyle.columnTabId = getStyleProperty("columnTabId", "");
-		widgetStyle.mainViewId = getStyleProperty("mainViewId", "");
-		widgetStyle.textEditFrameId = getStyleProperty("textEditFrameId", ""); 
-		widgetStyle.checkboxOnIcon = getStyleProperty("checkboxOnIcon", "");
-		widgetStyle.checkboxOffIcon = getStyleProperty("checkboxOffIcon", "");
 	}
 
 	function onDrawContents() {

@@ -116,6 +116,10 @@ global.KTabLayoutArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KTabLayoutWidgetStyleDefinition = [
+	[ "tabId", "tabId", "" ]
+];
+
 /**----------------------------------------------------------------------
  * タブレイアウト
  ----------------------------------------------------------------------*/
@@ -141,7 +145,8 @@ class KTabLayout extends KLayout
 	function KTabLayout(window, args*) {
 		var opts = args.count == 0 ? %[] : parseOldStyleWidgetArgs(KTabLayoutArgsFormat, args*);
 		super.KLayout(window, opts);
-//		frameLayer = new global.KWidget(window);
+		addWidgetStyleDefinition(KTabLayoutWidgetStyleDefinition);
+		//		frameLayer = new global.KWidget(window);
 //		frameLayer.parent = this;
 		_type = getOption("type", void);
 		childList = [];
@@ -152,10 +157,6 @@ class KTabLayout extends KLayout
 //		hasImage = false;
 		hitThreshold = 0;
 		overwriteStyle(%[ frameType: _type ]);
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.tabId = getStyleProperty("tabId", "");
 	}
 
 	/**------------------------------

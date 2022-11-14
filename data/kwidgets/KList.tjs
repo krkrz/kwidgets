@@ -83,6 +83,21 @@ global.KListArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KListWidgetStyleDefinition =
+	[
+		[ "stride", "stride", 14 ],
+		[ "slideWidth", "slideWidth", void, "resolveSlideWidth" ],
+		[ "renameTextinputId", "renameTextinputId" ],
+		[ "ignoreToggleWidth", "ignoreToggleWidth", false ],
+		[ "frameColor", "frameColor", void, "resolveColor" ],
+		[ "focusFrameColor", "focusFrameColor", void, "resolveColor" ],
+		[ "dragFrameColor", "dragFrameColor", void, "resolveColor" ],
+		[ "selectionColor", "selectionColor", void, "resolveColor" ],
+		[ "toggleOpenIcon", "toggleOpenIcon" ],
+		[ "toggleCloseIcon", "toggleCloseIcon" ],
+		[ "toggleInvisbleIcon", "toggleInvislbeIcon" ]
+	];
+
 class KList extends KVirtualWidget
 {
 	var isRoot = true;
@@ -137,6 +152,7 @@ class KList extends KVirtualWidget
 		var options = parseOldStyleWidgetArgs(KListArgsFormat, *);
 		options.middleButtonDrag = true;
 		super.KVirtualWidget(window, options);
+		addWidgetStyleDefinition(KListWidgetStyleDefinition);
 		focusable = getOption("focusable", window.defaultFocusable);
 		_focusOnSelect = getOption("focusOnSelect", true);
 		_multipleSelection = getOption("multipleSelection", false);
@@ -157,19 +173,6 @@ class KList extends KVirtualWidget
 	function finalize {
 		discardArray(childList);
 		super.finalize(...);
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.slideWidth = getStyleProperty("slideWidth", getStyleProperty("stride", 14));
-		widgetStyle.renameTextinputId = getStyleProperty("renameTextinputId");
-		widgetStyle.ignoreToggleWidth = getStyleProperty("ignoreToggleWidth", false);
-		widgetStyle.frameColor = resolveColor(getStyleProperty("frameColor"));
-		widgetStyle.focusFrameColor = resolveColor(getStyleProperty("focusFrameColor"));
-		widgetStyle.dragFrameColor = resolveColor(getStyleProperty("dragFrameColor"));
-		widgetStyle.selectionColor = resolveColor(getStyleProperty("selectionColor"));
-		widgetStyle.toggleOpenIcon = getStyleProperty("toggleOpenIcon");
-		widgetStyle.toggleCloseIcon = getStyleProperty("toggleCloseIcon");
-		widgetStyle.toggleInvisbleIcon = getStyleProperty("toggleInvislbeIcon");
 	}
 
 	property slideWidth {
@@ -209,6 +212,12 @@ class KList extends KVirtualWidget
 			else
 				return findIcon(root.widgetStyle.toggleOpenIcon).width + 4;
 		}
+	}
+
+	function resolveSlideWidth(v, style) {
+		if (v === void)
+			v = style.stride;
+		return v;
 	}
 
 	/**------------------------------
@@ -1792,6 +1801,7 @@ class KListItem
 	var labelStyle;
 	var appearanceStyle = %[];
 	var widgetStyle;
+	var widgetStyleDefinition = [];
 	var styleStates = [];
 	var customStyleStates = [];
 	var prevIconList = [];
@@ -2056,8 +2066,12 @@ class KListItem
 		return true;
 	}
 
+	function addWidgetStyleDefinition(defs) {
+		widgetStyleDefinition = concatArray(widgetStyleDefinition, defs);
+	}
+
 	function extractWidgetStyle() {
-		var widgetStyle = %[];
+		var widgetStyle = extractStyle(widgetStyleDefinition);
 		onExtractWidgetStyle(widgetStyle);
 		return widgetStyle;
 	}

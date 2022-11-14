@@ -71,6 +71,12 @@ global.KSpliterLayoutArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KSpliterLayoutWidgetStyleDefinition =
+	[
+		[ "handleSize", "handleSize", 5 ],
+		[ "handleId", "handleId", "" ],
+		[ "shutterToggleId", "shutterToggleId", "" ]
+	];
 
 class KSpliterLayout extends KLayout
 {
@@ -98,6 +104,7 @@ class KSpliterLayout extends KLayout
 	function KSpliterLayout(window, *) {
 		var opts = parseOldStyleWidgetArgs(KSpliterLayoutArgsFormat, *);
 		super.KLayout(window, opts);
+		addWidgetStyleDefinition(KSpliterLayoutWidgetStyleDefinition);
 		childList = [];
 		spliterHandle = new KSpliterHandle(window, 0, 0);
 		spliterHandle.hitThreshold = 0;
@@ -187,12 +194,6 @@ class KSpliterLayout extends KLayout
 			invalidate child;
 	}
 
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.handleSize = getStyleProperty("handleSize", 5);
-		widgetStyle.handleId = getStyleProperty("handleId", "");
-		widgetStyle.shutterToggleId = getStyleProperty("shutterToggleId", "");
-	}
 
 	property HANDLE_SIZE {
 		getter {

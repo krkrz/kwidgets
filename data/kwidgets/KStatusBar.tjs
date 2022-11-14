@@ -7,6 +7,10 @@ global.KStatusBarArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KStatusBarWidgetStyleDefinition = [
+	[ "textAlign", "textAlign", ALIGN_LEFT ]
+];
+
 
 /**----------------------------------------------------------------------
  * ステータスバー
@@ -26,6 +30,8 @@ class KStatusBar extends KEntity
 		var opts = parseOldStyleWidgetArgs(KStatusBarArgsFormat, *);
 		// 親クラス呼び出し
 		super.KEntity(win, opts);
+
+		addWidgetStyleDefinition(KStatusBarWidgetStyleDefinition);
 
 		_label = "";
 		_defaultLabel = getOption("defaultLabel", "");
@@ -85,10 +91,6 @@ class KStatusBar extends KEntity
 			if (window._statusBar === this)
 				window._statusBar = void;
 		}
-	}
-
-	function _onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.textAlign = getStyleProperty("textAlign", ALIGN_LEFT);
 	}
 
 	function onDrawContents() {

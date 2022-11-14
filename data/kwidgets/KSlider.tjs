@@ -17,6 +17,14 @@ global.KSliderArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KSliderWidgetStyleDefinition =
+	[
+		[ "width", "width", void ],
+		[ "height", "height", void ],
+		[ "knobWidth", "knobWidth", void ]
+	];
+
+
 class KSlider extends KRangePointer2D
 {
 	/**------------------------------
@@ -52,6 +60,7 @@ class KSlider extends KRangePointer2D
 		this.maxValue = int(Math.max(this.leftValue, this.rightValue));
 
 		super.KRangePointer2D(window, opts);
+		addWidgetStyleDefinition(KSliderWidgetStyleDefinition);
 
 		focusable = getOption("focusable", window.defaultFocusable);
 	}
@@ -81,13 +90,6 @@ class KSlider extends KRangePointer2D
 		getter {
 			return maxValue - minValue + knobFixedWidth + 1;
 		}
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		super.onExtractWidgetStyle(...);
-		widgetStyle.width = getStyleProperty("width", void);
-		widgetStyle.height = getStyleProperty("height", void);
-		widgetStyle.knobWidth = getStyleProperty("knobWidth", void);
 	}
 
 	function onDrawContents() {

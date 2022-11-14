@@ -4,6 +4,13 @@
 
 //----------------------------------------------------------------------
 // 2Dレンジポインタ
+global.KRangePointer2DWidgetStyleDefinition =
+	[
+		[ "knobId", "knobId" ],
+		[ "innerBgId", "innerBgId", "" ],
+		[ "innerKnobId", "innerKnobId", "" ]
+	];
+
 class KRangePointer2D extends KValueEntity
 {
 	var hParams, vParams;
@@ -24,6 +31,8 @@ class KRangePointer2D extends KValueEntity
 	//------------------------------
 	function KRangePointer2D(window, opts = %[]) {
 		super.KValueEntity(window, opts);
+
+		addWidgetStyleDefinition(KRangePointer2DWidgetStyleDefinition);
 
 		hitThreshold = 0;
 
@@ -87,12 +96,6 @@ class KRangePointer2D extends KValueEntity
 		invalidate autoDispatchTimer;
 		invalidate interp;
 		super.finalize();
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.knobId = getStyleProperty("knobId");
-		widgetStyle.innerBgId = getStyleProperty("innerBgId", "");
-		widgetStyle.innerKnobId = getStyleProperty("innerKnobId", "");
 	}
 
 	property pointerValue {

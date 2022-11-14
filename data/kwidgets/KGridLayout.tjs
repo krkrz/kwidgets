@@ -6,6 +6,12 @@
 /*----------------------------------------------------------------------
  * グリッドレイアウト
  ----------------------------------------------------------------------*/
+global.KGridLayoutWidgetStyle =
+	[
+		[ "drawBordersAroundIndividualWidgets", "drawBordersAroundIndividualWidgets", false ]
+	];
+
+
 class KGridLayout extends KLayout
 {
 	// X方向の要素数, Y方向の要素数
@@ -30,6 +36,8 @@ class KGridLayout extends KLayout
 	function KGridLayout(win, opts = %[]) {
 		// 親呼び出し
 		super.KLayout(win, opts);
+
+		addWidgetStyleDefinition(KGridLayoutWidgetStyle);
 
 		// 最初は要素0から。
 		xcount = ycount = 0;
@@ -110,13 +118,6 @@ class KGridLayout extends KLayout
 		xcount = 0;
 		ycount = 0;
 		redrawContents();
-	}
-
-	/*------------------------------
-	 * ウィジェットスタイル
-	 ------------------------------*/
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.drawBordersAroundIndividualWidgets = getStyleProperty("drawBordersAroundIndividualWidgets", false);
 	}
 
 	/*------------------------------

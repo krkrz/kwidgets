@@ -70,6 +70,12 @@ function ktimeline_fix_invalid_frame(frameList)
 /*----------------------------------------------------------------------
  * タイムロケーター(内部パーツ)
  ----------------------------------------------------------------------*/
+global.KTimeLineTimeLocatorWidgetStyleDefinition = [
+	[ "frameBorderColor", "frameBorderColor" ],
+	[ "activeColor", "activeColor" ]
+];
+
+
 class KTimeLineTimeLocator extends KVirtualWidget
 {
 	// オーナー(タイムラインコントロール本体)
@@ -95,6 +101,9 @@ class KTimeLineTimeLocator extends KVirtualWidget
 	// コンストラクタ
 	function KTimeLineTimeLocator(window, owner, name) {
 		super.KVirtualWidget(window, name);
+
+		addWidgetStyleDefinition(KTimeLineTimeLocatorWidgetStyleDefinition);
+
 		setFixedSize(2000, 0); // TIMELINE_LOCATOR_HEIGHT);
 		this.owner = owner;
 //		canvas.fontHeight = 12;
@@ -158,11 +167,6 @@ class KTimeLineTimeLocator extends KVirtualWidget
 			if (! v)
 				setActiveRange(void, void);
 		}
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.frameBorderColor = getStyleProperty("frameBorderColor");
-		widgetStyle.activeColor = getStyleProperty("activeColor");
 	}
 
 	function beforeFullUpdate() {
@@ -380,6 +384,24 @@ class KTimeLineTimeLocator extends KVirtualWidget
 /*----------------------------------------------------------------------
  * レイヤビュー(内部パーツ)
  ----------------------------------------------------------------------*/
+global.KTimeLineLayerViewWidgetStyleDefinition = [
+	[ "singleFrameLeftColor", [ "singleFrameLeftColor",  "singleFrameColor"] ],
+	[ "singleFrameRightColor", [ "singleFrameRightColor", "singleFrameColor"] ],
+	[ "continuousFrameLeftColor", [ "continuousFrameLeftColor",  "continuousFrameColor"] ],
+	[ "continuousFrameRightColor", [ "continuousFrameRightColor", "continuousFrameColor"] ],
+	[ "tweenFrameLeftColor", [ "tweenFrameLeftColor",  "tweenFrameColor"] ],
+	[ "tweenFrameRightColor", [ "tweenFrameRightColor", "tweenFrameColor"] ],
+	[ "oneSecondFrameBgColor", "oneSecondFrameBgColor" ],
+	[ "halfSecondFrameBgColor", "halfSecondFrameBgColor" ],
+	[ "fifthFrameBgColor", "fifthFrameBgColor" ],
+	[ "normalFrameBgColor", "normalFrameBgColor" ],
+	[ "frameSignColor", "frameSignColor" ],
+	[ "frameBorderColor", "frameBorderColor" ],
+	[ "cursorColor", "cursorColor" ],
+	[ "loopSingleFrameColor", "loopSingleFrameColor" ],
+	[ "loopContinuousFrameColor", "loopContinuousFrameColor" ]
+];
+
 class KTimeLineLayerView extends KVirtualWidget
 {
 	// オーナー(タイムラインコントロール本体)
@@ -433,6 +455,9 @@ class KTimeLineLayerView extends KVirtualWidget
 	// コンストラクタ
 	function KTimeLineLayerView(window, owner, name) {
 		super.KVirtualWidget(window, %[ name: name, middleButtonDrag: true ]);
+
+		addWidgetStyleDefinition(KTimeLineLayerViewWidgetStyleDefinition);
+
 		this.owner = owner;
 		list = owner._layerList;
 		setMinMaxSize(2000, list.minHeight, 2000, list.maxHeight);
@@ -457,24 +482,6 @@ class KTimeLineLayerView extends KVirtualWidget
 			dashLineApp = new GdiPlus.Appearance();
 			dashLineApp.addPen(WIN_DARKEN2, %[ width: 1, dashStyle: [ 3, 2 ] ], 0.5, 0);
 		}
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.singleFrameLeftColor  = getStyleProperty([ "singleFrameLeftColor",  "singleFrameColor"]);
-		widgetStyle.singleFrameRightColor = getStyleProperty([ "singleFrameRightColor", "singleFrameColor"]);
-		widgetStyle.continuousFrameLeftColor  = getStyleProperty([ "continuousFrameLeftColor",  "continuousFrameColor"]);
-		widgetStyle.continuousFrameRightColor = getStyleProperty([ "continuousFrameRightColor", "continuousFrameColor"]);
-		widgetStyle.tweenFrameLeftColor  = getStyleProperty([ "tweenFrameLeftColor",  "tweenFrameColor"]);
-		widgetStyle.tweenFrameRightColor = getStyleProperty([ "tweenFrameRightColor", "tweenFrameColor"]);
-		widgetStyle.oneSecondFrameBgColor = getStyleProperty("oneSecondFrameBgColor");
-		widgetStyle.halfSecondFrameBgColor = getStyleProperty("halfSecondFrameBgColor");
-		widgetStyle.fifthFrameBgColor = getStyleProperty("fifthFrameBgColor");
-		widgetStyle.normalFrameBgColor = getStyleProperty("normalFrameBgColor");
-		widgetStyle.frameSignColor = getStyleProperty("frameSignColor");
-		widgetStyle.frameBorderColor = getStyleProperty("frameBorderColor");
-		widgetStyle.cursorColor = getStyleProperty("cursorColor");
-		widgetStyle.loopSingleFrameColor = getStyleProperty("loopSingleFrameColor");
-		widgetStyle.loopContinuousFrameColor = getStyleProperty("loopContinuousFrameColor");
 	}
 
 	property singleFrameLeftColor {
@@ -2524,6 +2531,16 @@ class KFrameTextInput extends KTextInput
 /**----------------------------------------------------------------------
  * タイムラインコントロール
  ----------------------------------------------------------------------*/
+global.KTimelineControlWidgetStyleDefinition = [
+	[ "layerListId", "layerListId", "" ],
+	[ "layerViewId", "layerViewId", "" ],
+	[ "timeLocatorId", "timeLocatorId", "" ],
+	[ "titleLabelId", "titleLabelId", "" ],
+	[ "statusBarId", "statusBarId", "" ],
+	[ "frameTextId", "frameTextId", "" ]
+];
+
+
 class KTimeLineControl extends KEntity
 {
 	// 辞書
@@ -2616,6 +2633,8 @@ class KTimeLineControl extends KEntity
 	function KTimeLineControl(window, name) {
 		super.KEntity(...);
 
+		addWidgetStyleDefinition(KTimelineControlWidgetStyleDefinition);
+
 		// ウィジェット生成
 		_selectedTime = 0;
 
@@ -2674,15 +2693,6 @@ class KTimeLineControl extends KEntity
 
 	function onChildMinMaxSizeModified() {
 		redrawContents();
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.layerListId = getStyleProperty("layerListId", "");
-		widgetStyle.layerViewId = getStyleProperty("layerViewId", "");
-		widgetStyle.timeLocatorId = getStyleProperty("timeLocatorId", "");
-		widgetStyle.titleLabelId = getStyleProperty("titleLabelId", "");
-		widgetStyle.statusBarId =  getStyleProperty("statusBarId", "");
-		widgetStyle.frameTextId =  getStyleProperty("frameTextId", "");
 	}
 
 	function onDrawContents() {

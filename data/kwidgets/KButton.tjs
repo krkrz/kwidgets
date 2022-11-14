@@ -7,6 +7,12 @@ global.KButtonArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KButtonWidgetStyleDefinition =
+	[
+		[ "isVariableWidth", "isVariableWidth", false ],
+		[ "width", "width", void ],
+		[ "height", "height", void ]
+	];
 
 class KButton extends KEntity
 {
@@ -34,6 +40,9 @@ class KButton extends KEntity
 		var opts = parseOldStyleWidgetArgs(KButtonArgsFormat, *);
 
 		super.KEntity(win, opts);
+
+		addWidgetStyleDefinition(KButtonWidgetStyleDefinition);
+		addCustomWidgetStyleDefinition();
 
 		// 値の初期値
 		_value = getOption("value", void);
@@ -178,14 +187,6 @@ class KButton extends KEntity
 	function onKeyUp() {
 		super.onKeyUp(...);
 		removeCustomStyleState("mouseDown");
-	}
-
-	// ウィジェットスタイル展開
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.isVariableWidth = getStyleProperty("isVariableWidth", false);
-		widgetStyle.width = getStyleProperty("width");
-		widgetStyle.height = getStyleProperty("height");
-		_onExtractWidgetStyle(widgetStyle);
 	}
 };
 

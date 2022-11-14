@@ -7,6 +7,10 @@ global.KLabelArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KLabelWidgetStyleDefinition = [
+	[ "isVariableWidth", "isVariableWidth", false ]
+];
+
 class KLabel extends KEntity
 {
 	// ラベル
@@ -25,6 +29,9 @@ class KLabel extends KEntity
 		var opts = parseOldStyleWidgetArgs(KLabelArgsFormat, *);
 
 		super.KEntity(win, opts);
+
+		addWidgetStyleDefinition(KLabelWidgetStyleDefinition);
+		addCustomWidgetStyleDefinition();
 
 		// 値の初期値
 		_label = getInitialLabel();
@@ -65,27 +72,21 @@ class KLabel extends KEntity
 
 		onDrawLabel(borderPaddingLeft, borderPaddingTop, width - borderPaddingWidth, height - borderPaddingHeight);
 	}
-
-	// ウィジェットスタイル展開
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.isVariableWidth = getStyleProperty("isVariableWidth", false);
-		_onExtractWidgetStyle(widgetStyle);
-	}
 }
 
 /*----------------------------------------------------------------------
  * テキストケイパビリティ
  ----------------------------------------------------------------------*/
+global.KTextCapabilityWidgetStyleDefinition = [
+	[ "lineSpacing", "lineSpacing", 0 ],
+	[ "textAlign", "textAlign", ALIGN_LEFT ],
+	[ "maxLabelWidth", "maxLabelWidth", 0 ]
+];
+
 class KTextCapability
 {
 	function getInitialLabel() {
 		return getOption("label", "");
-	}
-
-	function _onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.lineSpacing = getStyleProperty("lineSpacing", 0);
-		widgetStyle.textAlign = getStyleProperty("textAlign", ALIGN_LEFT);
-		widgetStyle.maxLabelWidth = getStyleProperty("maxLabelWidth", 0);
 	}
 
 	function onCalcLabelSize() {
@@ -98,6 +99,10 @@ class KTextCapability
 
 	function onDrawLabel(x, y, w, h) {
 		drawTextArea(fontStyle, x, y, w, widgetStyle.lineSpacing, textArea.texts, textArea.textWidths, widgetStyle.textAlign);
+	}
+
+	function addCustomWidgetStyleDefinition() {
+		addWidgetStyleDefinition(KTextCapabilityWidgetStyleDefinition);
 	}
 };
 
@@ -122,14 +127,18 @@ mixin(KTextLabel, KTextCapability);
 /*----------------------------------------------------------------------
  * イメージケイパビリティ
  ----------------------------------------------------------------------*/
+global.KImageCapabilityWidgetStyleDefinition = [
+	[ "icon", "icon", void ]
+];
+
 class KImageCapability
 {
 	function getInitialLabel() {
 		return getOption("label", getOption("icon", ""));
 	}
 
-	function _onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.icon = getStyleProperty("icon", void);
+	function addCustomWidgetStyleDefinition() {
+		addWidgetStyleDefinition(KImageCapabilityWidgetStyleDefinition);
 	}
 
 	function getIconLabel() {

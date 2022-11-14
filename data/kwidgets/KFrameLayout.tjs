@@ -14,6 +14,13 @@ global.KFrameLayoutArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KFrameLayoutWidgetStyleDefinition =
+	[
+		[ "textAlign", "textAlign", ALIGN_CENTER ],
+		[ "checkIcon", "checkIcon", "" ],
+		[ "helpIcon", "helpIcon", "" ]
+	];
+
 class KFrameLayout extends KLayout
 {
 	var child;
@@ -44,6 +51,8 @@ class KFrameLayout extends KLayout
 
 		super.KLayout(win, opts);
 
+		addWidgetStyleDefinition(KFrameLayoutWidgetStyleDefinition);
+
 		_type = getOption("type", void);
 		_label = getOption("label", "");
 		_helpText = getOption("helpText", "");
@@ -52,12 +61,6 @@ class KFrameLayout extends KLayout
 		focusable = getOption("focusable", window.defaultFocusable);
 		overwriteStyle(%[ frameType: _type ]);
 		addCustomStyleState("checked");
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.textAlign = getStyleProperty("textAlign", ALIGN_CENTER);
-		widgetStyle.checkIcon = getStyleProperty("checkIcon", "");
-		widgetStyle.helpIcon = getStyleProperty("helpIcon", "");
 	}
 
 	function onUnserialize(dict, key) {

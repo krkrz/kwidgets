@@ -441,6 +441,13 @@ global.KTextEditArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+
+global.KTextEditWidgetStyleDefinition =
+	[
+		[ "selectionBackgroundColor", "selectionBackgroundColor", WIN_SELECTED, "resolveColor" ],
+		[ "selectionFontColor", "selectionFontColor", 0xffffff, "resolveColor" ]
+	];
+
 class KTextEdit extends KVirtualWidget
 {
 	// 最小限サイズ
@@ -510,6 +517,9 @@ class KTextEdit extends KVirtualWidget
 		var options = parseOldStyleWidgetArgs(KTextEditArgsFormat, *);
 		options.middleButtonDrag = true;
 		super.KVirtualWidget(window, options);
+
+		addWidgetStyleDefinition(KTextEditWidgetStyleDefinition);
+
 		// ウィンドウ初期化
 		focusable = getOption("focusable", true);
 		hitThreshold = 0;
@@ -1958,10 +1968,5 @@ class KTextEdit extends KVirtualWidget
 		var to = findRowIndex(t + h);
 		for (var i = from; i <= to ; i++)
 			rowList[i].redraw();
-	}
-
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.selectionBackgroundColor = resolveColor(getStyleProperty("selectionBackgroundColor", WIN_SELECTED));
-		widgetStyle.selectionFontColor = resolveColor(getStyleProperty("selectionFontColor", 0xffffff));
 	}
 }

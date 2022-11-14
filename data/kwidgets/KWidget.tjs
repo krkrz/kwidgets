@@ -211,6 +211,7 @@ class KWidget extends Layer
 	var layoutStyle;
 	var locateStyle;
 	var widgetStyle;
+	var widgetStyleDefinition = [];
 
 	// nameプロパティを上書き
 	var _name;
@@ -1296,8 +1297,12 @@ class KWidget extends Layer
 	/*----------------------------------------------------------------------
 	 * ウィジェットスタイルの適用
 	 ----------------------------------------------------------------------*/
+	function addWidgetStyleDefinition(defs) {
+		widgetStyleDefinition = concatArray(widgetStyleDefinition, defs);
+	}
+
 	function extractWidgetStyle {
-		var widgetStyle = %[];
+		var widgetStyle = extractStyle(widgetStyleDefinition);
 		onExtractWidgetStyle(widgetStyle);
 		return widgetStyle;
 	}

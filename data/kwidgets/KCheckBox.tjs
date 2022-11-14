@@ -7,6 +7,12 @@ global.KCheckBoxArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KCheckBoxWidgetStyle =
+	[
+		[ "icon", "icon", "" ],
+		[ "lineSpacing", "lineSpacing", 0 ]
+	];
+
 class KCheckBox extends KValueEntity
 {
 	var _value = false;
@@ -18,6 +24,8 @@ class KCheckBox extends KValueEntity
 		var opts = parseOldStyleWidgetArgs(KCheckBoxArgsFormat, *);
 
 		super.KValueEntity(win, opts);
+
+		addWidgetStyleDefinition(KCheckBoxWidgetStyle);
 
 		_label = getOption("label", "");
 		isVariableWidth = getOption("isVariableWidth", false);
@@ -53,14 +61,6 @@ class KCheckBox extends KValueEntity
 			// 再描画
 			redrawContents();
 		}
-	}
-
-	/*------------------------------
-	 * ウィジェットスタイル
-	 ------------------------------*/
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.icon = getStyleProperty("icon", "");
-		widgetStyle.lineSpacing = getStyleProperty("lineSpacing", 0);
 	}
 
 	/*------------------------------

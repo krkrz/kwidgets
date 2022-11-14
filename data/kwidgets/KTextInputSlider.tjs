@@ -11,6 +11,15 @@ global.KTextInputSliderArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KTextInputSliderWidgetStyleDefinition =
+	[
+		[ "textInputId", "textinputId" ],
+		[ "sliderId", "sliderId" ],
+		[ "width", "width" ],
+		[ "height", "height" ],
+		[ "placeTextOnRightsideOfSlider", "placeTextOnRightsideOfSlider", false ]
+	];
+
 class KTextInputSliderEmbededSlider extends KSlider
 {
 	function KTextInputSliderEmbededSlider() {
@@ -46,6 +55,8 @@ class KTextInputSlider extends KValueEntity
 
 		super.KValueEntity(window, options);
 
+		addWidgetStyleDefinition(KTextInputSliderWidgetStyleDefinition);
+
 		hasImage = false;
 
 		var w = getOption("width", SLIDER_ADAPTIVE_WIDTH);
@@ -75,17 +86,6 @@ class KTextInputSlider extends KValueEntity
 		slider.parent = this;
 
 		_value = v;
-	}
-
-	/**------------------------------
-	 * ウィジェットスタイルを展開
-	 ------------------------------*/
-	function onExtractWidgetStyle(widgetStyle) {
-		widgetStyle.textInputId = getStyleProperty("textinputId");
-		widgetStyle.sliderId = getStyleProperty("sliderId");
-		widgetStyle.width = getStyleProperty("width");
-		widgetStyle.height = getStyleProperty("height");
-		widgetStyle.placeTextOnRightsideOfSlider = getStyleProperty("placeTextOnRightsideOfSlider", false);
 	}
 
 	/**------------------------------
