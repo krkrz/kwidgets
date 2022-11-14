@@ -19,7 +19,7 @@
 
 //----------------------------------------------------------------------
 // ïœêî
-tjs_uint32 countHint;
+tjs_uint32 countHint, _styleHint, addHint, ancestorsHint, reverseHint, windowHint, styleRepositoryHint, _idStyleKeysHint, idHint, findHint, isIdHint, _classStyleKeysHint, isClassHint, _classWeakStyleKeysHint, isClassWeakHint, isAttachedToWindowHint, insertHint;
 
 //----------------------------------------------------------------------
 // êÈåæ
@@ -55,6 +55,29 @@ countArray(tTJSVariant array)
 	ncbPropAccessor arrayObj(array);
 	return arrayObj.GetValue(L"count", ncbTypedefs::Tag<tjs_uint>(), 0, &countHint);
 }
+
+//----------------------------------------------------------------------
+// îzóÒÇÃåç∑ÇîªíË
+static bool
+intersectsArray(tTJSVariant a1, tTJSVariant a2)
+{
+	tjs_uint a1Count = countArray(a1);
+	tjs_uint a2Count = countArray(a2);
+	if (a1Count > a2Count) {
+		std::swap(a1, a2);
+		std::swap(a1Count, a2Count);
+	}
+	ncbPropAccessor a1Obj(a1), a2Obj(a2);
+	for (tjs_uint i = 0; i < a1Count; i++) {
+		ttstr value = a1Obj.GetValue(tjs_int(i), ncbTypedefs::Tag<ttstr>());
+		tTJSVariant findResult;
+		a2Obj.FuncCall(0, L"find", &findHint, &findResult, value);
+		if (tjs_int(findResult) >= 0)
+			return true;
+	}
+	return false;
+}
+
 
 //----------------------------------------------------------------------
 // é´èëÇÃóvëfÇëSî‰ärÇ∑ÇÈCaller
@@ -889,6 +912,93 @@ void applyAdditionalFunction(tTJSVariant widget, tTJSVariant style, tTJSVariant 
 	}
 }
 
+tTJSVariant extractStyleChain(tTJSVariant self, bool includeSelfToChain, tTJSVariant classes) {
+{
+	ncbPropAccessor selfObj(self);
+
+	tTJSVariant result = createArray();
+	ncbPropAccessor resultObj(result);
+
+	if (! includeSelfToChain) {
+		tTJSVariant selfStyle = selfObj.GetValue(L"_style", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleHint);
+		resultObj.FuncCall(0, L"add", &addHint, NULL, selfStyle);
+	}
+
+	tTJSVariant list;
+
+	if (selfObj.GetValue(L"isAttachedToWindow", ncbTypedefs::Tag<tjs_int>(), 0, &isAttachedToWindowHint)) {
+		list = selfObj.GetValue(L"ancestors", ncbTypedefs::Tag<tTJSVariant>(), 0, &ancestorsHint);
+		ncbPropAccessor listObj(list);
+		listObj.FuncCall(0, L"reverse", &reverseHint, NULL, NULL);
+		listObj.FuncCall(0, L"add", &addHint, NULL, selfObj.GetValue(L"window", ncbTypedefs::Tag<tTJSVariant>(), 0, &windowHint));
+		listObj.FuncCall(0, L"add", &addHint, NULL, selfObj.GetValue(L"styleRepository", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleRepositoryHint));
+	} else {
+		list = createArray();
+		ncbPropAccessor listObj(list);
+		listObj.FuncCall(0, L"add", &addHint, NULL, selfObj.GetValue(L"styleRepository", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleRepositoryHint));
+	}
+
+	tjs_uint idInsertionIndex, classInsertionIndex, classWeakInsertionIndex;
+	idInsertionIndex = classInsertionIndex = classWeakInsertionIndex = countArray(result);
+
+	ttstr _id = selfObj.GetValue(L"_id", ncbTypedefs::Tag<ttstr>(), 0, &idHint);
+	ncbPropAccessor listObj(list);
+	tjs_uint listCount = countArray(list);
+	ncbPropAccessor classesObj(classes);
+	tjs_uint classesCount = countArray(classes);
+
+	for (tjs_uint i = 0; i < listCount; i++) {
+		tTJSVariant widget = listObj.GetValue(tjs_int(i), ncbTypedefs::Tag<tTJSVariant>());
+		ncbPropAccessor widgetObj(widget);
+		tTJSVariant widgetStyle = widgetObj.GetValue(L"_style", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleHint);
+		ncbPropAccessor widgetStyleObj(widgetStyle);
+		tTJSVariant funcResult;
+
+		if (! includeSelfToChain) {
+			tTJSVariant _idStyleKeys = widgetObj.GetValue(L"_idStyleKeys", ncbTypedefs::Tag<tTJSVariant>(), 0, &_idStyleKeysHint);
+			ncbPropAccessor(_idStyleKeys).FuncCall(0, L"find", &findHint, &funcResult, _id);
+			if (tjs_int(funcResult) >= 0) {
+				tTJSVariant isId = widgetStyleObj.GetValue(L"isId", ncbTypedefs::Tag<tTJSVariant>(), 0, &isIdHint);
+				tTJSVariant idStyle = ncbPropAccessor(isId).GetValue(_id.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+				resultObj.FuncCall(0, L"insert", &insertHint, NULL, tjs_int(idInsertionIndex), idStyle);
+				idInsertionIndex++;
+				classInsertionIndex++;
+				classWeakInsertionIndex++;
+			}
+		}
+		tTJSVariant _classStyleKeys = widgetObj.GetValue(L"_classStyleKeys", ncbTypedefs::Tag<tTJSVariant>(), 0, &_classStyleKeysHint);
+		if (intersectsArray(_classStyleKeys, classes)) {
+			tTJSVariant isClass = widgetStyleObj.GetValue(L"isClass", ncbTypedefs::Tag<tTJSVariant>(), 0, &isClassHint);
+			ncbPropAccessor isClassObj(isClass);
+			for (tjs_uint j = 0; j < classesCount; j++) {
+				ttstr klass = classesObj.GetValue(tjs_int(j), ncbTypedefs::Tag<ttstr>());
+				if (isClassObj.HasValue(klass.c_str())) {
+					tTJSVariant classStyle = isClassObj.GetValue(klass.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+					resultObj.FuncCall(0, L"insert", &insertHint, NULL, tjs_int(classInsertionIndex), classStyle);
+					classInsertionIndex++;
+					classWeakInsertionIndex++;
+				}
+			}
+		}
+		tTJSVariant _classWeakStyleKeys = widgetObj.GetValue(L"_classWeakStyleKeys", ncbTypedefs::Tag<tTJSVariant>(), 0, &_classWeakStyleKeysHint);
+		if (intersectsArray(_classWeakStyleKeys, classes)) {
+			tTJSVariant isClassWeak = widgetStyleObj.GetValue(L"isClassWeak", ncbTypedefs::Tag<tTJSVariant>(), 0, &isClassWeakHint);
+			ncbPropAccessor isClassWeakObj(isClassWeak);
+			for (tjs_uint j = 0; j < classesCount; j++) {
+				ttstr klass = classesObj.GetValue(tjs_int(j), ncbTypedefs::Tag<ttstr>());
+				if (isClassWeakObj.HasValue(klass.c_str())) {
+					tTJSVariant classWeakStyle = isClassWeakObj.GetValue(klass.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+					resultObj.FuncCall(0, L"insert", &insertHint, NULL, tjs_int(classWeakInsertionIndex), classWeakStyle);
+					classWeakInsertionIndex++;
+				}
+			}
+		}
+	}
+	return result;
+ }
+}
+
+
 NCB_REGISTER_FUNCTION(equalStruct, equalStruct);
 NCB_REGISTER_FUNCTION(equalStructNumericLoose, equalStructNumericLoose);
 NCB_REGISTER_FUNCTION(dictionaryKeys, dictionaryKeys);
@@ -907,3 +1017,4 @@ NCB_REGISTER_FUNCTION(getPropertyFromStyleChain, getPropertyFromStyleChain);
 NCB_REGISTER_FUNCTION(extractDefinedProperties, extractDefinedProperties);
 NCB_REGISTER_FUNCTION(extractStyleWithChain, extractStyleWithChain);
 NCB_REGISTER_FUNCTION(applyAdditionalFunction, applyAdditionalFunction);
+NCB_REGISTER_FUNCTION(extractStyleChain, extractStyleChain);

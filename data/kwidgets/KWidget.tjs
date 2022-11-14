@@ -546,7 +546,7 @@ class KWidget extends Layer
 	function extractStyleWithChain(chain, states, definition) {
 		var style = global.extractStyleWithChain(...);
 		applyAdditionalFunction(style, definition);
-//		return style;
+		return style;
 
 		// BEGIN  reference implementation.
 		// This code is actually optimized and executed in C++.
@@ -601,7 +601,18 @@ class KWidget extends Layer
 			_classWeakStyleKeys = dictionaryKeys(_style.isClassWeak);
 	}
 
+	property styleRepository {
+		getter {
+			return global.styleRepository;
+		}
+	}
+
 	function extractStyleChain(includeSelfToChain = false, classes = classTrees) {
+		return global.extractStyleChain(this, includeSelfToChain, classes);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
+
 		var result =  [];
 		if (! includeSelfToChain)
 			result.add(_style);
@@ -624,11 +635,13 @@ class KWidget extends Layer
 
 		for (var i = 0; i < list.count; i++) {
 			var widget = list[i];
-			if (widget._idStyleKeys.find(_id) >= 0) {
-				result.insert(idInsertionIndex, widget._style.isId[_id]);
-				idInsertionIndex++;
-				classInsertionIndex++;
-				classWeakInsertionIndex++;
+			if (! includeSelfToChain) {
+				if (widget._idStyleKeys.find(_id) >= 0) {
+					result.insert(idInsertionIndex, widget._style.isId[_id]);
+					idInsertionIndex++;
+					classInsertionIndex++;
+					classWeakInsertionIndex++;
+				}
 			}
 			if (intersectionSet(widget._classStyleKeys, classes).count > 0)
 				for (var j = 0; j < classes.count; j++) {
@@ -649,6 +662,8 @@ class KWidget extends Layer
 				}
 		}
 		return result;
+
+		// END  reference implementation.
 	}
 
 	function updateStyleChain() {
