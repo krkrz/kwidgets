@@ -470,6 +470,9 @@ class KList extends KVirtualWidget
 		}
 	}
 
+	function onChildMinMaxSizeModified() {
+	}
+
 	function onStyleModified() {
 		super.onStyleModified();
 		if (prevSlideWidth != slideWidth) {
@@ -3880,7 +3883,7 @@ class KListItem
 /**----------------------------------------------------------------------
  * ウィジェットホルダーフレーム
  ----------------------------------------------------------------------*/
-class KWidgetHolderFrame extends KWidget
+class KWidgetHolderFrame extends KLayout
 {
 	var child;
 	var redrawn;
@@ -3900,7 +3903,7 @@ class KWidgetHolderFrame extends KWidget
 	function add(child) {
 		this.child = child;
 		child.parent = this;
-		invalidateLayout();
+		redrawContents();
 	}
 
 	/**------------------------------
@@ -3912,48 +3915,21 @@ class KWidgetHolderFrame extends KWidget
 	function remove(child, doInvalidate = true) {
 		this.child = void;
 		child.parent = widgetDepot;
-		invalidateLayout();
+		redrawContents();
 		if (doInvalidate)
 			invalidate child;
 	}
 
-
-	/*------------------------------
-	 * 各種フック関数
-	 ------------------------------*/
-	function onChildMinMaxSizeModified {
-		invalidateLayout();
-		ownerItem.onChildMinMaxSizeModified();
+	function setEnabled(v) {
+		if (! this isvalid)
+			return;
+		enabled = v;
 	}
 
-	function onChildMarginModified {
-		invalidateLayout();
-		ownerItem.onChildMarginModified();
-	}
 
-	function onChildAlignModified {
-		invalidateLayout();
-		ownerItem.onChildAlignModified();
-	}
-
-	function onSizeModified {
-		redraw();
-	}
-
-	function onChildNoticeRect {
-		ownerItem.onChildNoticeRect(...);
-	}
-
-	function onChildValueModified() {
-		ownerItem.onChildValueModified(...);
-	}
-
-	function invalidateLayout {
+	function onCalculateLayout() {
 		var minW, minH, maxW, maxH;
-		var labelW, labelH;
-
 		minW = minH = maxW = maxH = 0;
-		labelW = labelH = 0;
 
 		if (child) {
 			minW = child.minWidth + child.marginHorizontal;
@@ -3962,26 +3938,24 @@ class KWidgetHolderFrame extends KWidget
 			maxH = child.maxHeight + child.marginVertical;
 		}
 
-		redrawn = false;
 		setMinMaxSize(minW, minH, maxW, maxH);
-		if (! redrawn)
-			redraw();
+
+		ownerItem.onChildCalculateLayout();
 	}
 
-	function redraw {
-		redrawn = true;
-
+	function onLocateLayout() {
 		if (! child)
 			return;
-
 		child.setSize(width - child.marginHorizontal, height - child.marginVertical);
 		locateChild(0, 0, width, height, child);
 	}
 
-	function setEnabled(v) {
-		if (! this isvalid)
-			return;
-		enabled = v;
+	function onChildValueModified() {
+		ownerItem.onChildValueModified(...);
+	}
+
+	function onChildNoticeRect {
+		ownerItem.onChildNoticeRect(...);
 	}
 };
 
@@ -4046,12 +4020,10 @@ class KWidgetHolderListItem extends KListItem
 			super.itemVisible = v;
 			if (_widget !== void) {
 				if (v) {
-					_widgetFrame.invalidateLayout();
 					_widgetFrame.parent = root;
 					_widgetFrame.visible = true;
 					asyncCaller.call(_widgetFrame.setEnabled, nodeEnabled);
 				} else {
-					_widgetFrame.parent = root.widgetDepot;
 					_widgetFrame.visible = false;
 				}
 			}
@@ -4110,17 +4082,9 @@ class KWidgetHolderListItem extends KListItem
 		asyncCaller.call(_widgetFrame.setEnabled, nodeEnabled);
 	}
 
-	function onChildMinMaxSizeModified() {
+	function onChildCalculateLayout() {
 		updateSize();
 		requireRelocate();
-	}
-
-	function onChildMarginModified() {
-		updateSize();
-		requireRelocate();
-	}
-
-	function onChildAlignModified() {
 	}
 
 	function onChildNoticeRect() {
