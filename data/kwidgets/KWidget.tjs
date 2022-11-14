@@ -235,7 +235,9 @@ class KWidget extends Layer
 	var dragHover = false;
 	// 辞書
 	var _dict;
-
+	// 祖先
+	var _ancestors;
+	
 	var debugPrint = false;
 
 	/**------------------------------
@@ -599,8 +601,10 @@ class KWidget extends Layer
 			_classWeakStyleKeys = dictionaryKeys(_style.isClassWeak);
 	}
 
-	function extractStyleChain(includeSelf = false, classes = classTrees) {
-		var result =  [ _style ];
+	function extractStyleChain(includeSelfToChain = false, classes = classTrees) {
+		var result =  [];
+		if (! includeSelfToChain)
+			result.add(selfStyle);
 
 		var list;
 		if (isAttachedToWindow) {
@@ -612,7 +616,7 @@ class KWidget extends Layer
 			list = [ styleRepository ];
 		}
 
-		if (includeSelf)
+		if (includeSelfToChain)
 			list.insert(0, this);
 
 		var idInsertionIndex, classInsertionIndex, classWeakInsertionIndex;
@@ -906,17 +910,22 @@ class KWidget extends Layer
 	 ------------------------------*/
     property ancestors {
 		getter {
+			if (_ancestors !== void) 
+				return duplicateStruct(_ancestors);
+			var result;
 			if (isPrimary)
-				return [];
+				result = [];
 			else {
 				if (parent instanceof "KWidget") {
-					var result = parent.ancestors;
+					result = parent.ancestors;
 					result.add(parent);
-					return result;
 				} else {
-					return [];
+					result = [];
 				}
 			}
+			if (_isAttachedToWindow) 
+				_ancestors = result;
+			return duplicateStruct(result);
 		}
 	}
 
@@ -1057,6 +1066,12 @@ class KWidget extends Layer
 		getter {
 			return _isAttachedToWindow;
 		}
+		setter (v) {
+			if (v == _isAttachedToWindow)
+				return;
+			_isAttachedToWindow = v;
+			_ancestors = void;
+		}
 	}
 
 	// ウィンドウにアタッチ
@@ -1073,7 +1088,7 @@ class KWidget extends Layer
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
-			widget._isAttachedToWindow = true;
+			widget.isAttachedToWindow = true;
 			widget.updateStyleChain();
 			widget.invalidateStyles();
 			widget.onAttachedToWindow();
@@ -1088,7 +1103,7 @@ class KWidget extends Layer
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
-			widget._isAttachedToWindow = false;
+			widget.isAttachedToWindow = false;
 			widget.onDetachedFromWindow();
 		}
 	}
