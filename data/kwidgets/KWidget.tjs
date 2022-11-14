@@ -713,8 +713,11 @@ class KWidget extends Layer
 	 * スタイルを上書き
 	 ------------------------------*/
 	function overwriteStyle(newStyle) {
+		var oldStyle = duplicateStruct(_styleArch);
 		newStyle = styleRepository.normalizeStyle(newStyle);
 		(Dictionary.assign incontextof _styleArch)(newStyle, false) ;
+		if (equalStructNumericLoose(oldStyle, _styleArch))
+			return;
 		updateTheme();
 		updateStyleKeys();
 		invalidateStylesToDescendants();
