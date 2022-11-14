@@ -1919,7 +1919,6 @@ class KListItem
 		} else {
 			_styleChain = [];
 			_styleChain.assign(root.getStyleChainForListItem(this));
-			_styleChain.erase(0);
 			_styleChain.insert(0, _style);
 		}
 	}
@@ -2013,8 +2012,7 @@ class KListItem
 	}
 
 	function extractFontStyle() {
-		var fontStyle = extractStyle(K_LIST_ITEM_FONT_STYLE_DEFINITION);
-		return fontStyle;
+		return extractStyle(K_LIST_ITEM_FONT_STYLE_DEFINITION);
 	}
 
 	function updateFontStyle() {
@@ -2029,8 +2027,7 @@ class KListItem
 	}
 
 	function extractLabelStyle() {
-		var labelStyle = extractStyle(K_LIST_ITEM_LABEL_STYLE_DEFINITION);
-		return labelStyle;
+		return extractStyle(K_LIST_ITEM_LABEL_STYLE_DEFINITION);
 	}
 
 	function updateLabelStyle() {
@@ -2045,8 +2042,7 @@ class KListItem
 	}
 
 	function extractAppearanceStyle() {
-		var fontStyle = extractStyle(K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION);
-		return fontStyle;
+		return extractStyle(K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION);
 	}
 
 	function updateAppearanceStyle() {

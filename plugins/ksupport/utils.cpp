@@ -900,14 +900,24 @@ void applyAdditionalFunction(tTJSVariant widget, tTJSVariant style, tTJSVariant 
 	for (tjs_uint i = 0; i < definitionCount; i++) {
 		tTJSVariant def = definitionObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 		ncbPropAccessor defObj(def);
+		ttstr memberKey = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
+
+		tTJSVariant memberValue = styleObj.GetValue(memberKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+		if (memberValue.Type() == tvtVoid) {
+			tTJSVariant initialProperty = defObj.GetValue(tjs_int(4), ncbTypedefs::Tag<tTJSVariant>());
+			if (initialProperty.Type() != tvtVoid) {
+				ttstr initialKey = ttstr(initialProperty);
+				tTJSVariant initialValue = widgetObj.GetValue(initialKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+				styleObj.SetValue(memberKey.c_str(), initialValue);
+			}
+		}
 		tTJSVariant resolveFunction = defObj.GetValue(tjs_int(3), ncbTypedefs::Tag<tTJSVariant>());
 		if (resolveFunction.Type() == tvtVoid)
 			continue;
 		ttstr functionName = ttstr(resolveFunction);
-		ttstr memberKey = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
-		tTJSVariant memberValue = styleObj.GetValue(memberKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+		memberValue = styleObj.GetValue(memberKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
 		tTJSVariant functionResult;
-		(void)widgetObj.FuncCall(0, functionName.c_str(), NULL, &functionResult, memberValue);
+		(void)widgetObj.FuncCall(0, functionName.c_str(), NULL, &functionResult, memberValue, style);
 		styleObj.SetValue(memberKey.c_str(), functionResult);
 	}
 }

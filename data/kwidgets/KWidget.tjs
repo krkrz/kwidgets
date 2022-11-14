@@ -94,7 +94,19 @@ global.K_WIDGET_APPEARANCE_STYLE_DEFINITION = [
 	[ "opacity",    "opacity",  255 ]
 ];
 
+global.K_WIDGET_LOCATE_STYLE_DEFINITIION = [
+	[ "marginLeft", K_WIDGET_MARGIN_LEFT_PROPERTY_KEYS, void, void, "_marginLeft" ],
+	[ "marginTop", K_WIDGET_MARGIN_TOP_PROPERTY_KEYS, void, void, "_marginTop" ],
+	[ "marginRight", K_WIDGET_MARGIN_RIGHT_PROPERTY_KEYS, void, void, "_marginRight" ],
+	[ "marginBottom", K_WIDGET_MARGIN_BOTTOM_PROPERTY_KEYS, void, void, "_marginBottom" ],
+	[ "alignHorizontal", K_WIDGET_ALIGN_HORIZONTAL_PROPERTY_KEYS, void, void, "_alignHorizontal" ],
+	[ "alignVertical", K_WIDGET_ALIGN_VERTICAL_PROPERTY_KEYS, void, void, "_alignVertical" ]
+];
+
 global.K_WIDGET_FONT_STYLE_DEFINITION = [
+	[ "fontHeight",       "fontHeight", void, void, "_fontHeight" ],
+	[ "fontFace",         "fontFace", void, void, "_fontFace" ],
+	[ "fontColor",        "fontColor", void, "resolveColor", "_fontColor" ],
 	[ "fontAntiAlias",    "fontAntiAlias",  true ],
 	[ "fontOutline",      "fontOutline", false ],
 	[ "fontOutlineColor", "fontOutlineColor", 0 ],
@@ -109,10 +121,12 @@ global.K_WIDGET_LAYOUT_STYLE_DEFINITION = [
 	[ "paddingOffsetVertical",   K_WIDGET_PADDING_OFFSET_VERTICAL_PROPERTY_KEYS, 0 ],
 	[ "paddingInsetHorizontal",  K_WIDGET_PADDING_INSET_HORIZONTAL_PROPERTY_KEYS, 0 ],
 	[ "paddingInsetVertical",     K_WIDGET_PADDING_INSET_VERTICAL_PROPERTY_KEYS, 0 ],
-	[ "paddingLeft",   K_WIDGET_PADDING_LEFT_PROPERTY_KEYS, 0 ],
-	[ "paddingTop",    K_WIDGET_PADDING_TOP_PROPERTY_KEYS, 0 ],
-	[ "paddingRight",  K_WIDGET_PADDING_RIGHT_PROPERTY_KEYS, 0 ],
-	[ "paddingBottom", K_WIDGET_PADDING_BOTTOM_PROPERTY_KEYS, 0 ]
+	[ "spaceHorizontal", K_WIDGET_SPACE_HORIZONTAL_PROPERTY_KEYS, void, void, "_spaceHorizontal" ],
+	[ "spaceVertical", K_WIDGET_SPACE_VERTICAL_PROPERTY_KEYS, void, void, "_spaceVertical" ],
+	[ "paddingLeft",   K_WIDGET_PADDING_LEFT_PROPERTY_KEYS, 0, "resolvePaddingLeft" ],
+	[ "paddingTop",    K_WIDGET_PADDING_TOP_PROPERTY_KEYS, 0, "resolvePaddingTop" ],
+	[ "paddingRight",  K_WIDGET_PADDING_RIGHT_PROPERTY_KEYS, 0, "resolvePaddingRight" ],
+	[ "paddingBottom", K_WIDGET_PADDING_BOTTOM_PROPERTY_KEYS, 0, "resolvePaddingBottom" ]
 ];
 
 global.K_WIDGET_BORDER_STYLE_DEFNITION = [
@@ -571,11 +585,17 @@ class KWidget extends Layer
 		// This code is actually optimized and executed in C++.
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
-			var resolveFunction = def[3];
-			if (resolveFunction === void)
-				continue;
 			var memberKey = def[0];
-			style[memberKey] = this[resolveFunction](style[memberKey]);
+			if (style[memberKey] === void) {
+				var initialProperty = def[4];
+				if (initialProperty !== void)
+					style[memberKey] = this[initialProperty];
+			}
+			var resolveFunction = def[3];
+			if (resolveFunction !== void) {
+				var memberKey = def[0];
+				style[memberKey] = this[resolveFunction](style[memberKey], style);
+			}
 		}
 		// END  reference implementation.
 	}
@@ -1135,8 +1155,7 @@ class KWidget extends Layer
 	 * ボーダースタイルの適用
 	 ----------------------------------------------------------------------*/
 	function extractBorderStyle() {
-		var borderStyle = extractStyle(K_WIDGET_BORDER_STYLE_DEFNITION);
-		return borderStyle;
+		return extractStyle(K_WIDGET_BORDER_STYLE_DEFNITION);
 	}
 
 	function updateBorderStyle() {
@@ -1154,8 +1173,7 @@ class KWidget extends Layer
 	 * アピアランススタイルの適用
 	 ----------------------------------------------------------------------*/
 	function extractAppearanceStyle() {
-		var style = extractStyle(K_WIDGET_APPEARANCE_STYLE_DEFINITION);
-		return style;
+		return extractStyle(K_WIDGET_APPEARANCE_STYLE_DEFINITION);
 	}
 
 	function updateAppearanceStyle() {
@@ -1173,11 +1191,7 @@ class KWidget extends Layer
 	 * フォントスタイルの適用
 	 ----------------------------------------------------------------------*/
 	function extractFontStyle() {
-		var fontStyle = extractStyle(K_WIDGET_FONT_STYLE_DEFINITION);
-		fontStyle.fontFace   = getStyleProperty("fontFace",   _fontFace);
-		fontStyle.fontHeight = getStyleProperty("fontHeight", font.height);
-		fontStyle.fontColor  = resolveColor(getStyleProperty("fontColor",  _fontColor));
-		return fontStyle;
+		return extractStyle(K_WIDGET_FONT_STYLE_DEFINITION);
 	}
 
 	function applyFontStyle(font, fontStyle) {
@@ -1204,14 +1218,7 @@ class KWidget extends Layer
 	 * レイアウトスタイルの適用
 	 ----------------------------------------------------------------------*/
 	function extractLayoutStyle() {
-		var layoutStyle = extractStyle(K_WIDGET_LAYOUT_STYLE_DEFINITION);
-		layoutStyle.spaceHorizontal = getStyleProperty(K_WIDGET_SPACE_HORIZONTAL_PROPERTY_KEYS, _spaceHorizontal);
-		layoutStyle.spaceVertical = getStyleProperty(K_WIDGET_SPACE_VERTICAL_PROPERTY_KEYS, _spaceVertical);
-		layoutStyle.paddingLeft   +=   layoutStyle.paddingOffsetHorizontal + layoutStyle.paddingInsetHorizontal;
-		layoutStyle.paddingTop    +=   layoutStyle.paddingOffsetVertical   + layoutStyle.paddingInsetVertical;
-		layoutStyle.paddingRight  += - layoutStyle.paddingOffsetHorizontal + layoutStyle.paddingInsetHorizontal;
-		layoutStyle.paddingBottom += - layoutStyle.paddingOffsetVertical   + layoutStyle.paddingInsetVertical;
-		return layoutStyle;
+		return extractStyle(K_WIDGET_LAYOUT_STYLE_DEFINITION);
 	}
 
 	function updateLayoutStyle() {
@@ -1223,6 +1230,22 @@ class KWidget extends Layer
 		layoutStyle = newStyle;
 
 		return true;
+	}
+
+	function resolvePaddingLeft(v, style) {
+		return v + style.paddingOffsetHorizontal + style.paddingInsetHorizontal;
+	}
+
+	function resolvePaddingTop(v, style) {
+		return v + style.paddingOffsetVertical + style.paddingInsetVertical;
+	}
+
+	function resolvePaddingRight(v, style) {
+		return v - style.paddingOffsetHorizontal + style.paddingInsetHorizontal;
+	}
+
+	function resolvePaddingBottom(v, style) {
+		return v - style.paddingOffsetVertical   + style.paddingInsetVertical;
 	}
 
 	/*----------------------------------------------------------------------
@@ -1256,15 +1279,7 @@ class KWidget extends Layer
 	 * ロケートスタイルの適用
 	 ----------------------------------------------------------------------*/
 	function extractLocateStyle {
-		var locateStyle = %[
-			marginLeft:      getStyleProperty(K_WIDGET_MARGIN_LEFT_PROPERTY_KEYS, _marginLeft),
-			marginTop:       getStyleProperty(K_WIDGET_MARGIN_TOP_PROPERTY_KEYS, _marginTop),
-			marginRight:     getStyleProperty(K_WIDGET_MARGIN_RIGHT_PROPERTY_KEYS, _marginRight),
-			marginBottom:    getStyleProperty(K_WIDGET_MARGIN_BOTTOM_PROPERTY_KEYS, _marginBottom),
-			alignHorizontal: getStyleProperty(K_WIDGET_ALIGN_HORIZONTAL_PROPERTY_KEYS, _alignHorizontal),
-			alignVertical:   getStyleProperty(K_WIDGET_ALIGN_VERTICAL_PROPERTY_KEYS, _alignVertical),
-		];
-		return locateStyle;
+		return extractStyle(K_WIDGET_LOCATE_STYLE_DEFINITIION);
 	}
 
 	function updateLocateStyle() {
