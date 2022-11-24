@@ -247,6 +247,8 @@ class KPrimitiveIconBuilder
 					   borderColor: borderColor,
 					   borderRadius: borderRadius ];
 		var widget = new KWidget(window, %[ style: style ]);
+		widget.updateTheme();
+		widget.invalidateStyles(true);
 		widget.setFixedSize(width, height);
 		widget.fillRect(0, 0, width, height, 0);
 		widget.drawBorder(widget.borderStyle, 0, 0, width, height);

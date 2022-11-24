@@ -28,7 +28,7 @@ class KTextEditRow
 	// 行の表示範囲(配列で、左端インデックス、右端インデックス、右端X座標を記録)
 	var rowRange;
 	// レイアウト変更が必須かどうか？
-	var requireLayout;
+	var requireLayout = true;
 	// 選択範囲
 	var selectionBegin, selectionEnd;
 	// テキストを隠す？
@@ -1604,38 +1604,32 @@ class KTextEdit extends KVirtualWidget
 		}
 		rowList = [];
 
-		var charCount = 0;
-		var minW, minH;
-
 		// 新規行を生成
 		for (var i = 0; i < textRows.count; i++) {
 			var textRow = textRows[i];
 			var rowLayer = newRowLayer();
 			rowLayer.add(textRow);
 			rowList.add(rowLayer);
-			charCount += Math.max(1, rowLayer.count);
-			minW = Math.max(minW, rowLayer.minWidth);
 		}
-		minH = rowHeight;
-		// サイズを仮決定
-		setMinMaxSize(minW, minH, Math.max(minW, _marginalWidth), Math.max(minH, _marginalHeight));
-		// レイアウトを行う
-		locateLayout();
+		// 再描画発行
+		redrawContents();
 	}
 
 	// レイアウトを行う
 	function locateLayout {
 		if (lineWrapping) {
 			// 全ての行を、横幅に合わせてレイアウトする
+			var w = 0;
 			var y = 0;
 			for (var i = 0; i < rowList.count; i++) {
 				var rowLayer = rowList[i];
 				rowLayer.setPos(0, y);
 				rowLayer.layout(width);
 				y += rowLayer.height;
+				w = Math.max(w, rowLayer.minWidth);
 			}
 			// 最小サイズを決定する
-			setMinMaxSize(minWidth, y, maxWidth, Math.max(y, _marginalHeight));
+			setMinMaxSize(w, y, Math.max(w, _marginalWidth), Math.max(y, _marginalHeight));
 			// ポインタを現在位置に再表示
 			setPointer(pointer.row, pointer.col);
 		} else {
@@ -1928,10 +1922,6 @@ class KTextEdit extends KVirtualWidget
 	function onBlur {
 		super.onBlur();
 		stopPointerBlink();
-	}
-
-    function onAttachedToWindow() {
-		forceUpdate();
 	}
 
 	function onDrawContents() {

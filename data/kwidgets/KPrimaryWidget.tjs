@@ -128,4 +128,10 @@ class KPrimaryWidget extends KLayout
 			return;
 		embedChild(0, 0, width, height, child, true);
 	}
+
+	property styleParent {
+		getter {
+			return window;
+		}
+	}
 };

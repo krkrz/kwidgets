@@ -33,6 +33,7 @@ class KRangePointer2D extends KValueEntity
 		super.KValueEntity(window, opts);
 
 		addWidgetStyleDefinition(KRangePointer2DWidgetStyleDefinition);
+		earlyUpdateWidgetStyle();
 
 		hitThreshold = 0;
 
@@ -77,7 +78,10 @@ class KRangePointer2D extends KValueEntity
 		}
 
 		var knobId = getOption("knobId", "range_pointer_2d_knob");
-		knob = new KSpacer(window);
+		knob = new KSpacer(window, %[ name: "_knob",
+									  id: widgetStyle.knobId,
+									  lockStyleModificationOnAttach: true,
+									]);
 		knob.hitThreshold = 0;
 		knob.parent = this;
 		knob.onSpacerMouseUp = onKnobMouseUp;
@@ -272,21 +276,26 @@ class KRangePointer2D extends KValueEntity
 
 		knob.setPos(hParams.knobPixelPos, vParams.knobPixelPos);
 		knob.setFixedSize(hParams.knobPixelSize, vParams.knobPixelSize);
-
+		knob.unlockStyleModification();
+		
 		if (widgetStyle.innerBgId == "") {
 			if (innerBg !== void)
 				innerBg.visible = false;
 		} else {
 			if (innerBg === void){
-				innerBg = new KSpacer(window, %[ id: widgetStyle.innerBgId ]);
+				innerBg = new KSpacer(window, %[ id: widgetStyle.innerBgId, name: "_innerBg", lockStyleModificationOnAttach: true ]);
+				innerBg.lockStyleModification();
 				innerBg.setMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
 				innerBg.hitThreshold = 256;
 				innerBg.parent = this;
 				innerBg.absolute = -1;
+			} else {
+				innerBg.lockStyleModification();
 			}
 			innerBg.id = widgetStyle.innerBgId;
 			innerBg.visible = true;
 			embedChild(0, 0, width, height, innerBg);
+			innerBg.unlockStyleModification();
 		}
 
 		if (widgetStyle.innerKnobId == "") {
@@ -294,15 +303,18 @@ class KRangePointer2D extends KValueEntity
 				innerKnob.visible = false;
 		}else {
 			if (innerKnob === void) {
-				innerKnob = new KImageLabel(window, %[ id: widgetStyle.innerKnobId ]);
+				innerKnob = new KImageLabel(window, %[ id: widgetStyle.innerKnobId, name: "_innerKnob", lockStyleModificationOnAttach: true ]);
+				innerKnob.lockStyleModification();
 				innerKnob.hitThreshold = 256;
 				innerKnob.parent = this;
 				innerKnob.absolute = 2;
-			}
+			} else
+				innerKnob.lockStyleModification();
 			innerKnob.id = widgetStyle.innerKnobId;
 			innerKnob.visible = true;
 			innerKnob.setPos(knob.left + knob.width / 2 - innerKnob.width / 2,
 							 knob.top + knob.height / 2 - innerKnob.height / 2);
+			innerKnob.unlockStyleModification();
 		}
 	}
 

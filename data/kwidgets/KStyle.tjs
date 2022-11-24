@@ -35,6 +35,146 @@ global.K_WIDGET_DEFAULT_FRAME_TYPE_BORDER_STYLES =
 			],
 	];
 
+class KStyleObject
+{
+	// 実装する必要のあるインターフェース
+	// property styleParent スタイル上の親クラス
+	// 
+
+	function initStyleObject() {
+		this._styleFragCache = %[];
+	}
+
+	function clearStyleFragCache() {
+		_styleFragCache = %[];
+	}
+
+	function mergeFrags(frags) {
+		frags.remove(void);
+		if (frags.count == 0)
+			return void;
+		var result = frags[0];
+		for (var i = 0; i < frags.count; i++) 
+			result = unionDictionary(result, frags[i], true);
+		return result;
+	}
+
+	function getStyleFragForId(definitionsSet, state = void) {
+		var id = this.id;
+		if (id == "")
+			return void;
+		var key = className + "#id#" + id;
+		if (state !== void)
+			key += "#" + state;
+		return styleParent.findStyleFragForId(key, id, definitionsSet, state);
+	}
+
+	function findStyleFragForId(key, id, definitionsSet, state) {
+		if (typeof(_styleFragCache[key]) != K_UNDEFINED)
+			return _styleFragCache[key];
+		var aboveFrag = styleParent.findStyleFragForId(...);
+		var frag;
+		if (typeof(_style.isId) == K_UNDEFINED
+			|| typeof(_style.isId[id]) == K_UNDEFINED)
+			frag = aboveFrag;
+		else {
+			frag = mergeFrags([ aboveFrag, extractStyleFrag(_style.isId[id], definitionsSet, state) ]);
+		}
+//		_styleFragCache[key] = frag;
+		return frag;
+	}
+
+	function getStyleFragForClass(definitionsSet, state = void) {
+		var classes = classTrees;
+		var key = className + "#class";
+		if (state !== void)
+			key += "#" + state;
+		return styleParent.findStyleFragForClass(key, classes, definitionsSet, state);
+	}
+
+	function findStyleFragForClass(key, classes, definitionsSet, state) {
+		if (typeof(_styleFragCache[key]) != K_UNDEFINED)
+			return _styleFragCache[key];
+		var aboveFrag = styleParent.findStyleFragForClass(...);
+		var frags = [ aboveFrag ];
+		if (typeof(_style.isClass) != K_UNDEFINED)
+			for (var i = 0; i < classes.count; i++) {
+				var klass = classes[i];
+				if (typeof(_style.isClass[klass]) != K_UNDEFINED) {
+					frags.insert(1, extractStyleFrag(_style.isClass[klass], definitionsSet, state));
+				}
+			}
+		var frag = mergeFrags(frags);
+//		_styleFragCache[key] = frag;
+		return frag;
+	}
+
+	function getStyleFragForClassWeak(definitionsSet, state = void) {
+		var classes = classTrees;
+		var key = className + "#classweak";
+		if (state !== void)
+			key += "#" + state;
+		return styleParent.findStyleFragForClassWeak(key, classes, definitionsSet, state);
+	}
+
+	function findStyleFragForClassWeak(key, classes, definitionsSet, state) {
+		if (typeof(_styleFragCache[key]) != K_UNDEFINED)
+			return _styleFragCache[key];
+		var aboveFrag = styleParent.findStyleFragForClassWeak(...);
+		var frags = [ aboveFrag ];
+		if (typeof(_style.isClassWeak) != K_UNDEFINED)
+			for (var i = 0; i < classes.count; i++) {
+				var klass = classes[i];
+				if (typeof(_style.isClassWeak[klass]) != K_UNDEFINED)
+					frags.insert(1, extractStyleFrag(_style.isClassWeak[klass], definitionsSet, state));
+			}
+		var frag = mergeFrags(frags);
+//		_styleFragCache[key] = frag;
+		return frag;
+	}
+
+	function extractStyleFrag(style, definitionsSet, state) {
+		if (state !== void) {
+			if (typeof(style[state]) == K_UNDEFINED)
+				return void;
+			style = style[state];
+		}
+
+		var result = %[];
+		var modified = false;
+
+		for (var i = 0; i < definitionsSet.count; i++) {
+			var defs = definitionsSet[i];
+			for (var j = 0; j < defs.count; j++) {
+				var def = defs[j];
+				var propKey = def[0];
+				var searchKey = def[1];
+				if (searchKey instanceof "Array") {
+					for (var k = 0; k < searchKey.count; k++) {
+						var key = searchKey[k];
+						if (typeof(style[key]) != K_UNDEFINED) {
+							modified = true;
+							result[propKey] = style[key];
+							break;
+						}
+					}
+				} else {
+					var key = searchKey;
+					if (typeof(style[key]) != K_UNDEFINED) {
+						modified = true;
+						result[propKey] = style[key];
+					}
+				}
+			}
+		}
+
+		if (modified)
+			return result;
+		else
+			return void;
+	}
+}
+
 class KStyleRepository
 {
 	var classStyleMap = %[];
@@ -50,12 +190,18 @@ class KStyleRepository
 	var styleNotficationLockCount = 0;
 	var styleModified = false;
 	var readStorageFiles = [];
+	var styleParent = %[ styleParent: void,
+						 findStyleFragForId: function { return void; },
+						 findStyleFragForClass: function { return void; },
+						 findStyleFragForClassWeak: function { return void; } ];
+	var classTreeCache = %[];
 
 	function KStyleRepository() {
 		_style = %[ isId: idStyleMap,
 					isClass: classStyleMap,
 					isClassWeak: classWeakStyleMap,
 				  ];
+		initStyleObject();
 	}
 
 	function clear() {
@@ -112,7 +258,7 @@ class KStyleRepository
 			registerIdStyle(...);
 		else
 			(Dictionary.assign incontextof idStyleMap[idMame])(normalizeStyle(style), false);
-		 invalidateStyles();
+		invalidateStyles();
 	}
 
 	function registerTheme(themeName, style) {
@@ -135,7 +281,7 @@ class KStyleRepository
 				result = unionDictionary(result, findTheme(themeName[i]), true);
 			return result;
 		} else if (themeName != ""
-			&& typeof(themeMap[themeName]) != K_UNDEFINED)
+				   && typeof(themeMap[themeName]) != K_UNDEFINED)
 			return themeMap[themeName];
 		else
 			return %[];
@@ -173,6 +319,7 @@ class KStyleRepository
 			if (styleModified) {
 				styleModified = false;
 				readStorageFiles = [];
+				clearStyleFragCache();
 				invalidateStyles(fullUpdate);
 			}
 		}
@@ -318,6 +465,7 @@ class KStyleRepository
 	}
 };
 
+mixin(KStyleRepository, KStyleObject);
 
 global.styleRepository = new KStyleRepository();
 

@@ -220,7 +220,8 @@ global.KTextInputArgsFormat =
 global.KTextInputWidgetStyleDefinition =
 	[
 		[ "width", "width", void ],
-		[ "height", "height", void ]
+		[ "height", "height", void ],
+		[ "texteditId", "texteditId", "" ]
 	];
 
 class KTextInput extends KValueEntity
@@ -247,6 +248,7 @@ class KTextInput extends KValueEntity
 		super.KValueEntity(window, opts);
 
 		addWidgetStyleDefinition(KTextInputWidgetStyleDefinition);
+		earlyUpdateWidgetStyle();
 
 		// イメージは持たず
 		hasImage = true;
@@ -257,7 +259,9 @@ class KTextInput extends KValueEntity
 
 		// テキストエディット
 		text = new KTextInputEdit
-		(window, %[ type: getOption("type", TEXT_SYMBOL),
+		(window, %[ id: widgetStyle.texteditId,
+					type: getOption("type", TEXT_SYMBOL),
+					lockStyleMoficationOnAttach: true,
 					focusable: getOption("focusable", true),
 					hideText: getOption("hideText", false),
 					respondToValueModification: getOption("respondToValueModification", false)
@@ -366,6 +370,7 @@ class KTextInput extends KValueEntity
 	}
 
 	function onDrawContents() {
+		text.lockStyleModification();
 		var w, h;
 		w = widgetStyle.width;
 		if (w === void)
@@ -373,7 +378,7 @@ class KTextInput extends KValueEntity
 		h = widgetStyle.height;
 		if (h === void)
 			h = getOption("height", void);
-		text.id = getStyleProperty("texteditId");
+		text.id = widgetStyle.texteditId;
 		if (h === void)
 			h = text.fontStyle.fontHeight + borderPaddingHeight;
 		setFixedSize(w, h);
@@ -381,6 +386,7 @@ class KTextInput extends KValueEntity
 		frame.setFixedSize(width - borderPaddingWidth, height - borderPaddingHeight);
 		frame.setPos(borderPaddingLeft, borderPaddingTop);
 		text.overwriteStyle(%[ fontHeight: height - borderPaddingHeight ]);
+		text.unlockStyleModification();
 		text.onViewModified(-text.left, 0, frame.width, frame.height);
 	}
 

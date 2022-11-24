@@ -113,6 +113,7 @@ class KWindow extends Window
 		_id = getOption("id", "");
 		_theme = getOption("theme", "");
 		_styleArch = styleRepository.normalizeStyle(getOption("style", %[]));
+		initStyleObject();
 		updateTheme();
 		updateStyleKeys();
 		updateStyleChain();
@@ -120,6 +121,7 @@ class KWindow extends Window
 
 		caption = getOption("caption", caption);
 		borderStyle = getOption("borderStyle", borderStyle);
+		_alwaysSetToMinSize = getOption("alwaysSetToMinSize", false);
 
 		// とりあえず最小に
 		setSize(0, 0);
@@ -307,6 +309,12 @@ class KWindow extends Window
 			return defaultValue;
 	}
 
+	property styleParent {
+		getter {
+			return styleRepository;
+		}
+	}
+
 	/**------------------------------
 	 * スタイルは継承属性を持つか?
 	 ------------------------------*/
@@ -353,6 +361,12 @@ class KWindow extends Window
 			_classWeakStyleKeys = [];
 		else
 			_classWeakStyleKeys = dictionaryKeys(_style.isClassWeak);
+	}
+
+	function requireStyleModificationDelay() {
+	}
+
+	function releaseStyleModificationDelay() {
 	}
 
 	function updateStyleChain() {
@@ -792,6 +806,7 @@ class KWindow extends Window
 	}
 };
 
+mixin(KWindow, KStyleObject);
 
 KWindow.globalZoomNumer = 1;
 KWindow.globalZoomDenom = 1;

@@ -56,6 +56,7 @@ class KTextInputSlider extends KValueEntity
 		super.KValueEntity(window, options);
 
 		addWidgetStyleDefinition(KTextInputSliderWidgetStyleDefinition);
+		earlyUpdateWidgetStyle();
 
 		hasImage = false;
 
@@ -66,11 +67,17 @@ class KTextInputSlider extends KValueEntity
 		var right = getOption("right");
 		var v = getOption("value", left);
 
-		textInput = new KTextInput(window, %[ width: h * 2,
+		textInput = new KTextInput(window, %[ name: "_textInput",
+											  id: widgetStyle.textInputId,
+											  lockStyleMoficationOnAttach: true,
+											  width: h * 2,
 											  height: h,
 											  type: stride == int(stride) ? TEXT_DIGIT : TEXT_REAL,
 											  value: string(v) ]);
-		slider = new KTextInputSliderEmbededSlider(window, %[ width: w,
+		slider = new KTextInputSliderEmbededSlider(window, %[ name: "_slider",
+															  id: widgetStyle.sliderId,
+															  lockStyleMoficationOnAttach: true,
+															  width: w,
 															  height: h,
 															  left: left,
 															  right: right,
@@ -141,25 +148,31 @@ class KTextInputSlider extends KValueEntity
 	 * 描画
 	 ------------------------------*/
 	function onDrawContents() {
+		textInput.lockStyleModification();
+		slider.lockStyleModification();
+
 		textInput.id = widgetStyle.textInputId;
 		slider.id = widgetStyle.sliderId;
 
 		var w = widgetStyle.width !== void ? widgetStyle.width : getOption("width", SLIDER_ADAPTIVE_WIDTH);
 		var h = widgetStyle.height !== void ? widgetStyle.height : getOption("height", void);
-		if (h === void)
+		if (h === void) {
+			textInput.unlockStyleModification();
 			h = textInput.height;
-		textInput.overwriteStyle(%[ height: h ]);
-		slider.overwriteStyle(%[ height: h ]);
-
-		var fontHeight = textInput.fontStyle.fontHeight;
-		textInput.overwriteStyle(%[ width: fontHeight * 3]);
-
-		if (w == SLIDER_ADAPTIVE_WIDTH) {
-			slider.overwriteStyle(%[ width: w ]);
-			w = slider.width + spaceHorizontal + textInput.width;
 		}
 
-		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width ]);
+		var fontHeight = textInput.fontStyle.fontHeight;
+
+		textInput.overwriteStyle(%[ width: fontHeight * 3, height: h ]);
+		if (w == SLIDER_ADAPTIVE_WIDTH) {
+			slider.overwriteStyle(%[ width: w, height: h ]);
+			slider.unlockStyleModification();
+			w = slider.width + spaceHorizontal + textInput.width;
+		}
+		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width, height: h ]);
+
+		textInput.unlockStyleModification();
+		slider.unlockStyleModification();
 
 		setFixedSize(w, h);
 		if (! widgetStyle.placeTextOnRightsideOfSlider) {
@@ -169,5 +182,6 @@ class KTextInputSlider extends KValueEntity
 			textInput.setPos(slider.width + spaceHorizontal, (h - textInput.height) / 2);
 			slider.setPos(0, (h - slider.height) / 2);
 		}
+
 	}
 };

@@ -9,6 +9,8 @@ if (! System.createAppLock("kwidgets_sample"))
 @if (!kirikiriz)
 Debug.console.visible = true;
 @endif
+// テストベッドの有効・無効
+global.enableTestBed = true;
 
 // プラグインをリンク
 Plugins.link("clipboardEx.dll");
@@ -17,6 +19,10 @@ Plugins.link("json.dll");
 // kwidgetsをロード
 Storages.addAutoPath("kwidgets/");
 Scripts.execStorage("KInitialize.tjs");
+
+styleRepository.initStylesStorage("KDarkFlatStyle.tjs");
+
+
 // サンプルリストをロード
 Scripts.execStorage("WidgetSample.tjs");
 Scripts.execStorage("ScrollSample.tjs");
@@ -27,6 +33,9 @@ Scripts.execStorage("TableSample.tjs");
 Scripts.execStorage("TableSample2.tjs");
 Scripts.execStorage("SpiralSample.tjs");
 Scripts.execStorage("TimeLineSample.tjs");
+if (enableTestBed)
+	Scripts.execStorage("TestBed.tjs");
+
 Scripts.execStorage("TestCase.tjs");
 
 
@@ -76,6 +85,9 @@ class SampleLauncher extends KWindow
 		grid.add(0, 8, new KTextToggleButton(this, "スパイラルサンプル", "spiral_sample"));
 		grid.add(0, 9, new KTextToggleButton(this, "タイムラインサンプル", "timeline_sample"));
 
+		if (enableTestBed) {
+			grid.add(0, 10, new KTextToggleButton(this, "テストベッド", "testbed"));
+		}
 
 		//グリッドを配置
 		primaryWidget.add(grid);
@@ -113,6 +125,10 @@ class SampleLauncher extends KWindow
 			showSpiralSample();
 		if (timeline_sample.value)
 			showTimeLineSample();
+		if (enableTestBed) {
+			if (testbed.value)
+				showTestBed();
+		}
 
 		visible = true;
 	}
@@ -187,6 +203,13 @@ class SampleLauncher extends KWindow
 				showTimeLineSample();
 			else
 				hideTimeLineSample();
+			break;
+
+		case "testbed":
+			if (value)
+				showTestBed();
+			else
+				hideTestBed();
 			break;
 		}
 	}

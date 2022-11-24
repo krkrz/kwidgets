@@ -54,7 +54,6 @@ property defaultSpace {
 	}
 }
 
-
 global.K_WIDGET_MARGIN_LEFT_PROPERTY_KEYS   = [ "marginLeft",   "marginHorizontal", "margin" ];
 global.K_WIDGET_MARGIN_TOP_PROPERTY_KEYS    = [ "marginTop",    "marginVertical",   "margin" ];
 global.K_WIDGET_MARGIN_RIGHT_PROPERTY_KEYS  = [ "marginRight",  "marginHorizontal", "margin"];
@@ -199,13 +198,16 @@ class KWidget extends Layer
 	// スタイル
 	var _theme;
 	var _style, _styleArch;
+	var _styleComp = [];
 	var _idStyleKeys = [];
 	var _classStyleKeys = [];
 	var _classWeakStyleKeys = [];
 	var _styleChain;
-	var _notRespondToStyleModificationRefCount = 0;
+	var _styleModificationDelayRefCount = 0;
+	var _styleModificationLocked = false;
+	var _lockStyleModificationOnAttach = false;
 	var _styleModified = false;
-	var appearanceStyle;
+	var appearanceStyle = %[ compositeState: [], statePriority: [] ];
 	var fontStyle;
 	var borderStyle;
 	var layoutStyle;
@@ -252,7 +254,7 @@ class KWidget extends Layer
 	var _dict;
 	// 祖先
 	var _ancestors;
-	
+
 	var debugPrint = false;
 
 	/**------------------------------
@@ -267,6 +269,9 @@ class KWidget extends Layer
      style: スタイル
 	 ------------------------------*/
 	function KWidget(win, options = %[]) {
+		if (! (win instanceof "KWindow"))
+			throw new Exception("first option must be KWindow.");
+
 		// nameを指定している旧形式なら、optionsへ自動的に変換する
 		if (! (options instanceof "Dictionary"))
 			options = %[ name: options ];
@@ -279,6 +284,7 @@ class KWidget extends Layer
 		_options = options;
 
 		// スタイルを取得
+		initStyleObject();
 		_theme = getOption("theme", "");
 		_styleArch = styleRepository.normalizeStyle(getOption("style", %[]));
 		// IDを設定
@@ -324,17 +330,19 @@ class KWidget extends Layer
 		_inStatus = false;
 		// ヒント初期化
 		hint = getOption("hint", "");
+		// アタッチ時のロック動作制御
+		_lockStyleModificationOnAttach = getOption("lockStyleModificationOnAttach", false);
 		// missing を有効にする
 		Scripts.setCallMissing(this);
 
-		updateTheme();
-		updateStyleKeys();
-		updateStyleChain();
-		updateFontStyle();
-		updateAppearanceStyle();
-		updateBorderStyle();
-		updateLayoutStyle();
-		updateLocateStyle();
+//		updateTheme();
+//		updateStyleKeys();
+//		updateStyleChain();
+//		updateFontStyle();
+//		updateAppearanceStyle();
+//		updateBorderStyle();
+//		updateLayoutStyle();
+//		updateLocateStyle();
 	}
 
 	/**------------------------------
@@ -391,6 +399,15 @@ class KWidget extends Layer
 	/**------------------------------
 	 * スタイルプロパティを取得
 	 ------------------------------*/
+	property styleParent {
+		getter {
+			if (_isAttachedToWindow)
+				return parent;
+			else
+				return styleRepository;
+		}
+	}
+
 	var customStyleStates = [];
 	var styleStates = [];
 
@@ -555,6 +572,18 @@ class KWidget extends Layer
 	}
 
 	function extractStyle(definition) {
+		var style = %[];
+		for (var i = 0; i < definition.count; i++) {
+			var def = definition[i];
+			var key = def[0];
+			if (typeof(_styleComp[key]) != K_UNDEFINED) 
+				style[key] = _styleComp[key];
+			else
+				style[key] = def[2];
+		}
+		applyAdditionalFunction(style, definition);
+		return style;
+
 		return extractStyleWithChain(_styleChain, styleStates, definition);
 	}
 
@@ -688,30 +717,39 @@ class KWidget extends Layer
 	}
 
 	function updateStyleChain() {
-		_styleChain = extractStyleChain();
+//		_styleChain = extractStyleChain();
+	}
+
+	function testStyleModification() {
+		if (_styleModified
+			&& respondToStyleModification) {
+			_styleModified = false;
+			onStyleModified();
+		}
+	}
+
+	function requireStyleModificationDelay {
+		_styleModificationDelayRefCount++;
+	}
+
+	function releaseStyleModificationDelay {
+		_styleModificationDelayRefCount--;
+		testStyleModification();
+	}
+
+	function lockStyleModification() {
+		_styleModificationLocked = true;
+	}
+
+	function unlockStyleModification() {
+		_styleModificationLocked = false;
+		testStyleModification();
 	}
 
 	property respondToStyleModification {
 		getter {
-			return _notRespondToStyleModificationRefCount == 0;
-		}
-		setter(v) {
-			var prev = (_notRespondToStyleModificationRefCount == 0);
-
-			if (v)
-				_notRespondToStyleModificationRefCount--;
-			else
-				_notRespondToStyleModificationRefCount++;
-
-			var cur = (_notRespondToStyleModificationRefCount == 0);
-
-			if (prev == cur)
-				return;
-
-			if (cur && _styleModified) {
-				_styleModified = false;
-				onStyleModified();
-			}
+			return _styleModificationDelayRefCount == 0
+				&& ! _styleModificationLocked;
 		}
 	}
 
@@ -728,6 +766,34 @@ class KWidget extends Layer
 	}
 
 	function onChildLocateStyleModified() {
+	}
+
+	property defaultDefinitions {
+		getter {
+			return [ K_WIDGET_APPEARANCE_STYLE_DEFINITION,
+						K_WIDGET_LOCATE_STYLE_DEFINITIION,
+						K_WIDGET_FONT_STYLE_DEFINITION,
+						K_WIDGET_LAYOUT_STYLE_DEFINITION,
+						K_WIDGET_BORDER_STYLE_DEFNITION,
+					 widgetStyleDefinition ];
+		}
+	}
+
+	function updateStyleComp(defsSet = defaultDefinitions) {
+		var frags = [];
+		for (var i = 0; i < styleStates.count; i++) {
+			var state = styleStates[i];
+			frags.add(extractStyleFrag(_style, defsSet, state));
+			frags.add(getStyleFragForId(defsSet, state));
+			frags.add(getStyleFragForClass(defsSet, state));
+			frags.add(getStyleFragForClassWeak(defsSet, state));
+		}
+		frags.add(extractStyleFrag(_style, defsSet));
+		frags.add(getStyleFragForId(defsSet));
+		frags.add(getStyleFragForClass(defsSet));
+		frags.add(getStyleFragForClassWeak(defsSet));
+		frags.reverse();
+		_styleComp = mergeFrags(frags);
 	}
 
 	/*------------------------------
@@ -1112,6 +1178,8 @@ class KWidget extends Layer
 
 	// ウィンドウにアタッチ
 	function attachToWindow() {
+		clearStyleFragCache();
+
 		var widgets = widgetDescendants;
 		widgets.insert(0, this);
 
@@ -1119,16 +1187,21 @@ class KWidget extends Layer
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
-			widget.respondToStyleModification = false;
+			if (widget._lockStyleModificationOnAttach)
+				widget.lockStyleModification();
+			widget.requireStyleModificationDelay();
+			widget.clearStyleFragCache();
+			widget.isAttachedToWindow = true;
+			widget.updateTheme();
+			widget.updateStyleKeys();
 		}
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
-			widget.isAttachedToWindow = true;
 			widget.updateStyleChain();
 			widget.invalidateStyles();
 			widget.onAttachedToWindow();
-			widget.respondToStyleModification = true;
+			widget.releaseStyleModificationDelay();
 		}
 	}
 
@@ -1321,6 +1394,12 @@ class KWidget extends Layer
 		return true;
 	}
 
+	function earlyUpdateWidgetStyle() {
+		updateTheme();
+		updateStyleComp([ widgetStyleDefinition ]);
+		updateWidgetStyle();
+	}
+
 	/*----------------------------------------------------------------------
 	 * スタイルプロパティのショートカット
 	 ----------------------------------------------------------------------*/
@@ -1364,7 +1443,9 @@ class KWidget extends Layer
 	// スタイルの更新チェックを子へ波及させる
 	//------------------------------
 	function invalidateStylesToDescendants(fullUpdate = false) {
-		parentWidget.respondToStyleModification = false;
+		if (isInWidgetTree)
+			parentWidget.requireStyleModificationDelay();
+		clearStyleFragCache();
 
 		var widgets = widgetDescendants;
 		widgets.insert(0, this);
@@ -1373,11 +1454,14 @@ class KWidget extends Layer
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
-			widget.respondToStyleModification = false;
+			widget.requireStyleModificationDelay();
+			widget.clearStyleFragCache();
 		}
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
+			if (widget._lockStyleModificationOnAttach)
+				widget.lockStyleModification();
 			if (fullUpdate) {
 				widget.beforeStyleFullUpdate();
 				widget.updateTheme();
@@ -1387,10 +1471,11 @@ class KWidget extends Layer
 			widget.invalidateStyles();
 			if (fullUpdate)
 				widget.afterStyleFullUpdate();
-			widget.respondToStyleModification = true;
+			widget.releaseStyleModificationDelay();
 		}
 
-		parentWidget.respondToStyleModification = true;
+		if (isInWidgetTree)
+			parentWidget.releaseStyleModificationDelay();
 	}
 
 	function beforeStyleFullUpdate() {
@@ -1399,15 +1484,17 @@ class KWidget extends Layer
 	function afterStyleFullUpdate() {
 	}
 
-
 	//------------------------------
 	// スタイルの更新チェック
 	//------------------------------
-	function invalidateStyles() {
-		if (! isAttachedToWindow)
+	function invalidateStyles(force = false) {
+		if (! force &&
+			! isAttachedToWindow)
 			return;
-		parentWidget.respondToStyleModification = false;
-		respondToStyleModification = false;
+		if (isInWidgetTree)
+			parentWidget.requireStyleModificationDelay();
+		requireStyleModificationDelay();
+		updateStyleComp();
 		var modified = false;
 		modified ||= updateAppearanceStyle();
 		modified ||= updateBorderStyle();
@@ -1417,10 +1504,12 @@ class KWidget extends Layer
 		if (modified)
 			onStyleModified();
 		modified = updateLocateStyle();
-		if (modified)
+		if (modified
+			&& isInWidgetTree)
 			parentWidget.onChildLocateStyleModified();
-		respondToStyleModification = true;
-		parentWidget.respondToStyleModification = true;
+		releaseStyleModificationDelay();
+		if (isInWidgetTree)
+			parentWidget.releaseStyleModificationDelay();
 	}
 
 	/*----------------------------------------------------------------------
@@ -3450,6 +3539,7 @@ class KWidget extends Layer
 	}
 };
 
+mixin(KWidget, KStyleObject);
 
 
 /**----------------------------------------------------------------------
