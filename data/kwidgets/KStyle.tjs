@@ -59,11 +59,11 @@ class KStyleObject
 		return result;
 	}
 
-	function getStyleFragForId(definitionsSet, state = void) {
+	function getStyleFragForId(definitionsSet, uniqKey, state = void) {
 		var id = this.id;
 		if (id == "")
 			return void;
-		var key = className + "#id#" + id;
+		var key = className + "#" + uniqKey + "#id#" + id;
 		if (state !== void)
 			key += "#" + state;
 		return styleParent.findStyleFragForId(key, id, definitionsSet, state);
@@ -84,9 +84,9 @@ class KStyleObject
 		return frag;
 	}
 
-	function getStyleFragForClass(definitionsSet, state = void) {
+	function getStyleFragForClass(definitionsSet, uniqKey, state = void) {
 		var classes = classTrees;
-		var key = className + "#class";
+		var key = className + "#" + uniqKey + "#class";
 		if (state !== void)
 			key += "#" + state;
 		return styleParent.findStyleFragForClass(key, classes, definitionsSet, state);
@@ -100,18 +100,17 @@ class KStyleObject
 		if (typeof(_style.isClass) != K_UNDEFINED)
 			for (var i = 0; i < classes.count; i++) {
 				var klass = classes[i];
-				if (typeof(_style.isClass[klass]) != K_UNDEFINED) {
+				if (typeof(_style.isClass[klass]) != K_UNDEFINED) 
 					frags.insert(1, extractStyleFrag(_style.isClass[klass], definitionsSet, state));
-				}
 			}
 		var frag = mergeFrags(frags);
-//		_styleFragCache[key] = frag;
+		_styleFragCache[key] = frag;
 		return frag;
 	}
 
-	function getStyleFragForClassWeak(definitionsSet, state = void) {
+	function getStyleFragForClassWeak(definitionsSet, uniqKey, state = void) {
 		var classes = classTrees;
-		var key = className + "#classweak";
+		var key = className + "#" + uniqKey + "#classweak";
 		if (state !== void)
 			key += "#" + state;
 		return styleParent.findStyleFragForClassWeak(key, classes, definitionsSet, state);
@@ -129,7 +128,7 @@ class KStyleObject
 					frags.insert(1, extractStyleFrag(_style.isClassWeak[klass], definitionsSet, state));
 			}
 		var frag = mergeFrags(frags);
-//		_styleFragCache[key] = frag;
+		_styleFragCache[key] = frag;
 		return frag;
 	}
 

@@ -779,19 +779,19 @@ class KWidget extends Layer
 		}
 	}
 
-	function updateStyleComp(defsSet = defaultDefinitions) {
+	function updateStyleComp(defsSet = defaultDefinitions, uniqKey = "comp") {
 		var frags = [];
 		for (var i = 0; i < styleStates.count; i++) {
 			var state = styleStates[i];
 			frags.add(extractStyleFrag(_style, defsSet, state));
-			frags.add(getStyleFragForId(defsSet, state));
-			frags.add(getStyleFragForClass(defsSet, state));
-			frags.add(getStyleFragForClassWeak(defsSet, state));
+			frags.add(getStyleFragForId(defsSet, uniqKey, state));
+			frags.add(getStyleFragForClass(defsSet, uniqKey, state));
+			frags.add(getStyleFragForClassWeak(defsSet, uniqKey, state));
 		}
 		frags.add(extractStyleFrag(_style, defsSet));
-		frags.add(getStyleFragForId(defsSet));
-		frags.add(getStyleFragForClass(defsSet));
-		frags.add(getStyleFragForClassWeak(defsSet));
+		frags.add(getStyleFragForId(defsSet, uniqKey));
+		frags.add(getStyleFragForClass(defsSet, uniqKey));
+		frags.add(getStyleFragForClassWeak(defsSet, uniqKey));
 		frags.reverse();
 		_styleComp = mergeFrags(frags);
 	}
@@ -1396,7 +1396,7 @@ class KWidget extends Layer
 
 	function earlyUpdateWidgetStyle() {
 		updateTheme();
-		updateStyleComp([ widgetStyleDefinition ]);
+		updateStyleComp([ widgetStyleDefinition ], "earlywidget");
 		updateWidgetStyle();
 	}
 

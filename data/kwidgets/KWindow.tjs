@@ -428,6 +428,7 @@ class KWindow extends Window
 
 	function invalidateStylesToDescendants(fullUpdate = false) {
 		if (fullUpdate) {
+			clearStyleFragCache();
 			updateTheme();
 			updateStyleKeys();
 			updateStyleChain();

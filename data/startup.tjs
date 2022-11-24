@@ -20,8 +20,6 @@ Plugins.link("json.dll");
 Storages.addAutoPath("kwidgets/");
 Scripts.execStorage("KInitialize.tjs");
 
-styleRepository.initStylesStorage("KDarkFlatStyle.tjs");
-
 
 // サンプルリストをロード
 Scripts.execStorage("WidgetSample.tjs");
