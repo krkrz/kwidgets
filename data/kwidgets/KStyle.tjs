@@ -40,7 +40,7 @@ class KStyleObject
 	// 実装する必要のあるインターフェース
 	// property styleParent スタイル上の親クラス
 	// 
-
+ 
 	function initStyleObject() {
 		this._styleFragCache = %[];
 	}
@@ -80,7 +80,7 @@ class KStyleObject
 		else {
 			frag = mergeFrags([ aboveFrag, extractStyleFrag(_style.isId[id], definitionsSet, state) ]);
 		}
-//		_styleFragCache[key] = frag;
+		_styleFragCache[key] = frag;
 		return frag;
 	}
 
