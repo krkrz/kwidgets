@@ -212,6 +212,10 @@ class KScrollFrame extends KEntity
 		if (children.count == 0)
 			return;
 
+		if (! isAttachedToWindow
+			|| ! respondToStyleModification)
+			return;
+
 		var child = children[0];
 		var childMinLeft, childMaxLeft, childMinTop, childMaxTop;
 		childMinLeft = width - child.width;
