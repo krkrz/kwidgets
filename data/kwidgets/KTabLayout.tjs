@@ -145,7 +145,6 @@ class KTabLayout extends KLayout
 	function KTabLayout(window, args*) {
 		var opts = args.count == 0 ? %[] : parseOldStyleWidgetArgs(KTabLayoutArgsFormat, args*);
 		super.KLayout(window, opts);
-		addWidgetStyleDefinition(KTabLayoutWidgetStyleDefinition);
 		//		frameLayer = new global.KWidget(window);
 //		frameLayer.parent = this;
 		_type = getOption("type", void);
@@ -157,6 +156,12 @@ class KTabLayout extends KLayout
 //		hasImage = false;
 		hitThreshold = 0;
 		overwriteStyle(%[ frameType: _type ]);
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTabLayoutWidgetStyleDefinition);
+		}
 	}
 
 	/**------------------------------

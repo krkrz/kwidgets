@@ -37,12 +37,16 @@ class KGridLayout extends KLayout
 		// 親呼び出し
 		super.KLayout(win, opts);
 
-		addWidgetStyleDefinition(KGridLayoutWidgetStyle);
-
 		// 最初は要素0から。
 		xcount = ycount = 0;
 		items = %[];
 		revItems = %[];
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KGridLayoutWidgetStyle);
+		}
 	}
 
 	// 特定のポジションをあらわす文字列を返す

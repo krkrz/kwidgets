@@ -25,8 +25,6 @@ class KCheckBox extends KValueEntity
 
 		super.KValueEntity(win, opts);
 
-		addWidgetStyleDefinition(KCheckBoxWidgetStyle);
-
 		_label = getOption("label", "");
 		isVariableWidth = getOption("isVariableWidth", false);
 		_value = getOption("value", false);
@@ -39,6 +37,13 @@ class KCheckBox extends KValueEntity
 
 		// カスタムステート
 		addCustomStyleState(_value ? "checkOn" : "checkOff", true);
+	}
+
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KCheckBoxWidgetStyle);
+		}
 	}
 
 	/**------------------------------

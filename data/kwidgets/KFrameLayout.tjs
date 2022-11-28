@@ -51,8 +51,6 @@ class KFrameLayout extends KLayout
 
 		super.KLayout(win, opts);
 
-		addWidgetStyleDefinition(KFrameLayoutWidgetStyleDefinition);
-
 		_type = getOption("type", void);
 		_label = getOption("label", "");
 		_helpText = getOption("helpText", "");
@@ -61,6 +59,12 @@ class KFrameLayout extends KLayout
 		focusable = getOption("focusable", window.defaultFocusable);
 		overwriteStyle(%[ frameType: _type ]);
 		addCustomStyleState("checked");
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KFrameLayoutWidgetStyleDefinition);
+		}
 	}
 
 	function onUnserialize(dict, key) {

@@ -31,13 +31,17 @@ class KScrollBar extends KEntity
 	function KScrollBar(window, opts) {
 		super.KEntity(window, opts);
 
-		addWidgetStyleDefinition(KScrollBarWidgetStyleDefinition);
-
 		// レイヤパラメータ設定
 		hasImage = false;
 		hitThreshold = 0;
 
 		initWidgets();
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KScrollBarWidgetStyleDefinition);
+		}
 	}
 
 	// ボタン作成

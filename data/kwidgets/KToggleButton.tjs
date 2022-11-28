@@ -34,10 +34,6 @@ class KToggleButton extends KValueEntity
 
 		super.KValueEntity(win, opts);
 
-
-		addWidgetStyleDefinition(KToggleButtonWidgetStyleDefiiotion);
-		addCustomWidgetStyleDefinition();
-
 		// 値の初期値
 		_label = getInitialLabel();
 		_value = getOption("value", false);
@@ -49,6 +45,12 @@ class KToggleButton extends KValueEntity
 
 		// 辺り判定オール受けつけ
 		hitThreshold = 0;
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, concatArray(signWidgetStyleDefinition, KToggleButtonWidgetStyleDefiiotion));
+		}
 	}
 
 	/**------------------------------

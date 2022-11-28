@@ -55,7 +55,6 @@ class KTextInputSlider extends KValueEntity
 
 		super.KValueEntity(window, options);
 
-		addWidgetStyleDefinition(KTextInputSliderWidgetStyleDefinition);
 		earlyUpdateWidgetStyle();
 
 		hasImage = false;
@@ -93,6 +92,12 @@ class KTextInputSlider extends KValueEntity
 		slider.parent = this;
 
 		_value = v;
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTextInputSliderWidgetStyleDefinition);
+		}
 	}
 
 	/**------------------------------

@@ -102,13 +102,17 @@ class KTimeLineTimeLocator extends KVirtualWidget
 	function KTimeLineTimeLocator(window, owner, name) {
 		super.KVirtualWidget(window, name);
 
-		addWidgetStyleDefinition(KTimeLineTimeLocatorWidgetStyleDefinition);
-
 		setFixedSize(2000, 0); // TIMELINE_LOCATOR_HEIGHT);
 		this.owner = owner;
 //		canvas.fontHeight = 12;
 //		canvas.font.bold = true;
 		dragging = false;
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTimeLineTimeLocatorWidgetStyleDefinition);
+		}
 	}
 
 	property TIMELINE_FRAME_WIDTH {
@@ -456,8 +460,6 @@ class KTimeLineLayerView extends KVirtualWidget
 	function KTimeLineLayerView(window, owner, name) {
 		super.KVirtualWidget(window, %[ name: name, middleButtonDrag: true ]);
 
-		addWidgetStyleDefinition(KTimeLineLayerViewWidgetStyleDefinition);
-
 		this.owner = owner;
 		list = owner._layerList;
 		setMinMaxSize(2000, list.minHeight, 2000, list.maxHeight);
@@ -481,6 +483,12 @@ class KTimeLineLayerView extends KVirtualWidget
 		if (typeof(global["GdiPlus"]) != "undefined") {
 			dashLineApp = new GdiPlus.Appearance();
 			dashLineApp.addPen(WIN_DARKEN2, %[ width: 1, dashStyle: [ 3, 2 ] ], 0.5, 0);
+		}
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTimeLineLayerViewWidgetStyleDefinition);
 		}
 	}
 
@@ -2633,8 +2641,6 @@ class KTimeLineControl extends KEntity
 	function KTimeLineControl(window, name) {
 		super.KEntity(...);
 
-		addWidgetStyleDefinition(KTimelineControlWidgetStyleDefinition);
-
 		// ウィジェット生成
 		_selectedTime = 0;
 
@@ -2689,6 +2695,12 @@ class KTimeLineControl extends KEntity
 	function finalize {
 		discard(_playTimer);
 		super.finalize(...);
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTimelineControlWidgetStyleDefinition);
+		}
 	}
 
 	function onChildMinMaxSizeModified() {

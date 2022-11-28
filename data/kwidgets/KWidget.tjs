@@ -209,7 +209,6 @@ class KWidget extends Layer
 	var layoutStyle;
 	var locateStyle;
 	var widgetStyle;
-	var widgetStyleDefinition = [];
 
 	// nameプロパティを上書き
 	var _name;
@@ -552,12 +551,6 @@ class KWidget extends Layer
 
 	function updateTheme() {
 		_style = unionDictionary(styleRepository.findTheme(_theme), _styleArch, true);
-	}
-
-	property styleRepository {
-		getter {
-			return global.styleRepository;
-		}
 	}
 
 	function testStyleModification() {
@@ -1189,8 +1182,10 @@ class KWidget extends Layer
 	/*----------------------------------------------------------------------
 	 * ウィジェットスタイルの適用
 	 ----------------------------------------------------------------------*/
-	function addWidgetStyleDefinition(defs) {
-		widgetStyleDefinition = concatArray(widgetStyleDefinition, defs);
+	property widgetStyleDefinition {
+		getter {
+			return [];
+		}
 	}
 
 	function extractWidgetStyle {
@@ -1215,7 +1210,7 @@ class KWidget extends Layer
 
 	function earlyUpdateWidgetStyle() {
 		updateTheme();
-		updateStyleComp([ widgetStyleDefinition ], "earlywidget");
+		updateStyleComp(styleRepository.getWidgetStyleDefinition(this), "earlywidget");
 		updateWidgetStyle();
 	}
 

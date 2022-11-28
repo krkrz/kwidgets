@@ -493,7 +493,6 @@ class KTableTextAreaEdit extends KFrameLayout
 		textStyle.spaceVertical = 0;
 		super.KFrameLayout(table.window, %[ id: table.widgetStyle.textEditFrameId,
 											style: %[ backgroundColor: view.borderStyle.backgroundColor ] ]);
-		addWidgetStyleDefinition(KTableTextAreaEditWidgetStyleDefinition);
 
 		add(new KTextEdit(table.window, %[ style: textStyle, name: "textedit" ]));
 		setPos(rect.left, rect.top);
@@ -519,6 +518,12 @@ class KTableTextAreaEdit extends KFrameLayout
 		textedit.onWindowDeactivate = onWindowDeactivate;
 		textedit.focus();
 		redrawContents();
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTableTextAreaEditWidgetStyleDefinition);
+		}
 	}
 
 	// フォーカスが外れたらキャンセル扱い
@@ -2236,8 +2241,6 @@ class KTable extends KEntity
 		var options = parseOldStyleWidgetArgs(KTableArgsFormat, *);
 		super.KEntity(window, options);
 
-		addWidgetStyleDefinition(KTableWidgetStyleDefinition);
-
 		defaultColumnOptions = getOption("defaultColumnOptions");
 		_showVerticalGrid = getOption("showVerticalGrid", true);
 		_showHorizontalGrid = getOption("showHorizontalGrid", true);
@@ -2306,6 +2309,12 @@ class KTable extends KEntity
 		}
 		columnTab.redrawAll();
 		showRowTab = false;
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTableWidgetStyleDefinition);
+		}
 	}
 
 	// ファイナライザ

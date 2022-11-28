@@ -41,9 +41,6 @@ class KButton extends KEntity
 
 		super.KEntity(win, opts);
 
-		addWidgetStyleDefinition(KButtonWidgetStyleDefinition);
-		addCustomWidgetStyleDefinition();
-
 		// 値の初期値
 		_value = getOption("value", void);
 		_label = getInitialLabel();
@@ -68,6 +65,12 @@ class KButton extends KEntity
 	function finalize {
 		invalidate autoDispatchTimer;
 		super.finalize();
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, concatArray(signWidgetStyleDefinition, KButtonWidgetStyleDefinition));
+		}
 	}
 
 	/**------------------------------

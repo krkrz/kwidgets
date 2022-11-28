@@ -104,7 +104,6 @@ class KSpliterLayout extends KLayout
 	function KSpliterLayout(window, *) {
 		var opts = parseOldStyleWidgetArgs(KSpliterLayoutArgsFormat, *);
 		super.KLayout(window, opts);
-		addWidgetStyleDefinition(KSpliterLayoutWidgetStyleDefinition);
 		childList = [];
 		spliterHandle = new KSpliterHandle(window, 0, 0);
 		spliterHandle.hitThreshold = 0;
@@ -116,6 +115,11 @@ class KSpliterLayout extends KLayout
 		shutterIndex = getOption("shutterIndex", 0);
 	}
 
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KSpliterLayoutWidgetStyleDefinition);
+		}
+	}
 	/*------------------------------
 	 * 辞書登録
 	 ------------------------------*/

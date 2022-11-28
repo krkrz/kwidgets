@@ -32,7 +32,6 @@ class KRangePointer2D extends KValueEntity
 	function KRangePointer2D(window, opts = %[]) {
 		super.KValueEntity(window, opts);
 
-		addWidgetStyleDefinition(KRangePointer2DWidgetStyleDefinition);
 		earlyUpdateWidgetStyle();
 
 		hitThreshold = 0;
@@ -100,6 +99,12 @@ class KRangePointer2D extends KValueEntity
 		invalidate autoDispatchTimer;
 		invalidate interp;
 		super.finalize();
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KRangePointer2DWidgetStyleDefinition);
+		}
 	}
 
 	property pointerValue {

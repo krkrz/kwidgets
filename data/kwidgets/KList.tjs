@@ -152,7 +152,7 @@ class KList extends KVirtualWidget
 		var options = parseOldStyleWidgetArgs(KListArgsFormat, *);
 		options.middleButtonDrag = true;
 		super.KVirtualWidget(window, options);
-		addWidgetStyleDefinition(KListWidgetStyleDefinition);
+
 		focusable = getOption("focusable", window.defaultFocusable);
 		_focusOnSelect = getOption("focusOnSelect", true);
 		_multipleSelection = getOption("multipleSelection", false);
@@ -173,6 +173,12 @@ class KList extends KVirtualWidget
 	function finalize {
 		discardArray(childList);
 		super.finalize(...);
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KListWidgetStyleDefinition);
+		}
 	}
 
 	property slideWidth {
@@ -1774,7 +1780,6 @@ class KListItem
 	var labelStyle;
 	var appearanceStyle = %[];
 	var widgetStyle;
-	var widgetStyleDefinition = [];
 	var styleStates = [];
 	var customStyleStates = [];
 	var prevIconList = [];
@@ -1908,8 +1913,15 @@ class KListItem
 			return [
 				K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION,
 				K_LIST_ITEM_FONT_STYLE_DEFINITION,
-				K_LIST_ITEM_LABEL_STYLE_DEFINITION 
+				K_LIST_ITEM_LABEL_STYLE_DEFINITION ,
+				widgetStyleDefinition
 			];
+		}
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return [];
 		}
 	}
 
@@ -2000,10 +2012,6 @@ class KListItem
 		appearanceStyle = newStyle;
 
 		return true;
-	}
-
-	function addWidgetStyleDefinition(defs) {
-		widgetStyleDefinition = concatArray(widgetStyleDefinition, defs);
 	}
 
 	function extractWidgetStyle() {

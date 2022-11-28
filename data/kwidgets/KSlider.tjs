@@ -60,9 +60,14 @@ class KSlider extends KRangePointer2D
 		this.maxValue = int(Math.max(this.leftValue, this.rightValue));
 
 		super.KRangePointer2D(window, opts);
-		addWidgetStyleDefinition(KSliderWidgetStyleDefinition);
 
 		focusable = getOption("focusable", window.defaultFocusable);
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KSliderWidgetStyleDefinition);
+		}
 	}
 
 	property value {

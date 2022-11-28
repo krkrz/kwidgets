@@ -30,11 +30,15 @@ class KLabel extends KEntity
 
 		super.KEntity(win, opts);
 
-		addWidgetStyleDefinition(KLabelWidgetStyleDefinition);
-		addCustomWidgetStyleDefinition();
-
 		// 値の初期値
 		_label = getInitialLabel();
+	}
+
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, concatArray(signWidgetStyleDefinition, KLabelWidgetStyleDefinition));
+		}
 	}
 
 	/**------------------------------
@@ -101,8 +105,10 @@ class KTextCapability
 		drawTextArea(fontStyle, x, y, w, widgetStyle.lineSpacing, textArea.texts, textArea.textWidths, widgetStyle.textAlign);
 	}
 
-	function addCustomWidgetStyleDefinition() {
-		addWidgetStyleDefinition(KTextCapabilityWidgetStyleDefinition);
+	property signWidgetStyleDefinition {
+		getter {
+			return KTextCapabilityWidgetStyleDefinition;
+		}
 	}
 };
 
@@ -137,8 +143,10 @@ class KImageCapability
 		return getOption("label", getOption("icon", ""));
 	}
 
-	function addCustomWidgetStyleDefinition() {
-		addWidgetStyleDefinition(KImageCapabilityWidgetStyleDefinition);
+	property signWidgetStyleDefinition {
+		getter {
+			return KImageCapabilityWidgetStyleDefinition;
+		}
 	}
 
 	function getIconLabel() {

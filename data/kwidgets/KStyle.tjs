@@ -176,7 +176,7 @@ class KStyleObject
 			return void;
 	}
 
-	function updateStyleComp(defsSet = defaultDefinitions, uniqKey = "default") {
+	function updateStyleComp(defsSet = styleRepository.getDefaultDefinitions(this), uniqKey = "default") {
 		var frags = [];
 		for (var i = 0; i < styleStates.count; i++) {
 			var state = styleStates[i];
@@ -362,7 +362,9 @@ class KStyleRepository
 						 findStyleFragForClass: function { return void; },
 						 findStyleFragForClassWeak: function { return void; } ];
 	var classTreeCache = %[];
-
+	var widgetStyleDefinitionCache = %[];
+	var defaultDefinitionsCache = %[];
+	
 	function KStyleRepository() {
 		_style = %[ isId: idStyleMap,
 					isClass: classStyleMap,
@@ -381,6 +383,20 @@ class KStyleRepository
 					isClass: classStyleMap,
 					isClassWeak: classWeakStyleMap,
 				  ];
+	}
+
+	function getWidgetStyleDefinition(widget) {
+		var key = widget.className;
+		if (typeof(widgetStyleDefinitionCache[key]) == K_UNDEFINED)
+			widgetStyleDefinitionCache[key] = [ widget.widgetStyleDefinition ];
+		return widgetStyleDefinitionCache[key];
+	}
+
+	function getDefaultDefinitions(widget) {
+		var key = widget.className;
+		if (typeof(defaultDefinitionsCache[key]) == K_UNDEFINED)
+			defaultDefinitionsCache[key] = widget.defaultDefinitions;
+		return defaultDefinitionsCache[key];
 	}
 
 	function registerClassStyle(className, style) {

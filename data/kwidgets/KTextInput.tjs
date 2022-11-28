@@ -247,7 +247,6 @@ class KTextInput extends KValueEntity
 
 		super.KValueEntity(window, opts);
 
-		addWidgetStyleDefinition(KTextInputWidgetStyleDefinition);
 		earlyUpdateWidgetStyle();
 
 		// イメージは持たず
@@ -273,6 +272,13 @@ class KTextInput extends KValueEntity
 
 		// いったん描画
 		redrawContents();
+	}
+
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTextInputWidgetStyleDefinition);
+		}
 	}
 
 	/*------------------------------

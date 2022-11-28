@@ -31,12 +31,17 @@ class KStatusBar extends KEntity
 		// 親クラス呼び出し
 		super.KEntity(win, opts);
 
-		addWidgetStyleDefinition(KStatusBarWidgetStyleDefinition);
-
 		_label = "";
 		_defaultLabel = getOption("defaultLabel", "");
 
 		maxWidth = K_WIDGET_MAX_POSSIBLE_WIDTH;
+	}
+
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KStatusBarWidgetStyleDefinition);
+		}
 	}
 
 	/**------------------------------

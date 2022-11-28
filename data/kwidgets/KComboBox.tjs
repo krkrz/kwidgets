@@ -37,8 +37,6 @@ class KComboBox extends KValueEntity
 
 		super.KValueEntity(window, options);
 
-		addWidgetStyleDefinition(KComboBoxWidgetStyleDefinition);
-
 		focusable = getOption("focusable", window.defaultFocusable);
 		_type = getOption("type", COMBO_STYLE_DROPDOWNLIST);
 		_values = getOption("values", []);
@@ -63,6 +61,12 @@ class KComboBox extends KValueEntity
 	function finalize {
 		invalidate _dropdownTimer;
 		super.finalize();
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KComboBoxWidgetStyleDefinition);
+		}
 	}
 
 	property hint {
