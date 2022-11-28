@@ -19,12 +19,30 @@
 
 //----------------------------------------------------------------------
 // 変数
-tjs_uint32 countHint, _styleHint, addHint, ancestorsHint, reverseHint, windowHint, styleRepositoryHint, _idStyleKeysHint, idHint, findHint, isIdHint, _classStyleKeysHint, isClassHint, _classWeakStyleKeysHint, isClassWeakHint, isAttachedToWindowHint, insertHint;
+tjs_uint32 countHint, _styleHint, addHint, ancestorsHint, reverseHint, windowHint, styleRepositoryHint, _idStyleKeysHint, idHint, findHint, isIdHint, _classStyleKeysHint, isClassHint, _classWeakStyleKeysHint, isClassWeakHint, isAttachedToWindowHint, insertHint, removeHint, _styleCompHint, classNameHint, styleParentHint, _styleFragCacheHint, classTreesHint, clearHint, styleStatesHint;
 
 //----------------------------------------------------------------------
 // 宣言
 bool equalStruct(tTJSVariant v1, tTJSVariant v2);
 bool equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2);
+
+//----------------------------------------------------------------------
+// スタイルレポジトリ参照
+static tTJSVariant *sStyleRepository;
+
+tTJSVariant &getStyleRepository() {
+	if (! sStyleRepository) {
+		sStyleRepository = new tTJSVariant();
+		TVPExecuteExpression(L"styleRepository", sStyleRepository);
+	}
+	return (*sStyleRepository);
+}
+
+void releaseStyleRepository() {
+	delete sStyleRepository;
+}
+
+NCB_PRE_UNREGIST_CALLBACK(releaseStyleRepository);
 
 //----------------------------------------------------------------------
 // 辞書を作成
@@ -45,6 +63,38 @@ tTJSVariant createArray(void)
 	obj->Release();
 	return result;
 }
+
+static tTJSVariant *sTempArray, *sTempArray2;
+
+tTJSVariant &getTempArray()
+{
+	if (! sTempArray) {
+		sTempArray = new tTJSVariant();
+		*sTempArray = createArray();
+	}
+	ncbPropAccessor(*sTempArray).FuncCall(0, L"clear", &clearHint, NULL);
+
+	return *sTempArray;
+}
+
+tTJSVariant &getTempArray2()
+{
+	if (! sTempArray2) {
+		sTempArray2 = new tTJSVariant();
+		*sTempArray2 = createArray();
+	}
+	ncbPropAccessor(*sTempArray2).FuncCall(0, L"clear", &clearHint, NULL);
+
+	return *sTempArray2;
+}
+
+void releaseTempArray()
+{
+	delete sTempArray;
+	delete sTempArray2;
+}
+
+NCB_PRE_UNREGIST_CALLBACK(releaseTempArray);
 
 //----------------------------------------------------------------------
 // 配列をカウント
@@ -814,9 +864,9 @@ tTJSVariant getPropertyFromStyleChain(tTJSVariant styleChain, tTJSVariant states
 				tTJSVariant style = styleChainObj.GetValue(j, ncbTypedefs::Tag<tTJSVariant>());
 				ncbPropAccessor styleObj(style);
 				if (styleObj.HasValue(state.c_str())) {
-						tTJSVariant stateStyle = styleObj.GetValue(state.c_str(), ncbTypedefs::Tag<tTJSVariant>());
-						if (getPropertyFromStyle(stateStyle, key, result))
-							return ncbPropAccessor(result).GetValue(tjs_int(0), ncbTypedefs::Tag<tTJSVariant>());
+					tTJSVariant stateStyle = styleObj.GetValue(state.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+					if (getPropertyFromStyle(stateStyle, key, result))
+						return ncbPropAccessor(result).GetValue(tjs_int(0), ncbTypedefs::Tag<tTJSVariant>());
 				}
 			}
 		}
@@ -922,7 +972,7 @@ void applyAdditionalFunction(tTJSVariant widget, tTJSVariant style, tTJSVariant 
 	}
 }
 
-tTJSVariant extractStyleChain(tTJSVariant self, bool includeSelfToChain, tTJSVariant classes) {
+tTJSVariant extractStyleChain(tTJSVariant self, bool includeSelfToChain, tTJSVariant classes) 
 {
 	ncbPropAccessor selfObj(self);
 
@@ -1005,7 +1055,274 @@ tTJSVariant extractStyleChain(tTJSVariant self, bool includeSelfToChain, tTJSVar
 		}
 	}
 	return result;
- }
+}
+
+tTJSVariant mergeFrags(tTJSVariant frags)
+{
+	ncbPropAccessor fragsObj(frags);
+	tTJSVariant voidVar;
+	tTJSVariant result;
+	fragsObj.FuncCall(0, L"remove", &removeHint, NULL, voidVar);
+	tjs_int fragsCount = countArray(frags);
+	if (fragsCount == 0)
+		return result;
+	result = fragsObj.GetValue(tjs_int(0), ncbTypedefs::Tag<tTJSVariant>());
+	for (tjs_int i = 1; i < fragsCount; i++)
+		result = _unionDictionary(result, fragsObj.GetValue(tjs_int(i), ncbTypedefs::Tag<tTJSVariant>()), true);
+	return result;
+}
+
+tTJSVariant extractStyle(tTJSVariant widget, tTJSVariant definition)
+{
+	ncbPropAccessor widgetObj(widget);
+	tTJSVariant styleComp = widgetObj.GetValue(L"_styleComp", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleCompHint);
+	ncbPropAccessor styleCompObj(styleComp);
+
+	ncbPropAccessor definitionObj(definition);
+	tjs_int definitionCount = countArray(definition);
+
+	tTJSVariant style = createDictionary();
+	ncbPropAccessor styleObj(style);
+
+	for (tjs_int i = 0; i < definitionCount; i++) {
+		tTJSVariant def = definitionObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+		ncbPropAccessor defObj(def);
+		ttstr key = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
+		if (styleCompObj.HasValue(key.c_str()))
+			styleObj.SetValue(key.c_str(), styleCompObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
+		else
+			styleObj.SetValue(key.c_str(), defObj.GetValue(tjs_int(2), ncbTypedefs::Tag<tTJSVariant>()));
+
+	}
+	applyAdditionalFunction(widget, style, definition);
+
+	return style;
+}
+
+
+tTJSVariant extractStyleFrag(tTJSVariant style, tTJSVariant definitionsSet, tTJSVariant state)
+{
+	tTJSVariant voidVar;
+
+	if (state.Type() != tvtVoid) {
+		auto stateString = ttstr(state);
+		ncbPropAccessor styleObj(style);
+		if (! styleObj.HasValue(stateString.c_str()))
+			return voidVar;
+		style = styleObj.GetValue(stateString.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+	}
+
+	ncbPropAccessor styleObj(style);
+	tTJSVariant result = createDictionary();
+	ncbPropAccessor resultObj(result);
+	bool modified = false;
+
+	ncbPropAccessor definitionsSetObj(definitionsSet);
+	tjs_int definitionsSetCount = countArray(definitionsSet);
+
+	for (tjs_int i = 0; i < definitionsSetCount; i++) {
+		tTJSVariant defs = definitionsSetObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+		ncbPropAccessor defsObj(defs);
+		tjs_int defsCount = countArray(defs);
+		for (tjs_int j = 0; j < defsCount; j++) {
+			tTJSVariant def = defsObj.GetValue(j, ncbTypedefs::Tag<tTJSVariant>());
+			ncbPropAccessor defObj(def);
+			ttstr propKey = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
+			tTJSVariant searchKey = defObj.GetValue(tjs_int(1), ncbTypedefs::Tag<tTJSVariant>());
+			if (searchKey.Type() == tvtObject) {
+				ncbPropAccessor searchKeyObj(searchKey);
+				tjs_int searchKeyCount = countArray(searchKey);
+				for (tjs_int k = 0; k < searchKeyCount; k++) {
+					ttstr key = searchKeyObj.GetValue(k, ncbTypedefs::Tag<ttstr>());
+					if (styleObj.HasValue(key.c_str())) {
+						modified = true;
+						resultObj.SetValue(propKey.c_str(), styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
+						break;
+					}
+				}
+			} else {
+				ttstr key = searchKey;
+				if (styleObj.HasValue(key.c_str())) {
+					modified = true;
+					resultObj.SetValue(propKey.c_str(), styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
+				}
+			}
+		}
+	}
+
+	if (modified)
+		return result;
+	else
+		return voidVar;
+}
+
+
+tTJSVariant findStyleFragForId(tTJSVariant widget, ttstr key, ttstr id, tTJSVariant definitionsSet, tTJSVariant state) {
+	ncbPropAccessor widgetObj(widget);
+	tTJSVariant styleFragCache = widgetObj.GetValue(L"_styleFragCache", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleFragCacheHint);
+	ncbPropAccessor styleFragCacheObj(styleFragCache);
+
+	if (styleFragCacheObj.HasValue(key.c_str()))
+		return styleFragCacheObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+	tTJSVariant styleParent = widgetObj.GetValue(L"styleParent", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleParentHint);
+	tTJSVariant aboveFrag;
+	if (styleParent.Type() != tvtVoid) 
+		aboveFrag = findStyleFragForId(styleParent, key, id, definitionsSet, state);
+	tTJSVariant frag = aboveFrag;
+	auto style = widgetObj.GetValue(L"_style", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleHint);
+	ncbPropAccessor styleObj(style);
+	if (styleObj.HasValue(L"isId", &isIdHint)) {
+		auto isId = styleObj.GetValue(L"isId", ncbTypedefs::Tag<tTJSVariant>(), 0, &isIdHint);
+		ncbPropAccessor isIdObj(isId);
+		if (isIdObj.HasValue(id.c_str())) {
+			auto frags = getTempArray();
+			ncbPropAccessor fragsObj(frags);
+			fragsObj.SetValue(tjs_int(0), aboveFrag);
+			fragsObj.SetValue(tjs_int(1), extractStyleFrag(isIdObj.GetValue(id.c_str(), ncbTypedefs::Tag<tTJSVariant>()), definitionsSet, state));
+			frag = mergeFrags(frags);
+		}
+	}
+	styleFragCacheObj.SetValue(key.c_str(), frag);
+	return frag;
+}
+
+tTJSVariant getStyleFragForId(tTJSVariant widget, tTJSVariant definitionsSet, ttstr uniqKey, tTJSVariant state) {
+	ncbPropAccessor widgetObj(widget);
+	ttstr id = widgetObj.GetValue(L"id", ncbTypedefs::Tag<ttstr>(), 0, &idHint);
+	if (id.IsEmpty())
+		return tTJSVariant();
+	ttstr className = widgetObj.GetValue(L"className", ncbTypedefs::Tag<ttstr>(), 0, &classNameHint);
+	ttstr key = className + L"#" + uniqKey + L"#id#" + id;
+	if (state.Type() == tvtString)
+		key += L"#" + ttstr(state);
+	tTJSVariant styleParent = widgetObj.GetValue(L"styleParent", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleParentHint);
+	return findStyleFragForId(styleParent, key, id, definitionsSet, state);
+}
+
+
+tTJSVariant findStyleFragForClass(tTJSVariant widget, ttstr key, tTJSVariant classes, tTJSVariant definitionsSet, tTJSVariant state)
+{
+	ncbPropAccessor widgetObj(widget);
+	tTJSVariant styleFragCache = widgetObj.GetValue(L"_styleFragCache", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleFragCacheHint);
+	ncbPropAccessor styleFragCacheObj(styleFragCache);
+
+	if (styleFragCacheObj.HasValue(key.c_str()))
+		return styleFragCacheObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+	tTJSVariant styleParent = widgetObj.GetValue(L"styleParent", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleParentHint);
+	tTJSVariant aboveFrag;
+	if (styleParent.Type() != tvtVoid) 
+		aboveFrag = findStyleFragForClass(styleParent, key, classes, definitionsSet, state);
+	tTJSVariant frags = getTempArray();
+	ncbPropAccessor fragsObj(frags);
+	fragsObj.SetValue(tjs_int(0), aboveFrag);
+	auto style = widgetObj.GetValue(L"_style", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleHint);
+	ncbPropAccessor styleObj(style);
+	if (styleObj.HasValue(L"isClass", &isClassHint)) {
+		tTJSVariant isClass = styleObj.GetValue(L"isClass", ncbTypedefs::Tag<tTJSVariant>(), 0, &isClassHint);
+		ncbPropAccessor isClassObj(isClass);
+		ncbPropAccessor classesObj(classes);
+		tjs_int classesCount = countArray(classes);
+		for (tjs_int i = 0; i < classesCount; i++) {
+			auto klass = classesObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
+			if (isClassObj.HasValue(klass.c_str()))
+				fragsObj.FuncCall(0, L"insert", &insertHint, NULL, tjs_int(1), extractStyleFrag(isClassObj.GetValue(klass.c_str(), ncbTypedefs::Tag<tTJSVariant>()), definitionsSet, state));
+		}
+	}
+	tTJSVariant frag = mergeFrags(frags);
+	styleFragCacheObj.SetValue(key.c_str(), frag);
+	return frag;
+}
+
+tTJSVariant getStyleFragForClass(tTJSVariant widget, tTJSVariant definitionsSet, ttstr uniqKey, tTJSVariant state)
+{
+	ncbPropAccessor widgetObj(widget);
+	auto classes = widgetObj.GetValue(L"classTrees", ncbTypedefs::Tag<tTJSVariant>(), 0, &classTreesHint);
+	ttstr className = widgetObj.GetValue(L"className", ncbTypedefs::Tag<ttstr>(), 0, &classNameHint);
+	ttstr key = className + L"#" + uniqKey + L"#class";
+	if (state.Type() == tvtString)
+		key += L"#" + ttstr(state);
+	tTJSVariant styleParent = widgetObj.GetValue(L"styleParent", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleParentHint);
+	return findStyleFragForClass(styleParent, key, classes, definitionsSet, state);
+}
+
+tTJSVariant findStyleFragForClassWeak(tTJSVariant widget, ttstr key, tTJSVariant classes, tTJSVariant definitionsSet, tTJSVariant state)
+{
+	ncbPropAccessor widgetObj(widget);
+	tTJSVariant styleFragCache = widgetObj.GetValue(L"_styleFragCache", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleFragCacheHint);
+	ncbPropAccessor styleFragCacheObj(styleFragCache);
+
+	if (styleFragCacheObj.HasValue(key.c_str()))
+		return styleFragCacheObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+	tTJSVariant styleParent = widgetObj.GetValue(L"styleParent", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleParentHint);
+	tTJSVariant aboveFrag;
+	if (styleParent.Type() != tvtVoid) 
+		aboveFrag = findStyleFragForClassWeak(styleParent, key, classes, definitionsSet, state);
+	tTJSVariant frags = getTempArray();
+	ncbPropAccessor fragsObj(frags);
+	fragsObj.SetValue(tjs_int(0), aboveFrag);
+	auto style = widgetObj.GetValue(L"_style", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleHint);
+	ncbPropAccessor styleObj(style);
+	if (styleObj.HasValue(L"isClassWeak", &isClassWeakHint)) {
+		tTJSVariant isClass = styleObj.GetValue(L"isClassWeak", ncbTypedefs::Tag<tTJSVariant>(), 0, &isClassWeakHint);
+		ncbPropAccessor isClassObj(isClass);
+		ncbPropAccessor classesObj(classes);
+		tjs_int classesCount = countArray(classes);
+		for (tjs_int i = 0; i < classesCount; i++) {
+			auto klass = classesObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
+			if (isClassObj.HasValue(klass.c_str()))
+				fragsObj.FuncCall(0, L"insert", &insertHint, NULL, tjs_int(1), extractStyleFrag(isClassObj.GetValue(klass.c_str(), ncbTypedefs::Tag<tTJSVariant>()), definitionsSet, state));
+		}
+	}
+	tTJSVariant frag = mergeFrags(frags);
+	styleFragCacheObj.SetValue(key.c_str(), frag);
+	return frag;
+}
+
+tTJSVariant getStyleFragForClassWeak(tTJSVariant widget, tTJSVariant definitionsSet, ttstr uniqKey, tTJSVariant state)
+{
+	ncbPropAccessor widgetObj(widget);
+	auto classes = widgetObj.GetValue(L"classTrees", ncbTypedefs::Tag<tTJSVariant>(), 0, &classTreesHint);
+	ttstr className = widgetObj.GetValue(L"className", ncbTypedefs::Tag<ttstr>(), 0, &classNameHint);
+	ttstr key = className + L"#" + uniqKey + L"#classweak";
+	if (state.Type() == tvtString)
+		key += L"#" + ttstr(state);
+	tTJSVariant styleParent = widgetObj.GetValue(L"styleParent", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleParentHint);
+	return findStyleFragForClassWeak(styleParent, key, classes, definitionsSet, state);
+}
+
+void updateStyleComp(tTJSVariant widget, tTJSVariant defsSet, ttstr uniqKey)
+{
+	ncbPropAccessor widgetObj(widget);
+	auto styleStates = widgetObj.GetValue(L"styleStates", ncbTypedefs::Tag<tTJSVariant>(), 0, &styleStatesHint);
+
+	ncbPropAccessor styleStatesObj(styleStates);
+	tjs_int styleStatesCount = countArray(styleStates);
+
+	auto style = widgetObj.GetValue(L"_style", ncbTypedefs::Tag<tTJSVariant>(), 0, &_styleHint);
+
+	tTJSVariant frags = getTempArray2();
+	ncbPropAccessor fragsObj(frags);
+
+	for (tjs_int i = 0; i < styleStatesCount; i++) {
+		auto state = styleStatesObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+		fragsObj.FuncCall(0, L"add", &addHint, 0, extractStyleFrag(style, defsSet, state));
+		fragsObj.FuncCall(0, L"add", &addHint, 0, getStyleFragForId(widget, defsSet, uniqKey, state));
+		fragsObj.FuncCall(0, L"add", &addHint, 0, getStyleFragForClass(widget, defsSet, uniqKey, state));
+		fragsObj.FuncCall(0, L"add", &addHint, 0, getStyleFragForClassWeak(widget, defsSet, uniqKey, state));
+	}
+	tTJSVariant voidVar;
+	fragsObj.FuncCall(0, L"add", &addHint, 0, extractStyleFrag(style, defsSet, voidVar));
+	fragsObj.FuncCall(0, L"add", &addHint, 0, getStyleFragForId(widget, defsSet, uniqKey, voidVar));
+	fragsObj.FuncCall(0, L"add", &addHint, 0, getStyleFragForClass(widget, defsSet, uniqKey, voidVar));
+	fragsObj.FuncCall(0, L"add", &addHint, 0, getStyleFragForClassWeak(widget, defsSet, uniqKey, voidVar));
+
+	fragsObj.FuncCall(0, L"reverse", &reverseHint, 0);
+
+	tTJSVariant styleComp = mergeFrags(frags);
+	if (styleComp.Type() == tvtVoid)
+		styleComp = createDictionary();
+
+	widgetObj.SetValue(L"_styleComp", styleComp, 0, &_styleCompHint);
 }
 
 
@@ -1028,3 +1345,13 @@ NCB_REGISTER_FUNCTION(extractDefinedProperties, extractDefinedProperties);
 NCB_REGISTER_FUNCTION(extractStyleWithChain, extractStyleWithChain);
 NCB_REGISTER_FUNCTION(applyAdditionalFunction, applyAdditionalFunction);
 NCB_REGISTER_FUNCTION(extractStyleChain, extractStyleChain);
+NCB_REGISTER_FUNCTION(mergeFrags, mergeFrags);
+NCB_REGISTER_FUNCTION(extractStyle, extractStyle);
+NCB_REGISTER_FUNCTION(extractStyleFrag, extractStyleFrag);
+NCB_REGISTER_FUNCTION(findStyleFragForId, findStyleFragForId);
+NCB_REGISTER_FUNCTION(getStyleFragForId, getStyleFragForId);
+NCB_REGISTER_FUNCTION(findStyleFragForClass, findStyleFragForClass);
+NCB_REGISTER_FUNCTION(getStyleFragForClass, getStyleFragForClass);
+NCB_REGISTER_FUNCTION(findStyleFragForClassWeak, findStyleFragForClassWeak);
+NCB_REGISTER_FUNCTION(getStyleFragForClassWeak, getStyleFragForClassWeak);
+NCB_REGISTER_FUNCTION(updateStyleComp, updateStyleComp);

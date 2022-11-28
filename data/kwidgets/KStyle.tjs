@@ -51,6 +51,10 @@ class KStyleObject
 	}
 
 	function mergeFrags(frags) {
+		return global.mergeFrags(frags);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		frags.remove(void);
 		if (frags.count == 0)
 			return void;
@@ -61,6 +65,10 @@ class KStyleObject
 	}
 
 	function getStyleFragForId(definitionsSet, uniqKey, state = void) {
+		return global.getStyleFragForId(this, definitionsSet, uniqKey, state);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		var id = this.id;
 		if (id == "")
 			return void;
@@ -71,11 +79,13 @@ class KStyleObject
 	}
 
 	function findStyleFragForId(key, id, definitionsSet, state) {
-		if (id == "")
-			return void;
+		return global.findStyleFragForId(this, key, id, definitionsSet, state);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		if (typeof(_styleFragCache[key]) != K_UNDEFINED)
 			return _styleFragCache[key];
-		var aboveFrag = styleParent.findStyleFragForId(...);
+		var aboveFrag = styleParent === void ? void : styleParent.findStyleFragForId(...);
 		var frag;
 		if (typeof(_style.isId) == K_UNDEFINED
 			|| typeof(_style.isId[id]) == K_UNDEFINED)
@@ -88,6 +98,10 @@ class KStyleObject
 	}
 
 	function getStyleFragForClass(definitionsSet, uniqKey, state = void) {
+		return global.getStyleFragForClass(this, definitionsSet, uniqKey, state);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		var classes = classTrees;
 		var key = className + "#" + uniqKey + "#class";
 		if (state !== void)
@@ -96,9 +110,13 @@ class KStyleObject
 	}
 
 	function findStyleFragForClass(key, classes, definitionsSet, state) {
+		return global.findStyleFragForClass(key, classes, definitionsSet, state);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		if (typeof(_styleFragCache[key]) != K_UNDEFINED)
 			return _styleFragCache[key];
-		var aboveFrag = styleParent.findStyleFragForClass(...);
+		var aboveFrag = styleParent === void ? void : styleParent.findStyleFragForClass(...);
 		var frags = [ aboveFrag ];
 		if (typeof(_style.isClass) != K_UNDEFINED)
 			for (var i = 0; i < classes.count; i++) {
@@ -112,6 +130,10 @@ class KStyleObject
 	}
 
 	function getStyleFragForClassWeak(definitionsSet, uniqKey, state = void) {
+		return global.getStyleFragForClassWeak(this, definitionsSet, uniqKey, state);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		var classes = classTrees;
 		var key = className + "#" + uniqKey + "#classweak";
 		if (state !== void)
@@ -120,9 +142,13 @@ class KStyleObject
 	}
 
 	function findStyleFragForClassWeak(key, classes, definitionsSet, state) {
+		return global.findStyleFragForClassWeak(this, key, classes, definitionsSet, state);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		if (typeof(_styleFragCache[key]) != K_UNDEFINED)
 			return _styleFragCache[key];
-		var aboveFrag = styleParent.findStyleFragForClassWeak(...);
+		var aboveFrag = styleParent === void ? void : styleParent.findStyleFragForClassWeak(...);
 		var frags = [ aboveFrag ];
 		if (typeof(_style.isClassWeak) != K_UNDEFINED)
 			for (var i = 0; i < classes.count; i++) {
@@ -136,6 +162,10 @@ class KStyleObject
 	}
 
 	function extractStyleFrag(style, definitionsSet, state) {
+		return global.extractStyleFrag(style, definitionsSet, state);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		if (state !== void) {
 			if (typeof(style[state]) == K_UNDEFINED)
 				return void;
@@ -177,6 +207,10 @@ class KStyleObject
 	}
 
 	function updateStyleComp(defsSet = styleRepository.getDefaultDefinitions(this), uniqKey = "default") {
+		return global.updateStyleComp(this, defsSet, uniqKey);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		var frags = [];
 		for (var i = 0; i < styleStates.count; i++) {
 			var state = styleStates[i];
@@ -196,6 +230,10 @@ class KStyleObject
 	}
 
 	function extractStyle(definition) {
+		return global.extractStyle(this, definition);
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		var style = %[];
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
@@ -357,14 +395,11 @@ class KStyleRepository
 	var styleNotficationLockCount = 0;
 	var styleModified = false;
 	var readStorageFiles = [];
-	var styleParent = %[ styleParent: void,
-						 findStyleFragForId: function { return void; },
-						 findStyleFragForClass: function { return void; },
-						 findStyleFragForClassWeak: function { return void; } ];
+	var styleParent = void; 
 	var classTreeCache = %[];
 	var widgetStyleDefinitionCache = %[];
 	var defaultDefinitionsCache = %[];
-	
+
 	function KStyleRepository() {
 		_style = %[ isId: idStyleMap,
 					isClass: classStyleMap,
