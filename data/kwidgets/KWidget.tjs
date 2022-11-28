@@ -994,6 +994,9 @@ class KWidget extends Layer
 	function attachToWindow() {
 		clearStyleFragCache();
 
+		if (isInWidgetTree)
+			parentWidget.requireStyleModificationDelay();
+
 		var widgets = widgetDescendants;
 		widgets.insert(0, this);
 
@@ -1015,6 +1018,9 @@ class KWidget extends Layer
 			widget.onAttachedToWindow();
 			widget.releaseStyleModificationDelay();
 		}
+
+		if (isInWidgetTree)
+			parentWidget.releaseStyleModificationDelay();
 	}
 
 	// ウィンドウからデタッチ

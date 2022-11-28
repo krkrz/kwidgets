@@ -21,10 +21,16 @@ class KTextBoard extends KVirtualWidget
 		}
 		setter (v) {
 			rows = v.split(linefeedPat);
-			invalidateLayout();
-			redrawAll();
+			if (isAttachedToWindow) {
+				invalidateLayout();
+				redrawAll();
+			}
 		}
 	}
+
+		function onAttachedToWindow() {
+			invalidateLayout();
+		}
 
 	function invalidateLayout() {
 		var w = 0;

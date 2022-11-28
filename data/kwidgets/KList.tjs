@@ -1778,7 +1778,7 @@ class KListItem
 	var _styleChain;
 	var fontStyle;
 	var labelStyle;
-	var appearanceStyle = %[];
+	var appearanceStyle = %[ icons: [] ];
 	var widgetStyle;
 	var styleStates = [];
 	var customStyleStates = [];
@@ -1896,6 +1896,7 @@ class KListItem
 
 	function overwriteStyle(newStyle) {
 		(Dictionary.assign incontextof _style)(newStyle, false) ;
+		requireStyleUpdate();
 		invalidateStyles();
 	}
 
