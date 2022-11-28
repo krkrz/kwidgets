@@ -228,7 +228,7 @@ class KList extends KVirtualWidget
 	function add(item) {
 		item.depth = -1;
 		item.parent = this;
-		item.requireStyleChainUpdate();
+		item.requireStyleUpdate();
 		childList.add(item);
 		item.invalidateNodeEnability();
 		requireReconstruct();
@@ -243,7 +243,7 @@ class KList extends KVirtualWidget
 	function insert(index, item) {
 		item.depth = -1;
 		item.parent = this;
-		item.requireStyleChainUpdate();
+		item.requireStyleUpdate();
 		childList.insert(index, item);
 		item.invalidateNodeEnability();
 		requireReconstruct();
@@ -442,40 +442,12 @@ class KList extends KVirtualWidget
 		}
 	}
 
-	/**------------------------------
-	 * リストアイテムのスタイルチェインキャッシュをクリア
-	 ------------------------------*/
-	function clearStyleChainCacheForListItem() {
-		listItemStyleChainCache = %[];
-	}
-
-	/**------------------------------
-	 * リストアイテムのスタイルチェインの取得
-	 ------------------------------*/
-	function getStyleChainForListItem(item) {
-		var itemClassName = item.className;
-		if (typeof(listItemStyleChainCache[itemClassName]) == K_UNDEFINED) {
-			var itemStyleChain = extractStyleChain(true, item.classTrees);
-			listItemStyleChainCache[itemClassName] = itemStyleChain;
-		}
-		return listItemStyleChainCache[itemClassName];
-	}
-
 	function beforeStyleFullUpdate() {
-		clearStyleChainCacheForListItem();
 		var items = descendants;
 		for (var i = 0; i < items.count; i++) {
 			var child = items[i];
-			child.updateIconLayerList();
-		}
-	}
-
-	function afterStyleFullUpdate() {
-		var items = descendants;
-		for (var i = 0; i < items.count; i++) {
-			var child = items[i];
-			child.updateStyleChain();
 			child.invalidateStyles();
+			child.updateIconLayerList();
 		}
 	}
 
@@ -1766,6 +1738,7 @@ global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
 
 class KListItem
 {
+	var id = "";
 	var _dict;
 	var _isAvoidDictionaryRegistration = false;
 	var isRoot = false;
@@ -1828,8 +1801,6 @@ class KListItem
 		ownIconLayerList = [];    // missing を有効にする
 		Scripts.setCallMissing(this);
 		initStyleObject();
-		updateStyleChain();
-		invalidateStyles();
 	}
 
 	/*------------------------------
@@ -1920,78 +1891,8 @@ class KListItem
 
 	function overwriteStyle(newStyle) {
 		(Dictionary.assign incontextof _style)(newStyle, false) ;
-		updateStyleChain();
 		invalidateStyles();
 	}
-
-	function updateStyleChain() {
-		if (! root) {
-			_styleChain = [ _style ];
-		} else {
-			_styleChain = [];
-			_styleChain.assign(root.getStyleChainForListItem(this));
-			_styleChain.insert(0, _style);
-		}
-	}
-
-	function getStyleProperty(key, defaultValue = void) {
-		return styleRepository.getPropertyFromStyleChain(_styleChain, styleStates, key, defaultValue);
-	}
-
-	function extractStyle(definition) {
-		var style = %[];
-		for (var i = 0; i < definition.count; i++) {
-			var def = definition[i];
-			var key = def[0];
-			if (typeof(_styleComp[key]) != K_UNDEFINED) 
-				style[key] = _styleComp[key];
-			else
-				style[key] = def[2];
-		}
-		applyAdditionalFunction(style, definition);
-		return style;
-
-		return extractStyleWithChain(_styleChain, styleStates, definition);
-	}
-
-	function extractStyleWithChain(chain, states, definition) {
-		var style = global.extractStyleWithChain(...);
-		applyAdditionalFunction(style, definition);
-		return style;
-
-		// BEGIN  reference implementation.
-		// This code is actually optimized and executed in C++.
-		var style = %[];
-		for (var i = 0; i < definition.count; i++) {
-			var def = definition[i];
-			var memberKey = def[0];
-			var styleKey = def[1];
-			var defaultValue = def[2];
-			style[memberKey] = styleRepository.getPropertyFromStyleChain(chain, states, styleKey, defaultValue);
-		}
-		applyAdditionalFunction(style, definition);
-		return style;
-		// END  reference implementation.
-	}
-
-	function applyAdditionalFunction(style, definition) {
-		global.applyAdditionalFunction(this, style, definition);
-		return;
-
-		// BEGIN  reference implementation.
-		// This code is actually optimized and executed in C++.
-		for (var i = 0; i < definition.count; i++) {
-			var def = definition[i];
-			var resolveFunction = def[3];
-			if (resolveFunction === void)
-				continue;
-			var memberKey = def[0];
-			style[memberKey] = this[resolveFunction](style[memberKey]);
-		}
-		// END  reference implementation.
-	}
-
-	var _styleComp = [];
 
 	property styleParent {
 		getter {
@@ -2010,25 +1911,6 @@ class KListItem
 				K_LIST_ITEM_LABEL_STYLE_DEFINITION 
 			];
 		}
-	}
-
-	function updateStyleComp(defsSet = defaultDefinitions, uniqKey = "comp") {
-		var frags = [];
-		for (var i = 0; i < styleStates.count; i++) {
-			var state = styleStates[i];
-			frags.add(extractStyleFrag(_style, defsSet, state));
-//			frags.add(getStyleFragForId(defsSet, uniqKey, state));
-			frags.add(getStyleFragForClass(defsSet, uniqKey, state));
-			frags.add(getStyleFragForClassWeak(defsSet, uniqKey, state));
-		}
-		frags.add(extractStyleFrag(_style, defsSet));
-//		frags.add(getStyleFragForId(defsSet, uniqKey));
-		frags.add(getStyleFragForClass(defsSet, uniqKey));
-		frags.add(getStyleFragForClassWeak(defsSet, uniqKey));
-		frags.reverse();
-		_styleComp = mergeFrags(frags);
-		if (_styleComp === void)
-			_styleComp = %[];
 	}
 
 	function invalidateStyles(forceUpdate = true) {
@@ -2062,16 +1944,15 @@ class KListItem
 		}
 	}
 
-	var _requireStyleChainUpdate = true;
+	var _requireStyleUpdate = true;
 
-	function requireStyleChainUpdate {
-		_requireStyleChainUpdate = true;
+	function requireStyleUpdate {
+		_requireStyleUpdate = true;
 	}
 
-	function resolveStyleChainUpdate {
-		if (_requireStyleChainUpdate) {
-			_requireStyleChainUpdate = false;
-			updateStyleChain();
+	function resolveStyleUpdate {
+		if (_requireStyleUpdate) {
+			_requireStyleUpdate = false;
 			invalidateStyles(false);
 		}
 	}
@@ -2749,7 +2630,7 @@ class KListItem
 		}
 		item.depth = -1;
 		item.parent = this;
-		item.requireStyleChainUpdate();
+		item.requireStyleUpdate();
 		childList.add(item);
 		item.invalidateNodeEnability();
 		requireReconstruct();
@@ -2768,7 +2649,7 @@ class KListItem
 		}
 		item.depth = -1;
 		item.parent = this;
-		item.requireStyleChainUpdate();
+		item.requireStyleUpdate();
 		childList.insert(index, item);
 		item.invalidateNodeEnability();
 		requireReconstruct();
@@ -3565,9 +3446,9 @@ class KListItem
 				return;
 			_itemVisible = v;
 			if (_itemVisible) {
+				resolveStyleUpdate();
 				updateIconLayerList();
 				updateSize();
-				resolveStyleChainUpdate();
 			}
 		}
 	}

@@ -9,6 +9,10 @@ global._existentWindowList = [];
 /**----------------------------------------------------------------------
  * ウィジェットを格納するウィンドウ
  ----------------------------------------------------------------------*/
+global.K_WINDOW_STYLE_DEFINITION = [
+	[ "defaultFocusable", "defaultFocusable", void ]
+];
+
 class KWindow extends Window
 {
 	/// デフォルトのフォントフェイス
@@ -60,14 +64,11 @@ class KWindow extends Window
 	var respondToStyleModification;
 	// スタイル
 	var _style, _styleArch;
-	var _idStyleKeys = [];
-	var _classStyleKeys = [];
-	var _classWeakStyleKeys = [];
 	var _theme = "";
 	var windowStyle = %[];
 	var _id = "";
-	var _styleChain;
-	
+	var styleStates = [];
+
 	/**------------------------------
 	 * コンストラクタ
 	 *
@@ -115,9 +116,7 @@ class KWindow extends Window
 		_styleArch = styleRepository.normalizeStyle(getOption("style", %[]));
 		initStyleObject();
 		updateTheme();
-		updateStyleKeys();
-		updateStyleChain();
-		updateWindowStyles();
+		invalidateStyles();
 
 		caption = getOption("caption", caption);
 		borderStyle = getOption("borderStyle", borderStyle);
@@ -250,6 +249,12 @@ class KWindow extends Window
 		super.finalize(...);
 	}
 
+	property id {
+		getter {
+			return _id;
+		}
+	}
+
 	property createNewWindowAsChild {
 		setter (v) {
 			if (! isMain)
@@ -332,12 +337,8 @@ class KWindow extends Window
 		(Dictionary.assign incontextof _style)(newStyle, false) ;
 		if (! isStyleHasInheritAttributes) {
 			invalidateStyles();
-			updateStyleChain();
-			updateWindowStyles();
 		} else {
-			updateStyleKeys();
-			updateStyleChain();
-			updateWindowStyles();
+			invalidateStyles();
 			invalidateStylesToDescendants();
 		}
 	}
@@ -346,93 +347,44 @@ class KWindow extends Window
 		_style = unionDictionary(styleRepository.findTheme(_theme), _styleArch, true);
 	}
 
-	function updateStyleKeys() {
-		if (typeof(_style.isId) == K_UNDEFINED)
-			_idStyleKeys = [];
-		else
-			_idStyleKeys = dictionaryKeys(_style.isId);
-
-		if (typeof(_style.isClass) == K_UNDEFINED)
-			_classStyleKeys = [];
-		else
-			_classStyleKeys = dictionaryKeys(_style.isClass);
-
-		if (typeof(_style.isClassWeak) == K_UNDEFINED)
-			_classWeakStyleKeys = [];
-		else
-			_classWeakStyleKeys = dictionaryKeys(_style.isClassWeak);
-	}
-
 	function requireStyleModificationDelay() {
 	}
 
 	function releaseStyleModificationDelay() {
 	}
 
-	function updateStyleChain() {
-		_styleChain = extractStyleChain();
-	}
 
-	function extractStyleChain(includeSelf = false, classes = classTrees) {
-		var result =  [ _style ];
-
-		var list;
-		list = [ styleRepository ];
-
-		if (includeSelf)
-			list.insert(0, this);
-
-		var idInsertionIndex, classInsertionIndex, classWeakInsertionIndex;
-		idInsertionIndex = classInsertionIndex = classWeakInsertionIndex = result.count;
-
-		for (var i = 0; i < list.count; i++) {
-			var widget = list[i];
-			if (widget._idStyleKeys.find(_id) >= 0) {
-				result.insert(idInsertionIndex, widget._style.isId[_id]);
-				idInsertionIndex++;
-				classInsertionIndex++;
-				classWeakInsertionIndex++;
-			}
-			if (intersectionSet(widget._classStyleKeys, classes).count > 0)
-				for (var j = 0; j < classes.count; j++) {
-					var klass = classes[j];
-					if (typeof(widget._style.isClass[klass]) != K_UNDEFINED) {
-						result.insert(classInsertionIndex, widget._style.isClass[klass]);
-						classInsertionIndex++;
-						classWeakInsertionIndex++;
-					}
-				}
-			if (intersectionSet(widget._classWeakStyleKeys, classes).count > 0)
-				for (var j = 0; j < classes.count; j++) {
-					var klass = classes[j];
-					if (typeof(widget._style.isClassWeak[klass]) != K_UNDEFINED) {
-						result.insert(classWeakInsertionIndex, widget._style.isClassWeak[klass]);
-						classWeakInsertionIndex++;
-					}
-				}
+	property defaultDefinitions {
+		getter {
+			return [ K_WINDOW_STYLE_DEFINITION ];
 		}
-		return result;
 	}
 
-	function getStyleProperty(key, defaultValue = void) {
-		return styleRepository.getPropertyFromStyleChain(_styleChain, [], key, defaultValue);
+	function extractWindowStyle() {
+		return extractStyle(K_WINDOW_STYLE_DEFINITION);
 	}
 
-	function updateWindowStyles() {
-		windowStyle = %[];
-		windowStyle.defaultFocusable = getStyleProperty("defaultFocusable", void);
+	function updateWindowStyle() {
+		var newStyle = extractWindowStyle();
+
+		if (equalStruct(newStyle, windowStyle))
+			return false;
+
+		windowStyle = newStyle;
+
+		return true;
 	}
 
 	function invalidateStyles() {
+		updateStyleComp();
+		updateWindowStyle();
 	}
 
 	function invalidateStylesToDescendants(fullUpdate = false) {
 		if (fullUpdate) {
 			clearStyleFragCache();
 			updateTheme();
-			updateStyleKeys();
-			updateStyleChain();
-			updateWindowStyles();
+			invalidateStyles();
 			primaryWidget.clearIconCache();
 		}
 		primaryWidget.invalidateStylesToDescendants(fullUpdate);
@@ -674,7 +626,7 @@ class KWindow extends Window
 		invalidateLayout();
 	}
 
-	function setZoom(numer, denom) {
+    function setZoom(numer, denom) {
 		_numer = numer;
 		_denom = denom;
 		var w, h;

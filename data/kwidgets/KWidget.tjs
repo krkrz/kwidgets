@@ -198,10 +198,6 @@ class KWidget extends Layer
 	// スタイル
 	var _theme;
 	var _style, _styleArch;
-	var _styleComp = [];
-	var _idStyleKeys = [];
-	var _classStyleKeys = [];
-	var _classWeakStyleKeys = [];
 	var _styleChain;
 	var _styleModificationDelayRefCount = 0;
 	var _styleModificationLocked = false;
@@ -334,15 +330,6 @@ class KWidget extends Layer
 		_lockStyleModificationOnAttach = getOption("lockStyleModificationOnAttach", false);
 		// missing を有効にする
 		Scripts.setCallMissing(this);
-
-//		updateTheme();
-//		updateStyleKeys();
-//		updateStyleChain();
-//		updateFontStyle();
-//		updateAppearanceStyle();
-//		updateBorderStyle();
-//		updateLayoutStyle();
-//		updateLocateStyle();
 	}
 
 	/**------------------------------
@@ -563,161 +550,14 @@ class KWidget extends Layer
 		invalidateStyles();
 	}
 
-	function getStyleProperty(key, defaultValue = void) {
-		return styleRepository.getPropertyFromStyleChain(_styleChain, styleStates, key, defaultValue);
-	}
-
-	function getStylePropertyWithChain(customChain, key, defaultValue = void) {
-		return styleRepository.getPropertyFromStyleChain(customChain, styleStates, key, defaultValue);
-	}
-
-	function extractStyle(definition) {
-		var style = %[];
-		for (var i = 0; i < definition.count; i++) {
-			var def = definition[i];
-			var key = def[0];
-			if (typeof(_styleComp[key]) != K_UNDEFINED) 
-				style[key] = _styleComp[key];
-			else
-				style[key] = def[2];
-		}
-		applyAdditionalFunction(style, definition);
-		return style;
-
-		return extractStyleWithChain(_styleChain, styleStates, definition);
-	}
-
-	function extractStyleWithChain(chain, states, definition) {
-		var style = global.extractStyleWithChain(...);
-		applyAdditionalFunction(style, definition);
-		return style;
-
-		// BEGIN  reference implementation.
-		// This code is actually optimized and executed in C++.
-		var style = %[];
-		for (var i = 0; i < definition.count; i++) {
-			var def = definition[i];
-			var memberKey = def[0];
-			var styleKey = def[1];
-			var defaultValue = def[2];
-			style[memberKey] = styleRepository.getPropertyFromStyleChain(chain, states, styleKey, defaultValue);
-		}
-		applyAdditionalFunction(style, definition);
-		return style;
-		// END  reference implementation.
-	}
-
-	function applyAdditionalFunction(style, definition) {
-		global.applyAdditionalFunction(this, style, definition);
-		return;
-
-		// BEGIN  reference implementation.
-		// This code is actually optimized and executed in C++.
-		for (var i = 0; i < definition.count; i++) {
-			var def = definition[i];
-			var memberKey = def[0];
-			if (style[memberKey] === void) {
-				var initialProperty = def[4];
-				if (initialProperty !== void)
-					style[memberKey] = this[initialProperty];
-			}
-			var resolveFunction = def[3];
-			if (resolveFunction !== void) {
-				var memberKey = def[0];
-				style[memberKey] = this[resolveFunction](style[memberKey], style);
-			}
-		}
-		// END  reference implementation.
-	}
-
 	function updateTheme() {
 		_style = unionDictionary(styleRepository.findTheme(_theme), _styleArch, true);
-	}
-
-	function updateStyleKeys() {
-		if (typeof(_style.isId) == K_UNDEFINED)
-			_idStyleKeys = [];
-		else
-			_idStyleKeys = dictionaryKeys(_style.isId);
-
-		if (typeof(_style.isClass) == K_UNDEFINED)
-			_classStyleKeys = [];
-		else
-			_classStyleKeys = dictionaryKeys(_style.isClass);
-
-		if (typeof(_style.isClassWeak) == K_UNDEFINED)
-			_classWeakStyleKeys = [];
-		else
-			_classWeakStyleKeys = dictionaryKeys(_style.isClassWeak);
 	}
 
 	property styleRepository {
 		getter {
 			return global.styleRepository;
 		}
-	}
-
-	function extractStyleChain(includeSelfToChain = false, classes = classTrees) {
-		return global.extractStyleChain(this, includeSelfToChain, classes);
-
-		// BEGIN  reference implementation.
-		// This code is actually optimized and executed in C++.
-
-		var result =  [];
-		if (! includeSelfToChain)
-			result.add(_style);
-
-		var list;
-		if (isAttachedToWindow) {
-			list = ancestors;
-			list.reverse();
-			list.add(window);
-			list.add(styleRepository);
-		} else {
-			list = [ styleRepository ];
-		}
-
-		if (includeSelfToChain)
-			list.insert(0, this);
-
-		var idInsertionIndex, classInsertionIndex, classWeakInsertionIndex;
-		idInsertionIndex = classInsertionIndex = classWeakInsertionIndex = result.count;
-
-		for (var i = 0; i < list.count; i++) {
-			var widget = list[i];
-			if (! includeSelfToChain) {
-				if (widget._idStyleKeys.find(_id) >= 0) {
-					result.insert(idInsertionIndex, widget._style.isId[_id]);
-					idInsertionIndex++;
-					classInsertionIndex++;
-					classWeakInsertionIndex++;
-				}
-			}
-			if (intersectionSet(widget._classStyleKeys, classes).count > 0)
-				for (var j = 0; j < classes.count; j++) {
-					var klass = classes[j];
-					if (typeof(widget._style.isClass[klass]) != K_UNDEFINED) {
-						result.insert(classInsertionIndex, widget._style.isClass[klass]);
-						classInsertionIndex++;
-						classWeakInsertionIndex++;
-					}
-				}
-			if (intersectionSet(widget._classWeakStyleKeys, classes).count > 0)
-				for (var j = 0; j < classes.count; j++) {
-					var klass = classes[j];
-					if (typeof(widget._style.isClassWeak[klass]) != K_UNDEFINED) {
-						result.insert(classWeakInsertionIndex, widget._style.isClassWeak[klass]);
-						classWeakInsertionIndex++;
-					}
-				}
-		}
-		return result;
-
-		// END  reference implementation.
-	}
-
-	function updateStyleChain() {
-//		_styleChain = extractStyleChain();
 	}
 
 	function testStyleModification() {
@@ -771,29 +611,12 @@ class KWidget extends Layer
 	property defaultDefinitions {
 		getter {
 			return [ K_WIDGET_APPEARANCE_STYLE_DEFINITION,
-						K_WIDGET_LOCATE_STYLE_DEFINITIION,
-						K_WIDGET_FONT_STYLE_DEFINITION,
-						K_WIDGET_LAYOUT_STYLE_DEFINITION,
-						K_WIDGET_BORDER_STYLE_DEFNITION,
+					 K_WIDGET_LOCATE_STYLE_DEFINITIION,
+					 K_WIDGET_FONT_STYLE_DEFINITION,
+					 K_WIDGET_LAYOUT_STYLE_DEFINITION,
+					 K_WIDGET_BORDER_STYLE_DEFNITION,
 					 widgetStyleDefinition ];
 		}
-	}
-
-	function updateStyleComp(defsSet = defaultDefinitions, uniqKey = "comp") {
-		var frags = [];
-		for (var i = 0; i < styleStates.count; i++) {
-			var state = styleStates[i];
-			frags.add(extractStyleFrag(_style, defsSet, state));
-			frags.add(getStyleFragForId(defsSet, uniqKey, state));
-			frags.add(getStyleFragForClass(defsSet, uniqKey, state));
-			frags.add(getStyleFragForClassWeak(defsSet, uniqKey, state));
-		}
-		frags.add(extractStyleFrag(_style, defsSet));
-		frags.add(getStyleFragForId(defsSet, uniqKey));
-		frags.add(getStyleFragForClass(defsSet, uniqKey));
-		frags.add(getStyleFragForClassWeak(defsSet, uniqKey));
-		frags.reverse();
-		_styleComp = mergeFrags(frags);
 	}
 
 	/*------------------------------
@@ -825,7 +648,6 @@ class KWidget extends Layer
 		if (equalStructNumericLoose(oldStyle, _styleArch))
 			return;
 		updateTheme();
-		updateStyleKeys();
 		invalidateStylesToDescendants();
 	}
 
@@ -862,7 +684,6 @@ class KWidget extends Layer
 			if (_id == v)
 				return;
 			_id = v;
-			updateStyleChain();
 			invalidateStyles();
 		}
 	}
@@ -1193,12 +1014,10 @@ class KWidget extends Layer
 			widget.clearStyleFragCache();
 			widget.isAttachedToWindow = true;
 			widget.updateTheme();
-			widget.updateStyleKeys();
 		}
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
-			widget.updateStyleChain();
 			widget.invalidateStyles();
 			widget.onAttachedToWindow();
 			widget.releaseStyleModificationDelay();
@@ -1465,9 +1284,7 @@ class KWidget extends Layer
 			if (fullUpdate) {
 				widget.beforeStyleFullUpdate();
 				widget.updateTheme();
-				widget.updateStyleKeys();
 			}
-			widget.updateStyleChain();
 			widget.invalidateStyles();
 			if (fullUpdate)
 				widget.afterStyleFullUpdate();
