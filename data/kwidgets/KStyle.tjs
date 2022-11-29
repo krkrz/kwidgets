@@ -42,12 +42,18 @@ class KStyleObject
 	// 
  
 	function initStyleObject() {
+		this._debug = getOption("debug", false);
 		this._styleFragCache = %[];
 		this._styleComp = %[];
 	}
 
 	function clearStyleFragCache() {
 		_styleFragCache = %[];
+	}
+
+	function dm() {
+		if (_debug)
+			Debug.message(...);
 	}
 
 	function mergeFrags(frags) {
@@ -406,6 +412,10 @@ class KStyleRepository
 					isClassWeak: classWeakStyleMap,
 				  ];
 		initStyleObject();
+	}
+
+	function getOption(key, defaultValue) {
+		return defaultValue;
 	}
 
 	function clear() {

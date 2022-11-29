@@ -1778,7 +1778,7 @@ class KListItem
 	var _styleChain;
 	var fontStyle;
 	var labelStyle;
-	var appearanceStyle = %[ icons: [] ];
+	var appearanceStyle = %[ icons: [], toggleEnabled: true ];
 	var widgetStyle;
 	var styleStates = [];
 	var customStyleStates = [];
