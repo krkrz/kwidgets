@@ -588,6 +588,13 @@ class KTableVirtualWidget extends KVirtualWidget
 		super.onDrawContents();
 	}
 
+	function onStyleModified() {
+		var rowHeightModified = layoutStyleModified || fontStyleModified;
+		super.onStyleModified();
+		if (rowHeightModified)
+			owner.requestModifyRowHeight();
+	}
+
 	// 選択中アイテムのフレームを描画する
 	function drawItemFrame(range, pointed = false, focused = false, selected = false, dragging = false) {
 		var fillColor = 0;
@@ -2241,6 +2248,8 @@ class KTable extends KEntity
 		var options = parseOldStyleWidgetArgs(KTableArgsFormat, *);
 		super.KEntity(window, options);
 
+		earlyUpdateWidgetStyle();
+
 		defaultColumnOptions = getOption("defaultColumnOptions");
 		_showVerticalGrid = getOption("showVerticalGrid", true);
 		_showHorizontalGrid = getOption("showHorizontalGrid", true);
@@ -2422,6 +2431,13 @@ class KTable extends KEntity
 	function onChildValueModified() {
 	}
 
+	var requireRowHeightModify = false;
+	
+	function requestModifyRowHeight() {
+		requireRowHeightModify = true;
+		redrawContents();
+	}
+	
 	function onDrawContents() {
 		_leftTopCorner.id = widgetStyle.leftTopCornerId;
 		rowTab.id = widgetStyle.rowTabId;
@@ -2429,6 +2445,14 @@ class KTable extends KEntity
 		view.id = widgetStyle.mainViewId;
 		_columnSpacer.setFixedSize(viewScroll.verticalBar.width, 0);
 		_rowSpacer.setFixedSize(0, viewScroll.horizontalBar.height);
+		if (requireRowHeightModify) {
+			initAllRows();
+			updateMinMaxSize();
+			requireRowHeightModify = false;
+			view.redrawAll();
+			rowTab.redrawAll();
+			columnTab.redrawAll();
+		}
 		setMinMaxSize(baseGrid.minWidth + borderPaddingWidth,
 					  baseGrid.minHeight + borderPaddingHeight,
 					  baseGrid.maxWidth + borderPaddingWidth,
@@ -2475,7 +2499,7 @@ class KTable extends KEntity
 	}
 
 	function onAttachedToWindow() {
-		afterStyleFullUpdate();
+		requestModifyRowHeight();
 	}
 
 	/*------------------------------
@@ -2515,26 +2539,44 @@ class KTable extends KEntity
 	 * @param element エレメントの値
 	 ------------------------------*/
 	function insertElement(index, element) {
+		var attached = isAttachedToWindow;
 		beginRedrawRegion();
 		element = duplicateStruct(element);
 		var row = new KTableRow(this, element);
 		row.index = index;
-		row.size = fontHeight + spaceVertical;;
-		row.pos = (index == 0) ? 0 : rowList[index - 1].tail;
-		row.initialize(columnList);
+		if (attached) {
+			row.size = fontHeight + spaceVertical;;
+			row.pos = (index == 0) ? 0 : rowList[index - 1].tail;
+			row.initialize(columnList);
+		}
 		rowList.insert(index, row);
 		var size = row.pos;
 		for (var i = index; i < rowList.count; i++) {
 			var row = rowList[i];
 			row.index = i;
-			row.pos = size;
-			size += row.size;
+			if (attached) {
+				row.pos = size;
+				size += row.size;
+			}
 		}
 		updateMinMaxSize();
 		view.redrawAll();
 		endRedrawRegion();
 		notifyValueModification();
 		rowTab.redrawAll();
+	}
+
+	/**------------------------------
+	 * すべての行を初期化する
+	 ------------------------------*/
+	function initAllRows() {
+		var pos = 0;
+		for (var i = 0; i < rowList.count; i++)  {
+			var row = rowList[i];
+			row.initialize(columnList);
+			row.pos = pos;
+			pos += row.size;
+		}
 	}
 
 	/**------------------------------
@@ -2547,6 +2589,7 @@ class KTable extends KEntity
 		rowTab.redrawAll();
 		notifyValueModification();
 	}
+
 
 	/**------------------------------
 	 * 複数行を移動する

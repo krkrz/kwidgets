@@ -35,6 +35,8 @@ class KEntity extends KWidget
 		isDrawing = true;
 		onDrawContents();
 		isDrawing = false;
+
+		clearStyleModifiedMask();
 	}
 
 	function onDrawContents() {
