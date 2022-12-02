@@ -121,11 +121,11 @@ global.K_WIDGET_LAYOUT_STYLE_DEFINITION = [
 	[ "paddingInsetHorizontal",  K_WIDGET_PADDING_INSET_HORIZONTAL_PROPERTY_KEYS, 0 ],
 	[ "paddingInsetVertical",     K_WIDGET_PADDING_INSET_VERTICAL_PROPERTY_KEYS, 0 ],
 	[ "spaceHorizontal", K_WIDGET_SPACE_HORIZONTAL_PROPERTY_KEYS, void, void, "_spaceHorizontal" ],
-	[ "spaceVertical", K_WIDGET_SPACE_VERTICAL_PROPERTY_KEYS, void, void, "_spaceVertical" ],
-	[ "paddingLeft",   K_WIDGET_PADDING_LEFT_PROPERTY_KEYS, 0, "resolvePaddingLeft" ],
-	[ "paddingTop",    K_WIDGET_PADDING_TOP_PROPERTY_KEYS, 0, "resolvePaddingTop" ],
-	[ "paddingRight",  K_WIDGET_PADDING_RIGHT_PROPERTY_KEYS, 0, "resolvePaddingRight" ],
-	[ "paddingBottom", K_WIDGET_PADDING_BOTTOM_PROPERTY_KEYS, 0, "resolvePaddingBottom" ]
+	[ "spaceVertical", K_WIDGET_SPACE_VERTICAL_PROPERTY_KEYS,     void, void, "_spaceVertical" ],
+	[ "paddingLeft",   K_WIDGET_PADDING_LEFT_PROPERTY_KEYS,       0,    void, void, "resolvePaddingLeft" ],
+	[ "paddingTop",    K_WIDGET_PADDING_TOP_PROPERTY_KEYS,        0,    void, void, "resolvePaddingTop" ],
+	[ "paddingRight",  K_WIDGET_PADDING_RIGHT_PROPERTY_KEYS,      0,    void, void, "resolvePaddingRight" ],
+	[ "paddingBottom", K_WIDGET_PADDING_BOTTOM_PROPERTY_KEYS,     0,    void, void, "resolvePaddingBottom" ]
 ];
 
 global.K_WIDGET_BORDER_STYLE_DEFNITION = [
@@ -377,15 +377,6 @@ class KWidget extends Layer
 				style[key] = args[i];
 		}
 		return style;
-	}
-
-	/*------------------------------
-	 * カラーを解決する
-	 ------------------------------*/
-	function resolveColor(exp) {
-		if (exp instanceof "Number")
-			return exp;
-		return styleRepository.resolveAlias("color", exp);
 	}
 
 	/**------------------------------

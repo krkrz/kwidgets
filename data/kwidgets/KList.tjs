@@ -1837,15 +1837,6 @@ class KListItem
 			return defaultValue;
 	}
 
-	/*------------------------------
-	 * カラーを解決する
-	 ------------------------------*/
-	function resolveColor(exp) {
-		if (exp instanceof "Number")
-			return exp;
-		return styleRepository.resolveAlias("color", exp);
-	}
-
 	function updateStyleStates() {
 		var prevStates = duplicateStruct(styleStates);
 		styleStates.assign(customStyleStates);

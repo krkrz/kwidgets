@@ -22,6 +22,15 @@
 tjs_uint32 countHint, _styleHint, addHint, ancestorsHint, reverseHint, windowHint, styleRepositoryHint, _idStyleKeysHint, idHint, findHint, isIdHint, _classStyleKeysHint, isClassHint, _classWeakStyleKeysHint, isClassWeakHint, isAttachedToWindowHint, insertHint, removeHint, _styleCompHint, classNameHint, styleParentHint, _styleFragCacheHint, classTreesHint, clearHint, styleStatesHint;
 
 //----------------------------------------------------------------------
+// íËêî
+static const tjs_int K_STYLE_DEF_INDEX_PROPERTY_KEY     = 0;
+static const tjs_int K_STYLE_DEF_INDEX_SEARCH_KEY       = 1;
+static const tjs_int K_STYLE_DEF_INDEX_DEFAULT_VALUE    = 2;
+static const tjs_int K_STYLE_DEF_INDEX_GLOBAL_RESOLVER  = 3;
+static const tjs_int K_STYLE_DEF_INDEX_DEFAULT_PROPERTY = 4;
+static const tjs_int K_STYLE_DEF_INDEX_LOCAL_RESOLVER   = 5;
+
+//----------------------------------------------------------------------
 // êÈåæ
 bool equalStruct(tTJSVariant v1, tTJSVariant v2);
 bool equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2);
@@ -40,6 +49,15 @@ tTJSVariant &getStyleRepository() {
 
 void releaseStyleRepository() {
 	delete sStyleRepository;
+}
+
+tTJSVariant
+resolveGlobalFunction(ttstr funcname, tTJSVariant value)
+{
+	ncbPropAccessor styleRepositoryObj(getStyleRepository());
+	tTJSVariant result;
+	styleRepositoryObj.FuncCall(0, funcname.c_str(), NULL, &result, value);
+	return result;
 }
 
 NCB_PRE_UNREGIST_CALLBACK(releaseStyleRepository);
@@ -950,18 +968,18 @@ void applyAdditionalFunction(tTJSVariant widget, tTJSVariant style, tTJSVariant 
 	for (tjs_uint i = 0; i < definitionCount; i++) {
 		tTJSVariant def = definitionObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 		ncbPropAccessor defObj(def);
-		ttstr memberKey = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
+		ttstr memberKey = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_PROPERTY_KEY), ncbTypedefs::Tag<ttstr>());
 
 		tTJSVariant memberValue = styleObj.GetValue(memberKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
 		if (memberValue.Type() == tvtVoid) {
-			tTJSVariant initialProperty = defObj.GetValue(tjs_int(4), ncbTypedefs::Tag<tTJSVariant>());
+			tTJSVariant initialProperty = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_DEFAULT_PROPERTY), ncbTypedefs::Tag<tTJSVariant>());
 			if (initialProperty.Type() != tvtVoid) {
 				ttstr initialKey = ttstr(initialProperty);
 				tTJSVariant initialValue = widgetObj.GetValue(initialKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
 				styleObj.SetValue(memberKey.c_str(), initialValue);
 			}
 		}
-		tTJSVariant resolveFunction = defObj.GetValue(tjs_int(3), ncbTypedefs::Tag<tTJSVariant>());
+		tTJSVariant resolveFunction = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_LOCAL_RESOLVER), ncbTypedefs::Tag<tTJSVariant>());
 		if (resolveFunction.Type() == tvtVoid)
 			continue;
 		ttstr functionName = ttstr(resolveFunction);
@@ -1127,8 +1145,9 @@ tTJSVariant extractStyleFrag(tTJSVariant style, tTJSVariant definitionsSet, tTJS
 		for (tjs_int j = 0; j < defsCount; j++) {
 			tTJSVariant def = defsObj.GetValue(j, ncbTypedefs::Tag<tTJSVariant>());
 			ncbPropAccessor defObj(def);
-			ttstr propKey = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
-			tTJSVariant searchKey = defObj.GetValue(tjs_int(1), ncbTypedefs::Tag<tTJSVariant>());
+			ttstr propKey = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_PROPERTY_KEY), ncbTypedefs::Tag<ttstr>());
+			tTJSVariant searchKey = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_SEARCH_KEY), ncbTypedefs::Tag<tTJSVariant>());
+			tTJSVariant resolver =  defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_GLOBAL_RESOLVER), ncbTypedefs::Tag<tTJSVariant>());
 			if (searchKey.Type() == tvtObject) {
 				ncbPropAccessor searchKeyObj(searchKey);
 				tjs_int searchKeyCount = countArray(searchKey);
@@ -1136,7 +1155,10 @@ tTJSVariant extractStyleFrag(tTJSVariant style, tTJSVariant definitionsSet, tTJS
 					ttstr key = searchKeyObj.GetValue(k, ncbTypedefs::Tag<ttstr>());
 					if (styleObj.HasValue(key.c_str())) {
 						modified = true;
-						resultObj.SetValue(propKey.c_str(), styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
+						tTJSVariant value = styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+						if (resolver.Type() != tvtVoid)
+							value = resolveGlobalFunction(resolver, value);
+						resultObj.SetValue(propKey.c_str(), value);
 						break;
 					}
 				}
@@ -1144,7 +1166,10 @@ tTJSVariant extractStyleFrag(tTJSVariant style, tTJSVariant definitionsSet, tTJS
 				ttstr key = searchKey;
 				if (styleObj.HasValue(key.c_str())) {
 					modified = true;
-					resultObj.SetValue(propKey.c_str(), styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
+					tTJSVariant value = styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+						if (resolver.Type() != tvtVoid)
+							value = resolveGlobalFunction(resolver, value);
+					resultObj.SetValue(propKey.c_str(), value);
 				}
 			}
 		}

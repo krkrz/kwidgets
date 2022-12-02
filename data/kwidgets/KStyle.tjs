@@ -35,6 +35,13 @@ global.K_WIDGET_DEFAULT_FRAME_TYPE_BORDER_STYLES =
 			],
 	];
 
+global.K_STYLE_DEF_INDEX_PROPERTY_KEY     = 0;
+global.K_STYLE_DEF_INDEX_SEARCH_KEY       = 1;
+global.K_STYLE_DEF_INDEX_DEFAULT_VALUE    = 2;
+global.K_STYLE_DEF_INDEX_GLOBAL_RESOLVER  = 3;
+global.K_STYLE_DEF_INDEX_DEFAULT_PROPERTY = 4;
+global.K_STYLE_DEF_INDEX_LOCAL_RESOLVER   = 5;
+
 class KStyleObject
 {
 	// 実装する必要のあるインターフェース
@@ -185,14 +192,17 @@ class KStyleObject
 			var defs = definitionsSet[i];
 			for (var j = 0; j < defs.count; j++) {
 				var def = defs[j];
-				var propKey = def[0];
-				var searchKey = def[1];
+				var propKey = def[K_STYLE_DEF_INDEX_PROPERTY_KEY];
+				var searchKey = def[K_STYLE_DEF_INDEX_SEARCH_KEY];
+				var resolver = def[K_STYLE_DEF_INDEX_GLOBAL_RESOLVER];
 				if (searchKey instanceof "Array") {
 					for (var k = 0; k < searchKey.count; k++) {
 						var key = searchKey[k];
 						if (typeof(style[key]) != K_UNDEFINED) {
 							modified = true;
 							result[propKey] = style[key];
+							if (resolver !== void)
+								result[propKey] = styleRepository[resolver](result[propKey]);
 							break;
 						}
 					}
@@ -201,6 +211,8 @@ class KStyleObject
 					if (typeof(style[key]) != K_UNDEFINED) {
 						modified = true;
 						result[propKey] = style[key];
+						if (resolver !== void)
+							result[propKey] = styleRepository[resolver](result[propKey]);
 					}
 				}
 			}
@@ -243,11 +255,11 @@ class KStyleObject
 		var style = %[];
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
-			var key = def[0];
+			var key = def[K_STYLE_DEF_INDEX_PROPERTY_KEY];
 			if (typeof(_styleComp[key]) != K_UNDEFINED) 
 				style[key] = _styleComp[key];
 			else
-				style[key] = def[2];
+				style[key] = def[K_STYLE_DEF_INDEX_DEFAULT_VALUE];
 		}
 		applyAdditionalFunction(style, definition);
 
@@ -264,13 +276,13 @@ class KStyleObject
 			var def = definition[i];
 			var memberKey = def[0];
 			if (style[memberKey] === void) {
-				var initialProperty = def[4];
+				var initialProperty = def[K_STYLE_DEF_INDEX_DEFAULT_PROPERTY];
 				if (initialProperty !== void)
 					style[memberKey] = this[initialProperty];
 			}
-			var resolveFunction = def[3];
+			var resolveFunction = def[K_STYLE_DEF_INDEX_LOCAL_RESOLVER];
 			if (resolveFunction !== void) {
-				var memberKey = def[0];
+				var memberKey = def[K_STYLE_DEF_INDEX_PROPERTY_KEY];
 				style[memberKey] = this[resolveFunction](style[memberKey], style);
 			}
 		}
@@ -530,6 +542,12 @@ class KStyleRepository
 				return key;
 			key = aliasMap[category][key];
 		}
+	}
+
+	function resolveColor(exp) {
+		if (exp instanceof "Number")
+			return exp;
+		return resolveAlias("color", exp);
 	}
 
 	function lockStyleNotification() {
