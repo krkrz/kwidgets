@@ -36,6 +36,18 @@
 		],
 
 		%[
+			theme: "editor",
+			styleOfTheme: "commono",
+			style: %[
+				isClass: %[
+					"KPrimaryWidget" => %[
+						padding: 4,
+					]
+				]
+			]
+		],
+
+		%[
 			theme: "dialog",
 			styleOfTheme: "common",
 			style: %[

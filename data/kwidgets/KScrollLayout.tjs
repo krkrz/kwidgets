@@ -342,6 +342,12 @@ global.KScrollLayoutArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
+global.KScrollLayoutWidgetStyleDefinition =
+	[
+		[ "mouseWheelFactor", "mouseWheelFactor", 0.25 ],
+		[ "accelMouseWheelFactor", "accelMouseWheelFactor", 1 ]
+	];
+
 class KScrollLayout extends KLayout
 {
 	// 横方向スクロールバー
@@ -406,6 +412,12 @@ class KScrollLayout extends KLayout
 		// 子ウィジェットを格納するフレーム
 		frame = new KScrollFrame(window);
 		frame.parent = this;
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KScrollLayoutWidgetStyleDefinition);
+		}
 	}
 
 	/**------------------------------
@@ -751,9 +763,11 @@ class KScrollLayout extends KLayout
 	}
 
 	function onHoverMouseWheel(shift, delta, x, y) {
-		var increment = - delta;
+		var increment;
 		if (! (shift & ssCtrl))
-			increment /= 4;
+			increment = - delta * widgetStyle.mouseWheelFactor;
+		else
+			increment = - delta * widgetStyle.accelMouseWheelFactor;
 		var props;
 		if (! (shift & ssShift))
 			props = [ "vertical", "horizontal" ];

@@ -152,6 +152,8 @@
 				borderStyle: BORDER_STYLE_SOLID,
 				borderColor: "scroll_border",
 				borderWidth: 1,
+				mouseWheelFactor: 0.5,
+				accelMouseWheelFactor: 1,
 			],
 		],
 
