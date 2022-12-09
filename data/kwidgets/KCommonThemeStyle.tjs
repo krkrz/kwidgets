@@ -1,27 +1,15 @@
 [
+
 		%[
-			theme: "dialog",
+			theme: "common",
 			style: %[
 				defaultFocusable: true,
 				isClass: %[
 					"KWidget" => %[
 						focusable: true
 					],
-
-					"KPrimaryWidget" => %[
-						padding: 16,
-					],
 				],
 				isId: %[
-					"primary_button" => %[
-						borderColor: 0xffaeaeae,
-						focus: %[
-							borderColor: "primary_button_border_focus",
-						],
-						mouseDown: %[
-							backgroundColor: "primary_button_bg_mousedown",
-						],
-					],
 					"widget_grid" => %[
 						space: 12,
 					],
@@ -44,6 +32,29 @@
 						descendantFocus: %[ borderColor: "textedit_border_focus" ],
 					]
 				]
+			]
+		],
+
+		%[
+			theme: "dialog",
+			styleOfTheme: "common",
+			style: %[
+				isClass: %[
+					"KPrimaryWidget" => %[
+						padding: 16,
+					],
+				],
+				isId: %[
+					"primary_button" => %[
+						borderColor: 0xffaeaeae,
+						focus: %[
+							borderColor: "primary_button_border_focus",
+						],
+						mouseDown: %[
+							backgroundColor: "primary_button_bg_mousedown",
+						],
+					],
+				],
 			]
 		],
 

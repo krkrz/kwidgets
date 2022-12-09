@@ -658,6 +658,9 @@ class KStyleRepository
 				style = classStyleMap[def.styleOfClass];
 			else if (typeof(def.styleOfId) != K_UNDEFINED)
 				style = idStyleMap[def.styleOfId];
+			else if (typeof(def.styleOfTheme) != K_UNDEFINED)
+				style = findTheme(def.styleOfTheme);
+
 			if (typeof(def.style) != K_UNDEFINED) {
 				if (style === void)
 					style = %[];
