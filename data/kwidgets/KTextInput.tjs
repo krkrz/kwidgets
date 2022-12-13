@@ -94,6 +94,8 @@ class KTextInputEdit extends KTextEdit
 	function onFocus {
 		// フォーカス
 		super.onFocus(...);
+		// 親に通知
+		parent.parent.onChildFocus(...);
 		// 全選択
 		selectAll();
 		setPointer(0, curRow.count);
@@ -105,6 +107,8 @@ class KTextInputEdit extends KTextEdit
 	function onBlur {
 		// フォーカスロスト
 		super.onBlur(...);
+		// 親に通知
+		parent.parent.onChildBlur(...);
 		// 選択を解除
 		deselect();
 		// 値を決定する
@@ -358,6 +362,18 @@ class KTextInput extends KValueEntity
 	 * ESCを押してキャンセルした時に呼ばれるフック関数
 	 ------------------------------*/
 	function onCancel {
+	}
+
+	/*------------------------------
+	 *  子のフォーカスを受け取るフック関数
+	 ------------------------------*/
+	function onChildFocus() {
+	}
+
+	/*------------------------------
+	 *  子のブラーを受け取るフック関数
+	 ------------------------------*/
+	function onChildBlur() {
 	}
 
 	/*------------------------------
