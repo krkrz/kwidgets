@@ -86,7 +86,7 @@ global.KListArgsFormat =
 global.KListWidgetStyleDefinition =
 	[
 		[ "stride", "stride", 14 ],
-		[ "slideWidth", "slideWidth", void, "resolveSlideWidth" ],
+		[ "slideWidth", "slideWidth", void, void, void, "resolveSlideWidth" ],
 		[ "renameTextinputId", "renameTextinputId" ],
 		[ "ignoreToggleWidth", "ignoreToggleWidth", false ],
 		[ "frameColor", "frameColor", void, "resolveColor" ],
