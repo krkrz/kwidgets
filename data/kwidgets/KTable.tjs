@@ -461,17 +461,6 @@ class KTableTextEdit extends KTextInput {
 /*----------------------------------------------------------------------
  * テキストエリア編集用のテキストエディット
  ----------------------------------------------------------------------*/
-global.KTableTextAreaEditWidgetStyleDefinition =
-	[
-		[ "gridBorderColor", "gridBorderColor", void, "resolveColor" ],
-		[ "tabBorderColor", "tabBorderColor", void, "resolveColor" ],
-		[ "innerSplitColor", "innerSplitColor" ,void, "resolveColor" ],
-		[ "frameColor", "frameColor", void, "resolveColor" ],
-		[ "focusFrameColor", "focusFrameColor", void, "resolveColor" ],
-		[ "dragFrameColor", "dragFrameColor", void, "resolveColor" ],
-		[ "selectionColor", "selectionColor", void, "resolveColor" ]
-	];
-
 class KTableTextAreaEdit extends KFrameLayout
 {
 	var table;
@@ -518,12 +507,6 @@ class KTableTextAreaEdit extends KFrameLayout
 		textedit.onWindowDeactivate = onWindowDeactivate;
 		textedit.focus();
 		redrawContents();
-	}
-
-	property widgetStyleDefinition {
-		getter {
-			return concatArray(super.widgetStyleDefinition, KTableTextAreaEditWidgetStyleDefinition);
-		}
 	}
 
 	// フォーカスが外れたらキャンセル扱い
@@ -573,6 +556,17 @@ class KTableTextAreaEdit extends KFrameLayout
 /*----------------------------------------------------------------------
  * テーブル用のバーチャルウィジェットの基底クラス（各種ユーティリティ実装）
  ----------------------------------------------------------------------*/
+global.KTableVirtualWidgetStyleDefinition =
+	[
+		[ "gridBorderColor", "gridBorderColor", void, "resolveColor" ],
+		[ "tabBorderColor", "tabBorderColor", void, "resolveColor" ],
+		[ "innerSplitColor", "innerSplitColor" ,void, "resolveColor" ],
+		[ "frameColor", "frameColor", void, "resolveColor" ],
+		[ "focusFrameColor", "focusFrameColor", void, "resolveColor" ],
+		[ "dragFrameColor", "dragFrameColor", void, "resolveColor" ],
+		[ "selectionColor", "selectionColor", void, "resolveColor" ]
+	];
+
 class KTableVirtualWidget extends KVirtualWidget
 {
 	var owner;
@@ -581,6 +575,12 @@ class KTableVirtualWidget extends KVirtualWidget
 	function KTableVirtualWidget(window, owner, name) {
 		super.KVirtualWidget(window, name);
 		this.owner = owner;
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTableVirtualWidgetStyleDefinition);
+		}
 	}
 
 	function onDrawContents() {
