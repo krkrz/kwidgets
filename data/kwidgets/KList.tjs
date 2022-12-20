@@ -1268,11 +1268,15 @@ class KList extends KVirtualWidget
 		isReadyToClick = false;
 
 		if (inMouseSelection) {
+			// 範囲選択開始
+
 			// ラストフォーカスはターゲットアイテムに移す
 			lastFocusedItem = mouseDownTargetItem;
 			mouseSelectionBaseX = x;
 			mouseSelectionBaseY = y;
 			curMouseSelectionRect = new KRect(x, y, 0, 0);
+			// ドラッグ移動処理を強制的に挟みこみむ。
+			onDragMove(...);
 		} else if (pressSelection) {
 			onSelectionDragEnter(...);
 		} else {

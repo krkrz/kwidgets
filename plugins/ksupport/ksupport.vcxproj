@@ -94,6 +94,7 @@
     <ClCompile Include="layer.cpp" />
     <ClCompile Include="ncbind.cpp" />
     <ClCompile Include="rect.cpp" />
+    <ClCompile Include="system.cpp" />
     <ClCompile Include="table.cpp" />
     <ClCompile Include="timeline.cpp" />
     <ClCompile Include="tp_stub.cpp" />
