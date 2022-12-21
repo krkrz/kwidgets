@@ -229,6 +229,7 @@ class KWidget extends Layer
 	var isReadyToDrag, isDragging;
 	var myDraggingPacket;
 	var mouseDownX, mouseDownY;
+	var dragStartX, dragStartY;
 	var curDragTarget, curDragTargetAcceptPacket;
 	var dragEnabledShiftMask;
 	var cursorOrig;
@@ -2941,6 +2942,8 @@ class KWidget extends Layer
 			// 基準座標はprimaryLayerから取得する
 			mouseDownX = window.primaryLayer.cursorX;
 			mouseDownY = window.primaryLayer.cursorY;
+			dragStartX = x;
+			dragStartY = y;
 			// ドラッグ準備開始
 			isReadyToDrag = true;
 		} else if (button == mbRight
@@ -2972,8 +2975,8 @@ class KWidget extends Layer
 				updateStyleStates();
 				invalidateStyles();
 				// ウィジェットローカルのドラッグ開始を通知
-				onDragEnter(x + mouseDownX - window.primaryLayer.cursorX,
-							y + mouseDownY - window.primaryLayer.cursorY,
+				onDragEnter(dragStartX,
+							dragStartY,
 							shift);
 			}
 		}
