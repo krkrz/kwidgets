@@ -1,0 +1,173 @@
+//
+// シンプルなダイアログ。
+// 格納するウィジェットリストを定義式で与えて作成する。
+//
+// ex) 
+//   var def = %[ 
+//       name: "test_dialog",
+//       response: DIALOG_RESPONSE_OK | DIALOG_RESPONSE_CANCEL,
+//       caption: "Test Dialog",
+//       widgetList: [ %[ name: "check", label: "チェックボックス", type: UI_TYPE_CHECKBOX,  defaultValue: true ],
+//                     %[ name: "int",   label: "整数入力",         type: UI_TYPE_TEXTINPUT, textType: TEXT_DIGIT ],
+//                     %[ name: "real",  label: "小数入力",         type: UI_TYPE_TEXTINPUT, textType: TEXT_REAL, defaultValue: 0.5 ],
+//                     %[ name: "str",   label: "文字入力",         type: UI_TYPE_TEXTINPUT, textType: TEXT_ANY ],
+//                     %[ name: "text",  label: "テキスト",         type: UI_TYPE_TEXTBOX,   defaultValue: "ほげ\nもげ" ],
+//                     %[ name: "list",  label: "リスト":           type: UI_TYPE_DROPDOWNLIST, listItems: [ "項目1", [ "項目2", 2 ], [ "項目3", 3 ] ], defaultValue: 2]
+//                     ]
+//   ];
+
+
+class KCustomUIGenerator
+{
+	var generatorMap = %[];
+
+	function KCustomUIGenerator() {
+		initDefaultGenerators();
+	}
+
+	function getValue(def, key, defaultValue) {
+		if (typeof(def[key]) != "undefined")
+			return def[key];
+		else
+			return defaultValue;
+	}
+
+	function initDefaultGenerators() {
+		var defs = global.K_CUSTOM_UI_DEFAULT_GENERATOR = [
+				%[ type: UI_TYPE_CHECKBOX,     func: generateCheckBox ],
+				%[ type: UI_TYPE_TEXTINPUT,    func: generateTextInput ],
+				%[ type: UI_TYPE_TEXTLABEL,    func: generateTextLabel ],
+				%[ type: UI_TYPE_TEXTAREA,     func: generateTextArea ],
+				%[ type: UI_TYPE_TABLE,        func: generateTable ],
+				%[ type: UI_TYPE_DROPDOWNLIST, func: generateDropdownList ]
+		];
+		for (var i = 0; i < defs.count; i++) {
+			var def = defs[i];
+			addGenerator(def.type, def.func);
+		}
+	}
+
+	function addGenerator(type, func) {
+		generatorMap[type] = func incontextof this;
+	}
+
+	function generateCheckBox(grid, insertionY, globalOptions, uiName, def) {
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		var widget = new KCheckBox(grid.window, %[ name: uiName, label: getValue(def, "label", ""), hint: hint, status: status, value: getValue(def, "value", false) ]);
+		grid.add(0, insertionY, widget, 2);
+		return %[ widget: widget, insertionY: ++insertionY ];
+	}
+
+	function generateTextInput(grid, insertionY, globalOptions, uiName, def) {
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status, style: %[ isVariableWidth: globalOptions.isVariableWidth ]  ]);
+		var textType = getValue(def, "textType", TEXT_ANY);
+		var value;
+		switch (textType) {
+		case TEXT_ANY:
+			value = getValue(def, "defaultValue", ""); break;
+		case TEXT_DIGIT:
+		case TEXT_REAL:
+			value = getValue(def, "value", 0); break;
+		}
+		var widget = new KTextInput(grid.window, %[ width: 120, type: textType, name: uiName, hint: hint, status: status, value: value, style: %[ isVariableWidth: globalOptions.isVariableWidth ] ]);
+		grid.add(0, insertionY, label);
+		grid.add(1, insertionY, widget);
+		return %[ widget: widget, label: label, insertionY: ++insertionY ];
+	}
+
+	function generateTextLabel(grid, insertionY, globalOptions, uiName, def) {
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: hint, style: %[ isVariableWidth: globalOptions.isVariableWidth ] ]);
+		grid.add(0, insertionY, label, 2);
+		return %[ label: label, insertionY: ++insertionY ];
+	}
+
+	function generateTextArea(grid, insertionY, globalOptions, uiName, def) {
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status, style: %[ alignVertical: ALIGN_TOP, isVariableWidth: globalOptions.isVariableWidth ] ]);
+		var scroll = new KScrollLayout(grid.window, %[ horizontal: false, vertical: true, id: "focusable_frame", hint: hint, status: status ]);
+		var textarea = new KTextEdit(grid.window, %[ name: uiName, value: getValue(def, "value", ""), hint: hint, status: status ]);
+		scroll.setMarginalFixedSize(getValue(def, "marginalWidth", 100), getValue(def, "marginalHeight",60));
+		scroll.add(textarea);
+		textarea._marginalHeight = 100;
+		grid.add(0, insertionY, label);
+		grid.add(1, insertionY, scroll);
+		return %[ widget: textarea, label: label, insertionY: ++insertionY ];
+	}
+
+	function generateTable(grid, insertionY, globalOptions, uiName, def) {
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status, style: %[ alignVertical: ALIGN_TOP, isVariableWidth: globalOptions.isVariableWidth ] ]);
+		var table = new KTable(grid.window, %[ name: uiName, hint: hint, status: status,
+											   attributes: getValue(def, "attributes", []),
+											   defaultColumnOptions: getValue(def, "defaultColumnOptions", %[])
+											 ]);
+		table.setMarginalFixedSize(getValue(def, "marginalWidth", 100), getValue(def, "marginalHeight", 100));
+	table.value = getValue(def, "value", []);
+		grid.add(0, insertionY, label);
+		grid.add(1, insertionY, table);
+		return %[ widget: table, label: label, insertionY: ++insertionY ];
+	}
+
+	function generateDropdownList(grid, insertionY, globalOptions, uiName, def) {
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
+		var widget = new KComboBox(grid.window, %[ name: uiName, hint: hint, status: status,
+												   width: 150, type: COMBO_STYLE_DROPDOWNLIST,
+												   items: getValue(def, "items", []), values: getValue(def, "values", []), captions: getValue(def, "captions", []) ]);
+		widget.value = getValue(def, "value", widget.values[0]);
+		grid.add(0, insertionY, label);
+		grid.add(1, insertionY, widget);
+		return %[ widget: widget, label: label, insertionY: ++insertionY ];
+	}
+};
+
+global.customUIGenerator = new KCustomUIGenerator();
+
+
+class KCustomUI extends KGridLayout
+{
+	var uiList = [];
+
+	function KCustomUI(window, options = %[]) {
+		options = duplicateStruct(options);
+		options.id = "widget_grid";
+		options.style = %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_LEFT, alignVertical: ALIGN_CENTER ],
+									   KTextLabel: %[ maxPossibleWidthRatio: 0.25 ]
+									 ] ];
+		super.KGridLayout(window, options);
+
+		var uiDefs = getOption("uis", []);
+		uiList = [];
+
+		var globalOptions = %[ isVariableWidth: getOption("isVariableWidth", false) ];
+
+		var uiNamePrefix = getOption("uiNamePrefix", "");
+
+		var insertionY = 0;
+
+		for (var i = 0; i < uiDefs.count; i++) {
+			var uiDef = uiDefs[i];
+			var uiKey = getOption("name", "", uiDef);
+			var uiName = uiNamePrefix + uiKey;
+			var result = customUIGenerator.generatorMap[uiDef.type](this, insertionY, globalOptions, uiName, uiDef);
+			insertionY = result.insertionY;
+			if (result.widget !== void) {
+				uiList.add(%[ key: uiKey,
+							  name: uiName,
+							  widget: result.widget ]);
+
+				if (typeof(uiDef[onValueModified]) != K_UNDEFINED)
+					widget.onValueModified = uiDef[onValueModified];
+			}
+		}
+	}
+};
+

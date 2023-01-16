@@ -326,7 +326,8 @@ class KWindow extends Window
 	property isStyleHasInheritAttributes {
 		getter {
 			return typeof(_style.isId) != K_UNDEFINED
-				|| typeof(_style.isClass) != K_UNDEFINED;
+				|| typeof(_style.isClass) != K_UNDEFINED
+				|| typeof(_style.isClassWeak) != K_UNDEFINED;
 		}
 	}
 

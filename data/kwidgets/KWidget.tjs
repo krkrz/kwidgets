@@ -279,6 +279,12 @@ class KWidget extends Layer
 		if (! (options instanceof "Dictionary"))
 			options = %[ name: options ];
 
+		if (typeof(options.hint) != K_UNDEFINED
+			&& options.hint === "") {
+			options = duplicateStruct(options);
+			delete options.hint;
+		}
+
 		if (options.primary)
 			super.Layer(win, null);
 		else
@@ -696,16 +702,6 @@ class KWidget extends Layer
 		for (var i = 0; i < keys.count; i++)
 			if (typeof(style[keys[i]]) !== K_UNDEFINED)
 				return true;
-	}
-
-	/**------------------------------
-	 * スタイルは継承属性を持つか?
-	 ------------------------------*/
-	property isStyleHasInheritAttributes {
-		getter {
-			return typeof(_style.isId) != K_UNDEFINED
-				|| typeof(_style.isClass) != K_UNDEFINED;
-		}
 	}
 
 	/**------------------------------
@@ -2395,10 +2391,14 @@ class KWidget extends Layer
 	function drawTextArea(fontStyle, x, y, w, lineSpacing, texts, textWidths, textAlign) {
 		applyFontStyle(font, fontStyle);
 		var textOmitLength = getTextOmitLength();
+		var inRange = true;
 		for (var i = 0; i < texts.count; i++) {
-			drawUITextInRange(fontStyle, x, y, w, texts[i], textAlign, false, textWidths[i], textOmitLength);
+			var drawResult = drawUITextInRange(fontStyle, x, y, w, texts[i], textAlign, false, textWidths[i], textOmitLength);
+			if (! drawResult.inRange)
+				inRange = false;
 			y += fontStyle.fontHeight + lineSpacing;
 		}
+		return %[ inRange: inRange ];
 	}
 
 	/*------------------------------

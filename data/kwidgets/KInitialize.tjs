@@ -56,6 +56,7 @@ Scripts.execStorage("KFixedSizeLayout.tjs");
 Scripts.execStorage("KColorBox.tjs");
 Scripts.execStorage("KColorPickerDialog.tjs");
 Scripts.execStorage("KTimeLineControl.tjs");
+Scripts.execStorage("KCustomUI.tjs");
 Scripts.execStorage("KCustomDialog.tjs");
 Scripts.execStorage("KTable.tjs");
 Scripts.execStorage("KTextBoard.tjs");

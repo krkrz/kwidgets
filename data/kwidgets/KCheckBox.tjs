@@ -10,7 +10,8 @@ global.KCheckBoxArgsFormat =
 global.KCheckBoxWidgetStyle =
 	[
 		[ "icon", "icon", "" ],
-		[ "lineSpacing", "lineSpacing", 0 ]
+		[ "lineSpacing", "lineSpacing", 0 ],
+		[ "isVariableWidth", "isVariableWidth", false ]
 	];
 
 class KCheckBox extends KValueEntity
@@ -18,7 +19,6 @@ class KCheckBox extends KValueEntity
 	var _value = false;
 
 	var _label;
-	var isVariableWidth = false;
 
 	function KCheckBox(win, *) {
 		var opts = parseOldStyleWidgetArgs(KCheckBoxArgsFormat, *);
@@ -26,7 +26,6 @@ class KCheckBox extends KValueEntity
 		super.KValueEntity(win, opts);
 
 		_label = getOption("label", "");
-		isVariableWidth = getOption("isVariableWidth", false);
 		_value = getOption("value", false);
 
 		// デフォルトフォーカス
@@ -83,7 +82,7 @@ class KCheckBox extends KValueEntity
 		var minW = textArea.width + iconWidth + spaceHorizontal;
 		var minH = Math.max(textArea.height, iconHeight);
 
-		if (! isVariableWidth)
+		if (! widgetStyle.isVariableWidth)
 			setFixedSize(minW, minH);
 		else
 			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, K_WIDGET_MAX_POSSIBLE_WIDTH, minH);

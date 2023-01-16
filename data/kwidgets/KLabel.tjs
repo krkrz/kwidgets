@@ -8,7 +8,8 @@ global.KLabelArgsFormat =
 	];
 
 global.KLabelWidgetStyleDefinition = [
-	[ "isVariableWidth", "isVariableWidth", false ]
+	[ "isVariableWidth", "isVariableWidth", false ],
+	[ "maxPossibleWidthRatio", "maxPossibleWidthRatio", 1 ]
 ];
 
 class KLabel extends KEntity
@@ -69,7 +70,7 @@ class KLabel extends KEntity
 		if (! widgetStyle.isVariableWidth)
 			setFixedSize(minW, minH);
 		else
-			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, K_WIDGET_MAX_POSSIBLE_WIDTH, minH);
+			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, int(K_WIDGET_MAX_POSSIBLE_WIDTH * widgetStyle.maxPossibleWidthRatio), minH);
 
 		// ボーダー描画
 		drawBorder(borderStyle, 0, 0, width, height);
@@ -102,7 +103,13 @@ class KTextCapability
 	}
 
 	function onDrawLabel(x, y, w, h) {
-		drawTextArea(fontStyle, x, y, w, widgetStyle.lineSpacing, textArea.texts, textArea.textWidths, widgetStyle.textAlign);
+		var drawResult = drawTextArea(fontStyle, x, y, w, widgetStyle.lineSpacing, textArea.texts, textArea.textWidths, widgetStyle.textAlign);
+		if (widgetStyle.isVariableWidth) {
+			if (! drawResult.inRange)
+				hint = getOption("hint", label);
+			else
+				hint = getOption("hint", "");
+		}
 	}
 
 	property signWidgetStyleDefinition {

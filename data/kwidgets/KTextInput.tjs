@@ -225,7 +225,8 @@ global.KTextInputWidgetStyleDefinition =
 	[
 		[ "width", "width", void ],
 		[ "height", "height", void ],
-		[ "texteditId", "texteditId", "" ]
+		[ "texteditId", "texteditId", "" ],
+		[ "isVariableWidth", "isVariableWidth", false ]
 	];
 
 class KTextInput extends KValueEntity
@@ -403,7 +404,10 @@ class KTextInput extends KValueEntity
 		text.id = widgetStyle.texteditId;
 		if (h === void)
 			h = text.fontStyle.fontHeight + borderPaddingHeight;
-		setFixedSize(w, h);
+		if (widgetStyle.isVariableWidth)
+			setMinMaxSize(w, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);
+		else
+			setFixedSize(w, h);
 		drawBorder(borderStyle, 0, 0, width, height);
 		frame.setFixedSize(width - borderPaddingWidth, height - borderPaddingHeight);
 		frame.setPos(borderPaddingLeft, borderPaddingTop);
