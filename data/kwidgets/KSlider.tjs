@@ -21,7 +21,8 @@ global.KSliderWidgetStyleDefinition =
 	[
 		[ "width", "width", void ],
 		[ "height", "height", void ],
-		[ "knobWidth", "knobWidth", void ]
+		[ "knobWidth", "knobWidth", void ],
+		[ "isVariableWidth", "isVariableWidth", false ]
 	];
 
 
@@ -43,6 +44,10 @@ class KSlider extends KRangePointer2D
 	 right: スライダーの右端の値
 	 stride: スライダーの刻み幅
 	 ------------------------------*/
+	var leftIcon, rightIcon;
+	var leftIconRange, rightIconRange;
+	var leftIconHint, rightIconHint;
+	
 	function KSlider(window, *) {
 		var opts = parseOldStyleWidgetArgs(KSliderArgsFormat, *);
 
@@ -62,6 +67,16 @@ class KSlider extends KRangePointer2D
 		super.KRangePointer2D(window, opts);
 
 		focusable = getOption("focusable", window.defaultFocusable);
+
+		var leftIconName = getOption("leftIcon", "");
+		if (leftIconName !== "")
+			leftIcon = findIcon(leftIconName);
+		leftIconHint = getOption("leftIconHint", "");
+
+		var rightIconName = getOption("rightIcon", "");
+		if (rightIconName !== "")
+			rightIcon = findIcon(rightIconName);
+		rightIconHint = getOption("rightIconHint", "");
 	}
 
 	property widgetStyleDefinition {
@@ -101,15 +116,58 @@ class KSlider extends KRangePointer2D
 		if (widgetStyle.knobWidth !== void)
 			knobFixedWidth = widgetStyle.knobWidth;
 
+		if (leftIcon !== void)
+			innerMargin.left = leftIcon.width + spaceHorizontal;
+		if (rightIcon !== void) 
+			innerMargin.right = rightIcon.width + spaceHorizontal;
+
 		var w = widgetStyle.width ? widgetStyle.width : getOption("width", SLIDER_ADAPTIVE_WIDTH);
 		var h = widgetStyle.height ? widgetStyle.height : getOption("height", 20);
 
 		if (w == SLIDER_ADAPTIVE_WIDTH)
 			w = adaptiveWidth;
 
-		setFixedSize(w, h);
+		if (! widgetStyle.isVariableWidth)
+			setFixedSize(w + innerMargin.left + innerMargin.right, h);
+		else
+			setMinMaxSize(w + innerMargin.left + innerMargin.right, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);
+		fillRect(0, 0, width, height, 0);
 
 		super.onDrawContents();
+
+		if (leftIcon !== void) {
+			var y;
+			if (innerBg !== void) 
+				y = innerBg.top + innerBg.height / 2;
+			else
+				y = height / 2;
+			leftIconRange = new KRect(0, y - leftIcon.height / 2, leftIcon.width, leftIcon.height);
+			operateRect(leftIconRange.left, leftIconRange.top, leftIcon, 0, 0, leftIcon.width, leftIcon.height);
+		}
+
+		if (rightIcon !== void) {
+			var y;
+			if (innerBg !== void) 
+				y = innerBg.top + innerBg.height / 2;
+			else
+				y = height / 2;
+			rightIconRange = new KRect(width - rightIcon.width, y - rightIcon.height / 2, rightIcon.width, rightIcon.height);
+			operateRect(rightIconRange.left, rightIconRange.top, rightIcon, 0, 0, rightIcon.width, rightIcon.height);
+		}
+	}
+
+	function onMouseMove(x, y, shift) {
+		super.onMouseMove(...);
+		if (leftIcon !== void
+			&& leftIconRange.contains(x, y)
+			&& leftIconHint != "")
+			hint = leftIconHint;
+		else if (rightIcon !== void
+				 && rightIconRange.contains(x, y)
+				 && rightIconHint != "")
+			hint = rightIconHint;
+		else
+			hint = getOption("hint", "");
 	}
 }
 

@@ -45,6 +45,7 @@ global.UI_TYPE_DROPDOWNLIST = "ui.type.drodpownlist";
 global.UI_TYPE_TEXTAREA = "ui.type.textarea";
 global.UI_TYPE_TEXTLABEL = "ui.type.textlabel";
 global.UI_TYPE_TABLE = "ui.type.table";
+global.UI_TYPE_SLIDER = "ui.type.slider";
 
 global.DIALOG_WIDGET_TYPE_CHECKBOX = 0;
 global.DIALOG_WIDGET_TYPE_TEXTINPUT = 1;

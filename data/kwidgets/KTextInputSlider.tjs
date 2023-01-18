@@ -17,7 +17,8 @@ global.KTextInputSliderWidgetStyleDefinition =
 		[ "sliderId", "sliderId" ],
 		[ "width", "width" ],
 		[ "height", "height" ],
-		[ "placeTextOnRightsideOfSlider", "placeTextOnRightsideOfSlider", false ]
+		[ "placeTextOnRightsideOfSlider", "placeTextOnRightsideOfSlider", false ],
+		[ "isVariableWidth", "isVariableWidth", false ]
 	];
 
 class KTextInputSliderEmbededSlider extends KSlider
@@ -72,6 +73,7 @@ class KTextInputSlider extends KValueEntity
 											  width: h * 2,
 											  height: h,
 											  type: stride == int(stride) ? TEXT_DIGIT : TEXT_REAL,
+											  hint: getOption("hint", ""),
 											  value: string(v) ]);
 		slider = new KTextInputSliderEmbededSlider(window, %[ name: "_slider",
 															  id: widgetStyle.sliderId,
@@ -83,6 +85,11 @@ class KTextInputSlider extends KValueEntity
 															  stride: stride,
 															  focusable: false,
 															  value: v,
+															  hint: getOption("hint", ""),
+															  leftIcon: getOption("leftIcon", ""),
+															  leftIconHint: getOption("leftIconHint", ""),
+															  rightIcon: getOption("rightIcon", ""),
+															  rightIconHint: getOption("rightIconHint", ""),
 															  interpolation: getOption("interpolation", false)
 															]);
 		slider.onStartInterpolation = _onStartInterpolation;
@@ -172,14 +179,20 @@ class KTextInputSlider extends KValueEntity
 		if (w == SLIDER_ADAPTIVE_WIDTH) {
 			slider.overwriteStyle(%[ width: w, height: h ]);
 			slider.unlockStyleModification();
-			w = slider.width + spaceHorizontal + textInput.width;
+			w = slider.minWidth + spaceHorizontal + textInput.width;
 		}
-		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width, height: h ]);
+		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width, height: h, isVariableWidth: widgetStyle.isVariableWidth ]);
 
 		textInput.unlockStyleModification();
 		slider.unlockStyleModification();
 
-		setFixedSize(w, h);
+		if (! widgetStyle.isVariableWidth) 
+			setFixedSize(w + slider.innerMargin.width, h);
+		else {
+			setMinMaxSize(w + slider.innerMargin.width, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);
+			slider.setSize(width - textInput.width - spaceHorizontal, slider.height);
+		}
+
 		if (! widgetStyle.placeTextOnRightsideOfSlider) {
 			textInput.setPos(0, (h - textInput.height) / 2);
 			slider.setPos(textInput.width + spaceHorizontal, (h - slider.height) / 2);

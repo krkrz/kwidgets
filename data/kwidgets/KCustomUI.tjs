@@ -35,6 +35,7 @@ class KCustomUIGenerator
 	function initDefaultGenerators() {
 		var defs = global.K_CUSTOM_UI_DEFAULT_GENERATOR = [
 				%[ type: UI_TYPE_CHECKBOX,     func: generateCheckBox ],
+				%[ type: UI_TYPE_SLIDER,       func: generateSlider ],
 				%[ type: UI_TYPE_TEXTINPUT,    func: generateTextInput ],
 				%[ type: UI_TYPE_TEXTLABEL,    func: generateTextLabel ],
 				%[ type: UI_TYPE_TEXTAREA,     func: generateTextArea ],
@@ -59,6 +60,22 @@ class KCustomUIGenerator
 		return %[ widget: widget, insertionY: ++insertionY ];
 	}
 
+	function generateSlider(grid, insertionY, globalOptions, uiName, def) {
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status, style: %[ isVariableWidth: globalOptions.isVariableWidth ]  ]);
+		var widget = new KTextInputSlider(grid.window, %[ name: uiName, hint: hint, status: status,
+														  width: 150,
+														  left: getValue(def, "left", 0), leftIcon: getValue(def, "leftIcon", ""), leftIconHint: getValue(def, "leftIconHint", ""),
+														  right: getValue(def, "right", 100), rightIcon: getValue(def, "rightIcon", ""), rightIconHint: getValue(def, "rightIconHint", ""),
+														  stride: getValue(def, "stride", 1),
+														  value: getValue(def, "value", getValue(def, "left", 0)),
+														  style: %[ isVariableWidth: globalOptions.isVariableWidth ] ]);
+		grid.add(0, insertionY, label);
+		grid.add(1, insertionY, widget);
+		return %[ widget: widget, label: label, insertionY: ++insertionY ];
+	}
+
 	function generateTextInput(grid, insertionY, globalOptions, uiName, def) {
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
@@ -72,7 +89,7 @@ class KCustomUIGenerator
 		case TEXT_REAL:
 			value = getValue(def, "value", 0); break;
 		}
-		var widget = new KTextInput(grid.window, %[ width: 120, type: textType, name: uiName, hint: hint, status: status, value: value, style: %[ isVariableWidth: globalOptions.isVariableWidth ] ]);
+		var widget = new KTextInput(grid.window, %[ width: 150, type: textType, name: uiName, hint: hint, status: status, value: value, style: %[ isVariableWidth: globalOptions.isVariableWidth ] ]);
 		grid.add(0, insertionY, label);
 		grid.add(1, insertionY, widget);
 		return %[ widget: widget, label: label, insertionY: ++insertionY ];
@@ -121,6 +138,7 @@ class KCustomUIGenerator
 		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
 		var widget = new KComboBox(grid.window, %[ name: uiName, hint: hint, status: status,
 												   width: 150, type: COMBO_STYLE_DROPDOWNLIST,
+												   style: %[ isVariableWidth: globalOptions.isVariableWidth ],
 												   items: getValue(def, "items", []), values: getValue(def, "values", []), captions: getValue(def, "captions", []) ]);
 		widget.value = getValue(def, "value", widget.values[0]);
 		grid.add(0, insertionY, label);

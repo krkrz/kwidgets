@@ -264,6 +264,7 @@ class KTextInput extends KValueEntity
 		// テキストエディット
 		text = new KTextInputEdit
 		(window, %[ id: widgetStyle.texteditId,
+					hint: getOption("hint", ""),
 					type: getOption("type", TEXT_SYMBOL),
 					lockStyleMoficationOnAttach: true,
 					focusable: getOption("focusable", true),

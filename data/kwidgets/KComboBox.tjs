@@ -16,7 +16,8 @@ global.KComboBoxWidgetStyleDefinition =
 		[ "dropdownButtonId", "dropdownButtonId" ],
 		[ "placeButtonInsideBorder", "placeButtonInsideBorder" ],
 		[ "dropdownInterval", "dropdownInterval" ],
-		[ "dispCount", "dispCount", 10 ]
+		[ "dispCount", "dispCount", 10 ],
+		[ "isVariableWidth", "isVariableWidth", false ]
 	];
 
 class KComboBox extends KValueEntity
@@ -284,7 +285,12 @@ class KComboBox extends KValueEntity
 
 		var w = getOption("width");
 		var h = getOption("height", fontStyle.fontHeight + borderPaddingHeight);
-		setFixedSize(w, h);
+
+		if (! widgetStyle.isVariableWidth)
+			setFixedSize(w, h);
+		else
+			setMinMaxSize(w, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);
+
 		fillRect(0, 0, width, height, 0);
 
 		dropdownButton.id = widgetStyle.dropdownButtonId;
@@ -399,7 +405,7 @@ class KComboTextInput extends KTextInput
 					   borderWidth: 0,
 					   padding: 0,
 					   backgroundColor: owner.borderStyle.backgroundColor ];
-		style = unionDictionary(style, owner.curFontStyle);
+		style = unionDictionary(style, owner.curFontStyle);
 		super.KTextInput(owner.window, %[ width: owner.width - owner.borderPaddingWidth - owner.dropdownButton.width,
 										  height: owner.height - owner.borderPaddingHeight,
 										  type: TEXT_ANY,

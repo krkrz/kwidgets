@@ -10,7 +10,6 @@ global.KRangePointer2DWidgetStyleDefinition =
 		[ "innerBgId", "innerBgId", "" ],
 		[ "innerKnobId", "innerKnobId", "" ]
 	];
-
 class KRangePointer2D extends KValueEntity
 {
 	var hParams, vParams;
@@ -25,6 +24,7 @@ class KRangePointer2D extends KValueEntity
 	var interp;
 	var innerBg;
 	var innerKnob;
+	var innerMargin = %[ left: 0, right: 0, top: 0, bottom: 0 ];
 
 	//------------------------------
 	// コンストラクタ
@@ -254,12 +254,15 @@ class KRangePointer2D extends KValueEntity
 
 		knob.id = widgetStyle.knobId;
 
-		drawBorder(borderStyle, 0, 0, width, height);
+		innerMargin.width = innerMargin.left + innerMargin.right;
+		innerMargin.height = innerMargin.top + innerMargin.bottom;
 
-		hParams.rangePixelMin = borderPaddingLeft;
-		hParams.rangePixelSize = width - borderPaddingWidth;
-		vParams.rangePixelMin = borderPaddingTop;
-		vParams.rangePixelSize = height - borderPaddingHeight;
+		drawBorder(borderStyle, innerMargin.left, innerMargin.top, width - innerMargin.width, height - innerMargin.height);
+
+		hParams.rangePixelMin = borderPaddingLeft + innerMargin.left;
+		hParams.rangePixelSize = width - (borderPaddingWidth + innerMargin.width);
+		vParams.rangePixelMin = borderPaddingTop + innerMargin.top;
+		vParams.rangePixelSize = height - (borderPaddingHeight + innerMargin.height);
 
 		for (var i = 0; i < paramsPair.count; i++) {
 			var params = paramsPair[i];
@@ -299,7 +302,7 @@ class KRangePointer2D extends KValueEntity
 			}
 			innerBg.id = widgetStyle.innerBgId;
 			innerBg.visible = true;
-			embedChild(0, 0, width, height, innerBg);
+			embedChild(innerMargin.left, innerMargin.top, width - innerMargin.width, height - innerMargin.height, innerBg);
 			innerBg.unlockStyleModification();
 		}
 

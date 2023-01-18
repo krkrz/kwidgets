@@ -8,7 +8,7 @@ class TestBed extends KWindow
 						 borderStyle: bsSizeable,
 						 alwaysSetToMinSize: false,
 //						 style: %[ isClass: %[ KGridLayout: %[ space: 10, margin: 10 ] ] ],
-//						 style: %[ isClass: %[ KWidget: %[ align: ALIGN_CENTER ] ] ],
+						 style: %[ isClass: %[ KWidget: %[ align: ALIGN_CENTER ] ] ],
 						 theme: "dialog",
 					   ]);
 
@@ -23,6 +23,7 @@ class TestBed extends KWindow
 					isVariableWidth: true,
 					uis: [
 							%[ type: UI_TYPE_TEXTLABEL, label: "シンプルなテキストラベル" ],
+							%[ type: UI_TYPE_SLIDER, label: "スライダー", left: -10, right: 30, stride: 0.1, value: 4.1, name: "cui_slider" ],
 							%[ type: UI_TYPE_TEXTINPUT, name: "texinput", label: "テキスト入力" ],
 							%[ type: UI_TYPE_CHECKBOX, name: "checkbox", label: "チェックボックス", value: true ],
 							%[ type: UI_TYPE_TEXTAREA, name: "textarea", label: "テキストエリア", value: "改行を許すテキスト領域\nテキストエディット" ],
@@ -72,7 +73,7 @@ class TestBed extends KWindow
 
 				.add("スライダー", new KFrameLayout(this, %[ name: "sliderFrame", id: "group_frame", label: "スライダーフレーム" ]));
 				.sliderFrame.add(new KGridLayout(this, %[ name: "sliderGrid", id: "widget_grid" ]));
-				.sliderGrid.add(0, 0, new KTextInputSlider(this, %[ width: 200, left: 0, right: 1000, stride: 1, name: "slider" ]));
+				.sliderGrid.add(0, 0, new KTextInputSlider(this, %[ width: 200, left: 0, right: 1000, stride: 1, name: "slider", leftIcon: "k_scroll_left", rightIcon: "k_scroll_right", leftIconHint: "left icon", rightIconHint: "right icon", hint: "hoge", style: %[ isVariableWidth: true ]  ]));
 		}
 
 		Debug.message("before attach to window");
