@@ -18,7 +18,12 @@ class TestBed extends KWindow
 //		Debug.message("after attach to window");
 
 		with (testTab) {
-				.add("カスタムUI", new KCustomUI(this, %[
+				.add("カスタムUI", new KScrollLayout(this, %[ vertical: true, horizontal: false, name: "customUIScroll" ]));
+				.customUIScroll.add(new KList(this, %[ name: "customUIList", style: %[ isVariableWidth: true ] ]));
+				.customUIList.add(new KListItem("とても長いリスト項目が全体のリストの幅をどのように規定するかをテストする"));
+				.customUIList.add(new KListItem("UIテスト", "uiTest"));
+				.customUIList.uiTest.add(
+					new KCustomUI(this, %[
 					name: "customUI",
 					isVariableWidth: true,
 					uis: [

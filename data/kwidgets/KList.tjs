@@ -95,7 +95,8 @@ global.KListWidgetStyleDefinition =
 		[ "selectionColor", "selectionColor", void, "resolveColor" ],
 		[ "toggleOpenIcon", "toggleOpenIcon" ],
 		[ "toggleCloseIcon", "toggleCloseIcon" ],
-		[ "toggleInvisbleIcon", "toggleInvislbeIcon" ]
+		[ "toggleInvisbleIcon", "toggleInvislbeIcon" ],
+		[ "isVariableWidth", "isVariableWidth", false ]
 	];
 
 class KList extends KVirtualWidget
@@ -874,8 +875,12 @@ class KList extends KVirtualWidget
 		for (var i = 0; i < drawItemList.count; i++) {
 			var item = drawItemList[i];
 			item.locate(item.depth * slideWidth, treeHeight);
-			treeWidth = Math.max(treeWidth,
-								 item.width + item.depth * slideWidth);
+			if (! widgetStyle.isVariableWidth)
+				treeWidth = Math.max(treeWidth,
+									 item.width + item.depth * slideWidth);
+			else
+				treeWidth = Math.max(treeWidth,
+									 K_WIDGET_MIN_POSSIBLE_WIDTH + item.depth * slideWidth);
 			treeHeight += item.height;
 		}
 	}
@@ -3693,7 +3698,7 @@ class KListItem
 		var rect = labelRect;
 		var style = currentFontStyle;
 		root.drawTextArea(currentFontStyle,
-						  left + rect.left, top + rect.top, textInfo.width, lineSpacing,
+						  left + rect.left, top + rect.top, Math.min(textInfo.width, root.width - (left + rect.left)), lineSpacing,
 						  textInfo.texts, textInfo.textWidths, ALIGN_LEFT);
 		root.applyFontStyle(root.font, root.fontStyle);
 		if (childCount) {
@@ -3990,14 +3995,15 @@ class KWidgetHolderListItem extends KListItem
 		}
 		var prevWidth = width;
 		var prevHeight = height;
-		_widgetFrame.setSize(_widget.minWidth, _widget.minHeight);
-		width = _widget.minWidth + _widget.marginHorizontal;
+		_widgetFrame.setSize(root.width - _widgetFrame.left, _widget.minHeight);
+		width = _widget.width + _widget.marginHorizontal;
 		height = _widget.minHeight + _widget.marginVertical + root.spaceVertical;
 		return width != prevWidth || height != prevHeight;
 	}
 
 	function onDraw() {
 		fillBackground();
+		updateSize();
 	}
 
 	function locate(x, y) {
