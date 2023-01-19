@@ -18,15 +18,14 @@ class TestBed extends KWindow
 //		Debug.message("after attach to window");
 
 		with (testTab) {
-				.add("カスタムUI", new KScrollLayout(this, %[ vertical: true, horizontal: false, name: "customUIScroll" ]));
-				.customUIScroll.add(new KList(this, %[ name: "customUIList", style: %[ isVariableWidth: true ] ]));
+				.add("カスタムUI", new KScrollLayout(this, %[ theme: "variable", vertical: true, horizontal: false, name: "customUIScroll" ]));
+				.customUIScroll.add(new KList(this, %[ name: "customUIList" ]));
 				.customUIList.add(new KListItem("とても長いリスト項目が全体のリストの幅をどのように規定するかをテストする"));
 				.customUIList.add(new KListItem("UIテスト", "uiTest"));
 				.customUIList.uiTest.add(new KFrameLayout(this, %[ name: "customUIFrame", id: "group_frame" ]));
 				.customUIFrame.add(
 					new KCustomUI(this, %[
 					name: "customUI",
-					isVariableWidth: true,
 					uis: [
 							%[ type: UI_TYPE_TEXTLABEL, label: "シンプルなテキストラベル" ],
 							%[ type: UI_TYPE_SLIDER, label: "スライダー", left: -10, right: 30, stride: 0.1, value: 4.1, name: "cui_slider" ],
