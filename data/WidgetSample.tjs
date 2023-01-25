@@ -426,18 +426,25 @@ class WidgetSample extends KWindow
 
 			// プレーンダイアログテスト
 		case "customDialogTest":
-			queryCustomDialog(this, dict,
-							  %[
-								  name: "test_dialog",
-								  caption: "Test Dialog",
-								  widgetList: [ %[ name: "check", label: "チェックボックス", type: DIALOG_WIDGET_TYPE_CHECKBOX,  defaultValue: true ],
-												%[ name: "int",   label: "整数入力",         type: DIALOG_WIDGET_TYPE_TEXTINPUT, textType: TEXT_DIGIT ],
-												%[ name: "real",  label: "小数入力",         type: DIALOG_WIDGET_TYPE_TEXTINPUT, textType: TEXT_REAL, defaultValue: 0.5 ],
-												%[ name: "str",   label: "文字入力",         type: DIALOG_WIDGET_TYPE_TEXTINPUT, textType: TEXT_ANY ],
-												%[ name: "text",  label: "テキスト",         type: DIALOG_WIDGET_TYPE_TEXTAREA,   defaultValue: "ほげ\nもげ" ],
-												%[ name: "list",  label: "リスト",           type: DIALOG_WIDGET_TYPE_DROPDOWNLIST, listItems: [ "項目1", [ "項目2", 2 ], [ "項目3", 3 ] ], defaultValue: 2]
-											  ]
-							  ]);
+			var queryResult =
+				queryCustomDialog(this, dict,
+								  %[
+									  name: "test_dialog",
+									  caption: "Test Dialog",
+									  uis: [ %[ name: "check", label: "チェックボックス", type: UI_TYPE_CHECKBOX,  value: true ],
+											 %[ name: "int",   label: "整数入力",         type: UI_TYPE_TEXTINPUT, textType: TEXT_DIGIT ],
+											 %[ name: "real",  label: "小数入力",         type: UI_TYPE_TEXTINPUT, textType: TEXT_REAL, value: 0.5 ],
+											 %[ name: "str",   label: "文字入力",         type: UI_TYPE_TEXTINPUT, textType: TEXT_ANY ],
+											 %[ name: "text",  label: "テキスト",         type: UI_TYPE_TEXTAREA,   value: "ほげ\nもげ" ],
+											 %[ name: "list",  label: "リスト",           type: UI_TYPE_DROPDOWNLIST, items: [ "項目1", "項目1", "項目2", 2, "項目3", 3 ], value: 2 ]
+										   ]
+								  ]);
+			if (queryResult == DIALOG_RESPONSE_CANCEL)
+				Debug.message("dialog canceled.");
+			else {
+				Debug.message("dialog submited.");
+				Debug.message(Scripts.toJSONString(queryResult));
+			}
 			break;
 
 		case "textedit":

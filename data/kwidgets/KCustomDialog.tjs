@@ -19,243 +19,132 @@
 
 class KCustomDialog extends KWindow
 {
-  var def;
-  var widgetDefList;
-  var widgetList;
-  var hasCancel = false;
-  var result = DIALOG_RESPONSE_CANCEL;
-  var response;
-  var done = false;
-  var widgetNamePrefix = "";
+	var uiList;
+	var hasCancel = false;
+	var result = DIALOG_RESPONSE_CANCEL;
+	var response;
+	var done = false;
+	var valueStore = %[];
 
-  function KCustomDialog(owner, dict, def) {
-    this.def = def;
-    this.owner = owner;
-      super.KWindow(%[ name: getValue(def, "name", "k_simple_dialog"), theme: "dialog", style: %[ isClass:  %[ KTextLabel: %[ alignVertical: ALIGN_CENTER ] ] ] ]);
+	function KCustomDialog(owner, dict, options) {
+		this.owner = owner;
+		var options = duplicateStruct(options);
+		options.theme = "dialog";
+		super.KWindow(options);
 
-    caption = getValue(def, "caption", "Simple Dialog");
-    borderStyle = bsDialog;
+		borderStyle = bsDialog;
 
-    defaultFocusable = true;
- //   defaultAlignHorizontal = ALIGN_LEFT;
+		defaultFocusable = true;
 
-      primaryLayer.add(new KGridLayout(this, %[ name: "rootGrid", id: "widget_grid" ]));
-//    rootGrid.margin = 5;
-//    rootGrid.space = 5;
+		primaryLayer.add(new KGridLayout(this, %[ name: "rootGrid", id: "widget_grid", style: %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_CENTER ] ] ] ]));
 
-    widgetDefList = getValue(def, "widgetList", []);
-    widgetList = [];
+		rootGrid.add(0, 0, new KCustomUI(this, %[ name: "uiPane",
+												  uis: getOption("uis", []),
+												  uiNamePrefix: getOption("uiNamePrefix", "") ]));
+		rootGrid.add(0, 1, new KGridLayout(this, %[ name: "buttonGrid", id: "button_grid" ]));
 
-    widgetNamePrefix = getValue(def, "keyPrefix", getValue(def, "name", "k_simple_dialog")) + "_";
+		uiList = uiPane.uiList;
+		response = getOption("response", DIALOG_RESPONSE_OK | DIALOG_RESPONSE_CANCEL);
 
-    var y = 0;
+		var x = 0;
+		if (response & DIALOG_RESPONSE_OK) 
+			buttonGrid.add(x++, 0, new KTextButton(this, %[ label: "OK", name: "okButton", id: "primary_button" ]));
+		if (response & DIALOG_RESPONSE_CANCEL) 
+			buttonGrid.add(x++, 0, new KTextButton(this, "キャンセル", "cancelButton"));
+		invalidateLayout();
 
-    for (var i = 0; i < widgetDefList.count; i++) {
-      var widgetDef = widgetDefList[i];
-      var widget, label;
-      var widgetKey = getValue(widgetDef, "name", "name");
-      var widgetName = widgetNamePrefix + widgetKey;
-      switch (widgetDef.type) {
-      case DIALOG_WIDGET_TYPE_CHECKBOX:
-        widget = new KCheckBox(this, getValue(widgetDef, "label", "label"), widgetName);
-        widget.value = getValue(widgetDef, "defaultValue", false);
-        rootGrid.add(0, y++, widget, 2);
-        break;
-      case DIALOG_WIDGET_TYPE_TEXTINPUT:
-          label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
-          widget = new KTextInput(this, %[ width: 120, type: getValue(widgetDef, "textType", TEXT_ANY), name: widgetName ]);
-          switch (widget.type) {
-        default: 
-          widget.value = getValue(widgetDef, "defaultValue", "");
-          break;
-        case TEXT_DIGIT:
-        case TEXT_REAL:
-          widget.value = getValue(widgetDef, "defaultValue", 0);
-        } 
-        rootGrid.add(0, y, label);
-        rootGrid.add(1, y, widget);
-        y++;
-        break;
-      case DIALOG_WIDGET_TYPE_TEXTLABEL: {
-        label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
-        rootGrid.add(0, y, label, 2);
-        y++;
-        break;
-      }
-      case DIALOG_WIDGET_TYPE_TEXTAREA: {
-        label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
-//        var frame = new KFrameLayout(this, FRAME_FLATTEN);
-          var scroll = new KScrollLayout(this, %[ horizontal: false, vertical: true, id: "focusable_frame" ]);
-        var textarea = new KTextEdit(this, widgetName);
-//        frame.add(scroll);
-        scroll.setMarginalFixedSize(getValue(widgetDef, "marginalWidth", 100), getValue(widgetDef, "marginalHeight",60));
-        scroll.add(textarea);
-        textarea._marginalHeight = 100;
-        widget = textarea;
-        widget.value = getValue(widgetDef, "defaultValue", "");
-        rootGrid.add(0, y, label);
-        rootGrid.add(1, y, scroll);
-        y++;
-        break;
-      }
-      case DIALOG_WIDGET_TYPE_TABLE: {
-        label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
-        var frame = new KFrameLayout(this, FRAME_FLATTEN);
-        var scroll = new KScrollLayout(this, false, true);
-        var table = new KTable(this, widgetName, getValue(widgetDef, "attrList", []), getValue(widgetDef, "opts", %[]));
-        frame.add(scroll);
-        scroll.setMarginalFixedSize(getValue(widgetDef, "marginalWidth", 100), getValue(widgetDef, "marginalHeight",60));
-        scroll.add(table);
-        widget = table;
-        widget.value = getValue(widgetDef, "defaultValue", "");
-        rootGrid.add(0, y, label);
-        rootGrid.add(1, y, frame);
-        y++;
-        break;
-      }      
-      case DIALOG_WIDGET_TYPE_DROPDOWNLIST:
-        label = new KTextLabel(this, getValue(widgetDef, "label", "label"));
-          widget = new KComboBox(this, %[ width: 150, type: COMBO_STYLE_DROPDOWNLIST, name: widgetName ]);
-        var items = getValue(widgetDef, "listItems", []);
-        for (var j = 0; j < items.count; j++) {
-          var item = items[j];
-          if (item instanceof "Array") 
-            widget.add(item[0], item[1]);
-          else
-            widget.add(item, item);
-        }
-        widget.value = getValue(widgetDef, "defaultValue", items[0]);
-        widget.dispCount = Math.min(20, items.count);
-        rootGrid.add(0, y, label);
-        rootGrid.add(1, y, widget);
-        y++;
-        break;
+		setPos(owner.left + (owner.width - width) / 2,
+			   owner.top + (owner.height - height) / 2);
 
-      };
-      if (widget !== void) {
-        widget.isAvoidDictionaryRegistration = getValue(widgetDef, "isAvoidDictionaryRegistration", getValue(def, "isAvoidDictionaryRegistration", false));
-        widgetList.add(%[ key: widgetKey,
-                          name: widgetName,
-                          widget: widget ]);
-      }
-    }
+		if (dict !== void)
+			bindPersistentDictionary(dict);
 
-    response = getValue(def, "response", DIALOG_RESPONSE_OK | DIALOG_RESPONSE_CANCEL);
+		callFunc("onInit");
 
-    defaultAlignHorizontal = ALIGN_CENTER;
-      rootGrid.add(0, y, new KGridLayout(this, %[ name: "buttonGrid", id: "button_grid" ]), 2);
-//    buttonGrid.marign = 20;
-//    buttonGrid.space = 10;
+		storeWidgetValue();
+	}
 
-    var x = 0;
-    if (response & DIALOG_RESPONSE_OK) 
-		buttonGrid.add(x++, 0, new KTextButton(this, %[ label: "OK", name: "okButton", id: "primary_button" ]));
-    if (response & DIALOG_RESPONSE_CANCEL) 
-      buttonGrid.add(x++, 0, new KTextButton(this, "キャンセル", "cancelButton"));
-    invalidateLayout();
+	function finalize() {
+		visible = false;
+		if (result == DIALOG_RESPONSE_CANCEL)
+			restoreWidgetValue();
+		super.finalize(...);
+	}
 
-    setPos(owner.left + (owner.width - width) / 2,
-           owner.top + (owner.height - height) / 2);
+	function getValue(def, key, defaultValue) {
+		if (typeof(def[key]) != "undefined")
+			return def[key];
+		else
+			return defaultValue;
+	}
 
-    if (dict !== void)
-      bindPersistentDictionary(dict);
+	function storeWidgetValue() {
+		for (var i = 0; i < uiList.count; i++) {
+			var ui = uiList[i];
+			valueStore[ui.name] = ui.widget.value;
+		}
+	}
 
-    callFunc(def, "onInit");
+	function restoreWidgetValue() {
+		for (var i = 0; i < uiList.count; i++) {
+			var ui = uiList[i];
+			ui.widget.value = valueStore[ui.name];
+		}
+	}
 
-    storeWidgetValue();
-  }
+	function onChildValueModified(widget, value) {
+		switch (widget.name) {
+		case "okButton":
+			ok();
+			break;
+		case "cancelButton":
+			cancel();
+			break;
+		}
+	}
 
-  function finalize() {
-    visible = false;
-    if (result == DIALOG_RESPONSE_CANCEL)
-      restoreWidgetValue();
-    super.finalize(...);
-  }
+	function callFunc(key, defaultValue, *) {
+		var func = getOption(key, void);
+		if (func === void)
+			return defaultValue;
+		else
+			return (func incontextof(this))(*);
+	}
 
-  function getValue(def, key, defaultValue) {
-    if (typeof(def[key]) != "undefined")
-      return def[key];
-    else
-      return defaultValue;
-  }
+	function onCloseQuery() {
+		if (done
+			|| response & DIALOG_RESPONSE_CANCEL) {
+			return super.onCloseQuery(true);
+		} else {
+			return super.onCloseQuery(false);
+		} 
+	}
 
-  function storeWidgetValue() {
-    for (var i = 0; i < widgetList.count; i++) {
-      var widget = widgetList[i];
-      widget.value = widget.widget.value;
-    }
-  }
+	function ok() {
+		if (! callFunc("onQuerySubmit", true))
+			return;
+		result = %[];
+		for (var i = 0; i < uiList.count; i++) {
+			var ui = uiList[i];
+			result[ui.key] = ui.widget.value;
+		}
+		callFunc("onSubmit");
+		done = true;
+		close();
+	}
 
-  function restoreWidgetValue() {
-    for (var i = 0; i < widgetList.count; i++) {
-      var widget = widgetList[i];
-      widget.widget.value = widget.value;
-    }
-  }
-
-  function onChildValueModified(widget, value) {
-    switch (widget.name) {
-    case "okButton":
-      ok();
-      break;
-    case "cancelButton":
-      cancel();
-      break;
-    }
-  }
-
-  function find(name) {
-    if (this.name === name)
-      return this;
-    var widgetName = widgetNamePrefix + name;
-    var result = super.find(widgetName);
-    if (result !== void)
-      return result;
-    return super.find(name);
-  }
-  
-  function callFunc(def, key, defaultValue, *) {
-    var func = getValue(def, key, void);
-    if (func === void)
-      return defaultValue;
-    else
-      return (func incontextof(this))(*);
-  }
-
-  function onCloseQuery() {
-    if (done
-        || response & DIALOG_RESPONSE_CANCEL) {
-      return super.onCloseQuery(true);
-    } else {
-      return super.onCloseQuery(false);
-    } 
-  }
-
-  function ok() {
-    if (! callFunc(def, "onQuerySubmit", true))
-      return;
-    result = %[];
-    for (var i = 0; i < widgetList.count; i++) {
-      var widget = widgetList[i];
-      result[widget.key] = widget.widget.value;
-    }
-    callFunc(def, "onSubmit");
-    done = true;
-    close();
-  }
-
-  function cancel() {
-    result = DIALOG_RESPONSE_CANCEL;
-    callFunc(def, "onCancel");
-    close();
-  }
+	function cancel() {
+		result = DIALOG_RESPONSE_CANCEL;
+		callFunc("onCancel");
+		close();
+	}
 };
 
-function queryCustomDialog(owner, dict, dialogDef)
+function queryCustomDialog(owner, dict, options)
 {
-  var win = new KCustomDialog(...);
-  win.showModal();
-  var result = win.result;
-  invalidate win;
-  return result;
+	var win = new KCustomDialog(...);
+	win.showModal();
+	var result = win.result;
+	invalidate win;
+	return result;
 }

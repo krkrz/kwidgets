@@ -83,7 +83,7 @@ class KCustomUIGenerator
 		var value;
 		switch (textType) {
 		case TEXT_ANY:
-			value = getValue(def, "defaultValue", ""); break;
+			value = getValue(def, "value", ""); break;
 		case TEXT_DIGIT:
 		case TEXT_REAL:
 			value = getValue(def, "value", 0); break;
@@ -151,7 +151,8 @@ global.customUIGenerator = new KCustomUIGenerator();
 class KCustomUI extends KGridLayout
 {
 	var uiList = [];
-
+	var uiNamePrefix;
+	
 	function KCustomUI(window, options = %[]) {
 		options = duplicateStruct(options);
 		options.id = "widget_grid";
@@ -163,7 +164,7 @@ class KCustomUI extends KGridLayout
 		var uiDefs = getOption("uis", []);
 		uiList = [];
 
-		var uiNamePrefix = getOption("uiNamePrefix", "");
+		uiNamePrefix = getOption("uiNamePrefix", "");
 
 		var insertionY = 0;
 
@@ -179,9 +180,21 @@ class KCustomUI extends KGridLayout
 							  widget: result.widget ]);
 
 				if (typeof(uiDef[onValueModified]) != K_UNDEFINED)
-					widget.onValueModified = uiDef[onValueModified];
+					result.widget.onValueModified = uiDef[onValueModified];
+				if (uiDef["isAvoidDictionaryRegistration"] != K_UNDEFINED)
+					result.widget.isAvoidDictionaryRegistration = uiDef["isAvoidDictionaryRegistration"];
 			}
 		}
+	}
+
+	function find(name) {
+		if (this.name === name)
+			return this;
+		var widgetName = uiNamePrefix + name;
+		var result = super.find(widgetName);
+		if (result !== void)
+			return result;
+		return super.find(name);
 	}
 };
 
