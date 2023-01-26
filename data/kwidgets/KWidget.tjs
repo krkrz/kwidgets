@@ -90,6 +90,7 @@ global.K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS = [ "borderRadiusRightBo
 global.K_WIDGET_APPEARANCE_STYLE_DEFINITION = [
 	[ "compositeState", "compositeState", [] ],
 	[ "statePriority", "statePriority", [] ],
+	[ "callback", "callback", "" ],
 	[ "opacity",    "opacity",  255 ]
 ];
 
@@ -210,7 +211,7 @@ class KWidget extends Layer
 	var _styleModificationLocked = false;
 	var _lockStyleModificationOnAttach = false;
 	var _styleModified = false;
-	var appearanceStyle = %[ compositeState: [], statePriority: [] ];
+	var appearanceStyle = %[ compositeState: [], statePriority: [], callback: "" ];
 	var fontStyle;
 	var borderStyle;
 	var layoutStyle;
@@ -259,7 +260,9 @@ class KWidget extends Layer
 	var _ancestors;
 	// スタイル更新フラグ
 	var _styleModifiedMask = 0;
-
+	// スタイルコールバック
+	var styleCallback = "";
+	
 	/**------------------------------
 	 * コンストラクタ
 	 *
@@ -1407,6 +1410,16 @@ class KWidget extends Layer
 		releaseStyleModificationDelay();
 		if (isInWidgetTree)
 			parentWidget.releaseStyleModificationDelay();
+		invalidateStyleCallback();
+	}
+
+	function invalidateStyleCallback() {
+		if (styleCallback == appearanceStyle.callback)
+			return;
+		styleCallback = appearanceStyle.callback;
+		if (styleCallback != ""
+			&& typeof(this[styleCallback]) != K_UNDEFINED)
+			this[styleCallback]();
 	}
 
 	/*----------------------------------------------------------------------

@@ -70,6 +70,10 @@ class TestBed extends KWindow
 				.buttonGrid.add(1, 1, new KTextButton(this, %[ name: "button4",
 															   label: "ボタン4" ]));
 
+				.button1.overwriteStyle(%[ callback: "onIdle", hover: %[ callback: "onHover" ] ]);
+				.button1.onHover = function() { global.Debug.message("onHover"); };
+				.button1.onIdle = function() { global.Debug.message("onIdle"); };
+			
 				.add("チェックボックス", new KFrameLayout(this, %[ name: "checkFrame", id: "group_frame", label: "チェックボックスフレーム" ]));
 				.checkFrame.add(new KGridLayout(this, %[ name: "checkGrid", id: "widget_grid" ]));
 				.checkGrid.add(0, 0, new KCheckBox(this, %[ name: "check1",
