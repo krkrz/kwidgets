@@ -26,21 +26,22 @@ class TestBed extends KWindow
 				.customUIFrame.add(
 					new KCustomUI(this, %[
 					name: "customUI",
-					uis: [
-//							%[ type: UI_TYPE_BEGIN_FRAME, label: "サブフレーム" ],
+						labelStyle: UI_LABEL_STYLE_LEFTTOPCORNER,
+						uis: [
+							%[ type: UI_TYPE_BEGIN_FRAME, label: "サブフレーム" ],
 							%[ type: UI_TYPE_TEXTLABEL, label: "シンプルなテキストラベル" ],
 							%[ type: UI_TYPE_SLIDER, label: "スライダー", left: -10, right: 30, stride: 0.1, value: 4.1, name: "cui_slider" ],
 							%[ type: UI_TYPE_TEXTINPUT, name: "texinput", label: "テキスト入力" ],
-//							%[ type: UI_TYPE_BEGIN_FRAME, label: "サブサブフレーム" ],
+							%[ type: UI_TYPE_BEGIN_FRAME, label: "サブサブフレーム" ],
 							%[ type: UI_TYPE_CHECKBOX, name: "checkbox", label: "チェックボックス", value: true ],
 							%[ type: UI_TYPE_TEXTAREA, name: "textarea", label: "テキストエリア", value: "改行を許すテキスト領域\nテキストエディット" ],
-//							%[ type: UI_TYPE_END_FRAME, label: "サブサブフレーム" ],
+							%[ type: UI_TYPE_END_FRAME, label: "サブサブフレーム" ],
 							%[ type: UI_TYPE_DROPDOWNLIST, name: "dropdownlist", label: "ドロップダウンリスト",
 							   captions: [ "選択肢1", "選択肢2", "選択肢3" ],
 							   values: [ 1, 2, 3],
 							   value: 3 ],
-//							%[ type: UI_TYPE_END_FRAME ],
-//							%[ type: UI_TYPE_BEGIN_FRAME, label: "サブフレーム2" ],
+							%[ type: UI_TYPE_END_FRAME ],
+							%[ type: UI_TYPE_BEGIN_FRAME, label: "サブフレーム2" ],
 							%[ type: UI_TYPE_TABLE, name: "table", label: "",
 							   defaultColumnOptions: %[ editable: true ],
 							   attributes: [

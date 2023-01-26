@@ -49,6 +49,8 @@ global.UI_TYPE_SLIDER = "ui.type.slider";
 global.UI_TYPE_BEGIN_FRAME = "ui.type.begin.frame";
 global.UI_TYPE_END_FRAME   = "ui.type.end.frame";
 
+global.UI_LABEL_STYLE_LEFT = 0;
+global.UI_LABEL_STYLE_LEFTTOPCORNER = 1;
 
 global.DIALOG_RESPONSE_OK = 1 << 0;
 global.DIALOG_RESPONSE_CANCEL = 1 << 1;
