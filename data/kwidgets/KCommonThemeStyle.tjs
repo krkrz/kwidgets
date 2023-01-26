@@ -30,7 +30,22 @@
 						borderColor: "textedit_border",
 						padding: 2,
 						descendantFocus: %[ borderColor: "textedit_border_focus" ],
-					]
+					],
+					"sub1_frame" => %[
+						padding: 6,
+						paddingTop: 2,
+						backgroundColor: "sub1_bg",
+					],
+					"sub2_frame" => %[
+						padding: 6,
+						paddingTop: 2,
+						backgroundColor: "sub2_bg",
+					],
+					"sub3_frame" => %[
+						padding: 6,
+						paddingTop: 2,
+						backgroundColor: "sub3_bg",
+					],
 				]
 			]
 		],

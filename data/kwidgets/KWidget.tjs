@@ -301,8 +301,8 @@ class KWidget extends Layer
 		_name = getOption("name", void);
 		// 最小・最大サイズを暫定サイズに決定
 		_marginal = %[ minw: getOption("marginalMinWidth", 0),
-					   maxw: getOption("marginalMinHeight", 0),
-					   minh: getOption("marginalMaxWidth", 0),
+					   minh: getOption("marginalMinHeight", 0),
+					   maxw: getOption("marginalMaxWidth", 0),
 					   maxh: getOption("marginalMaxHeight", 0) ];
 		_computed.minw = _specified.minw = width;
 		_computed.maxw = _specified.maxw = width;
@@ -2332,13 +2332,21 @@ class KWidget extends Layer
 			case ALIGN_CENTER: x += (w - tw) / 2; break;
 			case ALIGN_RIGHT:  x += w - tw; break;
 			}
-			if (fill)
-				fillRect(x, y, tw, font.height, borderStyle.backgroundColor);
+			if (fill) {
+				if (fill instanceof "Function")
+					fill(x, y, tw, font.height, borderStyle.backgroundColor);
+				else
+					fillRect(x, y, tw, font.height, borderStyle.backgroundColor);
+			}
 			drawUIText(fontStyle, x, y, text, overrideFontColor);
 			return %[ inRange: true, x: x, y: y, w: tw ];
 		} else {
-			if (fill)
-				fillRect(x, y, w, font.height, borderStyle.backgroundColor);
+			if (fill) {
+				if (fill instanceof "Function")
+					fill(x, y, w, font.height, borderStyle.backgroundColor);
+				else
+					fillRect(x, y, w, font.height, borderStyle.backgroundColor);
+			}
 			drawUIText(fontStyle, x, y, text.substr(0, len) + omitText, overrideFontColor);
 			return %[ inRange: false, x: x, y: y, w: w ];
 		}

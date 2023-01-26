@@ -450,8 +450,6 @@ global.KTextEditWidgetStyleDefinition =
 
 class KTextEdit extends KVirtualWidget
 {
-	// 最小限サイズ
-	var _marginalWidth, _marginalHeight;
 	// 行レイヤのリスト
 	var rowList, rowPool;
 	// ポインタレイヤ
@@ -515,7 +513,10 @@ class KTextEdit extends KVirtualWidget
 	 ------------------------------*/
 	function KTextEdit(window, *) {
 		var options = parseOldStyleWidgetArgs(KTextEditArgsFormat, *);
+		options = duplicateStruct(options);
 		options.middleButtonDrag = true;
+		options.marginalMaxWidth = K_WIDGET_MAX_POSSIBLE_WIDTH;
+		options.marginalMaxHeight = K_WIDGET_MAX_POSSIBLE_WIDTH;
 		super.KVirtualWidget(window, options);
 
 		// ウィンドウ初期化
@@ -524,8 +525,6 @@ class KTextEdit extends KVirtualWidget
 		cursor = crIBeam;
 		useAttention = true;
 		imeMode = imDontCare;
-		// 基準サイズ1000x1000で初期化
-		_marginalWidth = _marginalHeight = 1000;
 		// 行配列初期化
 		rowList = [];
 		rowPool = [];
@@ -1634,7 +1633,7 @@ class KTextEdit extends KVirtualWidget
 				w = Math.max(w, rowLayer.minWidth);
 			}
 			// 最小サイズを決定する
-			setMinMaxSize(w, y, Math.max(w, _marginalWidth), Math.max(y, _marginalHeight));
+			setMinMaxSize(w, y, w, y);
 			// ポインタを現在位置に再表示
 			setPointer(pointer.row, pointer.col);
 		} else {
@@ -1651,7 +1650,7 @@ class KTextEdit extends KVirtualWidget
 				y += rowLayer.height;
 			}
 			// 最小サイズを決定する
-			setMinMaxSize(w, y, Math.max(w, _marginalWidth), Math.max(y, _marginalHeight));
+			setMinMaxSize(w, y, w, y);
 			// ポインタを現在位置に再表示
 			setPointer(pointer.row, pointer.col);
 		}

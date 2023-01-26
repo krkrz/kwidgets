@@ -44,10 +44,11 @@ class KSlider extends KRangePointer2D
 	 right: スライダーの右端の値
 	 stride: スライダーの刻み幅
 	 ------------------------------*/
-	var leftIcon, rightIcon;
 	var leftIconRange, rightIconRange;
 	var leftIconHint, rightIconHint;
-	
+	var leftIconName, rightIconName;
+	var leftIcon, rightIcon;
+
 	function KSlider(window, *) {
 		var opts = parseOldStyleWidgetArgs(KSliderArgsFormat, *);
 
@@ -68,14 +69,10 @@ class KSlider extends KRangePointer2D
 
 		focusable = getOption("focusable", window.defaultFocusable);
 
-		var leftIconName = getOption("leftIcon", "");
-		if (leftIconName !== "")
-			leftIcon = findIcon(leftIconName);
+		leftIconName = getOption("leftIcon", "");
 		leftIconHint = getOption("leftIconHint", "");
 
-		var rightIconName = getOption("rightIcon", "");
-		if (rightIconName !== "")
-			rightIcon = findIcon(rightIconName);
+		rightIconName = getOption("rightIcon", "");
 		rightIconHint = getOption("rightIconHint", "");
 	}
 
@@ -115,6 +112,9 @@ class KSlider extends KRangePointer2D
 	function onDrawContents() {
 		if (widgetStyle.knobWidth !== void)
 			knobFixedWidth = widgetStyle.knobWidth;
+
+		leftIcon = leftIconName != "" ? findIcon(leftIconName) : void;
+		rightIcon = rightIconName != "" ? findIcon(rightIconName) : void;
 
 		if (leftIcon !== void)
 			innerMargin.left = leftIcon.width + spaceHorizontal;

@@ -46,13 +46,8 @@ global.UI_TYPE_TEXTAREA = "ui.type.textarea";
 global.UI_TYPE_TEXTLABEL = "ui.type.textlabel";
 global.UI_TYPE_TABLE = "ui.type.table";
 global.UI_TYPE_SLIDER = "ui.type.slider";
-
-global.DIALOG_WIDGET_TYPE_CHECKBOX = 0;
-global.DIALOG_WIDGET_TYPE_TEXTINPUT = 1;
-global.DIALOG_WIDGET_TYPE_DROPDOWNLIST = 2;
-global.DIALOG_WIDGET_TYPE_TEXTAREA = 3;
-global.DIALOG_WIDGET_TYPE_TEXTLABEL = 4;
-global.DIALOG_WIDGET_TYPE_TABLE = 5;
+global.UI_TYPE_BEGIN_FRAME = "ui.type.begin.frame";
+global.UI_TYPE_END_FRAME   = "ui.type.end.frame";
 
 
 global.DIALOG_RESPONSE_OK = 1 << 0;

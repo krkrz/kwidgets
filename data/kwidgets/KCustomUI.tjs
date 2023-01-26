@@ -126,8 +126,14 @@ class KCustomUIGenerator
 											 ]);
 		table.setMarginalFixedSize(getValue(def, "marginalWidth", 100), getValue(def, "marginalHeight", 100));
 	table.value = getValue(def, "value", []);
-		grid.add(0, insertionY, label);
-		grid.add(1, insertionY, table);
+		if (label.label == "") {
+			invalidate label;
+			label = void;
+			grid.add(0, insertionY, table, 2);
+		} else {
+			grid.add(0, insertionY, label);
+			grid.add(1, insertionY, table);
+		}
 		return %[ widget: table, label: label, insertionY: ++insertionY ];
 	}
 
@@ -167,12 +173,34 @@ class KCustomUI extends KGridLayout
 		uiNamePrefix = getOption("uiNamePrefix", "");
 
 		var insertionY = 0;
-
+		var curGrid = this;
+		var gridStack = [];
+		var yStack = [];
+		
 		for (var i = 0; i < uiDefs.count; i++) {
 			var uiDef = uiDefs[i];
 			var uiKey = getOption("name", "", uiDef);
 			var uiName = uiNamePrefix + uiKey;
-			var result = customUIGenerator.generatorMap[uiDef.type](this, insertionY, uiName, uiDef);
+
+			if (uiDef.type == UI_TYPE_BEGIN_FRAME) {
+				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][gridStack.count];
+				var frame = new KFrameLayout(window, %[ id: frameId, label: getOption("label", "", uiDef) ] );
+				var subGrid = new global.KGridLayout(window, %[ id: "widget_grid" ]);
+				frame.add(subGrid);
+				curGrid.add(0, insertionY++, frame, 2);
+				gridStack.push(curGrid);
+				yStack.push(insertionY);
+				curGrid = subGrid;
+				insertionY = 0;
+				continue;
+			}
+			if (uiDef.type == UI_TYPE_END_FRAME) {
+				curGrid = gridStack.pop();
+				insertionY = yStack.pop();
+				continue;
+			}
+
+			var result = customUIGenerator.generatorMap[uiDef.type](curGrid, insertionY, uiName, uiDef);
 			insertionY = result.insertionY;
 			if (result.widget !== void) {
 				uiList.add(%[ key: uiKey,

@@ -215,7 +215,7 @@ class KFrameLayout extends KLayout
 		if (label != "")
 			contentTop = labelFieldHeight;
 
-		fillRect(0, 0, width, height, borderStyle.backgroundColor);
+		fillRect(0, 0, width, height, 0);
 		drawBorder(borderStyle, 0, contentTop / 2, width, height - contentTop / 2);
 
 		labelBounds = void;
@@ -235,7 +235,8 @@ class KFrameLayout extends KLayout
 				lw -= findIcon(widgetStyle.helpIcon).width + spaceHorizontal;
 			var result = drawUITextInRange(fontStyle,
 										   lx, (labelFieldHeight - fontStyle.fontHeight) / 2, lw,
-										   label, widgetStyle.textAlign, true);
+										   label, widgetStyle.textAlign,
+										   function(x, y, w, h, color) { fillRect(x, y, w, h, 0); fillRect(x, y + h / 2, w, h / 2, color); } incontextof this);
 			if (! result.inRange)
 				labelBounds = new KRect(result.x, result.y, result.w, fontStyle.fontHeight);
 			if (_checkable) {
