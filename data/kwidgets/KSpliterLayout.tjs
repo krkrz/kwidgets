@@ -226,7 +226,7 @@ class KSpliterLayout extends KLayout
 				return;
 			_shutterEnabled = v;
 			if (shutterToggle == void) {
-				shutterToggle = new KSpliterShutterToggle(window, %[ name: "_shutterToggle" ]);
+				shutterToggle = new KSpliterShutterToggle(window, %[ name: "_shutterToggle", focusable: false ]);
 				shutterToggle.parent = this;
 			}
 			shutterToggle.visible = v;
