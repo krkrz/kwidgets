@@ -21,9 +21,8 @@ class TestBed extends KWindow
 				.add("カスタムUI", new KScrollLayout(this, %[ theme: "variable", vertical: true, horizontal: false, name: "customUIScroll" ]));
 				.customUIScroll.add(new KList(this, %[ name: "customUIList" ]));
 				.customUIList.add(new KListItem("とても長いリスト項目が全体のリストの幅をどのように規定するかをテストする"));
-				.customUIList.add(new KListItem("UIテスト", "uiTest"));
-				.customUIList.uiTest.add(new KFrameLayout(this, %[ name: "customUIFrame", id: "group_frame" ]));
-				.customUIFrame.add(
+				.customUIList.add(new KListItem(%[ label: "UIテスト", name: "uiTest", style: %[ fontBold: true, fontHeight: 14 ] ]));
+				.customUIList.uiTest.add(
 					new KCustomUI(this, %[
 					name: "customUI",
 						labelStyle: UI_LABEL_STYLE_LEFTTOPCORNER,

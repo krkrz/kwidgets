@@ -2294,6 +2294,7 @@ class KTable extends KEntity
 		viewScroll.setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
 		columnTabScroll.setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, 0);
 		rowTabScroll.setMarginalMinMaxSize(0, 0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH);
+		var initWithMinimumSize = getOption("initWithMinimumSize", false);
 
 		this.columnList = [];
 		var ofst = 0;
@@ -2310,7 +2311,10 @@ class KTable extends KEntity
 			}
 			var column = new klass(this, label, key, opts);
 			column.index = i;
-			column.size = Math.max(K_TABLE_COLUMN_MIN_WIDTH, column.fixedWidth);
+			if (initWithMinimumSize)
+				column.size = K_TABLE_COLUMN_MIN_WIDTH;
+			else
+				column.size = Math.max(K_TABLE_COLUMN_MIN_WIDTH, column.fixedWidth);
 			column.pos = ofst;
 			if (column.visible)
 				ofst += column.size;
@@ -2657,12 +2661,16 @@ class KTable extends KEntity
 		setter(v) {
 			var save = respondToValueModification;
 			respondToValueModification = false;
+			var viewTop = viewScroll.childViewTop;
+			var viewLeft = viewScroll.childViewLeft;
 			view.beginRedrawRegion();
 			clearRows();
 			for (var i = 0; i < v.count; i++)
 				addElement(v[i]);
 			view.redrawAll();
 			view.endRedrawRegion();
+			viewScroll.setChildViewPos(viewLeft, viewTop);
+			onViewModified(viewLeft, viewTop);
 			respondToValueModification = save;
 		}
 	}

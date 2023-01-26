@@ -114,6 +114,7 @@ class KCustomUIGenerator
 		var labelText = getValue(def, "label", "");
 		var label = labelText == "" ? void : new KTextLabel(grid.window, %[ label: labelText, hint: hint, status: status, style: %[ alignVertical: ALIGN_TOP ] ]);
 		var table = new KTable(grid.window, %[ name: uiName, hint: hint, status: status,
+											   initWithMinimumSize: getValue(def, "initWithMinimumSize", false),
 											   attributes: getValue(def, "attributes", []),
 											   defaultColumnOptions: getValue(def, "defaultColumnOptions", %[])
 											 ]);
@@ -143,20 +144,23 @@ class KCustomUI extends KGridLayout
 {
 	var uiList = [];
 	var uiNamePrefix;
+	var gridId;
 
 	function KCustomUI(window, options = %[]) {
 		options = duplicateStruct(options);
-		options.id = "widget_grid";
 		options.style = %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_LEFT, alignVertical: ALIGN_CENTER ],
 									   KTextLabel: %[ maxPossibleWidthRatio: 0.25 ]
 									 ] ];
 		super.KGridLayout(window, options);
+
+		id = gridId = getOption("gridId", "widget_grid");
 
 		var uiDefs = getOption("uis", []);
 		uiList = [];
 
 		uiNamePrefix = getOption("uiNamePrefix", "");
 		var labelStyle = getOption("labelStyle", UI_LABEL_STYLE_LEFT);
+		var fixedLabel = getOption("fixedLabel", false);
 
 		var insertionY = 0;
 		var curGrid = this;
@@ -171,7 +175,7 @@ class KCustomUI extends KGridLayout
 			if (uiDef.type == UI_TYPE_BEGIN_FRAME) {
 				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][gridStack.count];
 				var frame = new KFrameLayout(window, %[ id: frameId, label: getOption("label", "", uiDef) ] );
-				var subGrid = new global.KGridLayout(window, %[ id: "widget_grid" ]);
+				var subGrid = new global.KGridLayout(window, %[ id: gridId ]);
 				frame.add(subGrid);
 				curGrid.add(0, insertionY++, frame, 2);
 				gridStack.push(curGrid);
@@ -191,6 +195,9 @@ class KCustomUI extends KGridLayout
 				insertionY = result.insertionY;
 			var label = result.label;
 			var bounds = result.bounds !== void ? result.bounds : result.widget;
+			if (label !== void
+				&& fixedLabel)
+				label.overwriteStyle(%[ isVariableWidth: false ]);
 			if (label !== void && bounds === void)
 				curGrid.add(0, insertionY++, label, 2);
 			else if (label === void && bounds !== void)

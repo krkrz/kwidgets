@@ -16,7 +16,7 @@
 				"textboard_bg" => 0xff686868,
 				"button_bg" => "editable_bg",
 				"button_bg_active" => 0xffd4d4d4,
-				"hint_bg" => 0xc0c9c9c0,
+				"hint_bg" => 0xd0c9c9c0,
 				"hint_border" => 0xff383838,
 				"hint_font" => 0x404040,
 				"widget_border" => 0xff898989,
