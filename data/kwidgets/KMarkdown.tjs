@@ -96,6 +96,16 @@ class KMarkdownRow
 		}
 	}
 
+	function isJpEOLGlyph(glyph) {
+		return glyph.type == K_MARKDOWN_GLYPH_TYPE_CHAR
+			&& owner.widgetStyle.jpEOLRule.indexOf(glyph.char) >= 0;
+	}
+
+	function isJpBOLGlyph(glyph) {
+		return glyph.type == K_MARKDOWN_GLYPH_TYPE_CHAR
+			&& owner.widgetStyle.jpBOLRule.indexOf(glyph.char) >= 0;
+	}
+
 	// レイアウトのやり直し
 	function layout(w) {
 		// レイアウトの必要が無く、横幅が変化してないなら、そのまま終了
@@ -124,6 +134,30 @@ class KMarkdownRow
 			clearGlyph(glyph);
 			// 横幅をオーバーしてたら改行
 			if (x + glyph.width > w) {
+				// 行末禁足文字の追い出し
+				for (var j = 0; j < owner.widgetStyle.jpEOLLimit; j++) {
+					if (i - 1 <= n + 1)
+						break;
+					glyph = glyphs[i - 1];
+					if (isJpEOLGlyph(glyph)) {
+						x -= glyph.width;
+						i--;
+					}
+				}
+				// 行頭禁足文字の追い込み
+				for (var j = 0; j < owner.widgetStyle.jpBOLLimit; j++) {
+					if (i >= glyphs.count)
+						break;
+					var glyph = glyphs[i];
+					clearGlyph(glyph);
+					if (isJpBOLGlyph(glyph)) {
+						glyph.x = x;
+						glyph.y = y;
+						x += glyph.width;
+						rowHeight = Math.max(rowHeight, glyph.height);
+						i++;
+					}
+				}
 				// 行情報を記録
 				rowRanges.add([ n, i, x, y, rowHeight ]);
 				// 改行
@@ -131,6 +165,12 @@ class KMarkdownRow
 				rowHeight = 0;
 				x = indent;
 				n = i;
+
+				if (i >= glyphs.count)
+					break;
+
+				glyph = glyphs[i];
+				clearGlyph(glyph);
 			}
 			// 文字の座標を記録
 			if (typeof(glyph.indent) != K_UNDEFINED) {
@@ -266,7 +306,11 @@ global.KMarkdownWidgetStyleDefinition =
 		[ "listIndent", "listIndent", 16 ],
 		[ "listIconPadding", "listIconPadding", 4 ],
 		[ "orderedListMarkWidth", "orderedListMarkWidth", 24 ],
-		[ "orderedListMarkDigits", "orderedListMarkDigits", [ [] ] ]
+		[ "orderedListMarkDigits", "orderedListMarkDigits", [ [] ] ],
+		[ "jpBOLRule", "jpBOLRule", "" ],
+		[ "jpBOLLimit", "jpBOLLimit", 1 ],
+		[ "jpEOLRule", "jpEOLRule", "" ],
+		[ "jpEOLLimit", "jpEOLLimit", 1 ]
 	];
 
 
