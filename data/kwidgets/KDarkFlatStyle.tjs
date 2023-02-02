@@ -84,6 +84,9 @@
 				"k_slider_knob" => "$composite($triangle(10,9,u,#212121),$triangle(8,7,u,#f0f0f0))",
 				"k_table_check_on" => "k_framed_check_on",
 				"k_table_check_off" => "k_framed_check_off",
+				"k_list_mark_level1" => "$composite($circle(8,#c0c0c0),$circle(6,#434343))",
+				"k_list_mark_level2" => "$composite($triangle(8,8,r,#c0c0c0),$triangle(6,6,r,#434343))",
+				"k_list_mark_level3" => "$composite($rect(8,4,#c0c0c0),$rect(6,2,#434343))",
 			]
 		],
 
@@ -790,6 +793,17 @@
 					 headingStrong: [ true, true, true, true, true, true ],
 					 headingEm: [ true, false, false, false, false, false ],
 					 headingUnderline: [ false, true, true, false, false ],
+					 listIndent: 20,
+					 listMarkIcon: [ "k_list_mark_level1", "k_list_mark_level2", "k_list_mark_level3" ],
+					 listIconPadding: 0,
+					 orderedListMarkWidth: 8,
+					 orderedListMarkDigits: [
+						 [],
+						 [ "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z" ],
+						 [ "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x",
+						   "xi", "xii", "xiii", "xiv", "xv", "xvi", "xvii", "xviii", "xix", "xx",
+						   "xxi", "xxii", "xxiii", "xxiv", "xxv", "xxvi", "xxvii", "xxviii", "xxix", "xxx" ]
+					 ]
 				   ]
 		 ]
 ]

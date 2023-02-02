@@ -14,6 +14,7 @@ class KMarkdownRow
 	var requireLayout = true;
 	var hintedGlyphs = [];
 	var spacingScaleFactor = 1;
+	var indent = 0;
 
 	function KMarkdownRow(owner) {
 		this.owner = owner;
@@ -115,7 +116,7 @@ class KMarkdownRow
 		x = y = h = n = 0;
 		rowRanges = [];
 		var rowHeight = 0;
-		x = firstIndent;
+		x = indent + firstIndent;
 
 		// 全グリフについて走査、表示座標を決定
 		for (i = 0; i < glyphs.count; i++) {
@@ -128,13 +129,17 @@ class KMarkdownRow
 				// 改行
 				y += rowHeight + lineSpacing;
 				rowHeight = 0;
-				x = 0;
+				x = indent;
 				n = i;
 			}
 			// 文字の座標を記録
-			glyph.x = x;
+			if (typeof(glyph.indent) != K_UNDEFINED) {
+				glyph.x = glyph.indent;
+			} else {
+				glyph.x = x;
+				x += glyph.width;
+			}
 			glyph.y = y;
-			x += glyph.width;
 			rowHeight = Math.max(rowHeight, glyph.height);
 		}
 		// 末尾の改行位置の座標を記録
@@ -152,7 +157,12 @@ class KMarkdownRow
 			var height = rowRange[4];
 			for (var j = from; j < to; j++) {
 				var glyph = glyphs[j];
-				glyph.y = top + height - glyph.height;
+				var align = typeof(glyph.align) != K_UNDEFINED ? glyph.align : ALIGN_BOTTOM;
+				switch (align) {
+				case ALIGN_TOP:    glyph.y = top; break;
+				case ALIGN_CENTER: glyph.y = top + (height - glyph.height) / 2; break;
+				case ALIGN_BOTTOM: glyph.y = top + height - glyph.height; break;
+				}
 			}
 		}
 
@@ -176,7 +186,8 @@ class KMarkdownRow
 	function findSequence(from, to) {
 		var result = %[ from: from, to: from + 1];
 		var topGlyph = glyphs[from];
-		if (topGlyph.type != K_MARKDOWN_GLYPH_TYPE_CHAR)
+		if (topGlyph.type != K_MARKDOWN_GLYPH_TYPE_CHAR
+			|| typeof(topGlyph.indent) != K_UNDEFINED)
 			return result;
 		var i;
 		for (i = from + 1; i < to; i++) {
@@ -250,7 +261,12 @@ global.KMarkdownWidgetStyleDefinition =
 		[ "headingScaleFactor", "headingScaleFactor", [ 2 ] ],
 		[ "headingStrong", "headingStrong", [ true ] ],
 		[ "headingEm", "headingEm", [ false ] ],
-		[ "headingUnderline", "headingUnderline", [ true ] ]
+		[ "headingUnderline", "headingUnderline", [ true ] ],
+		[ "listMarkIcon", "listMarkIcon", [ "$circle(8,#000000)" ] ],
+		[ "listIndent", "listIndent", 16 ],
+		[ "listIconPadding", "listIconPadding", 4 ],
+		[ "orderedListMarkWidth", "orderedListMarkWidth", 24 ],
+		[ "orderedListMarkDigits", "orderedListMarkDigits", [ [] ] ]
 	];
 
 
@@ -273,6 +289,8 @@ class KMarkdown extends KVirtualWidget
 	var linefeedPat = /\r\n|\r|\n/;
 	var fullWhiteSpaceLinePat = /^\s*$/;
 	var whiteSpacePat = /\s/;
+	var listPat = /^(\s*)[-+*]\s(.+)$/;
+	var orderedListPat = /^(\s*)([0-9])(\\)?\.\s(.+)$/;
 	var materials = [];
 	var curMaterialIndex = -1;
 	var lineWrapping = false;
@@ -329,6 +347,9 @@ class KMarkdown extends KVirtualWidget
 		var row = new KMarkdownRow(this);
 		var lines = _text.split(linefeedPat);
 
+		var listIndentSpaceLevels = [];
+		var listOrderCounts = [];
+
 		while (lines.count > 0) {
 			var line = lines.shift();
 
@@ -345,12 +366,93 @@ class KMarkdown extends KVirtualWidget
 			var lst = LST_CHAR;
 			var state = %[];
 
+			// 順序無リスト
+			if (listPat.test(line)) {
+				var matches = listPat.matches;
+				var listIndentSpaceCount = matches[1].length;
+				line = matches[2];
+				var i;
+				for (i = 0; i < listIndentSpaceLevels.count; i++) {
+					if (listIndentSpaceCount <= listIndentSpaceLevels[i]) {
+						listIndentSpaceLevels[i] = listIndentSpaceCount;
+						listIndentSpaceLevels = sliceArray(listIndentSpaceLevels, 0, i + 1);
+						break;
+					}
+				}
+				if (i == listIndentSpaceLevels.count)
+					listIndentSpaceLevels.add(listIndentSpaceCount);
+				var indent = widgetStyle.listIndent * (i + 1);
+				var listMarkIcon = widgetStyle.listMarkIcon[i % widgetStyle.listMarkIcon.count];
+				var iconImage = findIcon(listMarkIcon);
+
+				if (! row.empty) {
+					rows.add(row);
+					row = new KMarkdownRow(this);
+				}
+
+				row.indent = indent;
+				row.add(%[ type: K_MARKDOWN_GLYPH_TYPE_IMAGE,
+						   image: listMarkIcon,
+						   hint: "",
+						   padding: widgetStyle.listIconPadding,
+						   width: iconImage.width + widgetStyle.listIconPadding * 2,
+						   height: iconImage.height,
+						   indent: indent - (iconImage.width + widgetStyle.listIconPadding * 2),
+						   align: ALIGN_CENTER,
+						 ]);
+			} 
+			// 順序ありリスト
+			else if (orderedListPat.test(line)) {
+				var matches = orderedListPat.matches;
+				var listIndentSpaceCount = matches[1].length;
+				var digits = matches[2];
+				var digitEscape = matches[3];
+				line = matches[4];
+				var i;
+				for (i = 0; i < listIndentSpaceLevels.count; i++) {
+					if (listIndentSpaceCount <= listIndentSpaceLevels[i]) {
+						listIndentSpaceLevels[i] = listIndentSpaceCount;
+						listIndentSpaceLevels = sliceArray(listIndentSpaceLevels, 0, i + 1);
+						listOrderCounts = sliceArray(listOrderCounts, 0, i + 1);
+						break;
+					}
+				}
+				if (i == listIndentSpaceLevels.count) {
+					listIndentSpaceLevels.add(listIndentSpaceCount);
+					listOrderCounts.add(0);
+				}
+				var indent = widgetStyle.listIndent * (i + 1);
+				var listOrderCount = digitEscape.length ? +digits : listOrderCounts[i] + 1;
+				listOrderCounts[i] = listOrderCount;
+				var digit = widgetStyle.orderedListMarkDigits[i % widgetStyle.orderedListMarkDigits.count][listOrderCount - 1];
+				if (digit === void)
+					digit = string(listOrderCount);
+				var mark = digit + ".";
+
+				if (! row.empty) {
+					rows.add(row);
+					row = new KMarkdownRow(this);
+				}
+
+				row.indent = indent;
+				row.add(%[ type: K_MARKDOWN_GLYPH_TYPE_CHAR,
+						   mi: mi,
+						   char: mark,
+						   indent: indent - (widgetStyle.orderedListMarkWidth),
+						 ]);
+			} else {
+				listIndentSpaceLevels.clear();
+				listOrderCounts.clear();
+			}
+
 			for (var i = 0; i < line.length; i++) {
 				var char = line[i];
 
 				switch (lst) {
 				case LST_CHAR: {
-					if (whiteSpacePat.test(char)) ;
+					if (whiteSpacePat.test(char)) 
+						continue;
+
 					else if (char == "!") { lst = LST_IMAGE1; }
 					else if (char == "\\") { lst = LST_ESCAPE; }
 					else if (char == "*") { lst = LST_EMSTR1; }
@@ -385,7 +487,8 @@ class KMarkdown extends KVirtualWidget
 								   hint: state.imageAlt,
 								   padding: widgetStyle.imagePadding,
 								   width: icon.width + widgetStyle.imagePadding * 2,
-								   height: icon.height ]);
+								   height: icon.height,
+								 ]);
 					} else {
 						state.imageName += char;
 					}

@@ -73,7 +73,7 @@ class TestBed extends KWindow
 				.button1.overwriteStyle(%[ callback: "onIdle", hover: %[ callback: "onHover" ] ]);
 				.button1.onHover = function() { global.Debug.message("onHover"); };
 				.button1.onIdle = function() { global.Debug.message("onIdle"); };
-			
+
 				.add("チェックボックス", new KFrameLayout(this, %[ name: "checkFrame", id: "group_frame", label: "チェックボックスフレーム" ]));
 				.checkFrame.add(new KGridLayout(this, %[ name: "checkGrid", id: "widget_grid" ]));
 				.checkGrid.add(0, 0, new KCheckBox(this, %[ name: "check1",
@@ -97,6 +97,22 @@ class TestBed extends KWindow
 マークダウンを表示してみるよ。
 改行を一行入れただけでは**段落**は変更されないよ。
 __段落__を*まとめて*改行が_適切_に入るかどうかを確認してみるよ。
+
+- リスト要素1
+  - リストインデント
+  - さらにインデントをして長めの文章をおいて折り返しをしてみるんですね。どうなんだこれは。
+    - 孫インデント
+- リスト要素2
+- リスト要素3
+
+1. 順序リスト
+1. 順序リストの2ほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげほげ
+  1. 順序の入れ子
+  1. 順序の入れ子
+    1. 順序の入れ子
+    1. 順序の入れ子
+  1. 順序の入れ子
+1. 順序リストの3
 
 ## 見出しの2
 
