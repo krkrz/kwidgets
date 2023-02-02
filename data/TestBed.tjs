@@ -92,9 +92,13 @@ class TestBed extends KWindow
 				.add("マークダウン", new KFrameLayout(this, %[ name: "markdownFrame", id: "group_frame", label: "マークダウンフレーム"]));
 				.markdownFrame.add(new KScrollLayout(this, %[ name: "markdownScroll", horizontal: false, vertical: true ]));
 				.markdownScroll.add(new KMarkdown(this, %[ name: "markdown", text: "
+# 見出し！
+
 マークダウンを表示してみるよ。
 改行を一行入れただけでは**段落**は変更されないよ。
 __段落__を*まとめて*改行が_適切_に入るかどうかを確認してみるよ。
+
+## 見出しの2
 
 空行を入れてやると段落が~~しっかり~~分かれてくれるよ。
 

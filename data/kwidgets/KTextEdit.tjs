@@ -71,9 +71,9 @@ class KTextEditRow
 	/*------------------------------
 	 * 縦スペース
 	 ------------------------------*/
-	property spaceVertical {
+	property lineSpacing {
 		getter {
-			return owner.spaceVertical;
+			return owner.widgetStyle.lineSpacing;
 		}
 	}
 
@@ -82,7 +82,7 @@ class KTextEditRow
 	 ------------------------------*/
 	property rowHeight {
 		getter {
-			return font.height + spaceVertical;
+			return font.height + lineSpacing;
 		}
 	}
 
@@ -445,7 +445,8 @@ global.KTextEditArgsFormat =
 global.KTextEditWidgetStyleDefinition =
 	[
 		[ "selectionBackgroundColor", "selectionBackgroundColor", WIN_SELECTED, "resolveColor" ],
-		[ "selectionFontColor", "selectionFontColor", 0xffffff, "resolveColor" ]
+		[ "selectionFontColor", "selectionFontColor", 0xffffff, "resolveColor" ],
+		[ "lineSpacing", "lineSpacing", 4 ]
 	];
 
 class KTextEdit extends KVirtualWidget
@@ -710,7 +711,7 @@ class KTextEdit extends KVirtualWidget
 	 */
 	property rowHeight {
 		getter {
-			return font.height + spaceVertical;
+			return font.height + widgetStyle.lineSpacing;
 		}
 	}
 

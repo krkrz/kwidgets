@@ -40,7 +40,8 @@ class KCustomUIGenerator
 				%[ type: UI_TYPE_TEXTLABEL,    func: generateTextLabel ],
 				%[ type: UI_TYPE_TEXTAREA,     func: generateTextArea ],
 				%[ type: UI_TYPE_TABLE,        func: generateTable ],
-				%[ type: UI_TYPE_DROPDOWNLIST, func: generateDropdownList ]
+				%[ type: UI_TYPE_DROPDOWNLIST, func: generateDropdownList ],
+				%[ type: UI_TYPE_SEPARATOR,    func: generateSeparator ]
 		];
 		for (var i = 0; i < defs.count; i++) {
 			var def = defs[i];
@@ -87,6 +88,11 @@ class KCustomUIGenerator
 		}
 		var widget = new KTextInput(grid.window, %[ width: 150, type: textType, name: uiName, hint: hint, status: status, value: value  ]);
 		return %[ widget: widget, label: label, insertionY: ++insertionY ];
+	}
+
+	function generateSeparator(grid, insertionY, uiName, def) {
+		var separator = new KVerticalSeparator(grid.window);
+		return %[ label: separator ];
 	}
 
 	function generateTextLabel(grid, insertionY, uiName, def) {

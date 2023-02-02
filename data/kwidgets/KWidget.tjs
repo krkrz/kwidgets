@@ -329,7 +329,7 @@ class KWidget extends Layer
 		// ミドルボタンドラッグ
 		_middleButtonDrag = getOption("middleButtonDrag", false);
 		// 可視
-		visible = true;
+		visible = getOption("visible", true);
 		// ドラッグ初期化
 		isDragging = isReadyToDrag = false;
 		curDragTargetAcceptPacket = false;
