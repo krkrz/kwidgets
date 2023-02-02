@@ -12,7 +12,7 @@ class TestBed extends KWindow
 						 theme: "dialog",
 					   ]);
 
-		var testTab = new KTabLayout(this, %[ name: "testTab" ]);
+		var testTab = new KTabLayout(this, %[ name: "testTab", tabWrapping: true ]);
 //		Debug.message("before attach to window");
 //		primaryWidget.add(testTab);
 //		Debug.message("after attach to window");
@@ -88,6 +88,27 @@ class TestBed extends KWindow
 				.add("スライダー", new KFrameLayout(this, %[ name: "sliderFrame", id: "group_frame", label: "スライダーフレーム" ]));
 				.sliderFrame.add(new KGridLayout(this, %[ name: "sliderGrid", id: "widget_grid" ]));
 				.sliderGrid.add(0, 0, new KTextInputSlider(this, %[ width: 200, left: 0, right: 1000, stride: 1, name: "slider", leftIcon: "k_scroll_left", rightIcon: "k_scroll_right", leftIconHint: "left icon", rightIconHint: "right icon", hint: "hoge", style: %[ isVariableWidth: true ]  ]));
+
+				.add("マークダウン", new KFrameLayout(this, %[ name: "markdownFrame", id: "group_frame", label: "マークダウンフレーム"]));
+				.markdownFrame.add(new KScrollLayout(this, %[ name: "markdownScroll", horizontal: false, vertical: true ]));
+				.markdownScroll.add(new KMarkdown(this, %[ name: "markdown", text: "
+マークダウンを表示してみるよ。
+改行を一行入れただけでは**段落**は変更されないよ。
+__段落__を*まとめて*改行が_適切_に入るかどうかを確認してみるよ。
+
+空行を入れてやると段落が~~しっかり~~分かれてくれるよ。
+
+こんな感じでどうだろうか？
+
+!(gotta_mail) 画像を埋め込んでみるよ。
+" ]));
+
+				.add("グリッドテスト", new KFrameLayout(this, %[ name: "gridTestFrame", theme: "debug_frame", id: "group_frame", label: "グリッドテスト" ]));
+				.gridTestFrame.add(new KGridLayout(this, %[ name: "gridTest", id: "widget_grid", ignoreHiddenChild: true, style: %[ space: 20 ] ]));
+				.gridTest.add(0, 0, new KCheckBox(this, %[ name: "gridTestCheck", label: "ボタン1の表示" ]));
+				.gridTest.add(1, 1, new KTextButton(this, %[ name: "gridTestButton1", label: "ボタン1" ]));
+				.gridTest.add(2, 2, new KTextButton(this, %[ name: "gridTestButton2", label: "ボタン2" ]));
+				.gridTest.add(2, 3, new KTextButton(this, %[ name: "gridTestButton2", label: "ボタン3" ]));
 		}
 
 		Debug.message("before attach to window");
@@ -97,6 +118,8 @@ class TestBed extends KWindow
 		var dict = new KPersistentDictionary(System.dataPath + "testbed_dict.txt");
 		add(dict);
 		bindPersistentDictionary(dict);
+
+		gridTestCheck.dispatch();
 	}
 
 	function onChildValueModified(child, value) {
@@ -104,6 +127,11 @@ class TestBed extends KWindow
 		default: {
 			// 更新のあったウィジェットの名前と値を表示。
 			Debug.message("child value modified", child.name, typeof(value), value);
+			break;
+		}
+		case "gridTestCheck": {
+			gridTestButton1.visible = value;
+			gridTest.redrawContents();
 			break;
 		}
 		}

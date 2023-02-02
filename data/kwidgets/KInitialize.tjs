@@ -62,6 +62,7 @@ Scripts.execStorage("KTable.tjs");
 Scripts.execStorage("KTextBoard.tjs");
 Scripts.execStorage("KSizeLimitLayout.tjs");
 Scripts.execStorage("KStringFormat.tjs");
+Scripts.execStorage("KMarkdown.tjs");
 
 // デフォルトスタイルをロードする
 styleRepository.loadStylesStorage("KDefaultStyle.tjs");

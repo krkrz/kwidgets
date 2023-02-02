@@ -414,6 +414,7 @@
 		%[
 			klass: "KTextEdit",
 			style: %[
+				padding: 4,
 				backgroundColor: "textedit_bg",
 				selectionBackgroundColor: "textedit_bg_selection",
 				selectionFontColor: "textedit_font_selection",
@@ -424,6 +425,7 @@
 		%[
 			id: "textinput_textedit",
 			style: %[
+				padding: 0,
 			]
 		],
 
@@ -775,6 +777,15 @@
 					 borderColor: 0xffacacac,
 					 borderWidth: 1,
 					 padding: 1,
+				   ]
+		 ],
+
+		%[ klass: "KMarkdown",
+		   style: %[ lineSpacing: 4,
+					 spaceVertical: 10,
+					 padding: 4,
+					 firstIndent: 6,
+					 imagePadding: 2,
 				   ]
 		 ]
 ]

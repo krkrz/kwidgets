@@ -208,6 +208,7 @@ class KTabLayout extends KLayout
 	 * @param child 子ウィジェット
 	 ------------------------------*/
 	function add(tabName, child) {
+		child.visible = false;
 		child.tabName = tabName;
 		child.parent = this;
 		childList.add(child);
@@ -227,6 +228,7 @@ class KTabLayout extends KLayout
 	function insert(index, tabName, child) {
 		if (_tabIndex >= index)
 			_tabIndex++;
+		child.visible = false;
 		child.tabName = tabName;
 		child.parent = this;
 		childList.insert(index, child);

@@ -26,6 +26,7 @@ class KGridLayout extends KLayout
 	var widthForColumn;
 	var heightForRow;
 	var logicalMaxWidth, logicalMaxHeight;
+	var ignoreHiddenChild = true;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -41,6 +42,7 @@ class KGridLayout extends KLayout
 		xcount = ycount = 0;
 		items = %[];
 		revItems = %[];
+		ignoreHiddenChild = getOption("ignoreHiddenChild", true);
 	}
 
 	property widgetStyleDefinition {
@@ -125,6 +127,17 @@ class KGridLayout extends KLayout
 	}
 
 	/*------------------------------
+	 * アクティブなスペースをカウントする
+	 ------------------------------*/
+	function isActiveSpaceHorizontal(x) {
+		return x < xcount - 1 && maxWidthForColumn[x] != 0;
+	}
+
+	function isActiveSpaceVertical(y) {
+		return y < ycount - 1 && maxHeightForRow[y] != 0;
+	}
+
+	/*------------------------------
 	 * レイアウトを計算する
 	 ------------------------------*/
 	function onCalculateLayout {
@@ -160,7 +173,8 @@ class KGridLayout extends KLayout
 		for (var x = 0; x < xcount; x++)
 			for (var y = 0; y < ycount; y++) {
 				var child = childAt(x, y);
-				if (child === void)
+				if (child === void
+					|| ! child.visible)
 					continue;
 				var revItem, colspan, rowspan;
 				revItem = revItems[child], colspan = revItem[2], rowspan = revItem[3];
@@ -193,15 +207,25 @@ class KGridLayout extends KLayout
 		// グリッド全体の最大・最小サイズを決定する
 		var minW, minH, maxW, maxH;
 
+		var sumSpaceHorizontal = 0, sumSpaceVertical = 0;
+
+		if (ignoreHiddenChild) {
+			for (var i = 0; i < xcount; i++) if (isActiveSpaceHorizontal(i)) sumSpaceHorizontal += spaceHorizontal;
+			for (var i = 0; i < ycount; i++) if (isActiveSpaceVertical(i))   sumSpaceVertical += spaceVertical;
+		} else {
+			sumSpaceHorizontal = (xcount - 1) * spaceHorizontal;
+			sumSpaceVertical = (ycount - 1) * spaceVertical;
+		}
+
 		var wofst = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingLeft + layoutStyle.paddingRight : borderPaddingWidth;
-		minW = maxW = spaceHorizontal * (xcount - 1) + wofst;
+		minW = maxW = sumSpaceHorizontal + wofst;
 		for (var x = 0; x < xcount; x++) {
 			minW += minWidthForColumn[x];
 			maxW += maxWidthForColumn[x];
 		}
 
 		var hofst = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingTop + layoutStyle.paddingBottom : borderPaddingHeight;
-		minH = maxH = spaceVertical * (ycount - 1) + hofst;
+		minH = maxH = sumSpaceVertical + hofst;
 		for (var y = 0; y < ycount; y++) {
 			minH += minHeightForRow[y];
 			maxH += maxHeightForRow[y];
@@ -274,7 +298,8 @@ class KGridLayout extends KLayout
 			ypos = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingTop : borderPaddingTop;
 			for (var y = 0; y < ycount; y++) {
 				var child = childAt(x, y);
-				if (child) {
+				if (child !== void
+					&& child.visible) {
 					var revItem, colspan, rowspan;
 					revItem = revItems[child], colspan = revItem[2], rowspan = revItem[3];
 					var w, h;
@@ -289,9 +314,9 @@ class KGridLayout extends KLayout
 					else
 						embedChildWithoutBorderPadding(xpos, ypos, w, h, child);
 				}
-				ypos += heightForRow[y] + spaceVertical;
+				ypos += heightForRow[y] + ((! ignoreHiddenChild || isActiveSpaceVertical(y)) ? spaceVertical : 0);
 			}
-			xpos += widthForColumn[x] + spaceHorizontal;
+			xpos += widthForColumn[x] + ((! ignoreHiddenChild || isActiveSpaceHorizontal(x)) ? spaceHorizontal : 0);
 		}
 	}
 };

@@ -513,11 +513,12 @@ class KTextEdit extends KVirtualWidget
 	 ------------------------------*/
 	function KTextEdit(window, *) {
 		var options = parseOldStyleWidgetArgs(KTextEditArgsFormat, *);
-		options = duplicateStruct(options);
-		options.middleButtonDrag = true;
-		options.marginalMaxWidth = K_WIDGET_MAX_POSSIBLE_WIDTH;
-		options.marginalMaxHeight = K_WIDGET_MAX_POSSIBLE_WIDTH;
-		super.KVirtualWidget(window, options);
+		var newOptions = %[ middleButtonDrag: true,
+							marginalMinWidth: 50,
+							marginalMaxWidth: K_WIDGET_MAX_POSSIBLE_WIDTH,
+							marginalMaxHeight: K_WIDGET_MAX_POSSIBLE_WIDTH ];
+		(Dictionary.assign incontextof newOptions)(options, false);
+		super.KVirtualWidget(window, newOptions);
 
 		// ウィンドウ初期化
 		focusable = getOption("focusable", true);
@@ -1621,18 +1622,21 @@ class KTextEdit extends KVirtualWidget
 
 	// レイアウトを行う
 	function locateLayout {
+		var innerWidth = width - borderPaddingWidth;
 		if (lineWrapping) {
 			// 全ての行を、横幅に合わせてレイアウトする
 			var w = 0;
-			var y = 0;
+			var y = borderPaddingTop;
 			for (var i = 0; i < rowList.count; i++) {
 				var rowLayer = rowList[i];
-				rowLayer.setPos(0, y);
+				rowLayer.setPos(borderPaddingLeft, y);
 				rowLayer.layout(width);
 				y += rowLayer.height;
 				w = Math.max(w, rowLayer.minWidth);
 			}
 			// 最小サイズを決定する
+			w += borderPaddingWidth;
+			y += borderPaddingHeight;
 			setMinMaxSize(w, y, w, y);
 			// ポインタを現在位置に再表示
 			setPointer(pointer.row, pointer.col);
@@ -1642,14 +1646,16 @@ class KTextEdit extends KVirtualWidget
 			for (var i = 0; i < rowList.count; i++) {
 				w = Math.max(rowList[i].textWidth, w);
 			}
-			var y = 0;
+			var y = borderPaddingTop;
 			for (var i = 0; i < rowList.count; i++) {
 				var rowLayer = rowList[i];
-				rowLayer.setPos(0, y);
+				rowLayer.setPos(borderPaddingLeft, y);
 				rowLayer.layout(w);
 				y += rowLayer.height;
 			}
 			// 最小サイズを決定する
+			w += borderPaddingWidth;
+			y += borderPaddingHeight;
 			setMinMaxSize(w, y, w, y);
 			// ポインタを現在位置に再表示
 			setPointer(pointer.row, pointer.col);
@@ -1660,7 +1666,7 @@ class KTextEdit extends KVirtualWidget
 
 	// Y座標に対応する行レイヤのインデックスを取得する
 	function findRowIndex(y) {
-		if (y < 0)
+		if (y < borderPaddingTop)
 			return 0;
 		if (y >= rowList[rowList.count - 1].top)
 			return rowList.count - 1;
