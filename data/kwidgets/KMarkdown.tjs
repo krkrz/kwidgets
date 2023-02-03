@@ -15,6 +15,7 @@ class KMarkdownRow
 	var hintedGlyphs = [];
 	var spacingScaleFactor = 1;
 	var indent = 0;
+	var frozen = false;
 
 	function KMarkdownRow(owner) {
 		this.owner = owner;
@@ -66,6 +67,11 @@ class KMarkdownRow
 				glyph.width = owner.getTextWidth(glyph.mi, glyph.char);
 				glyph.height = owner.getTextHeight(glyph.mi);
 				break;
+
+			case K_MARKDOWN_GLYPH_TYPE_SPACE:
+				glyph.width = owner.spaceWidth;
+				glyph.height = 0;
+				break;
 			}
 		}
 		calcSize();
@@ -106,6 +112,101 @@ class KMarkdownRow
 			&& owner.widgetStyle.jpBOLRule.indexOf(glyph.char) >= 0;
 	}
 
+	function isLatinGlyph(glyph) {
+		return glyph.type == K_MARKDOWN_GLYPH_TYPE_IMAGE
+			|| (glyph.type == K_MARKDOWN_GLYPH_TYPE_CHAR && owner.latinPat.test(glyph.char));
+	}
+
+	function markWordLang(wordBegin, wordEnd) {
+		for (var i = wordBegin; i < wordEnd; i++)
+			if (! isLatinGlyph(glyphs[i]))
+				return;
+		for (var i = wordBegin; i < wordEnd; i++)
+			glyphs[i].l = true;
+	}
+
+	function isLatinWord(glyph) {
+		return typeof(glyph.l) != K_UNDEFINED;
+	}
+
+	function isSpaceGlyph(glyph) {
+		return glyph.type == K_MARKDOWN_GLYPH_TYPE_SPACE;
+	}
+
+	function getWordRagne(glyphIndex) {
+		var begin, end;
+		for (begin = glyphIndex; begin > 0; begin--) 
+			if (glyphs[begin - 1].type == K_MARKDOWN_GLYPH_TYPE_SPACE)
+				break;
+
+		for (end = glyphIndex + 1; end < glyphs.count; end++) 
+			if (glyphs[end].type == K_MARKDOWN_GLYPH_TYPE_SPACE)
+				break;
+
+		return [ begin, end ];
+	}
+
+	function countSpaceInRange(begin, end) {
+		var count = 0;
+		for (var i = begin; i < end; i++)
+			if (glyphs[i].type == K_MARKDOWN_GLYPH_TYPE_SPACE)
+				count++;
+		return count;
+	}
+
+	function freeze() {
+		if (frozen)
+			return;
+		frozen = true;
+
+		// 行頭の空白を削除
+		while (glyphs.count > 0
+			   && glyphs[0].type == K_MARKDOWN_GLYPH_TYPE_SPACE)
+			glyphs.erase(0);
+		// 行末の空白を削除
+		while (glyphs.count > 0
+			   && glyphs[glyphs.count - 1].type == K_MARKDOWN_GLYPH_TYPE_SPACE)
+			glyphs.erase(glyphs.count - 1);
+
+		// 連続する空白を削除
+		for (var i = 1; i < glyphs.count - 1; i++) {
+			if (glyphs[i].type == K_MARKDOWN_GLYPH_TYPE_SPACE
+				&& glyphs[i + 1].type == K_MARKDOWN_GLYPH_TYPE_SPACE) {
+				glyphs.erase(i + 1);
+				i--;
+			}
+		}
+
+		// 空白で区切られた範囲を単語とみなし、ラテン語族かどうか判定する
+		var wordBegin = void;
+
+		var i;
+		for (i = 0; i < glyphs.count; i++) {
+			var glyph = glyphs[i];
+			if (typeof(glyph.indent) != K_UNDEFINED)
+				continue;
+			if (wordBegin === void) {
+				wordBegin = i;
+			} else if (glyph.type == K_MARKDOWN_GLYPH_TYPE_SPACE) {
+				markWordLang(wordBegin, i);
+				wordBegin = void;
+			}
+		}
+		if (wordBegin !== void)
+			markWordLang(wordBegin, i);
+
+		// 前後にラテン語がない空白を削除する
+		for (var i = 0; i < glyphs.count; i++) {
+			if (glyphs[i].type != K_MARKDOWN_GLYPH_TYPE_SPACE)
+				continue;
+			if (! isLatinWord(glyphs[i - 1])
+				&& ! isLatinWord(glyphs[i + 1])) {
+				glyphs.erase(i);
+				i--;
+			}
+		}
+	}
+
 	// レイアウトのやり直し
 	function layout(w) {
 		// レイアウトの必要が無く、横幅が変化してないなら、そのまま終了
@@ -122,7 +223,7 @@ class KMarkdownRow
 		}
 		requireLayout = false;
 
-		var x, y, h, n, i;
+		var x, y, h, n, i, spaceCount = 0;
 		x = y = h = n = 0;
 		rowRanges = [];
 		var rowHeight = 0;
@@ -132,39 +233,76 @@ class KMarkdownRow
 		for (i = 0; i < glyphs.count; i++) {
 			var glyph = glyphs[i];
 			clearGlyph(glyph);
-			// 横幅をオーバーしてたら改行
-			if (x + glyph.width > w) {
-				// 行末禁足文字の追い出し
-				for (var j = 0; j < owner.widgetStyle.jpEOLLimit; j++) {
-					if (i - 1 <= n + 1)
-						break;
-					glyph = glyphs[i - 1];
-					if (isJpEOLGlyph(glyph)) {
-						x -= glyph.width;
-						i--;
-					}
+
+			// 横幅をオーバーしてたら改行(行頭最初の1文字は改行処理をしない)
+			if (n != i
+				&& x + glyph.width > w) {
+				var rowEnd;
+
+				// 行末が空白なら単にその空白を無視
+				if (isSpaceGlyph(glyphs[i - 1])) {
+					x = glyphs[i - 1].x;
+					rowEnd = i - 1;
 				}
-				// 行頭禁足文字の追い込み
-				for (var j = 0; j < owner.widgetStyle.jpBOLLimit; j++) {
-					if (i >= glyphs.count)
-						break;
-					var glyph = glyphs[i];
-					clearGlyph(glyph);
-					if (isJpBOLGlyph(glyph)) {
-						glyph.x = x;
-						glyph.y = y;
-						x += glyph.width;
-						rowHeight = Math.max(rowHeight, glyph.height);
-						i++;
+				// ラテン語なら英語禁足規則で処理
+				else if (isLatinWord(glyphs[i - 1])) {
+					var range = getWordRagne(i - 1);
+					// 一単語目が表示し切れてないなら追い込み
+					if (spaceCount == 0) {
+						if (i < range[1]) {
+							for (; i < range[1]; i++) {
+								glyph = glyphs[i];
+								clearGlyph(glyph);
+								glyph.x = x;
+								x += glyph.width;
+							}
+						}
 					}
+					// 二単語目以降の末尾単語が表示し切れてないなら追い出し
+					else {
+						if (range[1] != i) {
+							x = glyphs[range[0] - 1].x;
+							i = range[0];
+						}
+					}
+					rowEnd = i;
+				}
+				// 非ラテン語なら日本語禁足規則で処理
+				else {
+					// 行末禁足文字の追い出し
+					for (var j = 0; j < owner.widgetStyle.jpEOLLimit; j++) {
+						if (i - 1 <= n + 1)
+							break;
+						glyph = glyphs[i - 1];
+						if (isJpEOLGlyph(glyph)) {
+							x -= glyph.width;
+							i--;
+						}
+					}
+					// 行頭禁足文字の追い込み
+					for (var j = 0; j < owner.widgetStyle.jpBOLLimit; j++) {
+						if (i >= glyphs.count)
+							break;
+						var glyph = glyphs[i];
+						clearGlyph(glyph);
+						if (isJpBOLGlyph(glyph)) {
+							glyph.x = x;
+							glyph.y = y;
+							x += glyph.width;
+							rowHeight = Math.max(rowHeight, glyph.height);
+							i++;
+						}
+					}
+					rowEnd = i;
 				}
 				// 行情報を記録
-				rowRanges.add([ n, i, x, y, rowHeight ]);
+				rowRanges.add([ n, rowEnd, x, y, rowHeight, spaceCount ]);
 				// 改行
 				y += rowHeight + lineSpacing;
 				rowHeight = 0;
 				x = indent;
 				n = i;
+				spaceCount = 0;
 
 				if (i >= glyphs.count)
 					break;
@@ -172,6 +310,16 @@ class KMarkdownRow
 				glyph = glyphs[i];
 				clearGlyph(glyph);
 			}
+
+			// 行頭が空白ならスキップ
+			if (isSpaceGlyph(glyph)) {
+				if (n == i) {
+					n = i + 1;
+					continue;
+				} else
+					spaceCount++;
+			}
+
 			// 文字の座標を記録
 			if (typeof(glyph.indent) != K_UNDEFINED) {
 				glyph.x = glyph.indent;
@@ -181,6 +329,7 @@ class KMarkdownRow
 			}
 			glyph.y = y;
 			rowHeight = Math.max(rowHeight, glyph.height);
+
 		}
 		// 末尾の改行位置の座標を記録
 		lastX = x;
@@ -203,6 +352,25 @@ class KMarkdownRow
 				case ALIGN_CENTER: glyph.y = top + (height - glyph.height) / 2; break;
 				case ALIGN_BOTTOM: glyph.y = top + height - glyph.height; break;
 				}
+			}
+		}
+
+		// 中途行について空白を広げて補正
+		for (var i = 0; i < rowRanges.count - 1; i++) {
+			var rowRange = rowRanges[i];
+			if (rowRange[2] == w)
+				continue;
+			var spaceCount = rowRange[5];
+			if (spaceCount == 0)
+				continue;
+			var diff = 0;
+			var count = 0;
+			var wide = Math.min((w - rowRange[2]), spaceCount * (owner.wordSpaceLimitWidth - owner.spaceWidth));
+			for (var j = rowRange[0]; j < rowRange[1]; j++) {
+				if (isSpaceGlyph(glyphs[j])) 
+					diff = int(++count * wide / spaceCount);
+				else
+					glyphs[j].x += diff;
 			}
 		}
 
@@ -308,9 +476,11 @@ global.KMarkdownWidgetStyleDefinition =
 		[ "orderedListMarkWidth", "orderedListMarkWidth", 24 ],
 		[ "orderedListMarkDigits", "orderedListMarkDigits", [ [] ] ],
 		[ "jpBOLRule", "jpBOLRule", "" ],
-		[ "jpBOLLimit", "jpBOLLimit", 1 ],
+		[ "jpBOLLimit", "jpBOLLimit", 0 ],
 		[ "jpEOLRule", "jpEOLRule", "" ],
-		[ "jpEOLLimit", "jpEOLLimit", 1 ]
+		[ "jpEOLLimit", "jpEOLLimit", 0 ],
+		[ "spaceScaleFactor", "spaceScaleFactor", 0.5 ],
+		[ "wordSpaceLimitScaleFactor", "wordSpaceLimitScaleFactor", 1 ]
 	];
 
 
@@ -340,6 +510,9 @@ class KMarkdown extends KVirtualWidget
 	var lineWrapping = false;
 	var parseRequired = true;
 	var customFontStyle;
+	var spaceWidth = 0;
+	var wordSpaceLimitWidth = 0;
+	var latinPat;
 
 	function KMarkdown(window, options) {
 		var newOptions = %[ middleButtonDrag: true,
@@ -350,6 +523,10 @@ class KMarkdown extends KVirtualWidget
 		super.KVirtualWidget(window, newOptions);
 		_text = getOption("text", "");
 		lineWrapping = getOption("lineWrapping", true);
+		if (k_kirikiriz)
+			latinPat =  /[\x20\x00-\x7f\x00]/;
+		else
+			latinPat =  /[\x20-\x7f]/;
 		parseRequired = true;
 	}
 
@@ -381,6 +558,11 @@ class KMarkdown extends KVirtualWidget
 		return materials.count - 1;
 	}
 
+	function addRow(row) {
+		row.freeze();
+		rows.add(row);
+	}
+
 	function parseText() {
 		if (! parseRequired)
 			return;
@@ -399,7 +581,7 @@ class KMarkdown extends KVirtualWidget
 
 			if (line == "" || fullWhiteSpaceLinePat.test(line)) {
 				if (! row.empty) {
-					rows.add(row);
+					addRow(row);
 					row = new KMarkdownRow(this);
 				}
 			}
@@ -430,7 +612,7 @@ class KMarkdown extends KVirtualWidget
 				var iconImage = findIcon(listMarkIcon);
 
 				if (! row.empty) {
-					rows.add(row);
+					addRow(row);
 					row = new KMarkdownRow(this);
 				}
 
@@ -444,7 +626,7 @@ class KMarkdown extends KVirtualWidget
 						   indent: indent - (iconImage.width + widgetStyle.listIconPadding * 2),
 						   align: ALIGN_CENTER,
 						 ]);
-			} 
+			}
 			// 順序ありリスト
 			else if (orderedListPat.test(line)) {
 				var matches = orderedListPat.matches;
@@ -474,7 +656,7 @@ class KMarkdown extends KVirtualWidget
 				var mark = digit + ".";
 
 				if (! row.empty) {
-					rows.add(row);
+					addRow(row);
 					row = new KMarkdownRow(this);
 				}
 
@@ -489,13 +671,18 @@ class KMarkdown extends KVirtualWidget
 				listOrderCounts.clear();
 			}
 
+			// 余分な空白を削除
+			line = line.trim();
+
 			for (var i = 0; i < line.length; i++) {
 				var char = line[i];
 
 				switch (lst) {
 				case LST_CHAR: {
-					if (whiteSpacePat.test(char)) 
+					if (whiteSpacePat.test(char)) {
+						row.add(%[ type: K_MARKDOWN_GLYPH_TYPE_SPACE ]);
 						continue;
+					}
 
 					else if (char == "!") { lst = LST_IMAGE1; }
 					else if (char == "\\") { lst = LST_ESCAPE; }
@@ -576,7 +763,7 @@ class KMarkdown extends KVirtualWidget
 					if (char == "#") {
 						state.headingLength++;
 					} else {
-						rows.add(row);
+						addRow(row);
 						row = new KMarkdownRow(this);
 						lst = LST_CHAR;
 						var headingLength = Math.min(state.headingLength, widgetStyle.headingScaleFactor.count);
@@ -593,15 +780,21 @@ class KMarkdown extends KVirtualWidget
 				}
 				}
 			}
+			// 改行位置にダミーの空白を入れる。
+			if (! row.empty)
+				row.add(%[ type: K_MARKDOWN_GLYPH_TYPE_SPACE ]);
 		}
 
 		if (! row.empty)
-			rows.add(row);
+			addRow(row);
 		else
 			invalidate row;
 	}
 
 	function updateFontSize() {
+		spaceWidth = fontStyle.fontHeight * widgetStyle.spaceScaleFactor;
+		wordSpaceLimitWidth = fontStyle.fontHeight * widgetStyle.wordSpaceLimitScaleFactor;
+
 		curMaterialIndex = -1;
 		for (var i = 0; i < materials.count; i++) {
 			var material = materials[i];
