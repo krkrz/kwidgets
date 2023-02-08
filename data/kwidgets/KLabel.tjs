@@ -31,6 +31,8 @@ class KLabel extends KEntity
 
 		super.KEntity(win, opts);
 
+		hitThreshold = 0;
+
 		// 値の初期値
 		_label = getInitialLabel();
 	}

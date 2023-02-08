@@ -32,8 +32,13 @@ class KCustomUIGenerator
 			return defaultValue;
 	}
 
+	function hasLabel(def) {
+		return typeof(def.label) != K_UNDEFINED;
+	}
+
 	function initDefaultGenerators() {
 		var defs = global.K_CUSTOM_UI_DEFAULT_GENERATOR = [
+				%[ type: UI_TYPE_TEXTBUTTON,   func: generateTextButton ],
 				%[ type: UI_TYPE_CHECKBOX,     func: generateCheckBox ],
 				%[ type: UI_TYPE_SLIDER,       func: generateSlider ],
 				%[ type: UI_TYPE_TEXTINPUT,    func: generateTextInput ],
@@ -53,30 +58,37 @@ class KCustomUIGenerator
 		generatorMap[type] = func incontextof this;
 	}
 
+	function generateTextButton(grid, insertionY, uiName, def) {
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		var button = new KTextButton(grid.window, %[ name: uiName, label: getValue(def, "label", ""), hint: hint, status: status, value: getValue(def, "value", false), style: %[ textAlign: ALIGN_CENTER ]  ]);
+		return %[ label: button ];
+	}
+
 	function generateCheckBox(grid, insertionY, uiName, def) {
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
 		var widget = new KCheckBox(grid.window, %[ name: uiName, label: getValue(def, "label", ""), hint: hint, status: status, value: getValue(def, "value", false) ]);
-		return %[ widget: widget, insertionY: ++insertionY ];
+		return %[ widget: widget ];
 	}
 
 	function generateSlider(grid, insertionY, uiName, def) {
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
-		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
+		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
 		var widget = new KTextInputSlider(grid.window, %[ name: uiName, hint: hint, status: status,
 														  width: 150,
 														  left: getValue(def, "left", 0), leftIcon: getValue(def, "leftIcon", ""), leftIconHint: getValue(def, "leftIconHint", ""),
 														  right: getValue(def, "right", 100), rightIcon: getValue(def, "rightIcon", ""), rightIconHint: getValue(def, "rightIconHint", ""),
 														  stride: getValue(def, "stride", 1),
 														  value: getValue(def, "value", getValue(def, "left", 0)) ]);
-		return %[ widget: widget, label: label, insertionY: ++insertionY ];
+		return %[ widget: widget, label: label ];
 	}
 
 	function generateTextInput(grid, insertionY, uiName, def) {
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
-		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
+		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
 		var textType = getValue(def, "textType", TEXT_ANY);
 		var value;
 		switch (textType) {
@@ -87,7 +99,7 @@ class KCustomUIGenerator
 			value = getValue(def, "value", 0); break;
 		}
 		var widget = new KTextInput(grid.window, %[ width: 150, type: textType, name: uiName, hint: hint, status: status, value: value  ]);
-		return %[ widget: widget, label: label, insertionY: ++insertionY ];
+		return %[ widget: widget, label: label ];
 	}
 
 	function generateSeparator(grid, insertionY, uiName, def) {
@@ -99,26 +111,25 @@ class KCustomUIGenerator
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
 		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: hint  ]);
-		return %[ label: label, insertionY: ++insertionY ];
+		return %[ label: label ];
 	}
 
 	function generateTextArea(grid, insertionY, uiName, def) {
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
-		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status, style: %[ alignVertical: ALIGN_TOP ] ]);
+		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status, style: %[ alignVertical: ALIGN_TOP ] ]);
 		var scroll = new KScrollLayout(grid.window, %[ horizontal: false, vertical: true, id: "focusable_frame", hint: hint, status: status ]);
 		var textarea = new KTextEdit(grid.window, %[ name: uiName, value: getValue(def, "value", ""), hint: hint, status: status ]);
 		scroll.setMarginalFixedSize(getValue(def, "marginalWidth", 100), getValue(def, "marginalHeight",60));
 		scroll.add(textarea);
 		textarea._marginalHeight = 100;
-		return %[ bounds: scroll, widget: textarea, label: label, insertionY: ++insertionY ];
+		return %[ bounds: scroll, widget: textarea, label: label ];
 	}
 
 	function generateTable(grid, insertionY, uiName, def) {
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
-		var labelText = getValue(def, "label", "");
-		var label = labelText == "" ? void : new KTextLabel(grid.window, %[ label: labelText, hint: hint, status: status, style: %[ alignVertical: ALIGN_TOP ] ]);
+		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status, style: %[ alignVertical: ALIGN_TOP ] ]);
 		var table = new KTable(grid.window, %[ name: uiName, hint: hint, status: status,
 											   initWithMinimumSize: getValue(def, "initWithMinimumSize", false),
 											   attributes: getValue(def, "attributes", []),
@@ -128,18 +139,18 @@ class KCustomUIGenerator
 		table.value = getValue(def, "value", []);
 		var frame = new KFrameLayout(grid.window, %[ id: "focusable_frame" ]);
 		frame.add(table);
-		return %[ bounds: frame, widget: table, label: label, insertionY: ++insertionY ];
+		return %[ bounds: frame, widget: table, label: label ];
 	}
 
 	function generateDropdownList(grid, insertionY, uiName, def) {
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
-		var label = new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
+		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
 		var widget = new KComboBox(grid.window, %[ name: uiName, hint: hint, status: status,
 												   width: 150, type: COMBO_STYLE_DROPDOWNLIST,
 												   items: getValue(def, "items", []), values: getValue(def, "values", []), captions: getValue(def, "captions", []) ]);
 		widget.value = getValue(def, "value", widget.values[0]);
-		return %[widget: widget, label: label, insertionY: ++insertionY ];
+		return %[widget: widget, label: label ];
 	}
 };
 
@@ -155,7 +166,7 @@ class KCustomUI extends KGridLayout
 	function KCustomUI(window, options = %[]) {
 		options = duplicateStruct(options);
 		options.style = %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_LEFT, alignVertical: ALIGN_CENTER ],
-									   KTextLabel: %[ maxPossibleWidthRatio: 0.25 ]
+									   KTextLabel: %[ maxPossibleWidthRatio: 0.5 ]
 									 ] ];
 		super.KGridLayout(window, options);
 
@@ -163,6 +174,10 @@ class KCustomUI extends KGridLayout
 
 		var uiDefs = getOption("uis", []);
 		uiList = [];
+
+		var valueModifiedFunc = getOption("onValueModified", void);
+		if (valueModifiedFunc !== void)
+			onValueModified = valueModifiedFunc;
 
 		uiNamePrefix = getOption("uiNamePrefix", "");
 		var labelStyle = getOption("labelStyle", UI_LABEL_STYLE_LEFT);
@@ -232,12 +247,23 @@ class KCustomUI extends KGridLayout
 							  name: uiName,
 							  widget: result.widget ]);
 
-				if (typeof(uiDef[onValueModified]) != K_UNDEFINED)
-					result.widget.onValueModified = uiDef[onValueModified];
-				if (uiDef["isAvoidDictionaryRegistration"] != K_UNDEFINED)
-					result.widget.isAvoidDictionaryRegistration = uiDef["isAvoidDictionaryRegistration"];
+				if (typeof(uiDef.onValueModified) != K_UNDEFINED)
+					result.widget.onValueModified = uiDef.onValueModified;
+				if (typeof(uiDef.isAvoidDictionaryRegistration) != K_UNDEFINED)
+					result.widget.isAvoidDictionaryRegistration = uiDef.isAvoidDictionaryRegistration;
+			} else if (result.label !== void) {
+				if (typeof(uiDef.onValueModified) != K_UNDEFINED) 
+					result.label.onValueModified = uiDef.onValueModified;
 			}
 		}
+	}
+
+	function onValueModified() {
+		super.onChildValueModified(...);
+	}
+
+	function onChildValueModified {
+		onValueModified(...);
 	}
 
 	function find(name) {
@@ -248,6 +274,27 @@ class KCustomUI extends KGridLayout
 		if (result !== void)
 			return result;
 		return super.find(name);
+	}
+
+	property value {
+		getter {
+			var result = %[];
+			for (var i = 0; i < uiList.count; i++) {
+				var ui = uiList[i];
+				var key = ui.key;
+				var uiName = ui.name;
+				result[key] = this[uiName].value;
+			}
+			return result;
+		}
+		setter(v) {
+			for (var i = 0; i < uiList.count; i++) {
+				var ui = uiList[i];
+				var key = ui.key;
+				var uiName = ui.name;
+				this[uiName].value = v[key];
+			}
+		}
 	}
 };
 

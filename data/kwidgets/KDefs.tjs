@@ -49,6 +49,7 @@ global.UI_TYPE_SLIDER = "ui.type.slider";
 global.UI_TYPE_BEGIN_FRAME = "ui.type.begin.frame";
 global.UI_TYPE_END_FRAME   = "ui.type.end.frame";
 global.UI_TYPE_SEPARATOR   = "ui.type.separator";
+global.UI_TYPE_TEXTBUTTON   = "ui.type.textbutton";
 
 global.UI_LABEL_STYLE_LEFT = 0;
 global.UI_LABEL_STYLE_LEFTTOPCORNER = 1;

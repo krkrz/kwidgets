@@ -809,7 +809,7 @@
 					 jpBOLLimit: 2,
 					 jpEOLRule: "([｛〔〈《「『【〘〖〝‘“｟«—…‥〳〴〵",
 					 jpEOLLimit: 2,
-					 spaceScaleFactor: 0.4,
+					 spaceScaleFactor: 0.3,
 					 wordSpaceLimitScaleFactor: 0.6,
 				   ]
 		 ]
