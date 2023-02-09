@@ -46,7 +46,8 @@ class KCustomUIGenerator
 				%[ type: UI_TYPE_TEXTAREA,     func: generateTextArea ],
 				%[ type: UI_TYPE_TABLE,        func: generateTable ],
 				%[ type: UI_TYPE_DROPDOWNLIST, func: generateDropdownList ],
-				%[ type: UI_TYPE_SEPARATOR,    func: generateSeparator ]
+				%[ type: UI_TYPE_SEPARATOR,    func: generateSeparator ],
+				%[ type: UI_TYPE_PLACEHOLDER,  func: generatePlaceHolder ]
 		];
 		for (var i = 0; i < defs.count; i++) {
 			var def = defs[i];
@@ -152,6 +153,11 @@ class KCustomUIGenerator
 		widget.value = getValue(def, "value", widget.values[0]);
 		return %[widget: widget, label: label ];
 	}
+
+	function generatePlaceHolder(grid, insertionY, uiName, def) {
+		var frame = new KFrameLayout(grid.window, %[ name: uiName, style: %[ borderStlye: BORDER_STYLE_NONE, borderWidth: 0, padding: 0, margin: 0 ] ]);
+		return %[ label: frame ];
+	}
 };
 
 global.customUIGenerator = new KCustomUIGenerator();
@@ -166,7 +172,7 @@ class KCustomUI extends KGridLayout
 	function KCustomUI(window, options = %[]) {
 		options = duplicateStruct(options);
 		options.style = %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_LEFT, alignVertical: ALIGN_CENTER ],
-									   KTextLabel: %[ maxPossibleWidthRatio: 0.5 ]
+									   KTextLabel: %[ maxPossibleWidthRatio: 0.75 ]
 									 ] ];
 		super.KGridLayout(window, options);
 
@@ -182,6 +188,7 @@ class KCustomUI extends KGridLayout
 		uiNamePrefix = getOption("uiNamePrefix", "");
 		var labelStyle = getOption("labelStyle", UI_LABEL_STYLE_LEFT);
 		var fixedLabel = getOption("fixedLabel", false);
+		var insertLabelToStatus = getOption("insertLabelToStatus", true);
 
 		var insertionY = 0;
 		var curGrid = this;
@@ -192,6 +199,11 @@ class KCustomUI extends KGridLayout
 			var uiDef = uiDefs[i];
 			var uiKey = getOption("name", "", uiDef);
 			var uiName = uiNamePrefix + uiKey;
+
+			if (insertLabelToStatus
+				&& getOption("label", "", uiDef) != ""
+				&& getOption("status", "", uiDef) != "")
+				uiDef.status = uiDef.label + ": " + uiDef.status;
 
 			if (uiDef.type == UI_TYPE_BEGIN_FRAME) {
 				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][gridStack.count];
