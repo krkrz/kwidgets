@@ -291,6 +291,14 @@ class KCustomUI extends KGridLayout
 		return super.find(name);
 	}
 
+	function callFunc(key, defaultValue, *) {
+		var func = getOption(key, void);
+		if (func === void)
+			return defaultValue;
+		else
+			return (func incontextof(this))(*);
+	}
+
 	property value {
 		getter {
 			var result = %[];
@@ -308,8 +316,8 @@ class KCustomUI extends KGridLayout
 				var key = ui.key;
 				var uiName = ui.name;
 				this[uiName].value = v[key];
+				callFunc("onValueSet");
 			}
 		}
 	}
 };
-
