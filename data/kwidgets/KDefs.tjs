@@ -2,6 +2,7 @@ global.K_UNDEFINED = "undefined";
 
 global.K_WIDGET_MIN_POSSIBLE_WIDTH = 32;
 global.K_WIDGET_MAX_POSSIBLE_WIDTH = 10000;
+global.K_UNLIMITED_SIZE = K_WIDGET_MAX_POSSIBLE_WIDTH;
 
 function blendColor(c1, c2, t = 0.5) {
   var a = Math.round((((c1 >> 24) & 0xff) * (1 - t) + ((c2 >> 24) & 0xff) * t));

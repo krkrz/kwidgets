@@ -58,6 +58,9 @@
 						paddingLeft: 2,
 						paddingBottom: 3,
 					],
+					"alignright_caption" => %[
+						alignHorizontal: ALIGN_RIGHT
+					],
 				]
 			]
 		],

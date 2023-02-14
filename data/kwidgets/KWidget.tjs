@@ -2856,9 +2856,9 @@ class KWidget extends Layer
 		var bpw = borderPaddingWidth;
 		var bph = borderPaddingHeight;
 		return %[ minWidth: child.minWidth + mh + bpw,
-				  maxWidth: child.maxWidth + mh + bpw,
+				  maxWidth: Math.min(K_UNLIMITED_SIZE, child.maxWidth + mh + bpw),
 				  minHeight: child.minHeight + mv + bph,
-				  maxHeight: child.maxHeight + mv + bph ];
+				  maxHeight: Math.min(K_UNLIMITED_SIZE, child.maxHeight + mv + bph) ];
 	}
 
 	function embedChild(x, y, w, h, child, clear = false) {
@@ -2875,9 +2875,9 @@ class KWidget extends Layer
 		var bpw = layoutStyle.borderLeft + layoutStyle.borderRight;
 		var bph = layoutStyle.borderTop + layoutStyle.borderBottom;
 		return %[ minWidth: child.minWidth + mh + bpw,
-				  maxWidth: child.maxWidth + mh + bpw,
+				  maxWidth: Math.min(K_UNLIMITED_SIZE, child.maxWidth + mh + bpw),
 				  minHeight: child.minHeight + mv + bph,
-				  maxHeight: child.maxHeight + mv + bph ];
+				  maxHeight: Math.min(K_UNLIMITED_SIZE, child.maxHeight + mv + bph) ];
 	}
 
 	function embedChildWithoutPadding(x, y, w, h, child, clear = false) {

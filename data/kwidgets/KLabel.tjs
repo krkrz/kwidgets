@@ -8,8 +8,7 @@ global.KLabelArgsFormat =
 	];
 
 global.KLabelWidgetStyleDefinition = [
-	[ "isVariableWidth", "isVariableWidth", false ],
-	[ "maxPossibleWidthRatio", "maxPossibleWidthRatio", 1 ]
+	[ "isVariableWidth", "isVariableWidth", false ]
 ];
 
 class KLabel extends KEntity
@@ -72,7 +71,7 @@ class KLabel extends KEntity
 		if (! widgetStyle.isVariableWidth)
 			setFixedSize(minW, minH);
 		else
-			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, int(K_WIDGET_MAX_POSSIBLE_WIDTH * widgetStyle.maxPossibleWidthRatio), minH);
+			setMinMaxSize(Math.min(minW, K_WIDGET_MIN_POSSIBLE_WIDTH), minH, minW, minH);
 
 		// ボーダー描画
 		drawBorder(borderStyle, 0, 0, width, height);

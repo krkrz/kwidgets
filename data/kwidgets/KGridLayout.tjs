@@ -27,6 +27,11 @@ class KGridLayout extends KLayout
 	var heightForRow;
 	var logicalMaxWidth, logicalMaxHeight;
 	var ignoreHiddenChild = true;
+	var limitedColumnCount, unlimitedColumnCount;
+	var sumLimitedColumnMinWidth, sumLimitedColumnMaxWidth, sumUnlimitedColumnMinWidth;
+	var limitedRowCount, unlimitedRowCount;
+	var sumLimitedRowMinHeight, sumLimitedRowMaxHeight, sumUnlimitedRowMinHeight;
+	var sumRowGap, sumColumnGap;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -188,9 +193,21 @@ class KGridLayout extends KLayout
 					minW = Math.max(0, cb.minWidth - spaceHorizontal * (colspan - 1));
 					w = 0; for (var i = 0; i < colspan; i++) w += minWidthForColumn[x + i];
 					if (w < minW) for (var i = 0; i < colspan; i++) minWidthForColumn[x + i] += int((minW - w) * (i + 1) / colspan) - int((minW - w) * i / colspan);
-					maxW = Math.max(0, cb.maxWidth - spaceHorizontal * (colspan - 1));
-					w = 0; for (var i = 0; i < colspan; i++) w += maxWidthForColumn[x + i];
-					if (w < maxW) for (var i = 0; i < colspan; i++) maxWidthForColumn[x + i] += int((maxW - w) * (i + 1) / colspan) - int((maxW - w) * i / colspan);
+					if (cb.maxWidth == K_UNLIMITED_SIZE) {
+						var unlimitedExistent = false;
+						for (var i = 0; i < colspan; i++)
+							if (maxWidthForColumn[x + i] == K_UNLIMITED_SIZE) {
+								unlimitedExistent = true;
+								break;
+							}
+						if (! unlimitedExistent) 
+							for (var i = 0; i < colspan; i++)
+								maxWidthForColumn[x + i] = K_UNLIMITED_SIZE;
+					} else {
+						maxW = Math.max(0, cb.maxWidth - spaceHorizontal * (colspan - 1));
+						w = 0; for (var i = 0; i < colspan; i++) w += maxWidthForColumn[x + i];
+						if (w < maxW) for (var i = 0; i < colspan; i++) maxWidthForColumn[x + i] += int((maxW - w) * (i + 1) / colspan) - int((maxW - w) * i / colspan);
+					}
 				}
 				if (rowspan > 1) {
 					var cb = getChildBoundsWithoutPadding(child);
@@ -198,9 +215,21 @@ class KGridLayout extends KLayout
 					minH = Math.max(0, cb.minHeight - spaceVertical * (rowspan - 1));
 					h = 0; for (var i = 0; i < rowspan; i++) h += minHeightForRow[y + i];
 					if (h < minH) for (var i = 0; i < rowspan; i++) minHeightForRow[y + i] += int((minH - h) * (i + 1) / rowspan) - int((minH - h) * i / rowspan);
-					maxH = Math.max(0, cb.maxHeight - spaceVertical * (rowspan - 1));
-					h = 0; for (var i = 0; i < rowspan; i++) h += maxHeightForRow[y + i];
-					if (h < maxH) for (var i = 0; i < rowspan; i++) maxHeightForRow[y + i] += int((maxH - h) * (i + 1) / rowspan) - int((maxH - h) * i / rowspan);
+					if (cb.maxHeight == K_UNLIMITED_SIZE) {
+						var unlimitedExistent = false;
+						for (var i = 0; i < rowspan; i++)
+							if (maxHeightForRow[y + i] == K_UNLIMITED_SIZE) {
+								unlimitedExistent = true;
+								break;
+							}
+						if (! unlimitedExistent)
+							for (var i = 0; i < rowspan; i++)
+								maxHeightForRow[y + i] = K_UNLIMITED_SIZE;
+					} else {
+						maxH = Math.max(0, cb.maxHeight - spaceVertical * (rowspan - 1));
+						h = 0; for (var i = 0; i < rowspan; i++) h += maxHeightForRow[y + i];
+						if (h < maxH) for (var i = 0; i < rowspan; i++) maxHeightForRow[y + i] += int((maxH - h) * (i + 1) / rowspan) - int((maxH - h) * i / rowspan);
+					}
 				}
 			}
 
@@ -218,23 +247,76 @@ class KGridLayout extends KLayout
 		}
 
 		var wofst = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingLeft + layoutStyle.paddingRight : borderPaddingWidth;
-		minW = maxW = sumSpaceHorizontal + wofst;
+		sumColumnGap = sumSpaceHorizontal + wofst;
+		minW = maxW = sumColumnGap;
 		for (var x = 0; x < xcount; x++) {
 			minW += minWidthForColumn[x];
 			maxW += maxWidthForColumn[x];
 		}
 
 		var hofst = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingTop + layoutStyle.paddingBottom : borderPaddingHeight;
-		minH = maxH = sumSpaceVertical + hofst;
+		sumRowGap = sumSpaceVertical + hofst;
+		minH = maxH = sumRowGap;
 		for (var y = 0; y < ycount; y++) {
 			minH += minHeightForRow[y];
 			maxH += maxHeightForRow[y];
+		}
+
+		// 制限サイズ、無制限サイズで分類してそれぞれの最小・最大サイズの合計を算出しておく。
+		limitedColumnCount = unlimitedColumnCount = 0;
+		sumLimitedColumnMinWidth = 0;
+		sumLimitedColumnMaxWidth = 0;
+		sumUnlimitedColumnMinWidth = 0;
+		for (var i = 0; i < xcount; i++) {
+				if (maxWidthForColumn[i] == K_UNLIMITED_SIZE) {
+					unlimitedColumnCount++;
+					sumUnlimitedColumnMinWidth += minWidthForColumn[i];
+				} else {
+					limitedColumnCount++;
+					sumLimitedColumnMinWidth += minWidthForColumn[i];
+					sumLimitedColumnMaxWidth += maxWidthForColumn[i];
+				}
+		}
+
+		limitedRowCount = unlimitedRowCount = 0;
+		sumLimitedRowMinHeight = 0;
+		sumLimitedRowMaxHeight = 0;
+		sumUnlimitedRowMinHeight = 0;
+		for (var i = 0; i < ycount; i++) {
+				if (maxHeightForRow[i] == K_UNLIMITED_SIZE) {
+					unlimitedRowCount++;
+					sumUnlimitedRowMinHeight += minHeightForRow[i];
+				} else {
+					limitedRowCount++;
+					sumLimitedRowMinHeight += minHeightForRow[i];
+					sumLimitedRowMaxHeight += maxHeightForRow[i];
+				}
 		}
 
 		// 最大・最小サイズを決定する
 		logicalMaxWidth = maxW;
 		logicalMaxHeight = maxH;
 		setMinMaxSize(minW, minH, maxW, maxH);
+	}
+
+	function calcSizeAllocation(sizes, minSizes, maxSizes, count, sumSize, sumMinSize, sumMaxSize, limited) {
+		if (sumSize == sumMinSize) {
+			for (var i = 0; i < count; i++) 
+				if ((maxSizes[i] == K_UNLIMITED_SIZE) ^ limited)
+					sizes[i] = minSizes[i];
+		} else {
+			var d = 0;
+			var denom = sumMaxSize - sumMinSize;
+			var minRatio = sumMaxSize - sumSize;
+			var maxRatio = sumSize - sumMinSize;
+			for (var i = 0; i < count; i++)
+				if ((maxSizes[i] == K_UNLIMITED_SIZE) ^ limited) {
+					sizes[i] = (minSizes[i] * minRatio + maxSizes[i] * maxRatio) / denom;
+					var v = int(sizes[i] + d + 0.5);
+					d += sizes[i] - v;
+					sizes[i] = v;
+				}
+		}
 	}
 
 	/*------------------------------
@@ -250,49 +332,23 @@ class KGridLayout extends KLayout
 		widthForColumn = [];
 		heightForRow = [];
 
-		// 大まかに、minとmaxの比率から幅・高さを決定する
-		var minWidthRatio, maxWidthRatio, minHeightRatio, maxHeightRatio;
+		var sumColumnWidth = width - sumColumnGap, sumRowHeight = height - sumRowGap;
 
-		minWidthRatio = (logicalMaxWidth - width);
-		maxWidthRatio = (width - minWidth);
+		// minとmaxの比率から幅・高さを決定する
+		widthForColumn = [];
+		var sumLimitedColumnWidth = Math.min(sumLimitedColumnMaxWidth, (sumColumnWidth - sumUnlimitedColumnMinWidth));
+		var sumUnlimitedColumnWidth = sumColumnWidth - sumLimitedColumnWidth;
+		calcSizeAllocation(widthForColumn, minWidthForColumn, maxWidthForColumn, xcount, sumLimitedColumnWidth, sumLimitedColumnMinWidth, sumLimitedColumnMaxWidth, true);
+		calcSizeAllocation(widthForColumn, minWidthForColumn, maxWidthForColumn, xcount, sumUnlimitedColumnWidth, sumUnlimitedColumnMinWidth, K_UNLIMITED_SIZE * unlimitedColumnCount, false);
 
-		for (var x = 0; x < xcount; x++) {
-			if (logicalMaxWidth == minWidth)
-				widthForColumn[x] = minWidthForColumn[x];
-			else
-				widthForColumn[x] =
-				((minWidthForColumn[x] * minWidthRatio
-				  + maxWidthForColumn[x] * maxWidthRatio)
-				 / (logicalMaxWidth - minWidth));
-		}
-
-		minHeightRatio = (logicalMaxHeight - height);
-		maxHeightRatio = (height - minHeight);
-
-		for (var y = 0; y < ycount; y++) {
-			if (logicalMaxHeight == minHeight)
-				heightForRow[y] = minHeightForRow[y];
-			else
-				heightForRow[y] =
-				((minHeightForRow[y] * minHeightRatio
-				  + maxHeightForRow[y] * maxHeightRatio)
-				 / (logicalMaxHeight - minHeight));
-		}
+		heightForRow = [];
+		var sumLimitedRowHeight = Math.min(sumLimitedRowMaxHeight, (sumRowHeight - sumUnlimitedRowMinHeight));
+		var sumUnlimitedRowHeight = sumRowHeight - sumLimitedRowHeight;
+		calcSizeAllocation(heightForRow, minHeightForRow, maxHeightForRow, ycount, sumLimitedRowHeight, sumLimitedRowMinHeight, sumLimitedRowMaxHeight, true);
+		calcSizeAllocation(heightForRow, minHeightForRow, maxHeightForRow, ycount, sumUnlimitedRowHeight, sumUnlimitedRowMinHeight, K_UNLIMITED_SIZE * unlimitedRowCount, false);
 
 		var xpos, ypos;
 		xpos = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingLeft : borderPaddingLeft;
-
-		var d = 0;
-		for (var i = 0; i < widthForColumn.count; i++) {
-			var v = int(widthForColumn[i] + d + 0.5);
-			d += widthForColumn[i] - v;
-			widthForColumn[i] = v;
-		}
-		for (var i = 0; i < heightForRow.count; i++) {
-			var v = int(heightForRow[i] + d + 0.5);
-			d += heightForRow[i] - v;
-			heightForRow[i] = v;
-		}
 
 		for (var x = 0; x < xcount; x++) {
 			ypos = widgetStyle.drawBordersAroundIndividualWidgets ? layoutStyle.paddingTop : borderPaddingTop;
