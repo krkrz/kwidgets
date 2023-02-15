@@ -455,10 +455,12 @@ class KWindow extends Window
 
 	function removeFindPath(object) {
 		_findPath.remove(object);
+		_nameCache = %[];
 	}
 
 	function clearFindPath() {
 		_findPath.clear();
+		_nameCache = %[];
 	}
 
 	/**------------------------------

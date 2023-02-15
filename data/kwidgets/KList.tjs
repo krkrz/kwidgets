@@ -367,10 +367,12 @@ class KList extends KVirtualWidget
 
 	function removeFindPath(object) {
 		_findPath.remove(object);
+		_nameCache = %[];
 	}
 
 	function clearFindPath() {
 		_findPath.clear();
+		_nameCache = %[];
 	}
 
 	/**------------------------------
@@ -2973,10 +2975,12 @@ class KListItem
 
 	function removeFindPath(object) {
 		_findPath.remove(object);
+		_nameCache = %[];
 	}
 
 	function clearFindPath() {
 		_findPath.clear();
+		_nameCache = %[];
 	}
 
 	/**------------------------------
