@@ -430,13 +430,35 @@ class KWindow extends Window
 	 * @param name 検索するウィジェットの名前
 	 * @return 名前の一致したウィジェット
 	 ------------------------------*/
+	var _findPath = [];
+
 	function find(name) {
 		var widget;
 		widget = primaryWidget.find(name);
 		if (widget !== void)
 			return widget;
 		widget = menu.find(name);
-		return widget;
+		if (widget !== void)
+			return widget;
+		for (var i = 0; i < _findPath.count; i++) {
+			var object = _findPath[i];
+			var widget = object.find(name);
+			if (widget)
+				return widget;
+		}
+		return void;
+	}
+
+	function addFindPath(object) {
+		_findPath.add(object);
+	}
+
+	function removeFindPath(object) {
+		_findPath.remove(object);
+	}
+
+	function clearFindPath() {
+		_findPath.clear();
 	}
 
 	/**------------------------------

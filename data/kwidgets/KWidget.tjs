@@ -982,6 +982,8 @@ class KWidget extends Layer
 	/**------------------------------
 	 * 子孫ウィジェットから特定の名前を持った子ウィジェットを捜す
 	 ------------------------------*/
+	var _findPath = [];
+
 	function find(name) {
 		if (this.name === name)
 			return this;
@@ -993,7 +995,25 @@ class KWidget extends Layer
 					return widget;
 			}
 		}
+		for (var i = 0; i < _findPath.count; i++) {
+			var object = _findPath[i];
+			var widget = object.find(name);
+			if (widget)
+				return widget;
+		}
 		return void;
+	}
+
+	function addFindPath(object) {
+		_findPath.add(object);
+	}
+
+	function removeFindPath(object) {
+		_findPath.remove(object);
+	}
+
+	function clearFindPath() {
+		_findPath.clear();
 	}
 
 	/**------------------------------
