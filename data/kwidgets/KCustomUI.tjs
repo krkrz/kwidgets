@@ -197,6 +197,9 @@ class KCustomUI extends KGridLayout
 		var gridStack = [];
 		var yStack = [];
 
+		var curList = void;
+		var listStack = [];
+
 		for (var i = 0; i < uiDefs.count; i++) {
 			var uiDef = uiDefs[i];
 			var uiKey = getOption("name", "", uiDef);
@@ -206,6 +209,9 @@ class KCustomUI extends KGridLayout
 				&& getOption("label", "", uiDef) != ""
 				&& getOption("status", "", uiDef) != "")
 				uiDef.status = uiDef.label + ": " + uiDef.status;
+
+			if (typeof(uiDef.label) != K_UNDEFINED)
+				uiDef.label = uiDef.label.trim();
 
 			if (uiDef.type == UI_TYPE_BEGIN_FRAME) {
 				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][gridStack.count];
@@ -225,6 +231,34 @@ class KCustomUI extends KGridLayout
 				continue;
 			}
 
+			if (uiDef.type == UI_TYPE_BEGIN_LIST) {
+				listStack.push(curList);
+				curList = new KList(window, %[ name: getOption("name", "", uiDef), style: %[ backgroundColor: 0 ] ]);
+				curGrid.add(0, insertionY++, curList, 2);
+				continue;
+			}
+			if (uiDef.type == UI_TYPE_LIST_LEVEL) {
+				if (curList.childCount == 0) {
+					gridStack.push(curGrid);
+					yStack.push(insertionY);
+				}
+				var level = new KListItem(%[ name: getOption("name", "", uiDef),
+											 label: getOption("label", "", uiDef) ]);
+				curList.add(level);
+				var subGrid = new global.KGridLayout(window, %[ id: gridId ]);
+				level.add(subGrid);
+				curGrid = subGrid;
+				insertionY = 0;
+				continue;
+			}
+			if (uiDef.type == UI_TYPE_END_LIST) {
+				if (curList.childCount != 0) {
+					curGrid = gridStack.pop();
+					insertionY = yStack.pop();
+				}
+				curList = listStack.pop();
+				continue;
+			}
 			var result = customUIGenerator.generatorMap[uiDef.type](curGrid, insertionY, uiName, uiDef, options);
 			if (result.placed)
 				insertionY = result.insertionY;
