@@ -34,6 +34,8 @@ class KFrameLayout extends KLayout
 	var checkBounds;
 	var checkButtonPress = false;
 	var labelFieldHeight = 0;
+	var contentTop;
+	var drawnBorderTop;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -193,6 +195,7 @@ class KFrameLayout extends KLayout
 			maxH += child.maxHeight + child.marginVertical;
 		}
 
+		contentTop = drawnBorderTop = 0;
 
 		if (label != "") {
 			labelFieldHeight = fontStyle.fontHeight;
@@ -200,8 +203,12 @@ class KFrameLayout extends KLayout
 				labelFieldHeight = Math.max(labelFieldHeight, findIcon(widgetStyle.checkIcon).height);
 			if (helpText != "")
 				labelFieldHeight = Math.max(labelFieldHeight, findIcon(widgetStyle.helpIcon).height);
-			minH += labelFieldHeight;
-			maxH += labelFieldHeight;
+
+			drawnBorderTop = int(labelFieldHeight / 2);
+			contentTop = Math.max(labelFieldHeight + spaceVertical, drawnBorderTop + borderPaddingTop) - borderPaddingTop;
+
+			minH += contentTop;
+			maxH += contentTop;
 		}
 
 		setMinMaxSize(minW, minH, maxW, maxH);
@@ -211,12 +218,8 @@ class KFrameLayout extends KLayout
 	 * ウィジェットを再配置する
 	 ------------------------------*/
 	function onLocateLayout {
-		var contentTop = 0;
-		if (label != "")
-			contentTop = labelFieldHeight;
-
 		fillRect(0, 0, width, height, 0);
-		drawBorder(borderStyle, 0, contentTop / 2, width, height - contentTop / 2);
+		drawBorder(borderStyle, 0, drawnBorderTop / 2, width, height - drawnBorderTop / 2);
 
 		labelBounds = void;
 		helpBounds = void;

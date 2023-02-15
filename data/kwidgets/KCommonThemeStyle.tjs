@@ -35,21 +35,18 @@
 						fontHeight: 12,
 						fontBold: true,
 						padding: 6,
-						paddingTop: 2,
 						backgroundColor: "sub1_bg",
 					],
 					"sub2_frame" => %[
 						fontHeight: 12,
 						fontBold: true,
 						padding: 6,
-						paddingTop: 2,
 						backgroundColor: "sub2_bg",
 					],
 					"sub3_frame" => %[
 						fontHeight: 12,
 						fontBold: true,
 						padding: 6,
-						paddingTop: 2,
 						backgroundColor: "sub3_bg",
 					],
 					"em_caption" => %[
