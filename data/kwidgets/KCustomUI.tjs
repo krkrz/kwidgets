@@ -243,7 +243,8 @@ class KCustomUI extends KGridLayout
 					yStack.push(insertionY);
 				}
 				var level = new KListItem(%[ name: getOption("name", "", uiDef),
-											 label: getOption("label", "", uiDef) ]);
+											 label: getOption("label", "", uiDef),
+											 id: "em_caption" ]);
 				curList.add(level);
 				var subGrid = new global.KGridLayout(window, %[ id: gridId ]);
 				level.add(subGrid);
