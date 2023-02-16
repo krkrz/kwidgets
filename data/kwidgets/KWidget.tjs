@@ -1112,6 +1112,7 @@ class KWidget extends Layer
 
 		for (var i = 0; i < widgets.count; i++) {
 			var widget = widgets[i];
+			widget.updateStyleStates();
 			widget.invalidateStyles();
 			widget.onAttachedToWindow();
 			widget.releaseStyleModificationDelay();

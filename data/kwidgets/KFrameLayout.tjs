@@ -259,10 +259,11 @@ class KFrameLayout extends KLayout
 			}
 		}
 		if (child !== void) {
-			child.setSize(width - borderPaddingWidth - child.marginHorizontal,
-						  height - borderPaddingHeight - child.marginVertical - contentTop);
-			child.setPos(borderPaddingLeft + child.marginLeft,
-						 borderPaddingTop + child.marginTop + contentTop);
+			embedChildWithoutBorderPadding(borderPaddingLeft,
+										   borderPaddingTop + contentTop,
+										   width - borderPaddingWidth,
+										   height - borderPaddingHeight - contentTop,
+										   child);
 		}
 	}
 

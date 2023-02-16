@@ -4064,6 +4064,7 @@ class KWidgetHolderListItem extends KListItem
 	function onDraw() {
 		fillBackground();
 		updateSize();
+		asyncCaller.call(_widgetFrame.setEnabled, nodeEnabled);
 	}
 
 	function locate(x, y) {
