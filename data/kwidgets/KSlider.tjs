@@ -57,6 +57,7 @@ class KSlider extends KRangePointer2D
 		opts.hKnobSize = 0;
 		opts.hKnobBlockStride = opts.hKnobStride = getOption("stride", 1, opts);
 		opts.hKnobPixelSize = SLIDER_SLIDER_WIDTH;
+		opts.hValue = getOption("value", opts.hLeft, opts);
 		opts.interpolation = getOption("interpolation", false, opts);
 
 		this.step = opts.hKnobStride;

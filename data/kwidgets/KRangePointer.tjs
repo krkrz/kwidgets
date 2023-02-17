@@ -64,7 +64,7 @@ class KRangePointer2D extends KValueEntity
 				= int(params.baseLogicalMin) == params.baseLogicalMin
 				&& int(params.baseLogicalMax) == params.baseLogicalMax
 				&& int(params.knobLogicalStride) == params.knobLogicalStride;
-			params.pointerValue = params.baseLogicalLeft;
+			params.pointerValue = getOption(prefix + "Value", params.baseLogicalLeft);
 		}
 
 		autoDispatchStartInterval = getOption("autoDispatchStartInterval", 200);

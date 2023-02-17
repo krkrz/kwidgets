@@ -2,6 +2,10 @@
 // $Id: KTabLayout.tjs,v 1.8 2007/09/17 10:03:45 m2 Exp $
 //
 
+global.TAB_STYLE_FIXED = 0;
+global.TAB_STYLE_WRAPPING = 1;
+global.TAB_STYLE_VARIABLE = 2;
+global.TAB_STYLE_SCROLL = 3;
 
 /**----------------------------------------------------------------------
  * タブボタン
@@ -9,6 +13,7 @@
 class KTab extends KEntity
 {
 	var _label;
+	var suitableWidth, suitableHeight;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -22,6 +27,8 @@ class KTab extends KEntity
 		_label = label;
 		hitThreshold = 0;
 		mouseDragThreshold = 8;
+		setMinMaxSize(0, 0, K_UNLIMITED_SIZE, K_UNLIMITED_SIZE);
+		omitText = ".";
 	}
 
 	/**------------------------------
@@ -75,16 +82,19 @@ class KTab extends KEntity
 
 	function onDrawContents() {
 		applyFontStyle(font, fontStyle);
-		var w = font.getTextWidth(_label) + borderPaddingWidth;
-		var h = fontStyle.fontHeight + borderPaddingHeight;
-		setMinMaxSize(w, h, w, K_WIDGET_MAX_POSSIBLE_WIDTH);
+		suitableWidth = font.getTextWidth(_label) + borderPaddingWidth;
+		suitableHeight= fontStyle.fontHeight + borderPaddingHeight;
 		var borderStyle = duplicateStruct(this.borderStyle);
 		borderStyle.borderWidthBottom = 0;
 		borderStyle.borderStyleBottom = BORDER_STYLE_NONE;
 		borderStyle.borderRadiusLeftBottom = 0;
 		borderStyle.borderRadiusRightBottom = 0;
 		drawBorder(borderStyle, 0, 0, width, height);
-		drawUIText(fontStyle, borderPaddingLeft, borderPaddingTop, _label);
+		var drawResult = drawUITextInRange(fontStyle, borderPaddingLeft, borderPaddingTop, width - borderPaddingWidth, _label, ALIGN_CENTER);
+		if (! drawResult.inRange)
+			hint = getOption("hint", _label);
+		else
+			hint = getOption("hint", "");
 	}
 
 	function onClick {
@@ -117,7 +127,13 @@ global.KTabLayoutArgsFormat =
 	];
 
 global.KTabLayoutWidgetStyleDefinition = [
-	[ "tabId", "tabId", "" ]
+	[ "tabId", "tabId", "" ],
+	[ "tabStyle", "tabStyle", void ],
+	[ "tabAlign", "tabAlign", ALIGN_LEFT ],
+	[ "buttonId", "buttonId", "" ],
+	[ "noteIcon", "noteIcon", "" ],
+	[ "scrollLeftIcon", "scrollLeftIcon", "" ],
+	[ "scrollRightIcon", "scrollRightIcon", "" ]
 ];
 
 /**----------------------------------------------------------------------
@@ -133,7 +149,9 @@ class KTabLayout extends KLayout
 	var tabW, tabH;
 	var boxMinW, boxMinH, boxMaxW, boxMaxH;
 	var redrawn;
-	var _tabWrapping;
+	var _tabStyle;
+	var noteButton, scrollLeftButton, scrollRightButton;
+	var scrollBegin = 0, scrollEnd;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -151,7 +169,7 @@ class KTabLayout extends KLayout
 		childList = [];
 		tabList = [];
 		_tabIndex = -1;
-		_tabWrapping = getOption("tabWrapping", false);
+		_tabStyle = getOption("tabStyle", getOption("tabWrapping", false) ? TAB_STYLE_WRAPPING : TAB_STYLE_FIXED);
 		focusable = getOption("focusable", window.defaultFocusable);
 //		hasImage = false;
 		hitThreshold = 0;
@@ -191,13 +209,23 @@ class KTabLayout extends KLayout
 	 ------------------------------*/
 	property tabWrapping {
 		getter {
-			return _tabWrapping;
+			return _tabStyle == TAB_STYLE_WRAPPING;
 		}
 		setter (v) {
-			if (_tabWrapping == v)
+			if (_tabStyle == TAB_STYLE_WRAPPING)
 				return;
-			_tabWrapping = v;
+			_tabStyle = TAB_STYLE_WRAPPING;
 			redrawContents();
+		}
+	}
+
+	/**------------------------------
+	 * タブスタイル
+	 * (読み出し専用。スタイル指定をオプション指定より優先する
+	 ------------------------------*/
+	property tabStyle {
+		getter {
+			return (widgetStyle.tabStyle !== void) ? widgetStyle.tabStyle : _tabStyle;
 		}
 	}
 
@@ -375,6 +403,23 @@ class KTabLayout extends KLayout
 		} 
 	}
 
+	function touchScrollButtons() {
+		if (noteButton === void) {
+			noteButton = new KImageButton(window, %[ name: "_note", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ isVariableWidth: false ] ]);
+			noteButton.parent = this;
+			scrollLeftButton = new KImageButton(window, %[ name: "_scrollLeft", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ isVariableWidth: false ] ]);
+			scrollLeftButton.parent = this;
+			scrollRightButton = new KImageButton(window, %[ name: "_scrollRight", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ isVariableWidth: false ] ]);
+			scrollRightButton.parent = this;
+		}
+		noteButton.id = widgetStyle.buttonId;
+		noteButton.icon = widgetStyle.noteIcon;
+		scrollLeftButton.id = widgetStyle.buttonId;
+		scrollLeftButton.icon = widgetStyle.scrollLeftIcon;
+		scrollRightButton.id = widgetStyle.buttonId;
+		scrollRightButton.icon = widgetStyle.scrollRightIcon;
+	}
+
 	// レイアウトのやり直し
 	function onCalculateLayout() {
 		if (childList.count == 0)
@@ -386,9 +431,9 @@ class KTabLayout extends KLayout
 
 		for (var i = 0; i < tabList.count; i++) {
 			var tab = tabList[i];
-			tabMinW = Math.max(tabMinW, tab.minWidth);
-			tabW += tab.minWidth;
-			tabH = Math.max(tabH, tab.minHeight);
+			tabMinW = Math.max(tabMinW, tab.suitableWidth);
+			tabW += tab.suitableWidth;
+			tabH = Math.max(tabH, tab.suitableHeight);
 		}
 		for (var i = 0; i < childList.count; i++) {
 			var child = childList[i];
@@ -404,21 +449,28 @@ class KTabLayout extends KLayout
 
 		var tabMargin = borderStyle.borderRadiusLeftTop + borderStyle.borderRadiusRightTop;
 		var minW, minH, maxW, maxH;
-		if (tabWrapping)
-			minW = int(Math.max(tabMinW + tabMargin, boxMinW));
-		else
+		switch (tabStyle) {
+		case TAB_STYLE_FIXED:
 			minW = int(Math.max(tabW + tabMargin, boxMinW));
+			break;
+		case TAB_STYLE_WRAPPING:
+		case TAB_STYLE_VARIABLE:
+			minW = int(Math.max(tabMinW + tabMargin, boxMinW));
+			break;
+		case TAB_STYLE_SCROLL: {
+			touchScrollButtons();
+			var myMargin
+				= Math.max(borderStyle.borderRadiusLeftTop, noteButton.width)
+				+  Math.max(borderStyle.borderRadiusRightTop, scrollLeftButton.width + scrollRightButton.width);
+			minW = int(Math.max(tabMinW + myMargin, boxMinW));
+			break;
+		}
+		}
 		minH = boxMinH + tabH;
 		maxW = int(Math.max(tabW + tabMargin, boxMaxW));
+		maxW = Math.max(minW, maxW);
 		maxH = boxMaxH + tabH;
 
-		var x = borderStyle.borderRadiusLeftTop;
-		for (var i = 0; i < tabList.count; i++) {
-			var tab = tabList[i];
-			tab.setSize(tab.minWidth, tab.minHeight);
-			tab.setPos(x, tabH - tab.height);
-			x += tab.width;
-		}
 		setMinMaxSize(minW, minH, maxW, maxH);
 	}
 
@@ -443,7 +495,126 @@ class KTabLayout extends KLayout
 			tabIndex = tabList.count - 1;
 		}
 
-		if (tabWrapping) {
+		var givenWidth = width - (borderStyle.borderRadiusLeftTop + borderStyle.borderRadiusRightTop);
+
+		var sumTabWidth = 0;
+		for (var i = 0; i < tabList.count; i++)
+			sumTabWidth += tabList[i].suitableWidth;;
+
+		var curTabStyle = tabStyle;
+		switch (curTabStyle) {
+		case TAB_STYLE_VARIABLE:
+			if (sumTabWidth <= givenWidth)
+				curTabStyle = TAB_STYLE_FIXED;
+			break;
+
+		case TAB_STYLE_SCROLL:
+			if (sumTabWidth <= givenWidth) {
+				curTabStyle = TAB_STYLE_FIXED;
+				noteButton.visible = false;
+				scrollLeftButton.visible = false;
+				scrollRightButton.visible = false;
+				break;
+			}
+		}
+
+		switch (curTabStyle) {
+		case TAB_STYLE_FIXED: {
+			var x = borderStyle.borderRadiusLeftTop;
+			switch (widgetStyle.tabAlign) {
+			case ALIGN_LEFT: break;
+			case ALIGN_CENTER: x += int((givenWidth - sumTabWidth) / 2); break;
+			case ALIGN_RIGHT: x += givenWidth - sumTabWidth; break;
+			}
+			for (var i = 0; i < tabList.count; i++) {
+				var tab = tabList[i];
+				tab.visible = true;
+				tab.setSize(tab.suitableWidth, tab.suitableHeight);
+				tab.setPos(x, tabH - tab.height);
+				x += tab.width;
+			}
+			break;
+		}
+		case TAB_STYLE_SCROLL: {
+			var tabMarginLeft = Math.max(borderStyle.borderRadiusLeftTop, noteButton.width);
+			var tabMarginRight = Math.max(borderStyle.borderRadiusRightTop, scrollLeftButton.width + scrollRightButton.width);
+			var tabMargin = tabMarginLeft + tabMarginRight;
+			var givenWidth = width - tabMargin;
+			noteButton.visible = true;
+			scrollLeftButton.visible = true;
+			scrollRightButton.visible = true;
+			noteButton.height = scrollLeftButton.height = scrollRightButton.height = tabH;
+			noteButton.setPos(0, 0);
+			scrollLeftButton.setPos(width - tabMarginRight, 0);
+			scrollRightButton.setPos(width - scrollRightButton.width, 0);
+			var x = tabMarginLeft;
+			for (var i = 0; i < tabList.count; i++)
+				tabList[i].visible = false;
+
+			scrollBegin = Math.max(0, Math.min(tabList.count - 1, scrollBegin));
+
+			var i;
+			for (i = scrollBegin; i < tabList.count; i++) {
+				var tab = tabList[i];
+				if (x + tab.suitableWidth > width - tabMarginRight)
+					break;
+				tab.setSize(tab.suitableWidth, tab.suitableHeight);
+				tab.setPos(x, tabH - tab.height);
+				tab.visible = true;
+				x += tab.width;
+			}
+			scrollEnd = i;
+			scrollLeftButton.enabled = scrollBegin > 0;
+			scrollRightButton.enabled = scrollEnd < tabList.count;
+			break;
+		}
+		case TAB_STYLE_VARIABLE: {
+			var givenWidth = width - (borderStyle.borderRadiusLeftTop + borderStyle.borderRadiusRightTop);
+			var requiredWidth = 0;
+			for (var i = 0; i < tabList.count; i++)
+				requiredWidth += tabList[i].suitableWidth;
+			var reduceWidth = Math.max(0, requiredWidth - givenWidth);
+			var unitWidth = givenWidth / tabList.count;
+			var reduceTabNum = 0;
+			var isReduceTab = [];
+			for (var i = 0; i < tabList.count; i++) {
+				isReduceTab[i] = false;
+				if (i != tabIndex
+					&& tabList[i].suitableWidth >= unitWidth) {
+					isReduceTab[i] = true;
+					reduceTabNum++;
+				}
+			}
+			if (reduceTabNum == 0) {
+				reduceTabNum = tabList.count;
+				for (var i = 0; i < tabList.count; i++)
+					isReduceTab[i] = true;
+			}
+
+			var reduceTabSumWidth = 0;
+			for (var i = 0; i < tabList.count; i++) {
+				if (isReduceTab[i])
+					reduceTabSumWidth += tabList[i].suitableWidth;
+			}
+
+			var d = 0;
+			var x = borderStyle.borderRadiusLeftTop;
+			for (var i = 0; i < tabList.count; i++) {
+				var tab = tabList[i];
+				if (! isReduceTab[i]) {
+					tab.setSize(tab.suitableWidth, tab.suitableHeight);
+				} else {
+					var reduce = reduceWidth * tab.suitableWidth / reduceTabSumWidth;
+					var v = int(reduce + d + 0.5);
+					d += reduce - v;
+					tab.setSize(tab.suitableWidth - v, tab.suitableHeight);
+				}
+				tab.setPos(x, tabH - tab.height);
+				x += tab.width;
+			}
+			break;
+		}
+		case TAB_STYLE_WRAPPING: {
 			var tabRowList;
 			var curIndexRowCount;
 			var x, y, row;
@@ -455,17 +626,18 @@ class KTabLayout extends KLayout
 			row = 0;
 			for (var i = 0; i < tabList.count; i++) {
 				var tab = tabList[i];
+				tab.setSize(tab.suitableWidth, tab.suitableHeight);
 				if (x + tab.width > r) {
 					x = l;
 					row ++;
-					y += tab.minHeight;
+					y += tab.suitableHeight;
 				}
 				tabRowList.add([ x, y, row ]);
 				x += tab.width;
 				if (i == tabIndex)
 					curIndexRowCount = row;
 			}
-			y += tabAt(0).minHeight;
+			y += tabAt(0).suitableHeight;
 
 			if (tabH != y) {
 				tabH = y;
@@ -484,21 +656,25 @@ class KTabLayout extends KLayout
 				tab.setPos(x, y);
 				tab.height = tabH - y;
 			}
+			break;
+		}
 		}
 
-		fillRect(0, 0, width, height, borderStyle.backgroundColor);
+		fillRect(0, 0, width, height, 0);
 		drawBorder(borderStyle, 0, tabH, width, height - tabH);
 
 		var tab = tabAt(tabIndex);
-		var slitLeft, slitRight;
-		slitLeft = tab.left + tab.borderStyle.borderWidthLeft;
-		slitRight = tab.left + tab.width - tab.borderStyle.borderWidthRight;
-		if (tab.top + tab.minHeight != tabH) {
-			var lastTab = tabAt(childCount - 1);
-			slitLeft = Math.max(slitLeft, lastTab.left + lastTab.width);
+		if (tab.visible) {
+			var slitLeft, slitRight;
+			slitLeft = tab.left + tab.borderStyle.borderWidthLeft;
+			slitRight = tab.left + tab.width - tab.borderStyle.borderWidthRight;
+			if (tab.top + tab.suitableHeight != tabH) {
+				var lastTab = tabAt(childCount - 1);
+				slitLeft = Math.max(slitLeft, lastTab.left + lastTab.width);
+			}
+			if (slitLeft < slitRight)
+				fillRect(slitLeft, tabH, slitRight - slitLeft, borderStyle.borderWidthTop, borderStyle.backgroundColor);
 		}
-		if (slitLeft < slitRight)
-			fillRect(slitLeft, tabH, slitRight - slitLeft, borderStyle.borderWidthTop, borderStyle.backgroundColor);
 
 		for (var i = 0; i < childList.count; i++) {
 			var child = childList[i];
@@ -526,5 +702,61 @@ class KTabLayout extends KLayout
 	// フォーカスロストを検知
 	function onBlur {
 		redrawAllTabs();
+	}
+
+	function onChildValueModified(child, value) {
+		switch (child.name) {
+		default:
+			super.onChildValueModified(...);
+			break;
+		case "_note":
+			selectTabsByMenu();
+			break;
+		case "_scrollLeft":
+			scrollLeft();
+			break;
+		case "_scrollRight":
+			scrollRight();
+			break;
+		}
+	}
+
+	function selectTabsByMenu() {
+		var menu = new KContextMenu();
+		for (var i = 0; i < tabList.count; i++) {
+			var menuItem = menu.addItem(tabList[i].label, "", true, funccall(onSelectTabByMenu, i));
+			menuItem.checked = tabIndex == i;
+		}
+		menu.show();
+	}
+
+	function onSelectTabByMenu(index) {
+		if (tabIndex == index)
+			return;
+
+		var tabMarginLeft = Math.max(borderStyle.borderRadiusLeftTop, noteButton.width);
+		var tabMarginRight = Math.max(borderStyle.borderRadiusRightTop, scrollLeftButton.width + scrollRightButton.width);
+		var tabMargin = tabMarginLeft + tabMarginRight;
+		var givenWidth = width - tabMargin;
+		scrollBegin = index;
+		for (var i = scrollBegin; i < tabList.count; i++)
+			givenWidth -= tabList[i].suitableWidth;
+		while (scrollBegin > 0
+			   && givenWidth >= tabList[scrollBegin - 1].suitableWidth) {
+			scrollBegin--;
+			givenWidth -= tabList[scrollBegin].suitableWidth;
+		}
+		tabIndex = index;
+		
+	}
+
+	function scrollLeft() {
+		scrollBegin--;
+		redrawContents();
+	}
+
+	function scrollRight() {
+		scrollBegin++;
+		redrawContents();
 	}
 }

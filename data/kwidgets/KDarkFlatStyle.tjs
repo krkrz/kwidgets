@@ -87,6 +87,9 @@
 				"k_list_mark_level1" => "$composite($circle(8,#c0c0c0),$circle(6,#434343))",
 				"k_list_mark_level2" => "$composite($triangle(8,8,r,#c0c0c0),$triangle(6,6,r,#434343))",
 				"k_list_mark_level3" => "$composite($rect(8,4,#c0c0c0),$rect(6,2,#434343))",
+				"k_tab_note" => "k_note",
+				"k_tab_scroll_left" => "$triangle(5,8,l,#f0f0f0)",
+				"k_tab_scroll_right" => "$triangle(5,8,r,#f0f0f0)",
 			]
 		],
 
@@ -632,7 +635,12 @@
 					 borderColor: "tab_border",
 					 borderWidth: 1,
 					 borderRadiusBottom: 4,
-					 padding: 12 ]
+					 padding: 12,
+					 buttonId: "tab_button",
+					 noteIcon: "k_tab_note",
+					 scrollLeftIcon: "k_tab_scroll_left",
+					 scrollRightIcon: "k_tab_scroll_right",
+				   ]
 		 ],
 
 		%[ klass: "KTab",
@@ -650,6 +658,14 @@
 				   ]
 		 ],
 
+		%[ id: "tab_button",
+		   style: %[
+			   padding: 3,
+			   borderWidth: 1,
+			   borderRadius: 3,
+		   ],
+		 ],
+	
 		%[ klass: "KTextBoard",
 		   style: %[
 			   backgroundColor: "textboard_bg",

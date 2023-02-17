@@ -20,6 +20,12 @@
 						padding: 12,
 						space: 12,
 					],
+					"noborder_frame" => %[
+						backgroundColor: 0,
+						borderStyle: BORDER_STYLE_NONE,
+						borderWidth: 0,
+						padding: 0
+					],
 					"group_frame" => %[
 						padding: 12,
 					],

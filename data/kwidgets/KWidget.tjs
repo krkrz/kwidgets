@@ -262,6 +262,7 @@ class KWidget extends Layer
 	var _styleModifiedMask = 0;
 	// スタイルコールバック
 	var styleCallback = "";
+	var omitText = "...";
 	
 	/**------------------------------
 	 * コンストラクタ
@@ -2350,7 +2351,6 @@ class KWidget extends Layer
 	// 指定範囲に収まるようにテキストを描画する（はみ出る分は省略）
 	//------------------------------
 	function getTextOmitLength() {
-		var omitText = "...";
 		var omitTextWidth = font.getTextWidth(omitText);
 		return omitTextWidth;
 	}
@@ -2358,7 +2358,6 @@ class KWidget extends Layer
 	function drawUITextInRange(fontStyle, x, y, w, text, alignment, fill = false, textWidth = void, textOmitLength = void, overrideFontColor = void) {
 		if (w <= 0)
 			return %[ inRange: false, x: x, y: y, width: w ];
-		var omitText = "...";
 		var omitTextWidth = textOmitLength !== void ? textOmitLength : font.getTextWidth(omitText);
 		var len = table_find_text_range(font, text, w, omitTextWidth);
 		if (len === void) {
@@ -2392,7 +2391,6 @@ class KWidget extends Layer
 		if (w <= 0)
 			return %[ inRange: false, text: text ];
 		applyFontStyle(font, fontStyle);
-		var omitText = "...";
 		var omitTextWidth = font.getTextWidth(omitText);
 		var len = table_find_text_range(font, text, w, omitTextWidth);
 		if (len === void) {
