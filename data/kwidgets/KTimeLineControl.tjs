@@ -2363,18 +2363,23 @@ class KTimeLineLoopItem extends KTimeLineItem
 		}
 	}
 
-	function buildTimeLinneRightClickContextMenu(menu, time) {
-		menu.addItem("ループの始点を設定する", "", true, funccall(this.onSetLoopBeginTime, time));
-		menu.addItem("ループの終点を設定する", "", true, funccall(this.onSetLoopEndTime, time + 1));
+	var contextmenu_loopBegin = "ループの始点を設定する";
+	var contextmenu_loopEnd = "ループの終点を設定する";
+	var contextmenu_lastFrame = "最終フレームを設定する";
+	var contextmenu_release = "ループ/最終フレームを解除する";
+
+	function buildTimeLineRightClickContextMenu(menu, time) {
+		menu.addItem(contextmenu_loopBegin, "", true, funccall(this.onSetLoopBeginTime, time));
+		menu.addItem(contextmenu_loopEnd, "", true, funccall(this.onSetLoopEndTime, time + 1));
 		menu.addSeparator();
-		menu.addItem("最終フレームを設定する", "", true, funccall(this.onSetLastTime, time));
+		menu.addItem(contextmenu_lastFrame, "", true, funccall(this.onSetLastTime, time));
 		menu.addSeparator();
-		menu.addItem("ループ/最終フレームを解除する", "", hasLastFrame || hasLoopFrame, funccall(this.onRelease));
+		menu.addItem(contextmenu_release, "", hasLastFrame || hasLoopFrame, funccall(this.onRelease));
 	}
 
 	function onTimeLineRightClick(time) {
 		var menu = new KContextMenu();
-		buildTimeLinneRightClickContextMenu(menu, time);
+		buildTimeLineRightClickContextMenu(menu, time);
 		menu.show();
 	}
 
@@ -2657,7 +2662,7 @@ class KTimeLineControl extends KEntity
 		_layerListScroll.hideHorizontalBar = true;
 		_layerListScroll.hideVerticalBar = true;
 		_layerListScroll.add(new timelineLayerListClass(window, this, "_layerList"));
-		_rightGrid.add(0, 0, new KScrollLayout(window, %[ horizontal: true, vertical: false, name: "_timeLocatorScroll", hideHorizontalBar: true, marginalMinHeight: 0]));
+		_rightGrid.add(0, 0, new KScrollLayout(window, %[ horizontal: true, vertical: false, name: "_timeLocatorScroll", hideHorizontalBar: true, marginalMinHeight: 0, marginalMaxHeight: 0]));
 		//    _timeLocatorScroll.hideHorizontalBar = true;
 		_timeLocatorScroll.add(new KTimeLineTimeLocator(window, this, "_timeLocator"));
 		_rightGrid.add(0, 1, new KScrollLayout(window, true, true, "_layerViewScroll"), 2);
