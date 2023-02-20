@@ -202,4 +202,42 @@ class KTextInputSlider extends KValueEntity
 		}
 
 	}
+
+	/*------------------------------
+	 * レガシー
+	 ------------------------------*/
+	property leftValue {
+		getter {
+			return slider.leftValue;
+		}
+	}
+
+	property rightValue {
+		getter {
+			return slider.rightValue;
+		}
+	}
+
+	property minValue {
+		getter {
+			return slider.minValue;
+		}
+	}
+
+	property maxValue {
+		getter {
+			return slider.maxValue;
+		}
+	}
+
+	property step {
+		getter {
+			return slider.step;
+		}
+	}
+
+	function updateRange {
+		slider.updateRange(...);
+	}
+
 };

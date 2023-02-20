@@ -241,7 +241,6 @@ class KWidget extends Layer
 	var _nameCache = %[];
 	// 不定値
 	var _indeterminate = false;
-	var indeterminateLayer = void;
 	// ドラッグ閾値
 	var mouseDragThreshold = 4;
 	// ヴァーチャルウィジェットのウィンドウ親
@@ -453,6 +452,8 @@ class KWidget extends Layer
 		styleStates.assign(customStyleStates);
 		if (! nodeEnabled)
 			styleStates.add("nodeDisabled");
+		if (_indeterminate)
+			styleStates.add("indeterminate");
 		if (isDragging)
 			styleStates.add("drag");
 		var leftButton = System.getKeyState(VK_LBUTTON);
@@ -771,17 +772,8 @@ class KWidget extends Layer
 			if (v == _indeterminate)
 				return;
 			_indeterminate = v;
-			if (v) {
-				indeterminateLayer = new global.Layer(window, this);
-				indeterminateLayer.absolute = 100000;
-				indeterminateLayer.setSize(width, height);
-				indeterminateLayer.fillRect(0, 0, width, height, 0x40000000);
-				indeterminateLayer.visible = true;
-				indeterminateLayer.hitThreshold = 256;
-			} else {
-				invalidate indeterminateLayer;
-				indeterminateLayer = void;
-			}
+			updateStyleStates();
+			invalidateStyles();
 		}
 	}
 

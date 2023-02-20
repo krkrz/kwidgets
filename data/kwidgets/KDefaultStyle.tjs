@@ -45,7 +45,10 @@
 				opacity: 255,
 				nodeDisabled: %[
 					opacity: 128,
-				]
+				],
+				indeterminate: %[
+					opacity: 192,
+				],
 			]
 		],
 

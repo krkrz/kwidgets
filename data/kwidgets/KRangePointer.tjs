@@ -25,6 +25,7 @@ class KRangePointer2D extends KValueEntity
 	var innerBg;
 	var innerKnob;
 	var innerMargin = %[ left: 0, right: 0, top: 0, bottom: 0 ];
+	var prefixes = [ "h", "v" ];
 
 	//------------------------------
 	// コンストラクタ
@@ -39,7 +40,6 @@ class KRangePointer2D extends KValueEntity
 		hParams = %[];
 		vParams = %[];
 		paramsPair = [ hParams, vParams ];
-		var prefixes = [ "h", "v" ];
 
 		for (var i = 0; i < paramsPair.count; i++) {
 			var params = paramsPair[i];
@@ -180,7 +180,7 @@ class KRangePointer2D extends KValueEntity
 	//------------------------------
 	// レンジの更新
 	//------------------------------
-	function updateLogicalRange(prefix, baseLeft, baseRight, knobSize) {
+	function updateLogicalRange(prefix, baseLeft, baseRight, knobSize, stride = void) {
 		var params;
 		switch (prefix) {
 		case "h": params = hParams; break;
@@ -189,6 +189,8 @@ class KRangePointer2D extends KValueEntity
 		params.baseLogicalLeft = baseLeft;
 		params.baseLogicalRight = baseRight;
 		params.knobLogicalSize = knobSize;
+		if (stride !== void)
+			params.knobLogicalStride = stride;
 		params.baseLogicalMin = Math.min(params.baseLogicalLeft, params.baseLogicalRight);
 		params.baseLogicalMax = Math.max(params.baseLogicalLeft, params.baseLogicalRight);
 		params.baseLogicalSize = params.baseLogicalMax - params.baseLogicalMin;

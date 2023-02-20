@@ -152,6 +152,7 @@ class KTabLayout extends KLayout
 	var _tabStyle;
 	var noteButton, scrollLeftButton, scrollRightButton;
 	var scrollBegin = 0, scrollEnd;
+	var _disableHiddenChild = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -170,6 +171,7 @@ class KTabLayout extends KLayout
 		tabList = [];
 		_tabIndex = -1;
 		_tabStyle = getOption("tabStyle", getOption("tabWrapping", false) ? TAB_STYLE_WRAPPING : TAB_STYLE_FIXED);
+		_disableHiddenChild = getOption("disableHiddenChild", false);
 		focusable = getOption("focusable", window.defaultFocusable);
 //		hasImage = false;
 		hitThreshold = 0;
@@ -237,6 +239,8 @@ class KTabLayout extends KLayout
 	 ------------------------------*/
 	function add(tabName, child) {
 		child.visible = false;
+		if (_disableHiddenChild)
+			child.enabled = false;
 		child.tabName = tabName;
 		child.parent = this;
 		childList.add(child);
@@ -256,7 +260,8 @@ class KTabLayout extends KLayout
 	function insert(index, tabName, child) {
 		if (_tabIndex >= index)
 			_tabIndex++;
-		child.visible = false;
+		if (_disableHiddenChild)
+			child.enabled = false;
 		child.tabName = tabName;
 		child.parent = this;
 		childList.insert(index, child);
@@ -678,15 +683,17 @@ class KTabLayout extends KLayout
 
 		for (var i = 0; i < childList.count; i++) {
 			var child = childList[i];
-			if (i != tabIndex) {
-				child.visible = false;
-				continue;
-			}
-			child.visible = true;
+			child.visible = false;
+			if (_disableHiddenChild)
+				child.enabled = false;
 			child.setSize(width - child.marginHorizontal - borderPaddingWidth,
 						  height - tabH - child.marginVertical - borderPaddingHeight);
 			locateChild(borderPaddingLeft, tabH + borderPaddingTop, width - borderPaddingWidth, height - tabH - borderPaddingHeight, child);
 		}
+
+		childAt(tabIndex).visible = true;
+		if (_disableHiddenChild)
+			childAt(tabIndex).enabled = true;
 	}
 
 	function onAttachedToWindow() {

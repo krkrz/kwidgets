@@ -110,6 +110,15 @@ class KSlider extends KRangePointer2D
 		}
 	}
 
+	function updateRange(left, right, stride) {
+		updateLogicalRange("h", left, right, SLIDER_SLIDER_WIDTH, stride);
+		this.step = hParams.knobLogicalStride;
+		this.leftValue = int(left / step);
+		this.rightValue = int(right / step);
+		this.minValue = int(Math.min(this.leftValue, this.rightValue));
+		this.maxValue = int(Math.max(this.leftValue, this.rightValue));
+	}
+
 	function onDrawContents() {
 		if (widgetStyle.knobWidth !== void)
 			knobFixedWidth = widgetStyle.knobWidth;
