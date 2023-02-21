@@ -226,7 +226,7 @@ global.KTextInputWidgetStyleDefinition =
 		[ "width", "width", void ],
 		[ "height", "height", void ],
 		[ "texteditId", "texteditId", "" ],
-		[ "isVariableWidth", "isVariableWidth", false ]
+		[ "variable", "variable", false ]
 	];
 
 class KTextInput extends KValueEntity
@@ -405,7 +405,7 @@ class KTextInput extends KValueEntity
 		text.id = widgetStyle.texteditId;
 		if (h === void)
 			h = text.fontStyle.fontHeight + borderPaddingHeight;
-		if (widgetStyle.isVariableWidth)
+		if (widgetStyle.variable)
 			setMinMaxSize(w, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);
 		else
 			setFixedSize(w, h);

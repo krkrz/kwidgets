@@ -9,7 +9,7 @@ global.KButtonArgsFormat =
 
 global.KButtonWidgetStyleDefinition =
 	[
-		[ "isVariableWidth", "isVariableWidth", false ],
+		[ "variable", "variable", false ],
 		[ "width", "width", void ],
 		[ "height", "height", void ]
 	];
@@ -34,7 +34,7 @@ class KButton extends KEntity
 	 * @param win ウィンドウ
 	 options:
 	 value: 値
-	 isVariableWidth: 可変幅
+	 variable: 可変幅
 	 ------------------------------*/
 	function KButton(win, *) {
 		var opts = parseOldStyleWidgetArgs(KButtonArgsFormat, *);
@@ -99,7 +99,7 @@ class KButton extends KEntity
 		var minW = widgetStyle.width ? widgetStyle.width : getOption("width", borderPaddingWidth + labelWidth);
 		var minH = widgetStyle.height ? widgetStyle.height : getOption("height", borderPaddingHeight + labelHeight);
 
-		if (! widgetStyle.isVariableWidth)
+		if (! widgetStyle.variable)
 			setFixedSize(minW, minH);
 		else
 			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, K_WIDGET_MAX_POSSIBLE_WIDTH, minH);

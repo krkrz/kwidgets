@@ -11,7 +11,7 @@ global.KCheckBoxWidgetStyle =
 	[
 		[ "icon", "icon", "" ],
 		[ "lineSpacing", "lineSpacing", 0 ],
-		[ "isVariableWidth", "isVariableWidth", false ]
+		[ "variable", "variable", false ]
 	];
 
 class KCheckBox extends KValueEntity
@@ -82,7 +82,7 @@ class KCheckBox extends KValueEntity
 		var minW = textArea.width + iconWidth + spaceHorizontal;
 		var minH = Math.max(textArea.height, iconHeight);
 
-		if (! widgetStyle.isVariableWidth)
+		if (! widgetStyle.variable)
 			setFixedSize(minW, minH);
 		else
 			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, K_WIDGET_MAX_POSSIBLE_WIDTH, minH);

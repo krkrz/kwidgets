@@ -106,14 +106,14 @@
 		%[ theme: "variable",
 		   style: %[
 			   isId: % [
-				   scrollbar_upward_button: %[ isVariableWidth: false ],
-				   scrollbar_downward_button: %[ isVariableWidth: false ],
-				   scrollbar_leftward_button: %[ isVariableWidth: false ],
-				   scrollbar_rightward_button: %[ isVariableWidth: false ],
+				   scrollbar_upward_button: %[ variable: false ],
+				   scrollbar_downward_button: %[ variable: false ],
+				   scrollbar_leftward_button: %[ variable: false ],
+				   scrollbar_rightward_button: %[ variable: false ],
 			   ],
 			   isClass: %[
 				   KWidget: %[
-					   isVariableWidth: true
+					   variable: true
 				   ]
 			   ]
 		   ]

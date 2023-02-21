@@ -22,7 +22,7 @@ global.KSliderWidgetStyleDefinition =
 		[ "width", "width", void ],
 		[ "height", "height", void ],
 		[ "knobWidth", "knobWidth", void ],
-		[ "isVariableWidth", "isVariableWidth", false ]
+		[ "variable", "variable", false ]
 	];
 
 
@@ -137,7 +137,7 @@ class KSlider extends KRangePointer2D
 		if (w == SLIDER_ADAPTIVE_WIDTH)
 			w = adaptiveWidth;
 
-		if (! widgetStyle.isVariableWidth)
+		if (! widgetStyle.variable)
 			setFixedSize(w + innerMargin.left + innerMargin.right, h);
 		else
 			setMinMaxSize(w + innerMargin.left + innerMargin.right, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);

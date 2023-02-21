@@ -630,11 +630,11 @@
 		   style: %[ fontHeight: 14,
 					 fontBold: true,
 					 margin: 3,
-					 isVariableWidth: true ]
+					 variable: true ]
 		 ],
 
 		%[ id: "timeline_status_bar",
-		   style: %[ isVariableWidth: true,
+		   style: %[ variable: true,
 					 marginVertical: 4,
 					 fontBold: true,
 					 fontHeight: 10 ]

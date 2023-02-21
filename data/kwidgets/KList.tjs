@@ -96,7 +96,7 @@ global.KListWidgetStyleDefinition =
 		[ "toggleOpenIcon", "toggleOpenIcon" ],
 		[ "toggleCloseIcon", "toggleCloseIcon" ],
 		[ "toggleInvisbleIcon", "toggleInvislbeIcon" ],
-		[ "isVariableWidth", "isVariableWidth", false ]
+		[ "variable", "variable", false ]
 	];
 
 class KList extends KVirtualWidget
@@ -897,7 +897,7 @@ class KList extends KVirtualWidget
 		for (var i = 0; i < drawItemList.count; i++) {
 			var item = drawItemList[i];
 			item.locate(item.depth * slideWidth, treeHeight);
-			if (! widgetStyle.isVariableWidth)
+			if (! widgetStyle.variable)
 				treeWidth = Math.max(treeWidth,
 									 item.width + item.depth * slideWidth);
 			else

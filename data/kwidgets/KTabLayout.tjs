@@ -410,11 +410,11 @@ class KTabLayout extends KLayout
 
 	function touchScrollButtons() {
 		if (noteButton === void) {
-			noteButton = new KImageButton(window, %[ name: "_note", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ isVariableWidth: false ] ]);
+			noteButton = new KImageButton(window, %[ name: "_note", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ variable: false ] ]);
 			noteButton.parent = this;
-			scrollLeftButton = new KImageButton(window, %[ name: "_scrollLeft", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ isVariableWidth: false ] ]);
+			scrollLeftButton = new KImageButton(window, %[ name: "_scrollLeft", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ variable: false ] ]);
 			scrollLeftButton.parent = this;
-			scrollRightButton = new KImageButton(window, %[ name: "_scrollRight", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ isVariableWidth: false ] ]);
+			scrollRightButton = new KImageButton(window, %[ name: "_scrollRight", focusable: false, marginalMaxHeight: K_UNLIMITED_SIZE, style: %[ variable: false ] ]);
 			scrollRightButton.parent = this;
 		}
 		noteButton.id = widgetStyle.buttonId;

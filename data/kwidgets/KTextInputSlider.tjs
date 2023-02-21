@@ -18,7 +18,7 @@ global.KTextInputSliderWidgetStyleDefinition =
 		[ "width", "width" ],
 		[ "height", "height" ],
 		[ "placeTextOnRightsideOfSlider", "placeTextOnRightsideOfSlider", false ],
-		[ "isVariableWidth", "isVariableWidth", false ]
+		[ "variable", "variable", false ]
 	];
 
 class KTextInputSliderEmbededSlider extends KSlider
@@ -181,12 +181,12 @@ class KTextInputSlider extends KValueEntity
 			slider.unlockStyleModification();
 			w = slider.minWidth + spaceHorizontal + textInput.width;
 		}
-		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width, height: h, isVariableWidth: widgetStyle.isVariableWidth ]);
+		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width, height: h, variable: widgetStyle.variable ]);
 
 		textInput.unlockStyleModification();
 		slider.unlockStyleModification();
 
-		if (! widgetStyle.isVariableWidth) 
+		if (! widgetStyle.variable) 
 			setFixedSize(w + slider.innerMargin.width, h);
 		else {
 			setMinMaxSize(w + slider.innerMargin.width, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);

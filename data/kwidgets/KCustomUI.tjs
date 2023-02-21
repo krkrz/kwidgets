@@ -267,7 +267,7 @@ class KCustomUI extends KGridLayout
 			var bounds = result.bounds !== void ? result.bounds : result.widget;
 			if (label !== void
 				&& fixedLabel)
-				label.overwriteStyle(%[ isVariableWidth: false ]);
+				label.overwriteStyle(%[ variable: false ]);
 			if (label !== void && bounds === void)
 				curGrid.add(0, insertionY++, label, 2);
 			else if (label === void && bounds !== void)

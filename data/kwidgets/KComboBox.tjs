@@ -17,7 +17,7 @@ global.KComboBoxWidgetStyleDefinition =
 		[ "placeButtonInsideBorder", "placeButtonInsideBorder" ],
 		[ "dropdownInterval", "dropdownInterval" ],
 		[ "dispCount", "dispCount", 10 ],
-		[ "isVariableWidth", "isVariableWidth", false ]
+		[ "variable", "variable", false ]
 	];
 
 class KComboBox extends KValueEntity
@@ -52,7 +52,7 @@ class KComboBox extends KValueEntity
 			_selected = 0;
 
 		var h = getOption("height");
-		dropdownButton = new KImageButton(window, %[ focusable: false, name: "_dropdownButton", style: %[ isVariableWidth: false ] ]);
+		dropdownButton = new KImageButton(window, %[ focusable: false, name: "_dropdownButton", style: %[ variable: false ] ]);
 		dropdownButton.parent = this;
 
 		_dropdownTimer = new Timer(openDropdownList, "");
@@ -286,7 +286,7 @@ class KComboBox extends KValueEntity
 		var w = getOption("width");
 		var h = getOption("height", fontStyle.fontHeight + borderPaddingHeight);
 
-		if (! widgetStyle.isVariableWidth)
+		if (! widgetStyle.variable)
 			setFixedSize(w, h);
 		else
 			setMinMaxSize(w, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);

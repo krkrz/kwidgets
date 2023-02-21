@@ -8,7 +8,7 @@ global.KToggleButtonArgsFormat =
 	];
 
 global.KToggleButtonWidgetStyleDefiiotion = [
-	[ "isVariableWidth", "isVariableWidth", false ],
+	[ "variable", "variable", false ],
 	[ "width", "width", void ],
 	[ "height", "height", void ]
 ];
@@ -79,7 +79,7 @@ class KToggleButton extends KValueEntity
 		var minW = widgetStyle.width ? widgetStyle.width : getOption("width", borderPaddingWidth + labelWidth);
 		var minH = widgetStyle.height ? widgetStyle.height : getOption("height", borderPaddingHeight + labelHeight);
 
-		if (! widgetStyle.isVariableWidth) 
+		if (! widgetStyle.variable) 
 			setFixedSize(minW, minH);
 		else
 			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, K_WIDGET_MAX_POSSIBLE_WIDTH, minH);
