@@ -12,7 +12,7 @@ class TestBed extends KWindow
 						 theme: "dialog",
 					   ]);
 
-		var testTab = new KTabLayout(this, %[ name: "testTab", disableHiddenChild: false, style: %[ tabStyle: TAB_STYLE_SCROLL, tabAlign: ALIGN_CENTER ] ]);
+		var testTab = new KTabLayout(this, %[ name: "testTab", disableHiddenChild: true, style: %[ tabStyle: TAB_STYLE_SCROLL, tabAlign: ALIGN_CENTER ] ]);
 //		Debug.message("before attach to window");
 //		primaryWidget.add(testTab);
 //		Debug.message("after attach to window");

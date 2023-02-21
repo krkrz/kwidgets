@@ -684,7 +684,8 @@ class KTabLayout extends KLayout
 		for (var i = 0; i < childList.count; i++) {
 			var child = childList[i];
 			child.visible = false;
-			if (_disableHiddenChild)
+			if (_disableHiddenChild
+				&& i != tabIndex)
 				child.enabled = false;
 			child.setSize(width - child.marginHorizontal - borderPaddingWidth,
 						  height - tabH - child.marginVertical - borderPaddingHeight);
