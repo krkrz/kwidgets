@@ -479,6 +479,7 @@
 
 		%[
 			id: "list_rename_textinput_textedit",
+			styleOfId: "textinput_textedit",
 			style: %[
 			]
 		],

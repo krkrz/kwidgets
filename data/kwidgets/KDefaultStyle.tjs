@@ -379,6 +379,7 @@
 
 		%[
 			id: "textinputslider_slider",
+			styleOfId: "textinput_textedit",
 			style: %[],
 		],
 
