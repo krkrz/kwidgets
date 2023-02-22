@@ -480,7 +480,9 @@ global.KMarkdownWidgetStyleDefinition =
 		[ "jpEOLRule", "jpEOLRule", "" ],
 		[ "jpEOLLimit", "jpEOLLimit", 0 ],
 		[ "spaceScaleFactor", "spaceScaleFactor", 0.5 ],
-		[ "wordSpaceLimitScaleFactor", "wordSpaceLimitScaleFactor", 1 ]
+		[ "wordSpaceLimitScaleFactor", "wordSpaceLimitScaleFactor", 1 ],
+		[ "textAlign", "textAlign", ALIGN_BOTTOM ],
+		[ "imageAlign", "imageAlign", ALIGN_BOTTOM ]
 	];
 
 
@@ -665,6 +667,7 @@ class KMarkdown extends KVirtualWidget
 						   mi: mi,
 						   char: mark,
 						   indent: indent - (widgetStyle.orderedListMarkWidth),
+						   align: widgetStyle.textAlign,
 						 ]);
 			} else {
 				listIndentSpaceLevels.clear();
@@ -694,6 +697,7 @@ class KMarkdown extends KVirtualWidget
 						row.add(%[ type: K_MARKDOWN_GLYPH_TYPE_CHAR,
 								   char: char,
 								   mi: mi,
+								   align: widgetStyle.textAlign,
 								 ]);
 					}
 					break;
@@ -702,6 +706,7 @@ class KMarkdown extends KVirtualWidget
 					row.add(%[ type: K_MARKDOWN_GLYPH_TYPE_CHAR,
 							   char: char,
 							   mi: mi,
+							   align: widgetStyle.textAlign,
 							 ]);
 					lst = LST_CHAR;
 					break;
@@ -719,6 +724,7 @@ class KMarkdown extends KVirtualWidget
 								   padding: widgetStyle.imagePadding,
 								   width: icon.width + widgetStyle.imagePadding * 2,
 								   height: icon.height,
+								   align: widgetStyle.imageAlign
 								 ]);
 					} else {
 						state.imageName += char;
@@ -888,6 +894,15 @@ class KMarkdown extends KVirtualWidget
 		}
 	}
 
+	property lastRowSpacing {
+		getter {
+			if (rows.count == 0)
+				return;
+			var lastRow = rows[-1];
+			return lastRow.paragraphSpacing;
+		}
+	}
+
 	// レイアウトを行う
 	function locateLayout {
 		var innerWidth = width - borderPaddingWidth;
@@ -905,6 +920,7 @@ class KMarkdown extends KVirtualWidget
 			// 最小サイズを決定する
 			w += borderPaddingWidth;
 			y += borderPaddingHeight;
+			y -= lastRowSpacing;
 			setMinMaxSize(w, y, w, y);
 		} else {
 			// 全ての行を、最大の横幅でレイアウトする
@@ -912,7 +928,7 @@ class KMarkdown extends KVirtualWidget
 			for (var i = 0; i < rows.count; i++) {
 				w = Math.max(rows[i].sumWidth, w);
 			}
-			var y = borderPaddngTop;
+			var y = borderPaddingTop;
 			for (var i = 0; i < rows.count; i++) {
 				var row = rows[i];
 				row.setPos(borderPaddingLeft, y);
@@ -922,6 +938,7 @@ class KMarkdown extends KVirtualWidget
 			// 最小サイズを決定する
 			w += borderPaddingWidth;
 			y += borderPaddingHeight;
+			y -= lastRowSpacing;
 			setMinMaxSize(w, y, w, y);
 		}
 		redrawAll();

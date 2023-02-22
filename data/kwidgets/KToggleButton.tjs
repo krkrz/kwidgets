@@ -187,3 +187,30 @@ class KImageToggleButton extends KToggleButton
 }
 
 mixin(KImageToggleButton, KImageCapability);
+
+
+/*----------------------------------------------------------------------
+ * マークダウントグルボタン
+ ----------------------------------------------------------------------*/
+class KMarkdownToggleButton extends KToggleButton
+{
+	/*------------------------------
+	 * コンストラクタ
+	 *
+	 * @param win ウィンドウ
+	 ------------------------------*/
+	function KMarkdownToggleButton(win, *) {
+		super.KToggleButton(win, *);
+	}
+
+	property text {
+		getter {
+			return label;
+		}
+		setter(v) {
+			label = v;
+		}
+	}
+}
+
+mixin(KMarkdownToggleButton, KMarkdownCapability);

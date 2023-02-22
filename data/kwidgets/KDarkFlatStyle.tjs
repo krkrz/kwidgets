@@ -815,6 +815,8 @@
 					 headingEm: [ true, false, false, false, false, false ],
 					 headingUnderline: [ false, true, true, false, false ],
 					 listIndent: 20,
+					 textAlign: ALIGN_BOTTOM,
+					 imageAlign: ALIGN_BOTTOM,
 					 listMarkIcon: [ "k_list_mark_level1", "k_list_mark_level2", "k_list_mark_level3" ],
 					 listIconPadding: 0,
 					 orderedListMarkWidth: 8,

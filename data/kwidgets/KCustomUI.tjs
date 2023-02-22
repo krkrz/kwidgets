@@ -233,7 +233,7 @@ class KCustomUI extends KGridLayout
 
 			if (uiDef.type == UI_TYPE_BEGIN_LIST) {
 				listStack.push(curList);
-				curList = new KList(window, %[ name: getOption("name", "", uiDef), style: %[ backgroundColor: 0 ] ]);
+				curList = new KList(window, %[ name: getOption("name", "", uiDef), focusable: false, style: %[ backgroundColor: 0 ] ]);
 				curGrid.add(0, insertionY++, curList, 2);
 				continue;
 			}

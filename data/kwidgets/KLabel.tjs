@@ -204,3 +204,85 @@ class KImageLabel extends KLabel
 }
 
 mixin(KImageLabel, KImageCapability);
+
+/*----------------------------------------------------------------------
+ * マークダウンケイパビリティ
+ ----------------------------------------------------------------------*/
+global.KMarkCapabilityWidgetStyleDefinition = [
+	[ "multiline", "multiline", false ],
+	[ "textWidth", "textWidth", 200 ],
+	[ "text", "text", void ]
+];
+
+class KMarkdownCapability
+{
+	function getInitialLabel() {
+		return getOption("text", getOption("label", ""));
+	}
+
+	property signWidgetStyleDefinition {
+		getter {
+			return KMarkCapabilityWidgetStyleDefinition;
+		}
+	}
+
+	function getText() {
+		var text = widgetStyle.text;
+		if (text === void)
+			text = label;
+		return label;
+	}
+
+	function touchMarkdown() {
+		if (typeof(this.prevText) == K_UNDEFINED) {
+			this.prevText = void;
+			this.md = void;
+		}
+		var text = getText();
+		if (prevText !== text) {
+			invalidate md;
+			prevText = label;
+			var options;
+			if (! getOption("multiline", false)) 
+				options = %[ text:label, lineWrapping: false, marginalMinHeight: 0, style: %[ padding: 0, backgroundColor: 0, firstIndent: 0, imageAlign: ALIGN_CENTER, textAlign: ALIGN_CENTER ] ];
+			else
+				options = %[ text:label, marginalMinWidth: getOption("textWidth", 200), style: %[ padding: 0, backgroundColor: 0 ] ];
+			md = new KMarkdown(window, options);
+			md.hitThreshold = 256;
+			md.parent = this;
+			md.redrawContents();
+			md.setSize(md.minWidth, md.minHeight);
+		}
+	}
+
+	function onCalcLabelSize() {
+		touchMarkdown();
+		labelWidth = md.width;
+		labelHeight = md.height;
+	}
+
+	function onDrawLabel(x, y, w, h) {
+		md.setPos(x, y);
+	}
+};
+
+/*----------------------------------------------------------------------
+ * マークダウンラベル
+ ----------------------------------------------------------------------*/
+class KMarkdownLabel extends KLabel
+{
+	function KMarkdownLabel() {
+		super.KLabel(...);
+	}
+
+	property text {
+		getter {
+			return label;
+		}
+		setter(v) {
+			label = v;
+		}
+	}
+};
+
+mixin(KMarkdownLabel, KMarkdownCapability);

@@ -239,3 +239,32 @@ class KImageButton extends KButton
 }
 
 mixin(KImageButton, KImageCapability);
+
+/*----------------------------------------------------------------------
+ * マークダウンボタン
+ ----------------------------------------------------------------------*/
+class KMarkdownButton extends KButton
+{
+	/*------------------------------
+	 * コンストラクタ
+	 *
+	 * @param win ウィンドウ
+	 * @param label イメージファイル名
+	 * @param name 名前
+	 ------------------------------*/
+	function KMarkdownButton(win, *) {
+		super.KButton(win, *);
+	}
+
+	property text {
+		getter {
+			return label;
+		}
+		setter(v) {
+			label = v;
+		}
+	}
+}
+
+mixin(KMarkdownButton, KMarkdownCapability);
+

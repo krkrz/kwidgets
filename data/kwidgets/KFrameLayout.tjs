@@ -58,7 +58,7 @@ class KFrameLayout extends KLayout
 		_helpText = getOption("helpText", "");
 		_checkable = getOption("checkable", false);
 		_checked = getOption("cheecked", true);
-		focusable = getOption("focusable", window.defaultFocusable);
+		focusable = getOption("focusable", window.defaultFocusable) && _checkable;
 		overwriteStyle(%[ frameType: _type ]);
 		addCustomStyleState("checked");
 	}

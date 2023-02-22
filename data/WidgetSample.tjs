@@ -170,13 +170,15 @@ class WidgetSample extends KWindow
 		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextButton(this, "ボタン", "textbutton"));
 		widgetGrid.add(1, 0, new KImageButton(this, "gotta_mail", "imagebutton"));
+		widgetGrid.add(2, 0, new KMarkdownButton(this, %[ text: "!(gotta_mail) ボタン", name: "markdownButton" ]));
 		widgetFrame.add(widgetGrid);
 		tabGrid.add(0, 0, widgetFrame);
 		widgetFrame = new KFrameLayout(this, %[ label: "トグルボタン", id: "group_frame" ]);
 		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextToggleButton(this, "ボタン", "texttogglebutton"));
 		widgetGrid.add(1, 0, new KImageToggleButton(this, "gotta_mail", "imagetogglebutton"));
-		widgetFrame.add(widgetGrid);
+		widgetGrid.add(2, 0, new KMarkdownToggleButton(this, %[ text: "!(gotta_mail) ボタン", name: "markdownToggleButton" ]));
+				   widgetFrame.add(widgetGrid);
 		tabGrid.add(0, 1, widgetFrame);
 
 		tabs.add("ボタン", tabGrid);
