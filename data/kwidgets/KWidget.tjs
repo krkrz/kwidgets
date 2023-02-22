@@ -1439,29 +1439,6 @@ class KWidget extends Layer
 	}
 
 	/*----------------------------------------------------------------------
-	 * focus chain の探索時にその順序を変更できるようにフックを追加する。
-	 ----------------------------------------------------------------------*/
-	function onSearchNextFocusable(layer) {
-		for (var w = this.parent; w != null; w = w.parent) {
-			if (typeof(w.onChildSearchNextFocusable) != K_UNDEFINED) {
-				layer = w.onChildSearchNextFocusable(this, layer);
-				break;
-			}
-		}
-		super.onSearchNextFocusable(layer);
-	}
-
-	function onSearchPrevFocusable(layer) {
-		for (var w = this.parent; w != null; w = w.parent) {
-			if (typeof(w.onChildSearchPrevFocusable) != K_UNDEFINED) {
-				layer = w.onChildSearchPrevFocusable(this, layer);
-				break;
-			}
-		}
-		super.onSearchPrevFocusable(layer);
-	}
-
-	/*----------------------------------------------------------------------
 	 * parentプロパティの拡張
 	 *
 	 * parentが更新された時に、onParentModifiedが呼ばれるようにする

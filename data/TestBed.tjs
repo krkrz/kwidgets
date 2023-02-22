@@ -147,7 +147,7 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 				.gridTest.add(0, 0, new KCheckBox(this, %[ name: "gridTestCheck", label: "ボタン1の表示", style: %[ isVariableWidth: true ] ]), 1);
 				.gridTest.add(1, 1, new KTextButton(this, %[ name: "gridTestButton1", label: "ボタン1" ]));
 				.gridTest.add(2, 2, new KTextButton(this, %[ name: "gridTestButton2", label: "ボタン2" ]));
-				.gridTest.add(2, 3, new KTextButton(this, %[ name: "gridTestButton2", label: "ボタン3" ]));
+				.gridTest.add(2, 3, new KTextButton(this, %[ name: "gridTestButton3", label: "ボタン3" ]));
 				.gridTest.add(0, 4, new KMarkdownLabel(this, %[ name: "mdLabel", multiline: false, text: "!(gotta_mail) マークダウンテキストラベル" ]), 3);
 		}
 
