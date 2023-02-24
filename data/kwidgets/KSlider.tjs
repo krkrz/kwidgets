@@ -111,7 +111,7 @@ class KSlider extends KRangePointer2D
 	}
 
 	function updateRange(left, right, stride) {
-		updateLogicalRange("h", left, right, SLIDER_SLIDER_WIDTH, stride);
+		updateLogicalRange("h", left, right, 0, stride);
 		this.step = hParams.knobLogicalStride;
 		this.leftValue = int(left / step);
 		this.rightValue = int(right / step);
