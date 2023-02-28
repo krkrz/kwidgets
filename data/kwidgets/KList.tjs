@@ -96,7 +96,8 @@ global.KListWidgetStyleDefinition =
 		[ "toggleOpenIcon", "toggleOpenIcon" ],
 		[ "toggleCloseIcon", "toggleCloseIcon" ],
 		[ "toggleInvisbleIcon", "toggleInvislbeIcon" ],
-		[ "variable", "variable", false ]
+		[ "variable", "variable", false ],
+		[ "spaceToggle", "spaceToggle", 4 ]
 	];
 
 class KList extends KVirtualWidget
@@ -1770,6 +1771,8 @@ global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
 	[ "backgroundColor", "backgroundColor", void, "resolveColor" ],
 	[ "itemColor", "itemColor", void, "resolveColor" ],
 	[ "spaceVertical", "spaceVertical", void ],
+	[ "spaceHorizontal", "spaceHorizontal", void ],
+	[ "spaceToggle", "spaceToggle", void ],
 	[ "lineSpacing", "lineSpacing", 0 ]
 ];
 
@@ -1855,7 +1858,7 @@ class KListItem
 
 	property toggleWidth {
 		getter {
-			return root.toggleWidth;
+			return root.toggleWidth + spaceToggle;
 		}
 	}
 
@@ -2232,6 +2235,46 @@ class KListItem
 		}
 		setter(v) {
 			overwriteStyle(%[ spaceVertical: v ]);
+		}
+	}
+
+	/**------------------------------
+	 * 横スペース
+	 *
+	 * @param value 行間
+	 * @return 行間
+	 ------------------------------*/
+	property spaceHorizontal {
+		getter {
+			if (appearanceStyle.spaceHorizontal !== void)
+				return appearanceStyle.spaceHorizontal;
+			else if (root)
+				return root.spaceHorizontal;
+			else
+				return 0;
+		}
+		setter(v) {
+			overwriteStyle(%[ spaceHorizontal: v ]);
+		}
+	}
+
+	/**------------------------------
+	 * トグルスペース
+	 *
+	 * @param value 行間
+	 * @return 行間
+	 ------------------------------*/
+	property spaceToggle {
+		getter {
+			if (appearanceStyle.spaceToggle !== void)
+				return appearanceStyle.spaceToggle;
+			else if (root)
+				return root.widgetStyle.spaceToggle;
+			else
+				return 0;
+		}
+		setter(v) {
+			overwriteStyle(%[ spaceToggle: v ]);
 		}
 	}
 
@@ -3553,7 +3596,7 @@ class KListItem
 		height = Math.max(height, root.findIcon(root.widgetStyle.toggleOpenIcon).height);
 		iconWidth = 0;
 		for (var i = 0; i < iconLayerList.count; i++) {
-			iconWidth += iconLayerList[i].width;
+			iconWidth += iconLayerList[i].width + spaceHorizontal;
 			height = Math.max(iconLayerList[i].height);
 		}
 		textInfo = labelSize = root.extractTextArea(currentFontStyle, label, lineSpacing);
@@ -3600,13 +3643,13 @@ class KListItem
 	// アイコンインデックスを特定
 	function iconIndexAt(x) {
 		x -= left;
-		x -= toggleWidth + 2;
+		x -= (toggleWidth + spaceHorizontal);
 		var i;
 		for (i = 0; i < iconLayerList.count - 1; i++)
 			if (x < iconLayerList[i].width)
 				return i;
 		else
-			x -= iconLayerList[i].width;
+			x -= (iconLayerList[i].width + spaceHorizontal);
 		return i;
 	}
 
@@ -3781,11 +3824,11 @@ class KListItem
 		}
 		var iconList = validIconList;
 		if (iconList.count) {
-			var x = left + toggleWidth + 2;
+			var x = left + toggleWidth;
 			for (var i = 0; i < iconList.count; i++) {
 				var iconLayer = iconLayerList[i];
 				root.operateRect(x, int(top + (height - iconLayer.height) / 2), iconLayer, 0, 0, iconLayer.width, iconLayer.height, omAuto, root.appearanceStyle.opacity);
-				x += iconLayer.width;
+				x += iconLayer.width + spaceHorizontal;
 			}
 		}
 	}

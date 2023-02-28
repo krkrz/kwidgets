@@ -36,7 +36,9 @@ class KCustomDialog extends KWindow
 
 		defaultFocusable = true;
 
-		primaryLayer.add(new KGridLayout(this, %[ name: "rootGrid", id: "widget_grid", style: %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_CENTER ] ] ] ]));
+		primaryLayer.add(new KGridLayout(this, %[ name: "rootGrid", id: "widget_grid",
+												  isAvoidDictionaryRegistration: getOption("isAvoidDictionaryRegistration", false),
+												  style: %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_CENTER ] ] ] ]));
 
 		rootGrid.add(0, 0, new KCustomUI(this, %[ name: "uiPane",
 												  uis: getOption("uis", []),

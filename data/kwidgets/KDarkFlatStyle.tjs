@@ -457,7 +457,9 @@
 			klass: "KList",
 			style: %[
 				stride: 14,
+				spaceToggle: 6,
 				spaceVertical: 6,
+				spaceHorizontal: 2,
 				renameTextinputId: "list_rename_textinput",
 				frameColor: "list_frame",
 				focusFrameColor: "list_frame_focus",
@@ -628,7 +630,7 @@
 		%[ id: "vertical_spliter_shutter_toggle",
 		   styleOfId: "spliter_shutter_toggle",
 		   style: %[ backward: %[ icon: "k_scroll_up" ],
-					 forward: %[ icon: "k_scroll_bottom" ],
+					 forward: %[ icon: "k_scroll_down" ],
 				   ],
 		 ],
 
