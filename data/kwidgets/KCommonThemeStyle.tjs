@@ -119,6 +119,36 @@
 		   ]
 		 ],
 
+		%[ theme: "not_variable",
+		   style: %[
+			   isClass: %[
+				   KWidget: %[
+					   variable: false
+				   ]
+			   ]
+		   ]
+		 ],
+
+		%[ theme: "focusable",
+		   style: %[
+			   isClass: %[
+				   KWidget: %[
+					   focusable: true,
+				   ]
+			   ]
+		   ]
+		 ],
+
+		%[ theme: "not_focusable",
+		   style: %[
+			   isClass: %[
+				   KWidget: %[
+					   focusable: false,
+				   ]
+			   ]
+		   ]
+		 ],
+
 		%[ theme: "debug_frame",
 		   style: %[
 			   isClassWeak: %[

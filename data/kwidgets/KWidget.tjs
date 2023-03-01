@@ -91,7 +91,8 @@ global.K_WIDGET_APPEARANCE_STYLE_DEFINITION = [
 	[ "compositeState", "compositeState", [] ],
 	[ "statePriority", "statePriority", [] ],
 	[ "callback", "callback", "" ],
-	[ "opacity",    "opacity",  255 ]
+	[ "opacity",    "opacity",  255 ],
+	[ "focusable", "focusable", true ]
 ];
 
 global.K_WIDGET_LOCATE_STYLE_DEFINITIION = [
@@ -1427,6 +1428,7 @@ class KWidget extends Layer
 		if (isInWidgetTree)
 			parentWidget.releaseStyleModificationDelay();
 		invalidateStyleCallback();
+		invalidateFocusable();
 	}
 
 	function invalidateStyleCallback() {
@@ -1436,6 +1438,12 @@ class KWidget extends Layer
 		if (styleCallback != ""
 			&& typeof(this[styleCallback]) != K_UNDEFINED)
 			this[styleCallback]();
+	}
+
+
+	function invalidateFocusable{
+		if (! appearanceStyle.focusable)
+			focusable = false;
 	}
 
 	/*----------------------------------------------------------------------

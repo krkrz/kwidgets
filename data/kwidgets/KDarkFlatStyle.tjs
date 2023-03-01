@@ -90,6 +90,8 @@
 				"k_tab_note" => "k_note",
 				"k_tab_scroll_left" => "$triangle(5,8,l,#f0f0f0)",
 				"k_tab_scroll_right" => "$triangle(5,8,r,#f0f0f0)",
+				"k_check_on_light" => "checked_8x8_light",
+				"k_check_off_light" => "$frame(8,8)",
 			]
 		],
 

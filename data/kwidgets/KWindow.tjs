@@ -507,7 +507,7 @@ class KWindow extends Window
 				   && ! targetWidget.enabled)
 				targetWidget = targetWidget.parent;
 			if (targetWidget !== void
-				&& targetWidget.enabled)
+				&& targetWidget.nodeEnabled)
 				targetWidget.onHoverMouseWheel(ev.shift,
 											   ev.delta,
 											   targetWidget.cursorX,

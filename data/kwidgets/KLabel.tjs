@@ -211,6 +211,7 @@ mixin(KImageLabel, KImageCapability);
 global.KMarkCapabilityWidgetStyleDefinition = [
 	[ "multiline", "multiline", false ],
 	[ "textWidth", "textWidth", 200 ],
+	[ "textAlign", "textAlign", ALIGN_LEFT ],
 	[ "text", "text", void ]
 ];
 
@@ -262,7 +263,11 @@ class KMarkdownCapability
 	}
 
 	function onDrawLabel(x, y, w, h) {
-		md.setPos(x, y);
+		switch (widgetStyle.textAlign) {
+		case ALIGN_LEFT: md.setPos(x, y); break;
+		case ALIGN_CENTER: md.setPos(x + (w - md.width) / 2, y); break;
+		case ALIGN_RIGHT: md.setPos(x + w - md.width, y); break;
+		}
 	}
 };
 

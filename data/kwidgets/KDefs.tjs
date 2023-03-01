@@ -1,6 +1,6 @@
 global.K_UNDEFINED = "undefined";
 
-global.K_WIDGET_MIN_POSSIBLE_WIDTH = 32;
+global.K_WIDGET_MIN_POSSIBLE_WIDTH = 8;
 global.K_WIDGET_MAX_POSSIBLE_WIDTH = 10000;
 global.K_UNLIMITED_SIZE = K_WIDGET_MAX_POSSIBLE_WIDTH;
 
@@ -55,6 +55,7 @@ global.UI_TYPE_PLACEHOLDER = "ui.type.placeholder";
 global.UI_TYPE_BEGIN_LIST = "ui.type.begin.list";
 global.UI_TYPE_END_LIST = "ui.type.end.list";
 global.UI_TYPE_LIST_LEVEL = "ui.type.list.level";
+global.UI_TYPE_MARKDOWNBUTTON   = "ui.type.markdownbutton";
 
 global.UI_LABEL_STYLE_LEFT = 0;
 global.UI_LABEL_STYLE_LEFTTOPCORNER = 1;

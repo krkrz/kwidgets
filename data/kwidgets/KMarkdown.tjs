@@ -424,7 +424,8 @@ class KMarkdownRow
 		}
 		case K_MARKDOWN_GLYPH_TYPE_IMAGE: {
 			owner.operateRect(left + topGlyph.x + topGlyph.padding, top + topGlyph.y,
-							  owner.findIcon(topGlyph.image), 0, 0, topGlyph.width, topGlyph.height);
+							  owner.findIcon(topGlyph.image), 0, 0, topGlyph.width, topGlyph.height,
+							  omAuto, owner.appearanceStyle.opacity);
 			break;
 		}
 		}
