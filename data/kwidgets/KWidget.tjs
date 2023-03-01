@@ -205,7 +205,7 @@ class KWidget extends Layer
 	var _options;
 	// スタイル
 	var _theme;
-	var _style, _styleArch;
+	var _style = %[], _styleArch;
 	var _styleChain;
 	var _styleModificationDelayRefCount = 0;
 	var _styleModificationLocked = false;
