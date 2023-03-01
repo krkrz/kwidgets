@@ -504,7 +504,7 @@ class KWindow extends Window
 														false,
 													   true);
 			while (targetWidget !== void
-				   && ! targetWidget.enabled)
+				   && ! targetWidget.nodeEnabled)
 				targetWidget = targetWidget.parent;
 			if (targetWidget !== void
 				&& targetWidget.nodeEnabled)
