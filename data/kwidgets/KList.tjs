@@ -140,6 +140,7 @@ class KList extends KVirtualWidget
 	var traceUnfocusableItem = false;
 	var listItemStyleChainCache = %[];
 	var mouseDownItem = void;
+	var _disableNotice = false;
 
 	/*------------------------------
 	 * リストビュー
@@ -159,6 +160,7 @@ class KList extends KVirtualWidget
 		_focusOnSelect = getOption("focusOnSelect", true);
 		_multipleSelection = getOption("multipleSelection", false);
 		_disabledItemCapabilityMask = getOption("disabledItemCapabilityMask", LIST_ITEM_CAPABILITY_MASK_FOCUS);
+		_disableNotice = getOption("disableNotice", false);
 		singleClickOpenToggle = getOption("singleClickOpenToggle", false);
 		traceUnfocusableItem = getOption("traceUnfocusableItem", false);
 		hitThreshold = 0;
@@ -1026,6 +1028,12 @@ class KList extends KVirtualWidget
 	function onBlur {
 		// セレクション再描画
 		drawFocusedItem();
+	}
+
+	function noticeRect {
+		if (_disableNotice)
+			return;
+		super.noticeRect(...);
 	}
 
 	// セレクションを注視する
