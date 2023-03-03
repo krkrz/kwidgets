@@ -1,11 +1,17 @@
 class KLayout extends KEntity
 {
+	var _inLocate = false;
+	var _redoCalc = false;
+	
 	function KLayout(window, opts) {
 		super.KEntity(window, opts);
 	}
 
 	function onChildMinMaxSizeModified() {
-		redrawContents();
+		if (_inLocate)
+			_redoCalc = true;
+		else
+			redrawContents();
 	}
 
 	function onChildLocateStyleModified() {
@@ -29,11 +35,19 @@ class KLayout extends KEntity
 
 		if (oldWidth == width
 			&& oldHeight == height)
-			onLocateLayout();
+			locateLayout();
+	}
+
+	function locateLayout() {
+		_inLocate = true;
+		onLocateLayout();
+		_inLocate = false;
+		if (_redoCalc)
+			redrawContents();
 	}
 
 	function onSizeModified(width, height) {
 		if (isAttachedToWindow)
-			onLocateLayout();
+			locateLayout();
 	}
 };

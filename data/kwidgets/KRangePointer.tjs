@@ -163,6 +163,10 @@ class KRangePointer2D extends KValueEntity
 		}
 	}
 
+	function complete {
+		interp.complete();
+	}
+
 	function _onStartInterpolation() {
 		onStartInterpolation();
 	}

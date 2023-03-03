@@ -24,11 +24,16 @@ class KSpiralLayout extends KLayout
 	 ------------------------------*/
 	function KSpiralLayout(window, *) {
 		var options = parseOldStyleWidgetArgs(KSpiralLayoutArgsFormat, *);
-		options.middleButtonDrag = true;
+		options = unionDictionary(%[ middleButtonDrag: true,
+									 marginalMinWidth: 0,
+									 marginalMinHeight: 0,
+									 marginalMaxWidth: K_WIDGET_MAX_POSSIBLE_WIDTH,
+									 marginalMaxHeight: K_WIDGET_MAX_POSSIBLE_WIDTH ],
+								  options,
+								  true);
 		super.KLayout(window, options);
 		childList = [];
 		hasImage = false;
-		setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
 		hitThreshold = 0;
 	}
 
@@ -115,15 +120,17 @@ class KSpiralLayout extends KLayout
 		minW = minH = maxW = maxH = 0;
 
 		for (var i = 0; i < childList.count; i++) {
-			var childW = childList[i].minWidth + childList[i].marginHorizontal + borderPaddingWidth;
-			var childH = childList[i].minHeight + childList[i].marginVertical + borderPaddingHeight;
+			var childW = childList[i].minWidth + childList[i].marginHorizontal;
+			var childH = childList[i].minHeight + childList[i].marginVertical;
 
 			minW = int(Math.max(minW, childW));
 			minH = int(Math.max(minH, childH));
 			maxH += childH;
 		}
 
-		maxH += spaceVertical * (childList.count - 1);
+		minW += borderPaddingWidth;
+		minH += borderPaddingHeight;
+		maxH += borderPaddingHeight + spaceVertical * (childList.count - 1);
 
 		setMinMaxSize(minW, minH, minW, minH);
 	}
@@ -132,64 +139,63 @@ class KSpiralLayout extends KLayout
 	 * レイアウトに従ってウィジェットを配置する
 	 ------------------------------*/
 	function onLocateLayout {
+		if (! hasDrawableBorder(borderStyle)) {
+			hasImage = false;
+		} else {
+			hasImage = true;
+			drawBorder(borderStyle, 0, 0, width, height);
+		}
+
 		var x, y, w, h;
-		x = y = w = h = 0;
+		x = borderPaddingLeft;
+		y = borderPaddingHeight;
+		h = 0;
 		var rowChildList = [];
+
 
 		for (var i = 0; i < childList.count; i++) {
 			var child;
 			var childW, childH;
 			child = childList[i];
-			childW = child.minWidth + child.marginHorizontal + borderPaddingWidth;
-			childH = child.minHeight + child.marginVertical + borderPaddingHeight;
+			childW = child.minWidth + child.marginHorizontal;
+			childH = child.minHeight + child.marginVertical;
 
-			var drawLine = false;
+			var linefeed = false;
 
-			if (w + childW > width) {
-				drawLine = true;
+			if (x + childW > width - borderPaddingRight) {
+				linefeed = true;
 				i--;
 			} else {
 				rowChildList.add(child);
-				w += childW;
+				x += childW + spaceHorizontal;
 				h = Math.max(h, childH);
 				if (i == childList.count - 1)
-					drawLine = true;
+					linefeed = true;
 			}
 
-			if (drawLine) {
+			if (linefeed) {
+				x = borderPaddingLeft;
 				for (var j = 0; j < rowChildList.count; j++) {
 					var child;
 					var childW, childH;
 					child = rowChildList[j];
-					childW = child.minWidth + child.marginHorizontal + borderPaddingWidth;
-					childH = child.minHeight + child.marginVertical + borderPaddingHeight;
+					childW = child.minWidth + child.marginHorizontal;
+					childH = child.minHeight + child.marginVertical;
 					child.setSize(child.minWidth, child.minHeight);
-					locateChild(x + borderPaddingLeft, y + borderPaddingTop, childW - borderPaddingWidth, childH - borderPaddingHeight, child);
+					locateChild(x, y, childW, h, child);
 					x += childW + spaceHorizontal;
 				}
 				y += h;
-				x = w = h = 0;
+				x = borderPaddingLeft;
+				h = 0;
 				rowChildList = [];
 				if (i != childList.count - 1)
 					y += spaceVertical;
+				else
+					y += borderPaddingBottom;
 			}
 		}
 
 		setMinMaxSize(minWidth, y, maxWidth, Math.max(y, maxHeight));
-
-		if (! hasDrawableBorder(borderStyle)) {
-			hasImage = false;
-		} else {
-			hasImage = true;
-			fillRect(0, 0, width, height, borderStyle.backgroundColor);
-			for (var i = 0; i < childList.count; i++) {
-				var child = childList[i];
-				drawBorder(borderStyle,
-						   child.left - borderPaddingLeft,
-						   child.top - borderPaddingTop,
-						   child.width + borderPaddingWidth,
-						   child.height + borderPaddingHeight);
-			}
-		}
 	}
 }

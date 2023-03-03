@@ -134,6 +134,10 @@ class KTextInputSlider extends KValueEntity
 		slider.interpolate(value);
 	}
 
+	function complete {
+		slider.complete();
+	}
+
 	function _onStartInterpolation() {
 		onStartInterpolation();
 	}
