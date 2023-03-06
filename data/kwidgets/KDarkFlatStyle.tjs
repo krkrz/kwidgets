@@ -182,7 +182,7 @@
 				focus: %[
 					borderColor: "widget_border_focus",
 				],
-				mouseDown: %[
+				mouseDownLeft: %[
 					backgroundColor: "highlight_bg",
 					fontColor: 0x323232,
 				],
@@ -360,7 +360,7 @@
 				borderWidth: 0,
 				borderRadius: 0,
 				backgroundColor: "scrollbar_bg",
-				mouseDown: %[ backgroundColor: "scroll_button_auto" ],
+				mouseDownLeft: %[ backgroundColor: "scroll_button_auto" ],
 				padding: 4 ]
 		],
 
@@ -537,7 +537,7 @@
 			id: "combobox_dropdown_button",
 			style: %[
 				backgroundColor: "textedit_bg",
-				mouseDown: %[ backgroundColor: "textedit_bg" ],
+				mouseDownLeft: %[ backgroundColor: "textedit_bg" ],
 				borderStyle: BORDER_STYLE_NONE,
 				borderWidth: 0,
 				borderRadius: 0,
@@ -593,7 +593,7 @@
 			   padding: 2,
 			   hover: %[ backgroundColor: "toggle_bg_hover",
 						 borderRadius: "toggle_border_hover" ],
-			   mouseDown: %[ backgroundColor: "highlight_bg" ],
+			   mouseDownLeft: %[ backgroundColor: "highlight_bg" ],
 		   ]
 		 ],
 
@@ -612,7 +612,7 @@
 
 		%[ id: "spliter_handle",
 		   style: %[
-			   mouseDown: %[ backgroundColor: "highlight_bg" ]
+			   mouseDownLeft: %[ backgroundColor: "highlight_bg" ]
 		   ]
 		 ],
 
@@ -661,8 +661,8 @@
 					 notSelected: %[ backgroundColor: "tab_bg_inactive" ],
 					 focused: %[ fontUnderline: true ],
 					 hover: %[ backgroundColor: "tab_bg_hover" ],
-					 mouseDown: %[ backgroundColor: "tab_bg_mousedown" ],
-					 statePriority: [ "mouseDown", "hover", "notSelected" ]
+					 mouseDownLeft: %[ backgroundColor: "tab_bg_mousedown" ],
+					 statePriority: [ "mouseDownLeft", "hover", "notSelected" ]
 				   ]
 		 ],
 

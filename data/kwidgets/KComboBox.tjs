@@ -321,8 +321,12 @@ class KComboBox extends KValueEntity
 		}
 	}
 
-	function onMouseDown() {
+	function onMouseDown(x, y, button, shift) {
 		super.onMouseDown(...);
+
+		if (button != mbLeft)
+			return;
+
 		focus();
 		switch (type) {
 		case COMBO_STYLE_DROPDOWN:
@@ -334,8 +338,12 @@ class KComboBox extends KValueEntity
 		}
 	}
 
-	function onMouseUp() {
+	function onMouseUp(x, y, button, shift) {
 		super.onMouseUp(...);
+
+		if (button != mbLeft)
+			return;
+
 		focus();
 		switch (type) {
 		case COMBO_STYLE_DROPDOWN:

@@ -95,13 +95,21 @@ class KToggleButton extends KValueEntity
 	 *
 	 * マウスボタンを押して値が変わると、 onValueModified が呼ばれます
 	 ------------------------------*/
-	function onMouseDown() {
+	function onMouseDown(x, t, button, shift) {
 		super.onMouseDown(...);
+
+		if (button != mbLeft)
+			return;
+
 		focus();
 	}
 
-	function onMouseUp {
+	function onMouseUp(x, y, button, shift) {
 		super.onMouseUp(...);
+
+		if (button != mbLeft)
+			return;
+
 		value = ! value;
 		onValueModified(value, ! value);
 	}

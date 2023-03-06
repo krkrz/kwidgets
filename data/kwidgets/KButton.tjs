@@ -160,15 +160,23 @@ class KButton extends KEntity
 	/*------------------------------
 	 * マウスに反応する
 	 ------------------------------*/
-	function onMouseDown() {
-		super.onMouseDown();
+	function onMouseDown(x, y, button, shift) {
+		super.onMouseDown(...);
+
+		if (button != mbLeft)
+			return;
+
 		focus();
 		if (dispatchOnMouseDown)
 			dispatch();
 	}
 
-	function onMouseUp {
+	function onMouseUp(x, y, button, shift) {
 		super.onMouseUp(...);
+
+		if (button != mbLeft)
+			return;
+
 		stopAutoDispatch();
 
 		if (! dispatchOnMouseDown)

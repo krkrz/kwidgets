@@ -349,7 +349,7 @@ class KRangePointer2D extends KValueEntity
 	function stopAutoDispatch() {
 		if (autoDispatchTimer !== void)
 			autoDispatchTimer.enabled = false;
-	}    
+	}
 
 	//------------------------------
 	// マウスイベント
@@ -360,15 +360,22 @@ class KRangePointer2D extends KValueEntity
 		knobDragging = false;
 	}
 
-	function onMouseDown(x, y) {
+	function onMouseDown(x, y, button, shift) {
 		super.onMouseDown(...);
+
+		if (button != mbLeft)
+			return;
 
 		focus();
 		dispatchMouseDownEvent();
 	}
 
-	function onMouseUp() {
+	function onMouseUp(x, y, button, shift) {
 		super.onMouseUp(...);
+
+		if (button != mbLeft)
+			return;
+
 		stopAutoDispatch();
 	}
 

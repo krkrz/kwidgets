@@ -280,8 +280,12 @@ class KFrameLayout extends KLayout
 			hint = "";
 	}
 
-	function onMouseDown(x, y) {
+	function onMouseDown(x, y, button, shift) {
 		super.onMouseDown(...);
+
+		if (button != mbLeft)
+			return;
+
 		if (_checkable
 			&& checkBounds.contains(x, y))	{
 			focus();
@@ -289,8 +293,12 @@ class KFrameLayout extends KLayout
 		}
 	}
 
-	function onMouseUp(x, y) {
+	function onMouseUp(x, y, button, shift) {
 		super.onMouseUp(...);
+
+		if (button != mbLeft)
+			return;
+
 		if (checkButtonPress) {
 			checkButtonPress = false;
 			if (checkBounds.contains(x, y))

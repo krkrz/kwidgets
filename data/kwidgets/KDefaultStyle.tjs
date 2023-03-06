@@ -86,7 +86,7 @@
 				hover: %[
 					backgroundColor: 0xfff8f8f8
 				],
-				mouseDown: %[
+				mouseDownLeft: %[
 					backgroundColor: 0xffffffff,
 					paddingOffset: 1,
 					padding: 1,
@@ -121,7 +121,7 @@
 				hover: %[
 					backgroundColor: 0xfff8f8f8
 				],
-				mouseDown: %[
+				mouseDownLeft: %[
 					backgroundColor: 0xffffffff,
 				],
 				toggleOff: %[
@@ -166,7 +166,7 @@
 				hover: %[
 					backgroundColor: 0xfff8f8f8
 				],
-				mouseDown: %[
+				mouseDownLeft: %[
 					backgroundColor: 0xffffffff,
 				],
 				checkOn: %[ icon: "k_check_button_on" ],
