@@ -105,6 +105,7 @@
 
 		%[ theme: "variable",
 		   style: %[
+			   variable: true,
 			   isId: % [
 				   scrollbar_upward_button: %[ variable: false ],
 				   scrollbar_downward_button: %[ variable: false ],
@@ -121,6 +122,7 @@
 
 		%[ theme: "not_variable",
 		   style: %[
+			   variable: false,
 			   isClass: %[
 				   KWidget: %[
 					   variable: false
@@ -131,6 +133,7 @@
 
 		%[ theme: "focusable",
 		   style: %[
+			   focusable: true,
 			   isClass: %[
 				   KWidget: %[
 					   focusable: true,
@@ -141,6 +144,7 @@
 
 		%[ theme: "not_focusable",
 		   style: %[
+			   focusable: false,
 			   isClass: %[
 				   KWidget: %[
 					   focusable: false,

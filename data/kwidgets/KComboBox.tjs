@@ -128,7 +128,12 @@ class KComboBox extends KValueEntity
 		}
 		setter(v) {
 			_inputValue = void;
-			_selected = _values.find(v);
+			_selected = -1;
+			for (var i = 0; i < _values.count; i++)
+				if (equalStructNumericLoose(_values[i], v)) {
+					_selected = i;
+					break;
+				}
 			if (_selected < 0
 				&& acceptInputValue)
 				_inputValue = v;

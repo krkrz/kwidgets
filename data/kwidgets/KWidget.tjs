@@ -1483,6 +1483,10 @@ class KWidget extends Layer
 	function onParentModified(parent) {
 	}
 
+	property boundDict {
+		getter { return _dict; }
+	}
+
 	/**------------------------------
 	 * 永続化辞書のバインドを避けるかどうか
 	 *

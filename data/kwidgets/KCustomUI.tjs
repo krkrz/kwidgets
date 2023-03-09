@@ -256,6 +256,7 @@ class KCustomUI extends KGridLayout
 				}
 				var level = new KListItem(%[ name: getOption("name", "", uiDef),
 											 label: getOption("label", "", uiDef),
+											 opened: getOption("opened", false, uiDef),
 											 id: "em_caption" ]);
 				curList.add(level);
 				var subGrid = new global.KGridLayout(window, %[ id: gridId ]);
