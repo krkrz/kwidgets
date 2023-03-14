@@ -1657,6 +1657,16 @@ class KList extends KVirtualWidget
 			childList[i].invalidateNodeEnability();
 	}
 
+	function onNodeDisabled {
+		super.onNodeDisabled();
+		invalidateNodeEnability();
+	}
+
+	function onNodeEnabled {
+		super.onNodeEnabled();
+		invalidateNodeEnability();
+	}
+
 	/**------------------------------
 	 * ドラッグ＆ドロップフック関数
 	 ------------------------------*/
