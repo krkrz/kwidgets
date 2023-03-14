@@ -3125,7 +3125,7 @@ class KWidget extends Layer
 											   curDragTarget.cursorY,
 											   _dragging_packet_,
 											   shift);
-				} else {
+				} else if (curDragTarget !== void)	{
 					curDragTarget.dragHover = false;
 					curDragTarget.updateStyleStates();
 					curDragTarget.invalidateStyles();
