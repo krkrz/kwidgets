@@ -6,6 +6,7 @@
 			map: %[
 				"transparent" => 0,
 				"normal_bg" => 0xff535353,
+				"normal_frame" => 0xff424242,
 				"sub1_bg" => 0xff636363,
 				"sub2_bg" => 0xff737373,
 				"sub3_bg" => 0xff838383,
@@ -146,7 +147,7 @@
 		%[
 			klass: "KFrameLayout",
 			style:  %[
-				borderColor: 0xff424242,
+				borderColor: "normal_frame",
 				borderStyle: BORDER_STYLE_SOLID,
 				borderWidth: 1,
 				spaceHorizontal: 4,
@@ -192,6 +193,7 @@
 		%[
 			klass: "KTextButton",
 			style: %[
+				textAlign: ALIGN_CENTER,
 			]
 		],
 
@@ -224,6 +226,7 @@
 		%[
 			klass: "KTextToggleButton",
 			style: %[
+				textAlign: ALIGN_CENTER,
 				paddingHorizontal: 15,
 				paddingVertical: 10 ]
 		],
@@ -492,7 +495,10 @@
 		   style: %[
 			   focus: %[ itemColor: "list_item_focus" ],
 			   selected: %[ itemColor: "list_item_focus" ],
-		   ]
+			   nodeDisabled: %[
+				   opacity: 128,
+			   ],
+		   ],
 		 ],
 
 		%[

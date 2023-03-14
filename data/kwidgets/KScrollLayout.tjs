@@ -383,17 +383,17 @@ class KScrollLayout extends KLayout
 	 * @param name 名前
 	 ------------------------------*/
 	function KScrollLayout(win, *) {
-		var opts = parseOldStyleWidgetArgs(KScrollLayoutArgsFormat, *);
+		var options = parseOldStyleWidgetArgs(KScrollLayoutArgsFormat, *);
+		options = unionDictionary(%[ marginalMinWidth: SCROLL_LAYOUT_MIN_WIDTH,
+									 marginalMinHeight: SCROLL_LAYOUT_MIN_WIDTH,
+									 marginalMaxWidth: SCROLL_LAYOUT_MIN_WIDTH,
+									 marginalMaxHeight: SCROLL_LAYOUT_MIN_WIDTH ],
+								  options,
+								  true);
 
-		super.KLayout(win, opts);
+		super.KLayout(win, options);
 
 		// パラメータ設定
-		neutralColor = WIN_BG;
-		setMarginalMinMaxSize(getOption("marginalMinWidth", SCROLL_LAYOUT_MIN_WIDTH),
-							  getOption("marginalMinHeight", SCROLL_LAYOUT_MIN_WIDTH),
-							  getOption("marginalMaxWidth", SCROLL_LAYOUT_MIN_WIDTH),
-							  getOption("marginalMaxHeight", SCROLL_LAYOUT_MIN_WIDTH));
-
 		var horizontal = getOption("horizontal", true);
 		var vertical = getOption("vertical", true);
 

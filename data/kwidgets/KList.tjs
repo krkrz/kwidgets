@@ -1772,6 +1772,7 @@ global.K_LIST_ITEM_LABEL_STYLE_DEFINITION = [
 ];
 
 global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
+	[ "opacity",    "opacity", void ],
 	[ "skipHierarchy", "skipHierarchy", false ],
 	[ "toggleEnabled", "toggleEnabled", true ],
 	[ "icon", "icon", void ],
@@ -1898,7 +1899,7 @@ class KListItem
 	function updateStyleStates() {
 		var prevStates = duplicateStruct(styleStates);
 		styleStates.assign(customStyleStates);
-		if (root && ! root.nodeEnabled)
+		if (! nodeEnabled)
 			styleStates.add("nodeDisabled");
 		if (root && root.mouseDownItem === this) {
 			var leftButton = System.getKeyState(VK_LBUTTON);
@@ -2301,9 +2302,30 @@ class KListItem
 		}
 	}
 
+	/**------------------------------
+	 * オパシティ
+	 *
+	 * @param value カラー
+	 * @return カラー
+	 ------------------------------*/
+	property opacity {
+		getter {
+			if (appearanceStyle.opacity !== void)
+				return appearanceStyle.opacity;
+			if (root)
+				return root.appearanceStyle.opacity;
+			else
+				return 255;
+		}
+	}
+
+	/**------------------------------
+	 * 現在のフォントスタイル
+	 ------------------------------*/
 	property currentFontStyle {
 		getter {
-			return %[ fontFace: fontFace,
+			return %[ opacity: opacity,
+					  fontFace: fontFace,
 					  fontHeight: fontHeight,
 					  fontColor: fontColor,
 					  fontAntiAlias: fontAntiAlias,
@@ -2357,7 +2379,7 @@ class KListItem
 			overwriteStyle(%[ fontFace: value ]);
 		}
 	}
-	
+
 	/**------------------------------
 	 * フォントカラー
 	 *
@@ -3828,14 +3850,14 @@ class KListItem
 							 toggle,
 							 0, 0,
 							 toggle.width, toggle.height,
-							 omAuto, toggleEnabled ? root.appearanceStyle.opacity : 0);
+							 omAuto, toggleEnabled ? opacity : 0);
 		}
 		var iconList = validIconList;
 		if (iconList.count) {
 			var x = left + toggleWidth;
 			for (var i = 0; i < iconList.count; i++) {
 				var iconLayer = iconLayerList[i];
-				root.operateRect(x, int(top + (height - iconLayer.height) / 2), iconLayer, 0, 0, iconLayer.width, iconLayer.height, omAuto, root.appearanceStyle.opacity);
+				root.operateRect(x, int(top + (height - iconLayer.height) / 2), iconLayer, 0, 0, iconLayer.width, iconLayer.height, omAuto, opacity);
 				x += iconLayer.width + spaceHorizontal;
 			}
 		}
@@ -3918,6 +3940,8 @@ class KListItem
 				if (! focusable)
 					_selected = false;
 			}
+			if (updateStyleStates())
+				invalidateStyles();
 			redraw();
 			for (var i = 0; i < childList.count; i++)
 				childList[i].invalidateNodeEnability();

@@ -105,6 +105,7 @@ global.K_WIDGET_LOCATE_STYLE_DEFINITIION = [
 ];
 
 global.K_WIDGET_FONT_STYLE_DEFINITION = [
+	[ "opacity",    "opacity",  255 ],
 	[ "fontHeight",       "fontHeight", void, void, "_fontHeight" ],
 	[ "fontFace",         "fontFace", void, void, "_fontFace" ],
 	[ "fontColor",        "fontColor", void, "resolveColor", "_fontColor" ],
@@ -308,6 +309,8 @@ class KWidget extends Layer
 					   minh: getOption("marginalMinHeight", 0),
 					   maxw: getOption("marginalMaxWidth", 0),
 					   maxh: getOption("marginalMaxHeight", 0) ];
+		_marginal.maxw = Math.max(_marginal.minw, _marginal.maxw);
+		_marginal.maxh = Math.max(_marginal.minh, _marginal.maxh);
 		_computed.minw = _specified.minw = width;
 		_computed.maxw = _specified.maxw = width;
 		_computed.minh = _specified.minh = height;
@@ -2340,7 +2343,7 @@ class KWidget extends Layer
 	 ------------------------------*/
 	function drawUIText(fontStyle, x, y, text, overrideFontColor = void) {
 		var fontColor = overrideFontColor !== void ? overrideFontColor : fontStyle.fontColor;
-		var opacity = appearanceStyle.opacity;
+		var opacity = fontStyle.opacity;
 		if ((fontColor & 0xff000000) != 0) {
 			opacity = opacity * (fontColor >> 24) / 255;
 			fontColor &= 0xff000000;
