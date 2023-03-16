@@ -333,7 +333,7 @@ class WidgetSample extends KWindow
 												  ]));
 		tabs.testGrid.add(0, 0, new KFrameLayout(this, %[ name: "testFrame", label: "テストフレーム", helpText: "ここにヘルプを表示", checkable: true  ]));
 		tabs.testFrame.add(new KGridLayout(this, %[ name: "testInnerGrid" ]));
-		tabs.testInnerGrid.add(0, 0, new KTextButton(this, %[ name: "testButton", label: "ボタン" ]));
+		tabs.testInnerGrid.add(0, 0, new KTextButton(this, %[ name: "testButton", label: "ボタン", status: "とてもとても長くてとても横幅におさまらないような長いステータス表示は、一定時間で勝手にロールして表示されるようになっているのでその表示テスト" ]));
 		tabs.testInnerGrid.add(0, 1, new KVerticalSeparator(this));
 		tabs.testInnerGrid.add(1, 0, new KHorizontalSeparator(this));
 

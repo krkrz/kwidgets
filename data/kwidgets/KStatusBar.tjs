@@ -19,6 +19,15 @@ class KStatusBar extends KEntity
 {
 	var _defaultLabel;
 	var _label;
+	var _crollStartInterval;
+	var _crollRepeatInterval;
+	var _crollSpeed;
+	var _crollStartTimer;
+	var _crollRepeatTimer;
+	var _reset = false;
+	var _statusOffset = 0;
+	var _crolling = false;
+	var _crollBeginTickCount;
 
 	/*------------------------------
 	 * コンストラクタ
@@ -33,10 +42,27 @@ class KStatusBar extends KEntity
 
 		_label = "";
 		_defaultLabel = getOption("defaultLabel", "");
+		_crollStartInterval = getOption("crollStartInterval", 1000);
+		_crollRepeatInterval = getOption("crollRepeatInterval", 1000);
+		_crollSpeed = getOption("crollSpeed", 75);
+		_crollStartTimer = new Timer(this, "startCroll");
+		_crollStartTimer.capacity = 1;
+		_crollStartTimer.enabled = false;
+		_crollStartTimer.interval = _crollStartInterval;
+		_crollRepeatTimer = new Timer(this, "repeatCroll");
+		_crollRepeatTimer.capacity = 1;
+		_crollRepeatTimer.enabled = false;
+		_crollRepeatTimer.interval =_crollRepeatInterval;
 
 		maxWidth = K_WIDGET_MAX_POSSIBLE_WIDTH;
 	}
 
+	function finalize {
+		stopCroll();
+		invalidate _crollStartTimer;
+		invalidate _crollRepeatTimer;
+		super.finalize();
+	}
 
 	property widgetStyleDefinition {
 		getter {
@@ -61,8 +87,8 @@ class KStatusBar extends KEntity
 				return;
 			// 値を更新
 			_defaultLabel = v;
-			// 再描画
-			redrawContents();
+			// リセット
+			reset();
 		}
 	}
 
@@ -83,8 +109,8 @@ class KStatusBar extends KEntity
 				return;
 			// 値を更新
 			_label = v;
-			// 再描画
-			redrawContents();
+			// リセット
+			reset();
 		}
 	}
 
@@ -103,6 +129,56 @@ class KStatusBar extends KEntity
 		setMinMaxSize(1, h, maxWidth, h);
 		var text = label.length ? label : defaultLabel;
 		drawBorder(borderStyle, 0, 0, width, height);
-		drawUITextInRange(fontStyle, borderPaddingLeft, borderPaddingTop, width - borderPaddingWidth, text, widgetStyle.textAlign);
+		var l = borderPaddingLeft, t = borderPaddingTop, w = width - borderPaddingWidth, h = fontStyle.fontHeight;
+		setClip(l, t, w, h);
+		var drawResult = drawUITextInRange(fontStyle, l - _statusOffset , t, w + _statusOffset, text, widgetStyle.textAlign);
+		setClip();
+		if (_reset) {
+			_reset = false;
+			if (! drawResult.inRange) {
+				_crollStartTimer.enabled = true;
+			}
+		} else if (_crolling) {
+			if (drawResult.inRange) {
+				stopCroll();
+				_crollRepeatTimer.enabled = true;
+			}
+		}
+	}
+
+	function reset {
+		stopCroll();
+		_reset = true;
+		_statusOffset = 0;
+		redrawContents();
+	}
+
+	function repeatCroll {
+		_crollRepeatTimer.enabled = false;
+		reset();
+	}
+
+	function startCroll {
+		if (_crolling)
+			return;
+		_crollStartTimer.enabled = false;
+		_crolling = true;
+		_statusOffset = 0;
+		_crollBeginTickCount = System.getTickCount();
+		System.addContinuousHandler(onCroll);
+	}
+
+	function stopCroll {
+		if (! _crolling)
+			return;
+		_crollStartTimer.enabled = false;
+		_crollRepeatTimer.enabled = false;
+		_crolling = false;
+		System.removeContinuousHandler(onCroll);
+	}
+
+	function onCroll {
+		_statusOffset = int((System.getTickCount() - _crollBeginTickCount) / 1000 * _crollSpeed);
+		redrawContents();
 	}
 }
