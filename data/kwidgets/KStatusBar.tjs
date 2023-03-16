@@ -42,8 +42,8 @@ class KStatusBar extends KEntity
 
 		_label = "";
 		_defaultLabel = getOption("defaultLabel", "");
-		_crollStartInterval = getOption("crollStartInterval", 1000);
-		_crollRepeatInterval = getOption("crollRepeatInterval", 1000);
+		_crollStartInterval = getOption("crollStartInterval", 2000);
+		_crollRepeatInterval = getOption("crollRepeatInterval", 3000);
 		_crollSpeed = getOption("crollSpeed", 75);
 		_crollStartTimer = new Timer(this, "startCroll");
 		_crollStartTimer.capacity = 1;
