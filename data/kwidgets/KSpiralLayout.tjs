@@ -34,7 +34,6 @@ class KSpiralLayout extends KLayout
 		super.KLayout(window, options);
 		childList = [];
 		hasImage = false;
-		hitThreshold = 0;
 	}
 
 	/**------------------------------

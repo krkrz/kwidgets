@@ -3199,6 +3199,7 @@ class KWidget extends Layer
 			new KInterpolateDispatcher(this,
 									   %[ valueName: "middleButtonDragTargetValue",
 										  dispatchName: "dispatchMiddleButtonDrag",
+										  interval: 60,
 										  lerpFunction: function(a, b, t)
 										  { return %[ left: a.left + (b.left - a.left) * t,
 													  top: a.top + (b.top - a.top) * t ]; } ]);
