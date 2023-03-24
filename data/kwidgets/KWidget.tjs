@@ -2961,6 +2961,21 @@ class KWidget extends Layer
 	}
 
 	/*------------------------------
+	 * キーダウンイベント
+	  ------------------------------*/
+	function onKeyDown(key, shift) {
+		switch (key) {
+		case VK_UP:
+		case VK_DOWN:
+		case VK_LEFT:
+		case VK_RIGHT:
+			if (! getOption("enableDefaultCursorKey", false))
+				return;
+		}
+		super.onKeyDown(...);
+	}
+
+	/*------------------------------
 	 * マウスホイールイベント
 	 *
 	 * 自分自身でホイールをトラップしない時は、
