@@ -11,7 +11,8 @@ global.KCheckBoxWidgetStyle =
 	[
 		[ "icon", "icon", "" ],
 		[ "lineSpacing", "lineSpacing", 0 ],
-		[ "variable", "variable", false ]
+		[ "variable", "variable", false ],
+		[ "fullBackgroundColor", "fullBackgroundColor", 0, "resolveColor" ]
 	];
 
 class KCheckBox extends KValueEntity
@@ -87,7 +88,7 @@ class KCheckBox extends KValueEntity
 		else
 			setMinMaxSize(K_WIDGET_MIN_POSSIBLE_WIDTH, minH, K_WIDGET_MAX_POSSIBLE_WIDTH, minH);
 
-		fillRect(0, 0, width, height, 0);
+		fillRect(0, 0, width, height, widgetStyle.fullBackgroundColor);
 
 		// ボーダー描画
 		var iconLeft = 0;

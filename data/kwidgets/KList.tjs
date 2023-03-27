@@ -478,8 +478,8 @@ class KList extends KVirtualWidget
 		var items = descendants;
 		for (var i = 0; i < items.count; i++) {
 			var child = items[i];
-			child.invalidateStyles();
-			child.updateIconLayerList();
+			child.invalidateStyles(true, true);
+//			child.updateIconLayerList();
 		}
 	}
 
@@ -1782,6 +1782,7 @@ global.K_LIST_ITEM_LABEL_STYLE_DEFINITION = [
 ];
 
 global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
+	[ "statePriority", "statePriority", [] ],
 	[ "opacity",    "opacity", void ],
 	[ "skipHierarchy", "skipHierarchy", false ],
 	[ "toggleEnabled", "toggleEnabled", true ],
@@ -1831,7 +1832,7 @@ class KListItem
 	var _styleChain;
 	var fontStyle;
 	var labelStyle;
-	var appearanceStyle = %[ icons: [], toggleEnabled: true ];
+	var appearanceStyle = %[ icons: [], toggleEnabled: true, statePriority: [] ];
 	var widgetStyle;
 	var styleStates = [];
 	var customStyleStates = [];
@@ -1930,7 +1931,39 @@ class KListItem
 			styleStates.add("focus");
 		if (selected)
 			styleStates.add("selected");
+
+		resolveStatePriority(styleStates);
+
 		return ! equalStruct(prevStates, styleStates);
+	}
+
+	function resolveStatePriority(states) {
+		var statePriority = appearanceStyle.statePriority;
+		if (statePriority.count <= 1)
+			return;
+
+		var matched = [];
+		for (var i = 0; i < statePriority.count; i++) {
+			var state = statePriority[i];
+			if (states.find(state) >= 0)
+				matched.add(state);
+		}
+
+		if (matched.count <= 1)
+			return;
+
+		for (var i = 0; i < matched.count - 1; i++) {
+			var priorState = matched[i];
+			var priorStateIndex = states.find(priorState);
+			for (var j = i + 1; j < matched.count; j++) {
+				var comparedState = matched[j];
+				var comparedStateIndex = states.find(comparedState);
+				if (comparedStateIndex < priorStateIndex) {
+					states.insert(priorStateIndex + 1, comparedState);
+					states.erase(comparedStateIndex);
+				}
+			}
+		}
 	}
 
 	function addCustomStyleState(state, onlyAdd = false) {
@@ -1986,7 +2019,7 @@ class KListItem
 		}
 	}
 
-	function invalidateStyles(forceUpdate = true) {
+	function invalidateStyles(forceUpdate = true, resetIcons = false) {
 		updateStyleComp();
 
 		var prevBackgroundColor = appearanceStyle.backgroundColor;
@@ -1998,7 +2031,8 @@ class KListItem
 		if (forceUpdate && modified) {
 			if (itemVisible) {
 				var iconList = validIconList;
-				if (! equalStruct(iconList, prevIconList)) {
+				if (resetIcons
+					|| ! equalStruct(iconList, prevIconList)) {
 					updateIconLayerList();
 					prevIconList = iconList;
 				}

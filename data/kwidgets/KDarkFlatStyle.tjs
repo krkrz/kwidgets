@@ -7,6 +7,7 @@
 				"transparent" => 0,
 				"normal_bg" => 0xff535353,
 				"normal_frame" => 0xff424242,
+				"hover_bg" => 0xff686868,
 				"sub1_bg" => 0xff636363,
 				"sub2_bg" => 0xff737373,
 				"sub3_bg" => 0xff838383,
@@ -15,6 +16,7 @@
 				"editable_bg" => 0xff454545,
 				"textedit_bg" => "editable_bg",
 				"textboard_bg" => 0xff686868,
+				"textedit_hover_bg" => 0xff555555,
 				"button_bg" => "editable_bg",
 				"button_bg_active" => 0xffd4d4d4,
 				"hint_bg" => 0xd0c9c9c0,
@@ -23,12 +25,14 @@
 				"widget_border" => 0xff898989,
 				"widget_border_focus" => 0xff3c5ba2,
 				"pointer_knob" => 0xff696969,
+				"pointer_knob_hover" => 0xff797979,
 				"textedit_border" => 0xff696969,
 				"textedit_border_focus" => 0xff0f64d2,
 				"scroll_button_auto" => 0xff1a1a1a,
 				"scroll_border" => 0xff383838,
 				"textedit_bg_selection" => 0xff0078d7,
 				"textedit_font_selection" => 0xfff0f0f0,
+				"list_hover_bg" => 0xff606060,
 				"list_frame" => "transparent",
 				"list_frame_focus" => "transparent",
 				"list_frame_drag" => 0xff1cc2ff,
@@ -180,6 +184,7 @@
 				borderColor: 0xff6b6b6b,
 				borderRadius: 18,
 				padding: 10,
+				hover: %[ backgroundColor: "hover_bg" ],
 				focus: %[
 					borderColor: "widget_border_focus",
 				],
@@ -252,7 +257,9 @@
 				borderRadius: 3,
 				spaceHorizontal: 6,
 				backgroundColor: "button_bg",
+				fullBackgroundColor: 0,
 				padding: 1,
+				hover: %[ fullBackgroundColor: "hover_bg" ],
 				focus: %[ borderColor: "widget_border_focus" ],
 				checkOn: %[ icon: "k_check_button_on", backgroundColor: "button_bg_active" ],
 				checkOff: %[ icon: "k_check_button_off" ],
@@ -281,6 +288,7 @@
 				borderColor: "pointer_knob",
 				borderWidth: 1,
 				borderRadius: 3,
+				hover: %[ backgroundColor: "pointer_knob_hover" ],
 			]
 		],
 
@@ -291,7 +299,7 @@
 				borderStyle: BORDER_STYLE_SOLID,
 				borderColor: "textedit_bg",
 				borderWidth: 2,
-				knobId: "range_pointer_2d_knob"
+				knobId: "range_pointer_2d_knob",
 			]
 		],
 
@@ -317,6 +325,14 @@
 		],
 
 		%[
+			id: "slider_inner_bg_hover",
+			styleOfId: "slider_inner_bg",
+			style: %[
+				backgroundColor: "textedit_hover_bg",
+			]
+		],
+
+		%[
 			id: "slider_inner_knob",
 			style: %[
 				backgroundColor: 0,
@@ -338,10 +354,13 @@
 			   knobId: "slider_knob",
 			   innerBgId: "slider_inner_bg",
 			   innerKnobId: "slider_inner_knob",
+			   hover: %[ innerBgId: "slider_inner_bg_hover" ],
+			   focus: %[ innerBgId: "slider_inner_bg" ],
+			   statePriority: %[ "focus", "hover" ],
 		   ]
 		 ],
 
-		%[
+		%[
 			id: "scrollbar_knob",
 			styleOfId: "range_pointer_2d_knob"
 		],
@@ -433,6 +452,9 @@
 				selectionBackgroundColor: "textedit_bg_selection",
 				selectionFontColor: "textedit_font_selection",
 				lineSpacing: 4,
+				hover: %[ backgroundColor: "textedit_hover_bg" ],
+				focus: %[ backgroundColor: "textedit_bg" ],
+				statePriority: [ "focus", "hover" ],
 			],
 		],
 
@@ -493,8 +515,10 @@
 
 		%[ klass: "KListItem",
 		   style: %[
+			   hover: %[ itemColor: "list_hover_bg" ],
 			   focus: %[ itemColor: "list_item_focus" ],
 			   selected: %[ itemColor: "list_item_focus" ],
+			   statePriority: [ "focus", "selected", "hover" ],
 			   nodeDisabled: %[
 				   opacity: 128,
 			   ],
@@ -536,6 +560,9 @@
 				dropdownInterval: 200,
 				dispCount: 20,
 				placeButtonInsideBorder: true,
+				hover: %[ backgroundColor: "textedit_hover_bg" ],
+				focus: %[ backgroundColor: "textedit_bg" ],
+				statePriority: [ "focus", "hover" ],
 			],
 		],
 
