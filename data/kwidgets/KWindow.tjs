@@ -531,8 +531,8 @@ class KWindow extends Window
 		// nameが指定されてたらウィンドウもバインド
 		if (name != "") {
 			this.dict = dict;
-			width = dict.init(name + "_width", width);
-			height = dict.init(name + "_height", height);
+			width = dict.init(name + "_width", width) * global.KWindow.globalZoomNumer / global.KWindow.globalZoomDenom;
+			height = dict.init(name + "_height", height) * global.KWindow.globalZoomNumer / global.KWindow.globalZoomDenom;
 			left = dict.init(name + "_left", left);
 			top = dict.init(name + "_top", top);
 		}
