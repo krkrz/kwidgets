@@ -19,7 +19,7 @@
 
 //----------------------------------------------------------------------
 // ïœêî
-tjs_uint32 countHint, _styleHint, addHint, ancestorsHint, reverseHint, windowHint, styleRepositoryHint, _idStyleKeysHint, idHint, findHint, isIdHint, _classStyleKeysHint, isClassHint, _classWeakStyleKeysHint, isClassWeakHint, isAttachedToWindowHint, insertHint, removeHint, _styleCompHint, classNameHint, styleParentHint, _styleFragCacheHint, classTreesHint, clearHint, styleStatesHint;
+tjs_uint32 countHint, _styleHint, addHint, ancestorsHint, reverseHint, windowHint, styleRepositoryHint, _idStyleKeysHint, idHint, findHint, isIdHint, _classStyleKeysHint, isClassHint, _classWeakStyleKeysHint, isClassWeakHint, isAttachedToWindowHint, insertHint, removeHint, _styleCompHint, classNameHint, styleParentHint, _styleFragCacheHint, classTreesHint, clearHint, styleStatesHint, eraseHint;
 
 //----------------------------------------------------------------------
 // íËêî
@@ -1350,6 +1350,40 @@ void updateStyleComp(tTJSVariant widget, tTJSVariant defsSet, ttstr uniqKey)
 	widgetObj.SetValue(L"_styleComp", styleComp, 0, &_styleCompHint);
 }
 
+void resolveStatePriority(tTJSVariant states, tTJSVariant statePriority)
+{
+	ncbPropAccessor statesObj(states);
+	ncbPropAccessor statePriorityObj(statePriority);
+	tjs_uint statePriorityCount = countArray(statePriority);
+	tTJSVariant result;
+
+	std::vector<ttstr> matched;
+
+	for (tjs_uint i = 0; i < statePriorityCount; i++) {
+		ttstr state = statePriorityObj.GetValue(i, ncbTypedefs::Tag<ttstr>());
+		statesObj.FuncCall(0, L"find", &findHint, &result, state);
+		if (tjs_int(result) >= 0)
+			matched.push_back(state);
+	}
+
+	if (matched.size() <= 1)
+		return;
+
+	for (std::size_t i = 0; i < matched.size() - 1; i++) {
+		auto priorState = matched[i];
+		statesObj.FuncCall(0, L"find", &findHint, &result, priorState);
+		tjs_int priorStateIndex = tjs_int(result);
+		for (std::size_t j = i + 1; j < matched.size(); j++) {
+			auto comparedState = matched[j];
+			statesObj.FuncCall(0, L"find", &findHint, &result, comparedState);
+			tjs_int comparedStateIndex = tjs_int(result);
+			if (comparedStateIndex < priorStateIndex) {
+				statesObj.FuncCall(0, L"insert", &insertHint, NULL, priorStateIndex + 1, comparedState);
+				statesObj.FuncCall(0, L"erase", &eraseHint, NULL, comparedStateIndex);
+			}
+		}
+	}
+}
 
 NCB_REGISTER_FUNCTION(equalStruct, equalStruct);
 NCB_REGISTER_FUNCTION(equalStructNumericLoose, equalStructNumericLoose);
@@ -1380,3 +1414,4 @@ NCB_REGISTER_FUNCTION(getStyleFragForClass, getStyleFragForClass);
 NCB_REGISTER_FUNCTION(findStyleFragForClassWeak, findStyleFragForClassWeak);
 NCB_REGISTER_FUNCTION(getStyleFragForClassWeak, getStyleFragForClassWeak);
 NCB_REGISTER_FUNCTION(updateStyleComp, updateStyleComp);
+NCB_REGISTER_FUNCTION(resolveStatePriority, resolveStatePriority);

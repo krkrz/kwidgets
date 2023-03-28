@@ -517,6 +517,11 @@ class KWidget extends Layer
 	}
 
 	function resolveStatePriority(states) {
+		global.resolveStatePriority(states, appearanceStyle.statePriority);
+		return;
+
+		// BEGIN  reference implementation.
+		// This code is actually optimized and executed in C++.
 		var statePriority = appearanceStyle.statePriority;
 		if (statePriority.count <= 1)
 			return;
