@@ -178,7 +178,7 @@ class KStatusBar extends KEntity
 	}
 
 	function onCroll {
-		_statusOffset = int((System.getTickCount() - _crollBeginTickCount) / 1000 * _crollSpeed);
+		_statusOffset = int((System.getTickCount() - _crollBeginTickCount) / 1000 * _crollSpeed + 0.5);
 		redrawContents();
 	}
 }

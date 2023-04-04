@@ -3767,6 +3767,8 @@ class KListItem
 	function isAncestorOf(item) {
 		if (item === void)
 			return false;
+		if (item === this)
+			return false;
 		for (; ! item.isRoot; item = item.parent) {
 			if (item == this)
 				return true;

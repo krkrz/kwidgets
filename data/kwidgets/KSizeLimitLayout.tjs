@@ -1,6 +1,15 @@
 /**----------------------------------------------------------------------
  * サイズ制限レイアウト
  ----------------------------------------------------------------------*/
+global.KSizeLimitLayoutArgsFormat =
+	[
+			%[ key: "minWidth", defaultValue: void ],
+			%[ key: "minHeight", defaultValue: void ],
+			%[ key: "maxWidth", defaultValue: void ],
+			%[ key: "maxHeight", defaultValue: void ],
+			%[ key: "name", defaultValue: "" ]
+	];
+
 class KSizeLimitLayout extends KLayout
 {
 	var child;
@@ -16,12 +25,13 @@ class KSizeLimitLayout extends KLayout
 	 * @param maxH 最大高(voidなら適用しない)
 	 * @param name 名前
 	 ------------------------------*/
-	function KSizeLimitLayout(window, minW, minH, maxW, maxH, name = "") {
-		super.KLayout(window, name);
-		limitMinW = minW;
-		limitMinH = minH;
-		limitMaxW = maxW;
-		limitMaxH = maxH;
+	function KSizeLimitLayout(window, *) {
+		var options = parseOldStyleWidgetArgs(KSizeLimitLayoutArgsFormat, *);
+		super.KLayout(window, options);
+		limitMinW = getOption("minWidth", getOption("fixedWidth", void));
+		limitMinH = getOption("minHeight", getOption("fixedHeight", void));
+		limitMaxW = getOption("maxWidth", getOption("fixedWidth", void));
+		limitMaxH = getOption("maxHeight", getOption("fixedHeight", void));
 
 		hasImage = false;
 	}

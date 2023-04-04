@@ -927,6 +927,8 @@ class KWidget extends Layer
 	function isWidgetAncestorOf(item) {
 		if (item === void)
 			return false;
+		if (item === this)
+			return false;
 		for (; item instanceof "KWidget"; item = item.parent) {
 			if (item == this)
 				return true;
