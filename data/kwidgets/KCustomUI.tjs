@@ -239,7 +239,7 @@ class KCustomUI extends KGridLayout
 			if (uiDef.type == UI_TYPE_BEGIN_FRAME) {
 				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][gridStack.count];
 				var frame = new KFrameLayout(window, %[ id: frameId, name: getOption("name", "", uiDef), label: getOption("label", "", uiDef) ] );
-				var subGrid = new global.KGridLayout(window, %[ id: gridId ]);
+				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
 				frame.add(subGrid);
 				curGrid.add(0, insertionY++, frame, 2);
 				gridStack.push(curGrid);
@@ -271,7 +271,7 @@ class KCustomUI extends KGridLayout
 											 record: getOption("isRecordOpenedToDictionary", false, uiDef),
 											 id: "em_caption" ]);
 				curList.add(level);
-				var subGrid = new global.KGridLayout(window, %[ id: gridId ]);
+				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
 				level.add(subGrid);
 				curGrid = subGrid;
 				insertionY = 0;

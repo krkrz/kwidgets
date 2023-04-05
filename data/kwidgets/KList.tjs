@@ -986,18 +986,20 @@ class KList extends KVirtualWidget
 				prevAncestors[i].onDescendantBlur();
 		}
 		focusedItem = void;
-		if (prevFocusedItem !== void)
+		if (prevFocusedItem !== void) {
+			invalidateItemStyleStates(prevFocusedItem);
 			prevFocusedItem.redraw();
+		}
 
 		focusedItem = item;
-		if (focusedItem === void) {
+		if (focusedItem === void) 
 			return;
-		}
-		if (focusedItem !== void) {
-			for (var i = curAncestors.count - 1; i >= 0; i--)
-				curAncestors[i].onDescendantFocus();
-			focusedItem.onFocus();
-		}
+
+		invalidateItemStyleStates(focusedItem);
+
+		for (var i = curAncestors.count - 1; i >= 0; i--)
+			curAncestors[i].onDescendantFocus();
+		focusedItem.onFocus();
 
 		if (resetSelection)
 			focusedItem.selected = true;
@@ -1007,9 +1009,6 @@ class KList extends KVirtualWidget
 			focus();
 
 		onFocusItem(focusedItem);
-
-		invalidateItemStyleStates(prevFocusedItem);
-		invalidateItemStyleStates(focusedItem);
 	}
 
 	// 選択アイテムの背景を選択色で描画する
