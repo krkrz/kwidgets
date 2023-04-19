@@ -16,6 +16,9 @@
 					"widget_grid_narrow" => %[
 						space: 8,
 					],
+					"widget_grid_closely" => %[
+						space: 0,
+					],
 					"button_grid" => %[
 						padding: 12,
 						space: 12,

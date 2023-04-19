@@ -91,10 +91,13 @@ class KCustomUIGenerator
 		var status = getValue(def, "status", "");
 		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
 		var klass = global[getValue(def, "klass", "KTextInputSlider")];
+		var icon = getValue(def, "icon", "");
+		var leftIcon = icon != "" ? icon + "_left" : getValue(def, "leftIcon", "");
+		var rightIcon = icon != "" ? icon + "_right" : getValue(def, "rightIcon", "");
 		var widget = new klass(grid.window, %[ name: uiName, hint: hint, status: status,
 											   width: getValue(globalOptions, "widgetMinWidth", K_CUSTOM_UI_DEFAULT_WIDGET_MIN_WIDTH),
-											   left: getValue(def, "left", 0), leftIcon: getValue(def, "leftIcon", ""), leftIconHint: getValue(def, "leftIconHint", ""),
-											   right: getValue(def, "right", 100), rightIcon: getValue(def, "rightIcon", ""), rightIconHint: getValue(def, "rightIconHint", ""),
+											   left: getValue(def, "left", 0), leftIcon: leftIcon, leftIconHint: getValue(def, "leftIconHint", ""),
+											   right: getValue(def, "right", 100), rightIcon: rightIcon, rightIconHint: getValue(def, "rightIconHint", ""),
 											   stride: getValue(def, "stride", 1),
 											   value: getValue(def, "value", getValue(def, "left", 0)) ]);
 		return %[ widget: widget, label: label ];
@@ -164,7 +167,7 @@ class KCustomUIGenerator
 
 	function generateDropdownList(grid, insertionY, uiName, def, globalOptions) {
 		var hint = getValue(def, "hint", "");
-		var status = getValue(def, "status", "");
+		var status = getValue(def, "status", "");
 		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
 		var klass = global[getValue(def, "klass", "KComboBox")];
 		var widget = new klass(grid.window, %[ name: uiName, hint: hint, status: status,
@@ -288,33 +291,35 @@ class KCustomUI extends KGridLayout
 			var result = customUIGenerator.generatorMap[uiDef.type](curGrid, insertionY, uiName, uiDef, options);
 			if (result.placed)
 				insertionY = result.insertionY;
-			var label = result.label;
-			var bounds = result.bounds !== void ? result.bounds : result.widget;
-			if (label !== void
-				&& fixedLabel)
-				label.overwriteStyle(%[ variable: false ]);
-			if (label !== void && bounds === void)
-				curGrid.add(0, insertionY++, label, 2);
-			else if (label === void && bounds !== void)
-				curGrid.add(0, insertionY++, bounds, 2);
 			else {
-				switch (labelStyle) {
-				case UI_LABEL_STYLE_LEFT: {
-					label.id = "alignright_caption";
-					curGrid.add(0, insertionY, label);
-					curGrid.add(1, insertionY, bounds);
-					insertionY++;
-					break;
-				}
-				case UI_LABEL_STYLE_LEFTTOPCORNER: {
-					var subGrid = new global.KGridLayout(window);
-					label.id = "em_caption";
-					subGrid.add(0, 0, label);
-					subGrid.add(0, 1, bounds);
-					curGrid.add(0, insertionY, subGrid, 2);
-					insertionY++;
-					break;
-				}
+				var label = result.label;
+				var bounds = result.bounds !== void ? result.bounds : result.widget;
+				if (label !== void
+					&& fixedLabel)
+					label.overwriteStyle(%[ variable: false ]);
+				if (label !== void && bounds === void)
+					curGrid.add(0, insertionY++, label, 2);
+				else if (label === void && bounds !== void)
+					curGrid.add(0, insertionY++, bounds, 2);
+				else {
+					switch (labelStyle) {
+					case UI_LABEL_STYLE_LEFT: {
+						label.id = "alignright_caption";
+						curGrid.add(0, insertionY, label);
+						curGrid.add(1, insertionY, bounds);
+						insertionY++;
+						break;
+					}
+					case UI_LABEL_STYLE_LEFTTOPCORNER: {
+						var subGrid = new global.KGridLayout(window);
+						label.id = "em_caption";
+						subGrid.add(0, 0, label);
+						subGrid.add(0, 1, bounds);
+						curGrid.add(0, insertionY, subGrid, 2);
+						insertionY++;
+						break;
+					}
+					}
 				}
 			}
 			if (result.widget !== void
