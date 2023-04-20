@@ -29,7 +29,7 @@ class TestBed extends KWindow
 						uis: [
 								%[ type: UI_TYPE_BEGIN_FRAME, label: "サブフレーム" ],
 								%[ type: UI_TYPE_TEXTLABEL, label: "シンプルなテキストラベル" ],
-								%[ type: UI_TYPE_SLIDER, label: "スライダー", left: -10, right: 30, stride: 0.1, value: 4.1, name: "cui_slider" ],
+								%[ type: UI_TYPE_SLIDER, label: "[md] スライダー !(gotta_mail)", left: -10, right: 30, stride: 0.1, value: 4.1, name: "cui_slider" ],
 								%[ type: UI_TYPE_TEXTINPUT, name: "texinput", label: "テキスト入力" ],
 								%[ type: UI_TYPE_BEGIN_FRAME, label: "サブサブフレーム" ],
 								%[ type: UI_TYPE_CHECKBOX, name: "checkbox", label: "チェックボックス", value: true ],

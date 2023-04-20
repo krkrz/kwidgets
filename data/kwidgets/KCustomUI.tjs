@@ -22,6 +22,7 @@ global.K_CUSTOM_UI_DEFAULT_WIDGET_MIN_WIDTH = 200;
 class KCustomUIGenerator
 {
 	var generatorMap = %[];
+	var mdPat = /^\[md\]\s*(.*)/;
 
 	function KCustomUIGenerator() {
 		initDefaultGenerators();
@@ -36,6 +37,19 @@ class KCustomUIGenerator
 
 	function hasLabel(def) {
 		return typeof(def.label) != K_UNDEFINED;
+	}
+
+	function generateLabel(window, def) {
+		if (! hasLabel(def))
+			return void;
+		var labelText = getValue(def, "label", "");
+		var hint = getValue(def, "hint", "");
+		var status = getValue(def, "status", "");
+		if (mdPat.test(labelText)) {
+			return new KMarkdownLabel(window, %[ label: mdPat.matches[1], hint: hint, status: status ]);
+		} else {
+			return new KTextLabel(window, %[ label: labelText, hint: hint, status: status ]);
+		}
 	}
 
 	function initDefaultGenerators() {
@@ -89,7 +103,7 @@ class KCustomUIGenerator
 	function generateSlider(grid, insertionY, uiName, def, globalOptions) {
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
-		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
+		var label = generateLabel(grid.window, def);
 		var klass = global[getValue(def, "klass", "KTextInputSlider")];
 		var icon = getValue(def, "icon", "");
 		var leftIcon = icon != "" ? icon + "_left" : getValue(def, "leftIcon", "");
@@ -199,6 +213,7 @@ class KCustomUI extends KGridLayout
 	var uiList = [];
 	var uiNamePrefix;
 	var gridId;
+	var mdPat = /^\[md\]\s*(.*)/;
 
 	function KCustomUI(window, options = %[]) {
 		options = unionDictionary(%[ style: %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_LEFT, alignVertical: ALIGN_CENTER ] ] ] ], options, true);
@@ -233,7 +248,8 @@ class KCustomUI extends KGridLayout
 
 			if (insertLabelToStatus
 				&& getOption("label", "", uiDef) != ""
-				&& getOption("status", "", uiDef) != "")
+				&& getOption("status", "", uiDef) != ""
+				&& ! mdPat.test(uiDef.label))
 				uiDef.status = uiDef.label + ": " + uiDef.status;
 
 			if (typeof(uiDef.label) != K_UNDEFINED)
@@ -294,6 +310,7 @@ class KCustomUI extends KGridLayout
 			else {
 				var label = result.label;
 				var bounds = result.bounds !== void ? result.bounds : result.widget;
+
 				if (label !== void
 					&& fixedLabel)
 					label.overwriteStyle(%[ variable: false ]);

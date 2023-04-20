@@ -45,6 +45,24 @@ class KMarkdownRow
 		}
 	}
 
+	property rawText {
+		getter {
+			var result = "";
+			for (var i = 0; i < glyphs.count; i++) {
+				var glyph = glyphs[i];
+				switch (glyph.type) {
+				case K_MARKDOWN_GLYPH_TYPE_CHAR:
+					result += glyph.char;
+					break;
+				case K_MARKDOWN_GLYPH_TYPE_SPACE:
+					result += " ";
+					break;
+				}
+			}
+			return result;
+		}
+	}
+
 	function setPos(left, top) {
 		this.left = left;
 		this.top = top;
@@ -549,6 +567,15 @@ class KMarkdown extends KVirtualWidget
 			_text = v;
 			parseRequired = true;
 			redrawContents();
+		}
+	}
+
+	property rawText {
+		getter {
+			var lines = [];
+			for (var i = 0; i < rows.count; i++)
+				lines.add(rows[i].rawText);
+			return lines.join("\n").trim();
 		}
 	}
 
