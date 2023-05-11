@@ -201,6 +201,45 @@ public:
     right = right > rect->right ? right : rect->right;
     bottom = bottom > rect->bottom ? bottom : rect->bottom;
   }
+
+	void insetBy(tjs_real x, tjs_real y) {
+		left += x;
+		top += y;
+		right -= x;
+		bottom -= y;
+	}
+
+	KRect *insetByCopy(tjs_real x, tjs_real y) {
+		KRect *result = dup();
+		result->insetBy(x, y);
+		return result;
+	}
+
+	void offsetBy(tjs_real x, tjs_real y) {
+		left += x;
+		top += y;
+		right += x;
+		bottom += y;
+	}
+
+	KRect *offsetByCopy(tjs_real x, tjs_real y) {
+		KRect *result = dup();
+		result->offsetBy(x, y);
+		return result;
+	}
+
+	void offsetTo(tjs_real x, tjs_real y) {
+		right += (x - left);
+		bottom += (y - top);
+		left = x;
+		top = y;
+	}
+
+	KRect *offsetToCopy(tjs_real x, tjs_real y) {
+		KRect *result = dup();
+		result->offsetTo(x, y);
+		return result;
+	}
 };
 
 NCB_REGISTER_CLASS(KRect)
@@ -222,6 +261,12 @@ NCB_REGISTER_CLASS(KRect)
   NCB_PROPERTY(bottom, getBottom, setBottom);
   NCB_PROPERTY(width, getWidth, setWidth);
   NCB_PROPERTY(height, getHeight, setHeight);
+  NCB_METHOD(insetBy);
+  NCB_METHOD(insetByCopy);
+  NCB_METHOD(offsetBy);
+  NCB_METHOD(offsetByCopy);
+  NCB_METHOD(offsetTo);
+  NCB_METHOD(offsetToCopy);
 };
 
 

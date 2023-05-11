@@ -348,13 +348,15 @@
 
 		%[ klass: "KSlider",
 		   style: %[
+			   directKnobDrag: true,
 			   backgroundColor: 0,
 			   borderStyle: BORDER_STYLE_NONE,
 			   borderWidth: 0,
 			   knobId: "slider_knob",
 			   innerBgId: "slider_inner_bg",
 			   innerKnobId: "slider_inner_knob",
-			   hover: %[ innerBgId: "slider_inner_bg_hover" ],
+			   hover: %[ innerBgId: "slider_inner_bg_hover", iconOverlayColor: 0x80686868 ],
+			   mouseDownLeft: %[ iconOverlayColor: 0x807d7d7d ],
 			   focus: %[ innerBgId: "slider_inner_bg" ],
 			   statePriority: %[ "focus", "hover" ],
 		   ]

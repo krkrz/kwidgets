@@ -8,14 +8,17 @@ global.KRangePointer2DWidgetStyleDefinition =
 	[
 		[ "knobId", "knobId" ],
 		[ "innerBgId", "innerBgId", "" ],
-		[ "innerKnobId", "innerKnobId", "" ]
+		[ "innerKnobId", "innerKnobId", "" ],
+		[ "directKnobDrag", "directKnobDrag", false ]
 	];
+
 class KRangePointer2D extends KValueEntity
 {
 	var hParams, vParams;
 	var paramsPair;
 	var knob;
 	var knobDragging = false;
+	var directKnobDragging = false;
 	var dragBeganPos;
 	var dragBeganValue;
 	var autoDispatchStartInterval = void;
@@ -105,6 +108,15 @@ class KRangePointer2D extends KValueEntity
 		getter {
 			return concatArray(super.widgetStyleDefinition, KRangePointer2DWidgetStyleDefinition);
 		}
+	}
+
+	function onStyleModified {
+		super.onStyleModified();
+
+		if (widgetStyle.kdirectKnobDrag) 
+			knob.hitThreshold = 256;
+		else
+			knob.hitThreshold = 0;
 	}
 
 	property pointerValue {
@@ -291,7 +303,7 @@ class KRangePointer2D extends KValueEntity
 		knob.setPos(hParams.knobPixelPos, vParams.knobPixelPos);
 		knob.setFixedSize(hParams.knobPixelSize, vParams.knobPixelSize);
 		knob.unlockStyleModification();
-		
+
 		if (widgetStyle.innerBgId == "") {
 			if (innerBg !== void)
 				innerBg.visible = false;
@@ -335,6 +347,13 @@ class KRangePointer2D extends KValueEntity
 	//------------------------------
 	// オートディスパッチを処理する
 	// ------------------------------
+	property autoDispatchRunning {
+		getter {
+			return autoDispatchTimer !== void
+				&& autoDispatchTimer.enabled;
+		}
+	}
+
 	function fireAutoDispatch() {
 		if (autoDispatchTimer !== void) {
 			if (! autoDispatchTimer.enabled) {
@@ -367,7 +386,22 @@ class KRangePointer2D extends KValueEntity
 			return;
 
 		focus();
-		dispatchMouseDownEvent();
+
+		if (x >= innerMargin.left && x < width - innerMargin.right
+			&& y >= innerMargin.top && y < height - innerMargin.bottom) {
+			if (! widgetStyle.directKnobDrag)
+				dispatchMouseDownEvent();
+			else {
+				startDirectKnobMouseEvent(x, y);
+			}
+		}
+	}
+
+	function onMouseMove(x, y, shift) {
+		super.onMouseMove(...);
+
+		if (directKnobDragging)
+			dispatchDirectKnobMouseEvent(x, y);
 	}
 
 	function onMouseUp(x, y, button, shift) {
@@ -376,7 +410,11 @@ class KRangePointer2D extends KValueEntity
 		if (button != mbLeft)
 			return;
 
-		stopAutoDispatch();
+		if (autoDispatchRunning)
+			stopAutoDispatch();
+
+		if (directKnobDragging)
+			directKnobDragging = false;
 	}
 
 	//------------------------------
@@ -420,6 +458,34 @@ class KRangePointer2D extends KValueEntity
 			dispatch();
 		} else {
 			_interpolate(newPointerValue);
+		}
+	}
+
+	//------------------------------
+	// ダイレクトノブイベントを発火する
+	//------------------------------
+		function startDirectKnobMouseEvent(x, y) {
+			directKnobDragging = true;
+			dispatchDirectKnobMouseEvent(x, y);
+		}
+
+		function dispatchDirectKnobMouseEvent(x, y) {
+			hParams.cursor = x - innerMargin.left;
+			vParams.cursor = y - innerMargin.top;
+
+		for (var i = 0; i < paramsPair.count; i++) {
+			var params = paramsPair[i];
+			if (params.knobPixelOperationAreaSize > 0) {
+				var ofst = params.cursor - params.knobPixelSize / 2;
+				params.newPointerValue = params.baseLogicalLeft + params.baseLogicalSign * (ofst / params.knobPixelOperationAreaSize) * (params.baseLogicalSize - params.knobLogicalSize);
+				standarizeNewPointerValue(params);
+			}
+		}
+
+		var newPointerValue = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
+		if (! equalStructNumericLoose(newPointerValue, pointerValue)) {
+			pointerValue = newPointerValue;
+			dispatch();
 		}
 	}
 

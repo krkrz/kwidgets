@@ -22,7 +22,8 @@ global.KSliderWidgetStyleDefinition =
 		[ "width", "width", void ],
 		[ "height", "height", void ],
 		[ "knobWidth", "knobWidth", void ],
-		[ "variable", "variable", false ]
+		[ "variable", "variable", false ],
+		[ "iconOverlayColor", "iconOverlayColor", 0 ]
 	];
 
 
@@ -153,6 +154,9 @@ class KSlider extends KRangePointer2D
 				y = height / 2;
 			leftIconRange = new KRect(0, y - leftIcon.height / 2, leftIcon.width, leftIcon.height);
 			operateRect(leftIconRange.left, leftIconRange.top, leftIcon, 0, 0, leftIcon.width, leftIcon.height);
+			if (widgetStyle.iconOverlayColor
+				&& leftIconRange.contains(cursorX, cursorY))
+				colorRect(leftIconRange.left, leftIconRange.top, leftIcon.width, leftIcon.height, widgetStyle.iconOverlayColor & 0xffffff, widgetStyle.iconOverlayColor >> 24);
 		}
 
 		if (rightIcon !== void) {
@@ -163,11 +167,30 @@ class KSlider extends KRangePointer2D
 				y = height / 2;
 			rightIconRange = new KRect(width - rightIcon.width, y - rightIcon.height / 2, rightIcon.width, rightIcon.height);
 			operateRect(rightIconRange.left, rightIconRange.top, rightIcon, 0, 0, rightIcon.width, rightIcon.height);
+			if (widgetStyle.iconOverlayColor
+				&& rightIconRange.contains(cursorX, cursorY))
+				colorRect(rightIconRange.left, rightIconRange.top, rightIcon.width, rightIcon.height, widgetStyle.iconOverlayColor & 0xffffff, widgetStyle.iconOverlayColor >> 24);
 		}
+	}
+
+	function onMouseDown(x, y, button, shift) {
+		super.onMouseDown(...);
+
+		if (button != mbLeft)
+			return;
+
+		if ((leftIcon !== void && leftIconRange.contains(x, y))
+			|| (rightIcon !== void && rightIconRange.contains(x, y)))
+			dispatchMouseDownEvent();
 	}
 
 	function onMouseMove(x, y, shift) {
 		super.onMouseMove(...);
+
+		if (leftIcon !== void
+			|| rightIcon !== void)
+			redrawContents();
+
 		if (leftIcon !== void
 			&& leftIconRange.contains(x, y)
 			&& leftIconHint != "")
