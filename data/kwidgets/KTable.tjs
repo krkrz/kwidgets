@@ -2342,8 +2342,6 @@ class KTable extends KEntity
 
 	// デシリアライズ
 	function onUnserialize(dict, key) {
-		Debug.message("onSerialize");
-
 		var orderList = dict.get(key + "_column_order", []);
 		if (orderList === void)
 			return;
