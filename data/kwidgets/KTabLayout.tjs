@@ -631,6 +631,7 @@ class KTabLayout extends KLayout
 			row = 0;
 			for (var i = 0; i < tabList.count; i++) {
 				var tab = tabList[i];
+				tab.absolute = i;
 				tab.setSize(tab.suitableWidth, tab.suitableHeight);
 				if (x + tab.width > r) {
 					x = l;
