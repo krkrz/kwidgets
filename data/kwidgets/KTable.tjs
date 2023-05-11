@@ -2330,8 +2330,8 @@ class KTable extends KEntity
 		}
 	}
 
-	// ファイナライザ
-	function onUnserialize(dict, key) {
+	// シリアライズ
+	function onSerialize(dict, key) {
 		var orderList = [];
 		for (var i = 0; i < columnList.count; i++) {
 			var column = columnList[i];
@@ -2340,13 +2340,10 @@ class KTable extends KEntity
 		dict.set(key + "_column_order", orderList);
 	}
 
-	/**------------------------------
-	 * 辞書とバインドする。
-	 * KTableはカラムの順番とサイズを辞書に記録する
-	 *
-	 * @param dict 辞書
-	 ------------------------------*/
-	function onSerialize(dict, key) {
+	// デシリアライズ
+	function onUnserialize(dict, key) {
+		Debug.message("onSerialize");
+
 		var orderList = dict.get(key + "_column_order", []);
 		if (orderList === void)
 			return;
