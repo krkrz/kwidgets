@@ -400,6 +400,42 @@ class KStyleObject
 }
 
 //----------------------------------------------------------------------
+// スタイルリファレンス
+class KStyleReference
+{
+	var _options;
+	var _style;
+	var styleParent;
+	var defaultDefinitions;
+	var className;
+	var id;
+	var styleStates = [];
+	var _styleComp;
+	var classTrees;
+
+	function KStyleReference(options = %[]) {
+		this._options = options;
+		_style = getOption("style", %[]);
+		id = getOption("id", "");
+		className = getOption("className", "KStyleReference");
+		classTrees = [ className ];
+		styleParent = getOption("parent", styleRepository);
+		defaultDefinitions = getOption("defaultDefinitions", []);
+		initStyleObject();
+		updateStyleComp();
+	}
+
+	function getOption(key, defaultValue, options = _options) {
+		if (typeof(options[key]) != K_UNDEFINED)
+			return options[key];
+		else
+			return defaultValue;
+	}
+}
+
+mixin(KStyleReference, KStyleObject);
+
+//----------------------------------------------------------------------
 // スタイルレポジトリ
 class KStyleRepository
 {

@@ -131,7 +131,7 @@ global.K_WIDGET_LAYOUT_STYLE_DEFINITION = [
 	[ "paddingBottom", K_WIDGET_PADDING_BOTTOM_PROPERTY_KEYS,     0,    void, void, "resolvePaddingBottom" ]
 ];
 
-global.K_WIDGET_BORDER_STYLE_DEFNITION = [
+global.K_WIDGET_BORDER_STYLE_DEFINITION = [
 	[ "backgroundColor", "backgroundColor", 0xfff0f0f0, "resolveColor" ],
 	[ "borderWidthLeft",   K_WIDGET_BORDER_LEFT_WIDTH_PROPERTY_KEYS, 0 ],
 	[ "borderWidthTop",    K_WIDGET_BORDER_TOP_WIDTH_PROPERTY_KEYS,    0 ],
@@ -625,7 +625,7 @@ class KWidget extends Layer
 					 K_WIDGET_LOCATE_STYLE_DEFINITIION,
 					 K_WIDGET_FONT_STYLE_DEFINITION,
 					 K_WIDGET_LAYOUT_STYLE_DEFINITION,
-					 K_WIDGET_BORDER_STYLE_DEFNITION,
+					 K_WIDGET_BORDER_STYLE_DEFINITION,
 					 widgetStyleDefinition ];
 		}
 	}
@@ -1150,7 +1150,7 @@ class KWidget extends Layer
 	 * ボーダースタイルの適用
 	 ----------------------------------------------------------------------*/
 	function extractBorderStyle() {
-		return extractStyle(K_WIDGET_BORDER_STYLE_DEFNITION);
+		return extractStyle(K_WIDGET_BORDER_STYLE_DEFINITION);
 	}
 
 	function updateBorderStyle() {

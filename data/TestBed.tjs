@@ -1,3 +1,10 @@
+class TestStyleProxy extends KStyleProxy
+{
+	function TestStyleProxy(style = %[]) {
+		super.KStyleProxy(%[ style: style, defaultDefinitions: [ K_WIDGET_BORDER_STYLE_DEFINITION ] ]);
+	}
+}
+
 class TestBed extends KWindow
 { 
 	function TestBed {
@@ -27,6 +34,7 @@ class TestBed extends KWindow
 					name: "customUI",
 						labelStyle: UI_LABEL_STYLE_LEFT,
 						uis: [
+								%[ type: UI_TYPE_TEXTBUTTON, name: "stylebutton", label: "スタイルボタン" ],
 								%[ type: UI_TYPE_BEGIN_FRAME, label: "サブフレーム" ],
 								%[ type: UI_TYPE_TEXTLABEL, label: "シンプルなテキストラベル" ],
 								%[ type: UI_TYPE_SLIDER, label: "[md] スライダー !(gotta_mail)", left: -10, right: 30, stride: 0.1, value: 4.1, name: "cui_slider" ],
@@ -167,6 +175,15 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 		default: {
 			// 更新のあったウィジェットの名前と値を表示。
 			Debug.message("child value modified", child.name, typeof(value), value);
+			break;
+		}
+		case "stylebutton": {
+			var styleProxy = new KStyleReference(%[ defaultDefinitions: [ K_WIDGET_BORDER_STYLE_DEFINITION ],
+													style: %[ borderWidth: 2 ] ]);
+			var style = styleProxy.extractStyle(K_WIDGET_BORDER_STYLE_DEFINITION);
+			Debug.message("_style", Scripts.toJSONString(styleProxy._style));
+			Debug.message("styleComp", Scripts.toJSONString(styleProxy._styleComp));
+			Debug.message("style", Scripts.toJSONString(style));
 			break;
 		}
 		case "gridTestCheck": {
