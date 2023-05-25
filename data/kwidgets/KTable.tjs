@@ -209,6 +209,9 @@
     spliter: (string: void)
       ラベルの区切り文字。
       この値を指定すると、ラベルが文字列の場合でも区切り文字で自動的に分割し、階層化メニューを表示するようになる。
+    spliterDepth: (int: void)
+      ラベル区切りの深さ
+      この値を指定すると、spliterでのラベル分割時、指定の値までしか分割を行わなくなる。
     showWholeLabelOnSplit: (bool: false)
       spliter指定時に、ラベルの全体を表示するかどうか。
       この値がfalseなら階層化されたラベルは、その最後の文字列のみがカラムに表示される。
@@ -4170,6 +4173,7 @@ class KDropDownListTableColumn extends KTableColumn
 	function initMenuDef() {
 		menuDefList = [];
 		var spliter = getOpts("spliter", void);
+		var spliterDepth = getOpts("spliterDepth", void);
 		var hierarchy;
 		for (var i = 0; i < labelList.count; i++) {
 			if (labelList[i] instanceof "Array")
@@ -4178,6 +4182,12 @@ class KDropDownListTableColumn extends KTableColumn
 				hierarchy = [ labelList[i] ];
 			} else {
 				hierarchy = labelList[i].split(spliter);
+				if (spliterDepth !== void) {
+					if (hierarchy.count > spliterDepth)
+						hierarchy[spliterDepth - 1] = sliceArray(hierarchy, spliterDepth - 1, hierarchy.count - spliterDepth + 1).join(spliter);
+					while (hierarchy.count > spliterDepth)
+						hierarchy.pop();
+				}
 			}
 			buildMenuDef(menuDefList, hierarchy, valueList[i]);
 		}
