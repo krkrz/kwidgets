@@ -18,7 +18,8 @@ global.KTextInputSliderWidgetStyleDefinition =
 		[ "width", "width" ],
 		[ "height", "height" ],
 		[ "placeTextOnRightsideOfSlider", "placeTextOnRightsideOfSlider", false ],
-		[ "variable", "variable", false ]
+		[ "variable", "variable", false ],
+		[ "focusOnSliderClick", true ]
 	];
 
 class KTextInputSliderEmbededSlider extends KSlider
@@ -28,7 +29,8 @@ class KTextInputSliderEmbededSlider extends KSlider
 	}
 
 	function focus() {
-		parent.textInput.focus();
+		if (parent.getOption("focusOnSliderClick", true))
+			parent.textInput.focus();
 	}
 }
 
