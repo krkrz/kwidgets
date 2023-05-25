@@ -431,6 +431,22 @@ class KStyleReference
 		else
 			return defaultValue;
 	}
+
+	function resolvePaddingLeft(v, style) {
+		return v + style.paddingOffsetHorizontal + style.paddingInsetHorizontal;
+	}
+
+	function resolvePaddingTop(v, style) {
+		return v + style.paddingOffsetVertical + style.paddingInsetVertical;
+	}
+
+	function resolvePaddingRight(v, style) {
+		return v - style.paddingOffsetHorizontal + style.paddingInsetHorizontal;
+	}
+
+	function resolvePaddingBottom(v, style) {
+		return v - style.paddingOffsetVertical   + style.paddingInsetVertical;
+	}
 }
 
 mixin(KStyleReference, KStyleObject);
