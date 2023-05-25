@@ -111,6 +111,11 @@
       この際、指定のキーのカラムは内部的には KArrayTableColumn に置き換えられる。
     innerDragSort (bool: false)
        配列化したカラムのエレメントをD&Dで入れ替え可能にするか
+    mouseOperation (bool: false)
+       このカラムでマウスのフルオペレーションを可能にするかどうか。
+       trueにすると、このカラムでは左クリックによる範囲選択は無効になり、
+       左クリックに対して onMouseDown/onMouseMove/onMouseUpのマウスイベントが
+       通常のレイヤイベントのように飛んでくるようになる。
   ・プロパティ
     array (bool)
       カラムが配列かされているかどうか返す
@@ -1260,6 +1265,7 @@ class KTableView extends KTableVirtualWidget
 	var inMouseSelection = false;
 	var pressSelection = false;
 	var delayMouseEvent = false;
+	var inMouseOperation = false;
 	var mouseSelectionBaseX, mouseSelectionBaseY;
 	var curMouseSelectionRect;
 	var redrawRefCount = 0;
@@ -1271,7 +1277,7 @@ class KTableView extends KTableVirtualWidget
 	var curDragRegion;
 	var confirmedDragTarget;
 	var clipList = [];
-
+	
 	// テーブルビュー
 	function KTableView(window, owner, name) {
 		super.KTableVirtualWidget(window, owner, %[ name: name, middleButtonDrag: true ]);
@@ -1826,6 +1832,14 @@ class KTableView extends KTableVirtualWidget
 		if (! k_kirikiriz)
 			onMouseMove(x, y);
 
+		if (button == mbLeft
+			&& curPoint !== void
+			&& curPoint.column.getOpts("mouseOperation", false)) {
+			inMouseOperation = true;
+			curPoint.column.onMouseDown(curPoint.row, x, y, button, shift);
+			return;
+		}
+
 		var targetPoint = curPoint;
 		if (multipleSelection) {
 			// マウス選択オフから初め
@@ -1883,6 +1897,13 @@ class KTableView extends KTableVirtualWidget
 
 	function onMouseUp(x, y, button, shift) {
 		super.onMouseUp(...);
+		if (inMouseOperation) {
+			inMouseOperation = false;
+			curPoint.column.onMouseUp(curPoint.row, x, y, button, shift);
+			onMouseMove(x, y);
+			return;
+		}
+
 		// マウスドラッグによる範囲選択を試みて結局
 		// ドラッグされなかった場合、ここでボタン押下動作を実行する。
 		if (delayMouseEvent
@@ -1899,6 +1920,12 @@ class KTableView extends KTableVirtualWidget
 	function onMouseMove(x, y) {
 		// ポイントの再描画と、マウスイベント処理
 		super.onMouseMove(...);
+
+		if (inMouseOperation) {
+			owner.onPointMouseMove(curPoint, x, y);
+			return;
+		}
+
 		var prevPoint = curPoint;
 		curPoint = findPoint(x, y);
 		if (! equalPoint(prevPoint, curPoint)) {
@@ -3581,6 +3608,12 @@ class KTableColumn
 	 * マウス押下イベント
 	 */
 	function onMouseDown(row, x, y, button, shift) {
+	}
+
+	/**
+	 * マウスリリースイベント
+	 */
+	function onMouseUp(row, x, y, button, shift) {
 	}
 
 	/**
