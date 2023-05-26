@@ -55,7 +55,7 @@ class KRangePointer2D extends KValueEntity
 			params.baseLogicalSign = (params.baseLogicalRight - params.baseLogicalLeft) / params.baseLogicalSize;
 
 			params.knobLogicalSize = getOption(prefix + "KnobSize", params.baseLogicalSize);
-			params.knobLogicalStride = getOption(prefix + "KnobStride", 0);
+			params.knobLogicalStride = getOption(prefix + "KnobStride", 1);
 			params.knobLogicalBlockStride = getOption(prefix + "KnobBlockStride", int((params.knobLogicalSize * 0.9) / params.knobLogicalStride) * params.knobLogicalStride);
 			params.knobFixedPixelSize = getOption(prefix + "KnobPixelSize", void);
 
@@ -129,7 +129,7 @@ class KRangePointer2D extends KValueEntity
 			standarizeNewPointerValue(hParams);
 			standarizeNewPointerValue(vParams);
 			val = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
-			if (equalStructNumericLoose(pointerValue, val))
+			if (equalStructNumericLoose(pointerValue, val)) 
 				return;
 			hParams.pointerValue = val.h;
 			vParams.pointerValue = val.v;
