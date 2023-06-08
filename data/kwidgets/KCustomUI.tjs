@@ -170,7 +170,9 @@ class KCustomUIGenerator
 		var table = new klass(grid.window, %[ name: uiName, hint: hint, status: status,
 											   initWithMinimumSize: getValue(def, "initWithMinimumSize", false),
 											   attributes: getValue(def, "attributes", []),
-											   defaultColumnOptions: getValue(def, "defaultColumnOptions", %[])
+											  showRowTab: getValue(def, "showRowTab", false),
+											  respondToValueModification: getValue(def, "respondToValueModification", false),
+											  defaultColumnOptions: getValue(def, "defaultColumnOptions", %[])
 											 ]);
 		table.setMarginalFixedSize(getValue(def, "marginalWidth", 100), getValue(def, "marginalHeight", 100));
 		table.value = getValue(def, "value", []);

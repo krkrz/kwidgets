@@ -45,6 +45,7 @@
 				"table_grid_border" => 0xff5e5e5e,
 				"table_tab_border" => 0xff7e7e7e,
 				"table_inner_split" => 0xff505050,
+				"table_bg_focus" => 0xff5b5b5b,
 				"menu_border" => 0xffaeaeae,
 				"menu_frame_focus" => 0xffc0c0c0,
 				"separator" => 0xff3e3e3e,
@@ -727,6 +728,7 @@
 					 focusFrameColor: "table_frame_focus",
 					 dragFrameColor: "table_frame_drag",
 					 selectionColor: "table_selection",
+					 focusBackgroundColor: "table_bg_focus",
 				   ]
 		 ],
 

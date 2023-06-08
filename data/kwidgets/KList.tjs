@@ -1019,12 +1019,14 @@ class KList extends KVirtualWidget
 
 	// フォーカス時反応
 	function onFocus {
+		super.onFocus();
 		// セレクション再描画
 		drawFocusedItem();
 	}
 
 	// フォーカス失った時の反応
 	function onBlur {
+		super.onBlur();
 		// セレクション再描画
 		drawFocusedItem();
 	}

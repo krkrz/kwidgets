@@ -307,7 +307,9 @@ class KFrameLayout extends KLayout
 	}
 
 	function onKeyDown(key, shift) {
-		if (key == VK_SPACE || key == VK_RETURN) {
+		if (_checkable
+			&& focused
+			&& (key == VK_SPACE || key == VK_RETURN)) {
 			checked = ! checked;
 		} else {
 			super.onKeyDown(...);

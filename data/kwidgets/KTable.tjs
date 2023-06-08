@@ -265,7 +265,7 @@
 
   value (var)
     全てのエレメントの値の配列
-  enableColumnKeyRowSort (bool: true)
+  enableColumnKeyRowSort (bool: false)
     カラムタブをクリックしての属性単位での昇順/降順ソートを有効にするかどうか
   enableColumnTabOrderExchange (bool: false)
     カラムタブをドラッグしてのカラムの順番の入れ替えを有効にするかどうか
@@ -572,7 +572,8 @@ global.KTableVirtualWidgetStyleDefinition =
 		[ "frameColor", "frameColor", void, "resolveColor" ],
 		[ "focusFrameColor", "focusFrameColor", void, "resolveColor" ],
 		[ "dragFrameColor", "dragFrameColor", void, "resolveColor" ],
-		[ "selectionColor", "selectionColor", void, "resolveColor" ]
+		[ "selectionColor", "selectionColor", void, "resolveColor" ],
+		[ "focusBackgroundColor", "focusBackgroundColor", void, "resolveColor" ]
 	];
 
 class KTableVirtualWidget extends KVirtualWidget
@@ -1037,6 +1038,11 @@ class KTableRowTab extends KTableVirtualWidget
 		var baseIndex = owner.rowTabBaseIndex;
 		for (var i = 0; i < rows.count; i++) {
 			var row = rows[i];
+			// フォーカスしていたらBG変更
+			if (view.curFocusPoint !== void
+				&& view.curFocusPoint.row === row
+				&& widgetStyle.focusBackgroundColor !== void)
+				fillRect(l, row.pos, w, row.size, widgetStyle.focusBackgroundColor);
 			// 縦グリッド
 			var y = row.tail - 1;
 			fillRect(l, y, w, 1, widgetStyle.gridBorderColor);
@@ -1385,6 +1391,12 @@ class KTableView extends KTableVirtualWidget
 		var rows = owner.findRowRange(t, h);
 		for (var i = 0; i < rows.count; i++) {
 			var row = rows[i];
+			// フォーカスしていたらBGカラー変更
+			if (curFocusPoint !== void
+				&& curFocusPoint.row === row
+				&& widgetStyle.focusBackgroundColor !== void
+				&& columns.count > 0)
+				fillRect(0, row.pos, columns[-1].tail, row.size, widgetStyle.focusBackgroundColor);
 			for (var j = 0; j < columns.count; j++) {
 				var column = columns[j];
 				// セル描画
@@ -1397,8 +1409,8 @@ class KTableView extends KTableVirtualWidget
 					fillRect(column.pos, row.tail - 1, column.size, 1, widgetStyle.gridBorderColor);
 				// セルセレクション時はセル単位で
 				if (cellSelection) {
-					var point = generatePoint(column, row);
 					// フレーム
+					var point = generatePoint(column, row);
 					var dragging = curDragInfo.acceptType == DRAG_ACCEPT_TYPE_POINT && equalPoint(curDragInfo.point, point);
 					drawItemFrame(new KRect(column.pos, row.pos, column.size, row.size),
 								  equalPoint(curPoint, point) && (curDragInfo.acceptType == DRAG_ACCEPT_TYPE_NONE),
@@ -1530,7 +1542,10 @@ class KTableView extends KTableVirtualWidget
 		var prevFocusPoint = curFocusPoint;
 		curFocusPoint = point;
 		drawPoint(prevFocusPoint);
+		owner.rowTab.drawPoint(prevFocusPoint);
 		drawPoint(curFocusPoint);
+		owner.rowTab.drawPoint(curFocusPoint);
+		owner.onFocusPoint(curFocusPoint);
 	}
 
 	// ポイントはフォーカスされているか？
@@ -1780,6 +1795,7 @@ class KTableView extends KTableVirtualWidget
 				else {
 					clearAllSelection();
 					lastFocusPoint = void;
+					focusPoint(void);
 				}
 				// ターゲットアイテムの onMouseDown をコール
 				onPointMouseDown(targetPoint, x, y, button, shift);
@@ -1801,6 +1817,7 @@ class KTableView extends KTableVirtualWidget
 				else if (targetPoint === void) {
 					clearAllSelection();
 					lastFocusPoint = void;
+					focusPoint(void);
 				}
 				// 選択範囲右クリックコールバック
 				if (pressSelection)
@@ -2280,13 +2297,13 @@ class KTable extends KEntity
 
 		earlyUpdateWidgetStyle();
 
-		defaultColumnOptions = getOption("defaultColumnOptions");
+		defaultColumnOptions = getOption("defaultColumnOptions", %[]);
 		_showVerticalGrid = getOption("showVerticalGrid", true);
 		_showHorizontalGrid = getOption("showHorizontalGrid", true);
 		_multipleSelection = getOption("multipleSelection", true);
 		_rowTabBaseIndex = getOption("rowTabBaseIndex", 1);
-		_enableColumnKeyRowSort = getOption("enableColumnKeyRowSort", true);
-		_enableColumnTabOrderExchange = getOption("enableColumnTabOrderExchange", true);
+		_enableColumnKeyRowSort = getOption("enableColumnKeyRowSort", false);
+		_enableColumnTabOrderExchange = getOption("enableColumnTabOrderExchange", false);
 		_cellSelection = getOption("cellSelection", false);
 		respondToValueModification = getOption("respondToValueModification", false);
 
@@ -2341,7 +2358,9 @@ class KTable extends KEntity
 			}
 			var column = new klass(this, label, key, opts);
 			column.index = i;
-			if (initWithMinimumSize)
+			if (column.fixedWidth === 0)
+				column.size = 0;
+			else if (initWithMinimumSize)
 				column.size = K_TABLE_COLUMN_MIN_WIDTH;
 			else
 				column.size = Math.max(K_TABLE_COLUMN_MIN_WIDTH, column.fixedWidth);
@@ -2351,7 +2370,8 @@ class KTable extends KEntity
 			columnList.add(column);
 		}
 		columnTab.redrawAll();
-		showRowTab = false;
+		showRowTab = getOption("showRowTab", false);
+		showColumnTab = getOption("showColumnTab", true);
 	}
 
 	property widgetStyleDefinition {
@@ -2614,6 +2634,7 @@ class KTable extends KEntity
 	function clearRows() {
 		rowList.clear();
 		updateMinMaxSize();
+		view.focusPoint(void);
 		view.redrawAll();
 		rowTab.redrawAll();
 		notifyValueModification();
@@ -3017,16 +3038,22 @@ class KTable extends KEntity
 		view.selectPoint(...);
 	}
 
+	function focusPoint(point) {
+		view.focusPoint(point);
+	}
+
 	// ポイント配列を選択
 	function selectPointList(pointList, value = true) {
 		view.selectPointList(...);
 	}
 
 	function onFocus {
+		super.onFocus();
 		view.redrawAll();
 	}
 
 	function onBlur {
+		super.onBlur();
 		view.redrawAll();
 	}
 
@@ -3249,6 +3276,15 @@ class KTable extends KEntity
 	 * 行間パケットの退出を通知するイベントハンドラ
 	 ------------------------------*/
 	function onRowPacketLeave(index, x, y, packet, shift) {
+	}
+
+	function onFocusPoint(point) {
+	}
+
+	property focusedPoint {
+		getter {
+			return view.curFocusPoint;
+		}
 	}
 };
 
@@ -3795,6 +3831,25 @@ class KTableRow
 };
 
 /*----------------------------------------------------------------------
+ * ダミーカラム
+ ----------------------------------------------------------------------*/
+class KHiddenTableColumn extends KTableColumn
+{
+	var fixedWidth = 0;
+
+	function KHiddenTableColumn(owner, label, key, opts = %[]) {
+		opts = duplicateStruct(opts);
+		opts.visible = false;
+		super.KTableColumn(owner, label, key, opts);
+	}
+
+
+	function equal(a, b) {
+		return equalStruct(a, b);
+	}
+}
+
+/*----------------------------------------------------------------------
  * テキストベースカラム
  ----------------------------------------------------------------------*/
 class KTextBaseTableColumn extends KTableColumn
@@ -4180,7 +4235,7 @@ class KDropDownListTableColumn extends KTableColumn
 	 */
 	function KDropDownListTableColumn(owner, label, key, opts = %[]) {
 		super.KTableColumn(...);
-		initItemList(getValue(opts, "itemList", []));
+		initItemList(getValue(opts, "items", getValue(opts, "itemList", [])));
 	}
 
 	function initItemList(itemList) {

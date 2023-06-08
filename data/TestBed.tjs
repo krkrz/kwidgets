@@ -157,6 +157,36 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 				.gridTest.add(2, 2, new KTextButton(this, %[ name: "gridTestButton2", label: "ボタン2" ]));
 				.gridTest.add(2, 3, new KTextButton(this, %[ name: "gridTestButton3", label: "ボタン3" ]));
 				.gridTest.add(0, 4, new KMarkdownLabel(this, %[ name: "mdLabel", multiline: false, text: "!(gotta_mail) マークダウンテキストラベル" ]), 3);
+
+				.add("フォーカステスト", new KVerticalBarLayout(this, %[ name: "focusBar", id: "widget_grid" ]));
+				.focusBar.add(new KFrameLayout(this, %[ name: "texteditFrame", id: "focusable_frame" ]));
+				.focusBar.add(new KFrameLayout(this, %[ name: "listFrame", id: "focusable_frame" ]));
+				.focusBar.add(new KFrameLayout(this, %[ name: "tableFrame", id: "focusable_frame" ]));
+				.texteditFrame.add(new KTextEdit(this, %[ name: "f_textedit", value: "最初からテキストを入力しておくよ" ]));
+				.listFrame.add(new KList(this, %[ name: "f_list" ]));
+				.f_list.add(new KListItem("リスト項目1"));
+
+				.f_list.add(new KListItem("リスト項目2"));
+				.f_list.add(new KListItem("リスト項目3"));
+				.f_list.add(new KListItem("リスト項目4"));
+				.f_list.add(new KListItem("リスト項目5"));
+
+				.tableFrame.add(new KTable(this,
+										   %[ name: "f_table",
+											  defaultColumnOptions: %[ editable: true ],
+											  multipleSelection: true,
+											  showRowTab: true,
+											  attributes: [
+												  [ KTextTableColumn, "テキスト", "text" ],
+												  [ KCheckBoxTableColumn, "チェック", "check" ],
+												  [ KDropDownListTableColumn, "ドロップダウン", "dropdown", %[ items: [ "項目1", 0, "項目2", 1, "項目3", 2 ], initialValue: 0 ] ]
+											  ] ]));
+				.f_table.addElement(%[]);
+
+				.f_table.addElement(%[]);
+				.f_table.addElement(%[]);
+				.f_table.addElement(%[]);
+
 		}
 
 		Debug.message("before attach to window");
