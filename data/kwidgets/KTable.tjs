@@ -3481,7 +3481,7 @@ class KTableColumn
 	 * @param b ロウb
 	 */
 	function compare(a, b) {
-		return false;
+		return compareStruct(a, b);
 	}
 
 	// 要素の同値判定
