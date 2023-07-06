@@ -56,6 +56,10 @@ global.UI_TYPE_BEGIN_LIST = "ui.type.begin.list";
 global.UI_TYPE_END_LIST = "ui.type.end.list";
 global.UI_TYPE_LIST_LEVEL = "ui.type.list.level";
 global.UI_TYPE_MARKDOWNBUTTON   = "ui.type.markdownbutton";
+global.UI_TYPE_BEGIN_HORIZONTAL = "ui.type.begin.horiziontal";
+global.UI_TYPE_BEGIN_VERTICAL =   "ui.type.begin.vertical";
+global.UI_TYPE_END_HORIZONTAL = "ui.type.end.horizontal";
+global.UI_TYPE_END_VERTICAL = "ui.type.end.vertical";
 
 global.UI_LABEL_STYLE_LEFT = 0;
 global.UI_LABEL_STYLE_LEFTTOPCORNER = 1;
