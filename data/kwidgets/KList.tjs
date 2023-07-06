@@ -1070,6 +1070,10 @@ class KList extends KVirtualWidget
 
 	// アイテム一個押下
 	function pressItem(targetItem, x, y, button, shift) {
+		if (targetItem === void
+			&& getOption("ignoreNoTargetClick", false))
+			return;
+
 		//　マルチ選択時
 		if (multipleSelection) {
 			// 左クリック時の挙動
@@ -1833,7 +1837,7 @@ class KListItem
 	var _styleChain;
 	var fontStyle;
 	var labelStyle;
-	var appearanceStyle = %[ icons: [], toggleEnabled: true, statePriority: [] ];
+	var appearanceStyle = %[ icons: [], toggleEnabled: true, statePriority: [], skipHierarchy: false ];
 	var widgetStyle;
 	var styleStates = [];
 	var customStyleStates = [];
@@ -3260,6 +3264,10 @@ class KListItem
 	 * アイテムを「フォーカス」状態にする
 	 ------------------------------*/
 	function focus {
+		if (! inHierarchy)
+			return;
+		for (var p = parent; p instanceof "KListItem"; p = p.parent)
+			p.opened = true;
 		root.focusItem(this);
 		root.seeFocusedItem();
 	}
@@ -3385,6 +3393,18 @@ class KListItem
 			overwriteStyle(%[ skipHierarchy: value ]);
 			depth = -1;
 			requireReconstruct();
+		}
+	}
+
+	property inHierarchy {
+		getter {
+			if (skipHierarchy)
+				return false;
+			for (var p = this; p instanceof "KListItem"; p = p.parent) {
+				if (! p.visible)
+					return false;
+			}
+			return true;
 		}
 	}
 
