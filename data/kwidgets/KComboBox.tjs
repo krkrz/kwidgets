@@ -178,6 +178,20 @@ class KComboBox extends KValueEntity
 	property items {
 		getter {
 			var result = [];
+			for (var i = 0; i < _captions.count; i++) {
+				result.add(_captions[i]);
+				result.add(_values[i]);
+			}
+			return result;
+		}
+		setter (v) {
+			_captions = [];
+			_values = [];
+			for (var i = 0; i < v.count; i += 2) {
+				_captions.add(v[i    ]);
+				_values.add  (v[i + 1]);
+			}
+			redrawContents();
 		}
 	}
 
