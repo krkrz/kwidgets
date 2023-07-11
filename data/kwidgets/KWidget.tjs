@@ -1659,7 +1659,7 @@ class KWidget extends Layer
 	function setMinMaxSize(minW, minH, maxW, maxH) {
 		// minとmaxの逆転をチェック
 		if (minW > maxW || minH > maxH)
-			throw new Exception("%s: minmax size mismatch(minw:%d,minh:%d,maxw:%d,maxh:%d".sprintf(className, minW,minH,maxW,maxH));
+			throw new Exception("%s: %s: minmax size mismatch(minw:%d,minh:%d,maxw:%d,maxh:%d".sprintf(className, name, minW,minH,maxW,maxH));
 		_specified.minw = int(minW);
 		_specified.minh = int(minH);
 		_specified.maxw = int(maxW);
