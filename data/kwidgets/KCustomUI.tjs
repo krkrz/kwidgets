@@ -218,7 +218,42 @@ class KCustomUI extends KGridLayout
 	var mdPat = /^\[md\]\s*(.*)/;
 	var UI_DIR_VERTICAL = 0;
 	var UI_DIR_HORIZONTAL = 1;
-	
+
+	var insertionX, insertionY;
+	var curGrid;
+	var dir;
+	var stateStack = [];
+
+	function pushState() {
+		var state = %[ x: insertionX,
+					   y: insertionY,
+					   grid: curGrid,
+					   dir: dir ];
+		stateStack.push(state);
+	}
+
+	function popState() {
+		var state = stateStack.pop();
+		insertionX = state.x;
+		insertionY = state.y;
+		curGrid = state.grid;
+		dir = state.dir;
+	}
+
+	function setState(grid, x, y, _dir) {
+		curGrid = grid;
+		insertionX = x;
+		insertionY = y;
+		dir = _dir;
+	}
+
+	function advanceGrid() {
+		switch (dir) {
+		case UI_DIR_HORIZONTAL: insertionX += 2; break;
+		case UI_DIR_VERTICAL: insertionY += 1; break;
+		}
+	}
+
 	function KCustomUI(window, options = %[]) {
 		options = unionDictionary(%[ style: %[ isClass: %[ KWidget: %[ alignHorizontal: ALIGN_LEFT, alignVertical: ALIGN_CENTER ] ] ] ], options, true);
 		super.KGridLayout(window, options);
@@ -237,13 +272,8 @@ class KCustomUI extends KGridLayout
 		var fixedLabel = getOption("fixedLabel", false);
 		var insertLabelToStatus = getOption("insertLabelToStatus", true);
 
-		var insertionY = 0, insertionX = 0;
-		var curGrid = this;
-		var gridStack = [];
-		var yStack = [];
-		var xStack = [];
-		var dirStack = [];
-		var dir = UI_DIR_VERTICAL;
+		stateStack.clear();
+		setState(this, 0, 0, UI_DIR_VERTICAL);
 
 		var curList = void;
 		var listStack = [];
@@ -263,50 +293,29 @@ class KCustomUI extends KGridLayout
 				uiDef.label = uiDef.label.trim();
 
 			if (uiDef.type == UI_TYPE_BEGIN_FRAME) {
-				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][gridStack.count];
+				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][stateStack.count];
 				var frame = new KFrameLayout(window, %[ id: frameId, name: getOption("name", "", uiDef), label: getOption("label", "", uiDef), helpText: getOption("helpText", "", uiDef) ] );
 				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
 				frame.add(subGrid);
 				curGrid.add(insertionX, insertionY, frame, 2);
-				switch (dir) {
-				case UI_DIR_HORIZONTAL: insertionX += 2; break;
-				case UI_DIR_VERTICAL: insertionY += 1; break;
-				}
-				gridStack.push(curGrid);
-				yStack.push(insertionY);
-				xStack.push(insertionX);
-				dirStack.push(dir);
-				curGrid = subGrid;
-				insertionY = 0;
-				insertionX = 0;
-				dir = UI_DIR_VERTICAL;
+				advanceGrid();
+				pushState();
+				setState(subGrid, 0, 0, UI_DIR_VERTICAL);
 				continue;
 			}
 			if (uiDef.type == UI_TYPE_BEGIN_HORIZONTAL
 			   || uiDef.type == UI_TYPE_BEGIN_VERTICAL) {
 				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
 				curGrid.add(insertionX, insertionY, subGrid, 2);
-				switch (dir) {
-				case UI_DIR_HORIZONTAL: insertionX += 2; break;
-				case UI_DIR_VERTICAL: insertionY += 1; break;
-				}
-				gridStack.push(curGrid);
-				yStack.push(insertionY);
-				xStack.push(insertionX);
-				dirStack.push(dir);
-				curGrid = subGrid;
-				insertionY = 0;
-				insertionX = 0;
-				dir = uiDef.type == UI_TYPE_BEGIN_HORIZONTAL ? UI_DIR_HORIZONTAL : UI_DIR_VERTICAL;
+				advanceGrid();
+				pushState();
+				setState(subGrid, 0, 0, uiDef.type == UI_TYPE_BEGIN_HORIZONTAL ? UI_DIR_HORIZONTAL : UI_DIR_VERTICAL);
 				continue;
 			}
 			if (uiDef.type == UI_TYPE_END_FRAME
 				|| uiDef.type == UI_TYPE_END_HORIZONTAL
 				|| uiDef.type == UI_TYPE_END_VERTICAL) {
-				curGrid = gridStack.pop();
-				insertionY = yStack.pop();
-				insertionX = xStack.pop();
-				dir = dirStack.pop();
+				popState();
 				continue;
 			}
 
@@ -314,18 +323,12 @@ class KCustomUI extends KGridLayout
 				listStack.push(curList);
 				curList = new KList(window, %[ name: getOption("name", "", uiDef), focusable: false, disableNotice: true, singleClickOpenToggle: true, style: %[ backgroundColor: 0 ] ]);
 				curGrid.add(insertionX, insertionY, curList, 2);
-				switch (dir) {
-				case UI_DIR_HORIZONTAL: insertionX += 2; break;
-				case UI_DIR_VERTICAL: insertionY += 1; break;
-				}
+				advanceGrid();
 				continue;
 			}
 			if (uiDef.type == UI_TYPE_LIST_LEVEL) {
 				if (curList.childCount == 0) {
-					gridStack.push(curGrid);
-					yStack.push(insertionY);
-					xStack.push(insertionX);
-					dirStack.push(dir);
+					pushState();
 				}
 				var level = new KListItem(%[ name: getOption("name", "", uiDef),
 											 label: getOption("label", "", uiDef),
@@ -335,18 +338,12 @@ class KCustomUI extends KGridLayout
 				curList.add(level);
 				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
 				level.add(subGrid);
-				curGrid = subGrid;
-				insertionY = 0;
-				insertionX = 0;
-				dir = UI_DIR_VERTICAL;
+				setState(subGrid, 0, 0, UI_DIR_VERTICAL);
 				continue;
 			}
 			if (uiDef.type == UI_TYPE_END_LIST) {
 				if (curList.childCount != 0) {
-					curGrid = gridStack.pop();
-					insertionY = yStack.pop();
-					insertionX = xStack.pop();
-					dir = dirStack.pop();
+					popState();
 				}
 				curList = listStack.pop();
 				continue;
@@ -370,7 +367,7 @@ class KCustomUI extends KGridLayout
 					case UI_LABEL_STYLE_LEFT: {
 						label.id = "alignright_caption";
 						curGrid.add(insertionX, insertionY, label);
-						curGrid.add(insertionX, insertionY, bounds);
+						curGrid.add(insertionX + 1, insertionY, bounds);
 						break;
 					}
 					case UI_LABEL_STYLE_LEFTTOPCORNER: {
@@ -383,10 +380,7 @@ class KCustomUI extends KGridLayout
 					}
 					}
 				}
-				switch (dir) {
-				case UI_DIR_HORIZONTAL: insertionX += 2; break;
-				case UI_DIR_VERTICAL: insertionY += 1; break;
-				}
+				advanceGrid();
 			}
 			if (result.widget !== void
 				&& typeof(result.widget.value) != K_UNDEFINED) {
