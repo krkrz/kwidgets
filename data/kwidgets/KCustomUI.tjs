@@ -109,6 +109,7 @@ class KCustomUIGenerator
 		var leftIcon = icon != "" ? icon + "_left" : getValue(def, "leftIcon", "");
 		var rightIcon = icon != "" ? icon + "_right" : getValue(def, "rightIcon", "");
 		var widget = new klass(grid.window, %[ name: uiName, hint: hint, status: status,
+											   custom: getValue(def, "custom", void),
 											   width: getValue(globalOptions, "widgetMinWidth", K_CUSTOM_UI_DEFAULT_WIDGET_MIN_WIDTH),
 											   left: getValue(def, "left", 0), leftIcon: leftIcon, leftIconHint: getValue(def, "leftIconHint", ""),
 											   right: getValue(def, "right", 100), rightIcon: rightIcon, rightIconHint: getValue(def, "rightIconHint", ""),

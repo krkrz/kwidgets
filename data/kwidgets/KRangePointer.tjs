@@ -239,7 +239,7 @@ class KRangePointer2D extends KValueEntity
 			newValue = int(newValue);
 		params.newPointerValue = newValue;
 	}
-	
+
 	//------------------------------
 	// ノブサイズを更新
 	//------------------------------
@@ -284,7 +284,7 @@ class KRangePointer2D extends KValueEntity
 
 		for (var i = 0; i < paramsPair.count; i++) {
 			var params = paramsPair[i];
-			
+
 			params.knobPixelSize = (params.knobFixedPixelSize !== void)
 				? params.knobFixedPixelSize
 				: int(params.rangePixelSize * params.knobLogicalSize / params.baseLogicalSize);
@@ -521,6 +521,7 @@ class KRangePointer2D extends KValueEntity
 		}
 
 		pointerValue = %[ h: hParams.newPointerValue, v: vParams.newPointerValue ];
+		redrawContents();
 		dispatch();
 	}
 

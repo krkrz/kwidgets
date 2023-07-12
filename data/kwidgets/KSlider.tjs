@@ -191,16 +191,21 @@ class KSlider extends KRangePointer2D
 			|| rightIcon !== void)
 			redrawContents();
 
+		var newHint;
+
 		if (leftIcon !== void
 			&& leftIconRange.contains(x, y)
 			&& leftIconHint != "")
-			hint = leftIconHint;
+			newHint = leftIconHint;
 		else if (rightIcon !== void
 				 && rightIconRange.contains(x, y)
 				 && rightIconHint != "")
-			hint = rightIconHint;
+			newHint = rightIconHint;
 		else
-			hint = getOption("hint", "");
+			newHint = getOption("hint", "");
+
+		if (newHint != hint)
+			hint = newHint;
 	}
 }
 

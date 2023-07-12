@@ -22,18 +22,6 @@ global.KTextInputSliderWidgetStyleDefinition =
 		[ "focusOnSliderClick", true ]
 	];
 
-class KTextInputSliderEmbededSlider extends KSlider
-{
-	function KTextInputSliderEmbededSlider() {
-		super.KSlider(...);
-	}
-
-	function focus() {
-		if (parent.getOption("focusOnSliderClick", true))
-			parent.textInput.focus();
-	}
-}
-
 class KTextInputSlider extends KValueEntity
 {
 	var _value;
@@ -77,23 +65,25 @@ class KTextInputSlider extends KValueEntity
 											  type: stride == int(stride) ? TEXT_DIGIT : TEXT_REAL,
 											  hint: getOption("hint", ""),
 											  value: string(v) ]);
-		slider = new KTextInputSliderEmbededSlider(window, %[ name: "_slider",
-															  id: widgetStyle.sliderId,
-															  lockStyleMoficationOnAttach: true,
-															  width: w,
-															  height: h,
-															  left: left,
-															  right: right,
-															  stride: stride,
-															  focusable: false,
-															  value: v,
-															  hint: getOption("hint", ""),
-															  leftIcon: getOption("leftIcon", ""),
-															  leftIconHint: getOption("leftIconHint", ""),
-															  rightIcon: getOption("rightIcon", ""),
-															  rightIconHint: getOption("rightIconHint", ""),
-															  interpolation: getOption("interpolation", false)
-															]);
+		var sliderClass = getOption("sliderClass", "KSlider");
+		slider = new global[sliderClass](window, %[ name: "_slider",
+													id: widgetStyle.sliderId,
+													lockStyleMoficationOnAttach: true,
+													width: w,
+													height: h,
+													left: left,
+													right: right,
+													stride: stride,
+													focusable: false,
+													value: v,
+													hint: getOption("hint", ""),
+													leftIcon: getOption("leftIcon", ""),
+													leftIconHint: getOption("leftIconHint", ""),
+													rightIcon: getOption("rightIcon", ""),
+													rightIconHint: getOption("rightIconHint", ""),
+													interpolation: getOption("interpolation", false)
+												  ]);
+		slider.focus = onSliderFocus;
 		slider.onStartInterpolation = _onStartInterpolation;
 		slider.onStopInterpolation = _onStopInterpolation;
 
@@ -152,6 +142,11 @@ class KTextInputSlider extends KValueEntity
 	}
 
 	function onStopInterpolation() {
+	}
+
+	function onSliderFocus {
+		if (getOption("focusOnSliderClick", true))
+			textInput.focus();
 	}
 
 	/**------------------------------
