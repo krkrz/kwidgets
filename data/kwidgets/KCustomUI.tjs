@@ -306,7 +306,7 @@ class KCustomUI extends KGridLayout
 			}
 			if (uiDef.type == UI_TYPE_BEGIN_HORIZONTAL
 			   || uiDef.type == UI_TYPE_BEGIN_VERTICAL) {
-				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
+				var subGrid = new global.KGridLayout(window, %[ name: getOption("name", "", uiDef), id: getOption("gridId", gridId, uiDef) ]);
 				curGrid.add(insertionX, insertionY, subGrid, 2);
 				advanceGrid();
 				pushState();

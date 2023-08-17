@@ -74,7 +74,8 @@ class KTextInputEdit extends KTextEdit
 	function enterValue {
 		decideValue();
 		// TextInput本体のフック関数をコール
-		parent.parent.onEnter();
+		if (this isvalid)
+			parent.parent.onEnter();
 	}
 
 

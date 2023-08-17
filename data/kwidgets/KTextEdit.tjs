@@ -1879,6 +1879,8 @@ class KTextEdit extends KVirtualWidget
 				var prevRow, prevCol;
 				prevRow = pointer.row, prevCol = pointer.col;
 				keyBind[i][3]();
+				if (! (this isvalid))
+					return;
 				if (keyBind[i][1] == 2)
 					;
 				else if (keyBind[i][1] == 0 || ! (shift & ssShift)) {
