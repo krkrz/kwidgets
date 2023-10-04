@@ -40,6 +40,7 @@ global.LIST_ITEM_CAPABILITY_MASK_DRAG        = 1 << 3;
 global.LIST_ITEM_CAPABILITY_MASK_DROP        = 1 << 4;
 global.LIST_ITEM_CAPABILITY_MASK_MOUSEDOWN   = 1 << 5;
 
+global.UI_TYPE_SPACER = "ui.type.spacer";
 global.UI_TYPE_CHECKBOX = "ui.type.checkbox";
 global.UI_TYPE_TEXTINPUT = "ui.type.textinput";
 global.UI_TYPE_DROPDOWNLIST = "ui.type.drodpownlist";

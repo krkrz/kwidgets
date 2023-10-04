@@ -64,7 +64,8 @@ class KCustomUIGenerator
 				%[ type: UI_TYPE_TABLE,        func: generateTable ],
 				%[ type: UI_TYPE_DROPDOWNLIST, func: generateDropdownList ],
 				%[ type: UI_TYPE_SEPARATOR,    func: generateSeparator ],
-				%[ type: UI_TYPE_PLACEHOLDER,  func: generatePlaceHolder ]
+				%[ type: UI_TYPE_PLACEHOLDER,  func: generatePlaceHolder ],
+				%[ type: UI_TYPE_SPACER, func: generateSpacer ]
 		];
 		for (var i = 0; i < defs.count; i++) {
 			var def = defs[i];
@@ -188,9 +189,11 @@ class KCustomUIGenerator
 		var label = ! hasLabel(def) ? void : new KTextLabel(grid.window, %[ label: getValue(def, "label", ""), hint: hint, status: status ]);
 		var klass = global[getValue(def, "klass", "KComboBox")];
 		var widget = new klass(grid.window, %[ name: uiName, hint: hint, status: status,
-												   type: COMBO_STYLE_DROPDOWNLIST,
-												   width: getValue(globalOptions, "widgetMinWidth", K_CUSTOM_UI_DEFAULT_WIDGET_MIN_WIDTH),
-												   items: getValue(def, "items", []), values: getValue(def, "values", []), captions: getValue(def, "captions", []) ]);
+											   type: COMBO_STYLE_DROPDOWNLIST,
+											   width: getValue(globalOptions, "widgetMinWidth", K_CUSTOM_UI_DEFAULT_WIDGET_MIN_WIDTH),
+											   items: getValue(def, "items", []), values: getValue(def, "values", []), captions: getValue(def, "captions", []),
+											   forcePrimaryHint: getValue(def, "forcePrimaryHint", false)
+											 ]);
 		widget.value = getValue(def, "value", widget.values[0]);
 		return %[widget: widget, label: label ];
 	}
@@ -206,6 +209,10 @@ class KCustomUIGenerator
 		else
 			return %[ label: frame ];
 	}
+
+	function generateSpacer(grid, insertionY, uiName, def) {
+		return %[ widget: new KSpacer(grid.window, %[ minWidth: 0, minHeight: 0, maxWidth: K_WIDGET_MAX_POSSIBLE_WIDTH, maxHeight: 0 ]) ];
+	}
 };
 
 global.customUIGenerator = new KCustomUIGenerator();
@@ -219,6 +226,7 @@ class KCustomUI extends KGridLayout
 	var mdPat = /^\[md\]\s*(.*)/;
 	var UI_DIR_VERTICAL = 0;
 	var UI_DIR_HORIZONTAL = 1;
+	var targetsMap = %[];
 
 	var insertionX, insertionY;
 	var curGrid;
@@ -278,6 +286,7 @@ class KCustomUI extends KGridLayout
 
 		var curList = void;
 		var listStack = [];
+		var frameCount = 0;
 
 		for (var i = 0; i < uiDefs.count; i++) {
 			var uiDef = uiDefs[i];
@@ -294,7 +303,7 @@ class KCustomUI extends KGridLayout
 				uiDef.label = uiDef.label.trim();
 
 			if (uiDef.type == UI_TYPE_BEGIN_FRAME) {
-				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][stateStack.count];
+				var frameId = [ "sub1_frame", "sub2_frame", "sub3_frame" ][(frameCount++) % 3];
 				var frame = new KFrameLayout(window, %[ id: frameId, name: getOption("name", "", uiDef), label: getOption("label", "", uiDef), helpText: getOption("helpText", "", uiDef) ] );
 				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
 				frame.add(subGrid);
@@ -306,15 +315,19 @@ class KCustomUI extends KGridLayout
 			}
 			if (uiDef.type == UI_TYPE_BEGIN_HORIZONTAL
 			   || uiDef.type == UI_TYPE_BEGIN_VERTICAL) {
-				var subGrid = new global.KGridLayout(window, %[ name: getOption("name", "", uiDef), id: getOption("gridId", gridId, uiDef) ]);
+				var subGrid = new global.KGridLayout(window, %[ name: getOption("name", "", uiDef), id: getOption("gridId", gridId, uiDef), visible: getOption("visible", true, uiDef) ]);
 				curGrid.add(insertionX, insertionY, subGrid, 2);
 				advanceGrid();
 				pushState();
 				setState(subGrid, 0, 0, uiDef.type == UI_TYPE_BEGIN_HORIZONTAL ? UI_DIR_HORIZONTAL : UI_DIR_VERTICAL);
 				continue;
 			}
-			if (uiDef.type == UI_TYPE_END_FRAME
-				|| uiDef.type == UI_TYPE_END_HORIZONTAL
+			if (uiDef.type == UI_TYPE_END_FRAME) {
+				frameCount--;
+				popState();
+				continue;;
+			}
+			if (uiDef.type == UI_TYPE_END_HORIZONTAL
 				|| uiDef.type == UI_TYPE_END_VERTICAL) {
 				popState();
 				continue;
@@ -334,7 +347,7 @@ class KCustomUI extends KGridLayout
 				var level = new KListItem(%[ name: getOption("name", "", uiDef),
 											 label: getOption("label", "", uiDef),
 											 opened: getOption("opened", false, uiDef),
-											 record: getOption("isRecordOpenedToDictionary", false, uiDef),
+											 isRecordOpenedToDictionary: getOption("record", false, uiDef),
 											 id: "em_caption" ]);
 				curList.add(level);
 				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
@@ -381,6 +394,22 @@ class KCustomUI extends KGridLayout
 					}
 					}
 				}
+
+				if (uiKey != "") {
+					var targets = [];
+					if (label !== void)  targets.add(label);
+					if (bounds !== void) targets.add(bounds);
+					if (targets.count != 0) {
+						targetsMap[uiKey] = targets;
+						var toVisible = getOption("visible", true, uiDef);
+						var toEnable = getOption("enabled", true, uiDef);
+						for (var i = 0; i < targets.count; i++) {
+							targets[i].visible = toVisible;
+							targets[i].enabled = toEnable;
+						}
+					}
+				}
+
 				advanceGrid();
 			}
 			if (result.widget !== void
@@ -445,6 +474,22 @@ class KCustomUI extends KGridLayout
 				this[uiName].value = v[key];
 				callFunc("onValueSet");
 			}
+		}
+	}
+
+	function setWidgetVisible(key, value) {
+		if (typeof(targetsMap[key]) != K_UNDEFINED) {
+			var targets = targetsMap[key];
+			for (var i = 0; i < targets.count; i++) 
+				targets[i].visible = value;
+		}
+	}
+
+	function setWidgetEnabled(key, value) {
+		if (typeof(targetsMap[key]) != K_UNDEFINED) {
+			var targets = targetsMap[key];
+			for (var i = 0; i < targets.count; i++) 
+				targets[i].enabled = value;
 		}
 	}
 };
