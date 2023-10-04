@@ -248,7 +248,7 @@ class KSpliterLayout extends KLayout
 
 	property spliterActive {
 		getter {
-			return ! shutterEnabled || shutterOpened;
+			return shutterOpened;
 		}
 	}
 
