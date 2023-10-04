@@ -1039,6 +1039,8 @@ class KList extends KVirtualWidget
 
 	// セレクションを注視する
 	function seeFocusedItem {
+		if (! nodeVisible)
+			return;
 		asyncCaller.callOnce(this.doSeeFocusedItem, this);
 	}
 
