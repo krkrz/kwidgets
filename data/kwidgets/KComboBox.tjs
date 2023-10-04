@@ -32,6 +32,7 @@ class KComboBox extends KValueEntity
 	var _dispCount = 10;
 	var _inputValue = void;
 	var _textinput;
+	var _forcePrimaryHint;
 
 	function KComboBox(window, *) {
 		var options = parseOldStyleWidgetArgs(KComboBoxArgsFormat, *);
@@ -42,6 +43,7 @@ class KComboBox extends KValueEntity
 		_type = getOption("type", COMBO_STYLE_DROPDOWNLIST);
 		_values = getOption("values", []);
 		_captions = getOption("captions", []);
+		_forcePrimaryHint = getOption("forcePrimaryHint", false);
 		var items = getOption("items", []);
 		for (var i = 0; i < items.count; i += 2) {
 			_captions.add(items[i    ]);
@@ -185,6 +187,8 @@ class KComboBox extends KValueEntity
 			return result;
 		}
 		setter (v) {
+			if (equalStruct(items, v))
+				return;
 			_captions = [];
 			_values = [];
 			for (var i = 0; i < v.count; i += 2) {
@@ -329,7 +333,7 @@ class KComboBox extends KValueEntity
 		var text = caption;
 		var drawResult =
 			drawUITextInRange(curFontStyle, borderPaddingLeft, borderPaddingTop, textFieldWidth, text, ALIGN_LEFT);
-		super.hint = drawResult.inRange ? _primaryHint : text;
+		super.hint = (drawResult.inRange || _forcePrimaryHint) ? _primaryHint : text;
 	}
 
 	function onChildValueModified(child, newValue) {
