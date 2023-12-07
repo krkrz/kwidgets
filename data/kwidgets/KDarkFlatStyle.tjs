@@ -533,6 +533,7 @@
 			style: %[
 				textinputId: "textinputslider_textinput",
 				sliderId: "textinputslider_slider",
+				unitLabelId: "textinputslider_unitlabel",
 				spaceHorizontal: 3,
 				placeTextOnRightsideOfSlider: true,
 			]
@@ -545,7 +546,15 @@
 
 		%[
 			id: "textinputslider_slider",
-			style: %[],
+			style: %[
+			],
+		],
+
+		%[
+			id: "textinputslider_unitlabel",
+			style: %[
+				width: 40
+			],
 		],
 
 		%[

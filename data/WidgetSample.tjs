@@ -219,7 +219,7 @@ class WidgetSample extends KWindow
 		widgetFrame = new KFrameLayout(this, %[ label: "テキストスライダー", id: "group_frame" ]);
 		widgetGrid = new KGridLayout(this, %[ id: "widget_grid" ]);
 		widgetGrid.add(0, 0, new KTextLabel(this, "0〜10(0.1刻み)"));
-		widgetGrid.add(1, 0, new KTextInputSlider(this, %[ left: 0, right: 10, stride: 0.1, name: "textinputslider" ]));
+		widgetGrid.add(1, 0, new KTextInputSlider(this, %[ left: 0, right: 10, stride: 0.1, name: "textinputslider", unitLabel: "s" ]));
 		widgetFrame.add(widgetGrid);
 		tabGrid.add(0, 1, widgetFrame);
 

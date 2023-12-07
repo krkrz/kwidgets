@@ -81,7 +81,11 @@ class KCustomUIGenerator
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
 		var klass = global[getValue(def, "klass", "KTextButton")];
-		var button = new klass(grid.window, %[ name: uiName, label: getValue(def, "label", ""), hint: hint, status: status, value: getValue(def, "value", false), style: %[ textAlign: ALIGN_CENTER ]  ]);
+		var button = new klass(grid.window, %[ name: uiName, label: getValue(def, "label", ""), hint: hint, status: status, value: getValue(def, "value", false), style: %[ textAlign: ALIGN_CENTER ],
+											   dispatchOnMouseDown: getValue(def, "dispatchOnMouseDown", false),
+											   autoDispatchStartInterval: getValue(def, "autoDispatchStartInterval", void),
+											   autoDispatchRepeatInterval: getValue(def, "autoDispatchRepeatInterval", void),
+											 ]);
 		return %[ label: button ];
 	}
 
@@ -89,7 +93,11 @@ class KCustomUIGenerator
 		var hint = getValue(def, "hint", "");
 		var status = getValue(def, "status", "");
 		var klass = global[getValue(def, "klass", "KMarkdownButton")];
-		var button = new klass(grid.window, %[ name: uiName, label: getValue(def, "label", ""), hint: hint, status: status, value: getValue(def, "value", false), style: %[ textAlign: ALIGN_CENTER ]  ]);
+		var button = new klass(grid.window, %[ name: uiName, label: getValue(def, "label", ""), hint: hint, status: status, value: getValue(def, "value", false), style: %[ textAlign: ALIGN_CENTER ],
+											   dispatchOnMouseDown: getValue(def, "dispatchOnMouseDown", false),
+											   autoDispatchStartInterval: getValue(def, "autoDispatchStartInterval", void),
+											   autoDispatchRepeatInterval: getValue(def, "autoDispatchRepeatInterval", void),
+											 ]);
 		return %[ label: button ];
 	}
 
@@ -115,6 +123,7 @@ class KCustomUIGenerator
 											   left: getValue(def, "left", 0), leftIcon: leftIcon, leftIconHint: getValue(def, "leftIconHint", ""),
 											   right: getValue(def, "right", 100), rightIcon: rightIcon, rightIconHint: getValue(def, "rightIconHint", ""),
 											   stride: getValue(def, "stride", 1),
+											   unitLabel: getValue(def, "unitLabel", ""),
 											   value: getValue(def, "value", getValue(def, "left", 0)) ]);
 		return %[ widget: widget, label: label ];
 	}

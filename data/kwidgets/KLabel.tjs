@@ -8,7 +8,8 @@ global.KLabelArgsFormat =
 	];
 
 global.KLabelWidgetStyleDefinition = [
-	[ "variable", "variable", false ]
+	[ "variable", "variable", false ],
+	[ "width", "width", void ]
 ];
 
 class KLabel extends KEntity
@@ -68,7 +69,9 @@ class KLabel extends KEntity
 
 		var minW = borderPaddingWidth + labelWidth, minH = borderPaddingHeight + labelHeight;
 
-		if (! widgetStyle.variable)
+		if (widgetStyle.width !== void)
+			setFixedSize(widgetStyle.width, minH);
+		else if (! widgetStyle.variable)
 			setFixedSize(minW, minH);
 		else
 			setMinMaxSize(Math.min(minW, K_WIDGET_MIN_POSSIBLE_WIDTH), minH, minW, minH);

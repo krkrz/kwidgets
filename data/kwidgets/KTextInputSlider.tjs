@@ -19,7 +19,8 @@ global.KTextInputSliderWidgetStyleDefinition =
 		[ "height", "height" ],
 		[ "placeTextOnRightsideOfSlider", "placeTextOnRightsideOfSlider", false ],
 		[ "variable", "variable", false ],
-		[ "focusOnSliderClick", true ]
+		[ "focusOnSliderClick", "focusOnSliderClick", true ],
+		[ "unitLabelId", "unitLabelId" ]
 	];
 
 class KTextInputSlider extends KValueEntity
@@ -27,6 +28,7 @@ class KTextInputSlider extends KValueEntity
 	var _value;
 	var textInput;
 	var slider;
+	var unitLabel;
 	// 辞書
 	var dict;
 
@@ -90,6 +92,14 @@ class KTextInputSlider extends KValueEntity
 		textInput.parent = this;
 		slider.parent = this;
 
+		var unitLabelText = getOption("unitLabel", "");
+		if (unitLabelText != "") {
+			unitLabel = new KTextLabel(window, %[ name, "_unitLabel",
+												  id: widgetStyle.unitLabelId,
+												  label: unitLabelText,
+												  hint: getOption("hint", "") ]);
+			unitLabel.parent = this;
+		}
 		_value = v;
 	}
 
@@ -167,6 +177,11 @@ class KTextInputSlider extends KValueEntity
 		textInput.id = widgetStyle.textInputId;
 		slider.id = widgetStyle.sliderId;
 
+		if (unitLabel !== void) {
+			unitLabel.id = widgetStyle.unitLabelId;
+			unitLabel.setSize(0, 0);
+		}
+
 		var w = widgetStyle.width !== void ? widgetStyle.width : getOption("width", SLIDER_ADAPTIVE_WIDTH);
 		var h = widgetStyle.height !== void ? widgetStyle.height : getOption("height", void);
 		if (h === void) {
@@ -177,12 +192,15 @@ class KTextInputSlider extends KValueEntity
 		var fontHeight = textInput.fontStyle.fontHeight;
 
 		textInput.overwriteStyle(%[ width: fontHeight * 3, height: h ]);
+		var textAreaWidth = textInput.width;
+		if (unitLabel !== void) 
+			textAreaWidth += spaceHorizontal + unitLabel.width;
 		if (w == SLIDER_ADAPTIVE_WIDTH) {
 			slider.overwriteStyle(%[ width: w, height: h ]);
 			slider.unlockStyleModification();
-			w = slider.minWidth + spaceHorizontal + textInput.width;
+			w = slider.minWidth + spaceHorizontal + textAreaWidth;
 		}
-		slider.overwriteStyle(%[ width: w - spaceHorizontal - textInput.width, height: h, variable: widgetStyle.variable ]);
+		slider.overwriteStyle(%[ width: w - spaceHorizontal - textAreaWidth, height: h, variable: widgetStyle.variable ]);
 
 		textInput.unlockStyleModification();
 		slider.unlockStyleModification();
@@ -191,17 +209,18 @@ class KTextInputSlider extends KValueEntity
 			setFixedSize(w + slider.innerMargin.width, h);
 		else {
 			setMinMaxSize(w + slider.innerMargin.width, h, K_WIDGET_MAX_POSSIBLE_WIDTH, h);
-			slider.setSize(width - textInput.width - spaceHorizontal, slider.height);
+			slider.setSize(width - textAreaWidth - spaceHorizontal, slider.height);
 		}
 
 		if (! widgetStyle.placeTextOnRightsideOfSlider) {
 			textInput.setPos(0, (h - textInput.height) / 2);
-			slider.setPos(textInput.width + spaceHorizontal, (h - slider.height) / 2);
+			slider.setPos(textAreaWidth + spaceHorizontal, (h - slider.height) / 2);
 		} else {
 			textInput.setPos(slider.width + spaceHorizontal, (h - textInput.height) / 2);
 			slider.setPos(0, (h - slider.height) / 2);
 		}
-
+		if (unitLabel !== void) 
+			unitLabel.setPos(textInput.left + textInput.width + spaceHorizontal, (h - unitLabel.height) / 2);
 	}
 
 	/*------------------------------
