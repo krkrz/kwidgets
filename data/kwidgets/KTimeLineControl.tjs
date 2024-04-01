@@ -1346,8 +1346,8 @@ class KTimeLineItem extends KListItem
 	 * - onTimeLineKeyDown(key, shift) タイムライン上でキーが押されると呼び出される。
 	 * - onFrameDragged() フレームがドラッグされた
 	 ------------------------------*/
-	function KTimeLineItem(label = "", name = "") {
-		super.KListItem(label, name);
+	function KTimeLineItem() {
+		super.KListItem(...);
 		frameList = [];
 	}
 

@@ -2465,11 +2465,10 @@ class KWidget extends Layer
 	var borderCornerLayers = [];
 
 	function darkenColor(color) {
-		var r = (color >> 16) & 0xff, g = (color >> 8) & 0xff, b = color & 0xff;
-		var hsv = global.Layer.RGB2HSV(r, g, b);
-		hsv.v  = Math.max(0, hsv.v - 25);
-		var rgb = global.Layer.HSV2RGB(hsv.h, hsv.s, hsv.v);
-		return (rgb.r << 16) | (rgb.g << 8) | rgb.b;
+		var hsv = ColorSpace.convertColorTuple(csRGB, csHSV, color);
+		hsv[0]  = Math.max(0, hsv[0] - 25);
+		var rgb = ColorSpace.convertColorTuple(csHSV, csRGB, hsv);
+		return ColorSpace.argbTupleToColor(rgb);
 	}
 
 	function generateBorderPen(penLayer, dir, style, width, color, bgColor) {

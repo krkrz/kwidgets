@@ -297,8 +297,8 @@ class WidgetSample extends KWindow
 		for (var y = 0; y < 5; y++)
 			for (var x = 0; x < 10; x++) {
 				var colorBox = new KColorBox(this, %[ width: 20, height: 20, name: "color" + x + y ]);
-				var rgb = Layer.HSV2RGB(x * 360 / 10, y * 100 / 4, 100);
-				colorBox.value = (rgb.r << 16) | (rgb.g << 8) | (rgb.b);
+				var rgb = ColorSpace.convertColorTuple(csHSV, csRGB, [ x * 360 / 10, y * 100 / 4, 100, 0 ]);
+				colorBox.value = ColorSpace.argbTupleToColor(rgb);
 				colorBox.margin = 0;
 				colorGrid.add(x, y, colorBox);
 			}
@@ -309,8 +309,8 @@ class WidgetSample extends KWindow
 		for (var y = 0; y < 5; y++)
 			for (var x = 0; x < 10; x++) {
 				var colorBox = new KColorBox(this, %[ hasAlpha: true, width: 20, height: 20, name: "alpha" + x + y ]);
-				var rgb = Layer.HSV2RGB(x * 360 / 10, y * 100 / 4, 100);
-				colorBox.value = 0x80000000 | (rgb.r << 16) | (rgb.g << 8) | (rgb.b);
+				var rgb = ColorSpace.convertColorTuple(csHSV, csRGB, [ x * 360 / 10, y * 100 / 4, 100, 0x80 ]);
+				colorBox.value = ColorSpace.argbTupleToColor(rgb);
 				colorBox.margin = 0;
 				colorGrid.add(x, y, colorBox);
 			}

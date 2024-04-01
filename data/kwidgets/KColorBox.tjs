@@ -18,6 +18,7 @@ class KColorBox extends KValueEntity
 	var _hasAlpha;
 	var _pickerDict;
 	var _pickerName;
+	var _respondToValueModification;
 	var pressing = false;
 
 	/**------------------------------
@@ -40,6 +41,7 @@ class KColorBox extends KValueEntity
 		_hasAlpha = getOption("hasAlpha", false);
 		_pickerDict = getOption("pickerDict", void);
 		_pickerName = getOption("pickerName", "colorPicker");
+		_respondToValueModification = getOption("respondToValueModification", false);
 		setFixedSize(w, h);
 	}
 
@@ -170,13 +172,20 @@ class KColorBox extends KValueEntity
 		super.onMouseUp(...);
 		if (button == mbLeft) {
 			if (pressing) {
-				var result = queryColorPicker(value, hasAlpha, _pickerDict, _pickerName);
+				var result = queryColorPicker(value, hasAlpha, _pickerDict, _pickerName, onDialogModify);
 				if (result !== void) {
 					value = result;
 					dispatch();
 				}
 			}
 			pressing = false;
+		}
+	}
+
+	function onDialogModify(result) {
+		if (_respondToValueModification) {
+			value = result;
+			dispatch();
 		}
 	}
 

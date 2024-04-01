@@ -190,6 +190,20 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 				.f_table.addElement(%[]);
 				.f_table.addElement(%[]);
 
+				.add("グラデーションテスト", new KFrameLayout(this, %[ name: "gradationTestFrame", label: "グラデーションテスト" ]));
+				.gradationTestFrame.add(new KGridLayout(this, %[ name: "gradationTestGrid", id: "widget_grid" ]));
+				.gradationTestGrid.add(0, 0, new KColorBox(this, %[ hasAlpha: false, width: 32, height: 32, name: "gradationLeftColor", respondToValueModification: true ]));
+				.gradationTestGrid.add(1, 0, new KVerticalBarLayout(this, %[ name: "gradationHolder" ]));
+				.gradationTestGrid.add(2, 0, new KColorBox(this, %[ hasAlpha: false, width: 32, height: 32, name: "gradationRightColor", respondToValueModification: true ]));
+				.gradationHolder.add(new KFrameLayout(this, %[ name: "rgbFrame", label: "RGB" ]));
+				.rgbFrame.add(new KWidget(this, %[ name: "rgbBar" ]));
+				.gradationHolder.add(new KFrameLayout(this, %[ name: "hsvFrame", label: "HSV" ]));
+				.hsvFrame.add(new KWidget(this, %[ name: "hsvBar" ]));
+				.gradationHolder.add(new KFrameLayout(this, %[ name: "hclFrame", label: "HCL" ]));
+				.hclFrame.add(new KWidget(this, %[ name: "hclBar" ]));
+				.rgbBar.setFixedSize(300, 16);
+				.hsvBar.setFixedSize(300, 16);
+				.hclBar.setFixedSize(300, 16);
 		}
 
 		Debug.message("before attach to window");
@@ -201,6 +215,15 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 		bindPersistentDictionary(dict);
 
 		gridTestCheck.dispatch();
+		redrawGradations();
+	}
+
+	function redrawGradations() {
+		var c0 = 0xff000000 | gradationLeftColor.value;
+		var c1 = 0xff000000 | gradationRightColor.value;
+		rgbBar.fillGradientRectLR(0, 0, 300, 16, c0, c1);
+		hsvBar.fillGradientRectLR(0, 0, 300, 16, c0, c1, csHSV);
+		hclBar.fillGradientRectLR(0, 0, 300, 16, c0, c1, csHCL);
 	}
 
 	function onChildValueModified(child, value) {
@@ -224,6 +247,11 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 			gridTest.redrawContents();
 			break;
 		}
+
+		case "gradationLeftColor":
+		case "gradationRightColor":
+			redrawGradations();
+			break;
 		}
 	}
 }
