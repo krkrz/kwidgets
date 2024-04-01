@@ -334,6 +334,7 @@ private:
 	bool cyclic;
 
 	double rgb255(double v) const {
+		v += 0.5;
 		return (v < 255 ? (v > 0 ? v : 0) : 255);
 	}
 
@@ -388,7 +389,7 @@ public:
 			TVPThrowExceptionMessage(L"tuple index out of range.");
 		switch (componentIndex) {
 		default: return range_t(0, 360, cyclic);
-		case 1: return range_t(0, 130); 
+		case 1: return range_t(0, 130);
 		case 2: return range_t(0, 100);
 		}
 	}
