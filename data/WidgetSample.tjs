@@ -135,6 +135,13 @@ class WidgetSample extends KWindow
 		menuNest.addRadioItem("ラジオその2", 2, "menuRadio");
 		menuNest.addRadioItem("ラジオその3", 3, "menuRadio");
 		menuTop.addSeparator();
+		menuTop.addItem("項目が多いから自動でネストにする_0");
+		menuTop.addItem("項目が多いから自動でネストにする_1");
+		menuTop.addItem("項目が多いから自動でネストにする_2");
+		menuTop.addItem("項目が多いから自動でネストにする_3");
+		menuTop.addItem("項目が多いから自動でネストにする_4");
+		menuTop.addItem("項目が多いから自動でネストにする_5");
+		menuTop.addSeparator();
 		menuTop.addItem("カスタムダイアログ", "customDialogTest");
 
 		menu.addItem("ズーム", "zoomRoot");
@@ -155,6 +162,8 @@ class WidgetSample extends KWindow
 		menuAction2.shortcut = "Ctrl+2";
 		menuToggle1.shortcut = "Ctrl+3";
 		menuToggle2.shortcut = "Ctrl+4";
+
+		menuTop.doCompact();
 
 		// ウィジェットを作成、配置
 		var tabs, tabGrid, widgetFrame, widgetGrid, scroll, colorGrid;
