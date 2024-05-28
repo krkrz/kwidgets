@@ -746,7 +746,10 @@ class KStyleRepository
 			reutrn;
 		readStorageFiles.add(filename);
 
-		loadStyles(Scripts.evalStorage(filename));
+		var style = Scripts.evalStorage(filename);
+		if (style === void)
+			throw new Exception("empty style. " + filename);
+		loadStyles(style);
 	}
 
 	function initStyles(defs) {
