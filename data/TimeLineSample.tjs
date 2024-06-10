@@ -870,7 +870,7 @@ class TimeLineSample extends KWindow
     vsplit.splitRatio = 1.0;
     timelineControl.resize = true;
     timelineControl.framePerSecond = 60;
-    timelineControl.add(new KTimeLineLoopItem("ループ", "loopItem"));
+      timelineControl.add(new KTimeLineLoopItem(%[ label: "ループ", name: "loopItem", style: %[ fontHeight: 32 ] ]));
     timelineControl.add(new TimeLineSampleRootItem("ルート", "rootItem"));
 
     timelineControl.onRenderFrame = this.onRenderFrame;

@@ -97,33 +97,32 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
   global->Release();
 
   tjs_int TIMELINE_FRAME_WIDTH = viewObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
-  tjs_int TIMELINE_FRAME_HEIGHT = viewObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
+  tjs_int TIMELINE_FRAME_HEIGHT = itemObj.getIntValue(L"height");
 
-  tTJSVariant oneSecondFrameBgLayer, halfSecondFrameBgLayer, fifthFrameBgLayer, normalFrameBgLayer;
-
+  tTJSVariant widgetStyle = viewObj.GetValue(L"widgetStyle", ncbTypedefs::Tag<tTJSVariant>());
+  ncbPropAccessor widgetStyleObj(widgetStyle);
+  tjs_int oneSecondFrameBgColor = widgetStyleObj.getIntValue(L"oneSecondFrameBgColor");
+  tjs_int halfSecondFrameBgColor = widgetStyleObj.getIntValue(L"halfSecondFrameBgColor");
+  tjs_int fifthFrameBgColor = widgetStyleObj.getIntValue(L"fifthFrameBgColor");
+  tjs_int normalFrameBgColor = widgetStyleObj.getIntValue(L"normalFrameBgColor");
+  tjs_int frameBorderColor = widgetStyleObj.getIntValue(L"frameBorderColor");
+  
   // バックグラウンドを描画
   for (tjs_int time = fromTime; time < toTime; time ++) {
     tjs_int x = time * TIMELINE_FRAME_WIDTH;
-    tTJSVariant layer;
+	tjs_int color;
     if (time % fps == 0) {
-      if (oneSecondFrameBgLayer.Type() == tvtVoid)
-        oneSecondFrameBgLayer = viewObj.GetValue(L"oneSecondFrameBgLayer", ncbTypedefs::Tag<tTJSVariant>(), 0, &oneSecondFrameBgLayerHint);
-      layer = oneSecondFrameBgLayer;
+		color = oneSecondFrameBgColor;
     } else if (time % fps * 2 == fps) {
-      if (halfSecondFrameBgLayer.Type() == tvtVoid)
-        halfSecondFrameBgLayer = viewObj.GetValue(L"halfSecondFrameBgLayer", ncbTypedefs::Tag<tTJSVariant>(), 0, &halfSecondFrameBgLayerHint);
-      layer = halfSecondFrameBgLayer;
+		color = halfSecondFrameBgColor;
     } else if (time % 5 == 0) {
-      if (fifthFrameBgLayer.Type() == tvtVoid)
-        fifthFrameBgLayer = viewObj.GetValue(L"fifthFrameBgLayer", ncbTypedefs::Tag<tTJSVariant>(), 0, &fifthFrameBgLayerHint);
-      layer = fifthFrameBgLayer;
+		color = fifthFrameBgColor;
     } else {
-      if (normalFrameBgLayer.Type() == tvtVoid)
-        normalFrameBgLayer = viewObj.GetValue(L"normalFrameBgLayer", ncbTypedefs::Tag<tTJSVariant>(), 0, &normalFrameBgLayerHint);
-      layer = normalFrameBgLayer;
+		color = normalFrameBgColor;
     }
-    viewObj.FuncCall(0, L"copyRect", &copyRectHint, NULL,
-                     x, y, layer, 0, 0, TIMELINE_FRAME_WIDTH, TIMELINE_FRAME_HEIGHT);
+	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y, TIMELINE_FRAME_WIDTH, TIMELINE_FRAME_HEIGHT, color);
+	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x + TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, frameBorderColor);
+	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y + TIMELINE_FRAME_HEIGHT - 1, TIMELINE_FRAME_WIDTH, 1, frameBorderColor);
   }
 }
 
@@ -141,7 +140,7 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int y, tTJSVari
 
   tjs_int WIN_DARKEN2 = globalObj.GetValue(L"WIN_DARKEN2", ncbTypedefs::Tag<tjs_uint>(), 0, &winDarken2Hint);
   tjs_int TIMELINE_FRAME_WIDTH = viewObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
-  tjs_int TIMELINE_FRAME_HEIGHT = viewObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
+  tjs_int TIMELINE_FRAME_HEIGHT = itemObj.GetValue(L"height", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
   tjs_int frameType = frameObj.GetValue(L"type", ncbTypedefs::Tag<tjs_int>(), 0, &typeHint);
   tjs_int frameTime = frameObj.GetValue(L"time", ncbTypedefs::Tag<tjs_int>(), 0, &timeHint);
 
@@ -310,7 +309,7 @@ void timeline_draw_timeline(tTJSVariant item, tTJSVariant view, tjs_int fromTime
   tTJSVariant selection = itemObj.GetValue(L"selection", ncbTypedefs::Tag<tTJSVariant>(), 0, &selectionHint);
   if (selection.Type() != tvtVoid) {
     tjs_int TIMELINE_FRAME_WIDTH = viewObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
-    tjs_int TIMELINE_FRAME_HEIGHT = viewObj.GetValue(L"TIMELINE_FRAME_HEIGHT", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
+    tjs_int TIMELINE_FRAME_HEIGHT = itemObj.getIntValue(L"height");
 
     ncbPropAccessor selectionObj(selection);
     viewObj.FuncCall(0, L"colorRect", &colorRectHint, NULL,
