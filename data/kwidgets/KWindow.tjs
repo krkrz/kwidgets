@@ -425,6 +425,13 @@ class KWindow extends Window
 	}
 
 	/**------------------------------
+	 * プリミティブアイコンを生成する関数を追加します。
+	 ------------------------------*/
+	function addPrimitiveIconDefinition(pat, func) {
+		primaryWidget.primitiveIconBuilder.addDefinition(pat, func);
+	}
+
+	/**------------------------------
 	 * ウィジェットツリーから特定の名前を持った子ウィジェットを捜します
 	 *
 	 * @param name 検索するウィジェットの名前

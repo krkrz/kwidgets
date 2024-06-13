@@ -32,6 +32,10 @@ class KPrimitiveIconBuilder
 		];
 	}
 
+	function addDefinition(pat, func) {
+		definitions.add(%[ pat: pat, func: func ]);
+	}
+
 	function matchIcon(name) {
 		if (compositePat.test(name))
 			return matchCompositePat(name);
