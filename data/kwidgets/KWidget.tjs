@@ -3507,6 +3507,35 @@ class KWidget extends Layer
 		}
 	}
 
+	function convertCoordinate(target, x, y) {
+		var isAncestor = target.isAncestorOf(this);
+		var isDescendant = target.isDescendantOf(this);
+
+		if (! isAncestor && ! isDescendantOf)
+			throw new Exception("coordinate conversion target is not family of this widget.");
+
+		var from, to;
+
+		if (isAncestor) {
+			from = this; to = target;
+		} else {
+			from = target; to = this;
+		}
+
+		var dx = 0, dy = 0;
+		for (var layer = from;
+			 layer.parent && layer.parent != to;
+			 layer = layer.parent) {
+			dx += layer.left;
+			dy += layer.top;
+		}
+
+		if (isAncestor)
+			return %[ x: x + dx, y: y + dy ];
+		else
+			return %[ x: x - dx, y: y - dy ];
+	}
+
 	function onWindowActivate {
 	}
 
