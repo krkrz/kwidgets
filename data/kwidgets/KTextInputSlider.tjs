@@ -191,7 +191,7 @@ class KTextInputSlider extends KValueEntity
 
 		var fontHeight = textInput.fontStyle.fontHeight;
 
-		textInput.overwriteStyle(%[ width: fontHeight * 3, height: h ]);
+		textInput.overwriteStyle(%[ width: int(fontHeight * 3.5), height: h ]);
 		var textAreaWidth = textInput.width;
 		if (unitLabel !== void) 
 			textAreaWidth += spaceHorizontal + unitLabel.width;
