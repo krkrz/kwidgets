@@ -389,12 +389,9 @@ class KTimeLineTimeLocator extends KVirtualWidget
  * レイヤビュー(内部パーツ)
  ----------------------------------------------------------------------*/
 global.KTimeLineLayerViewWidgetStyleDefinition = [
-	[ "singleFrameLeftColor", [ "singleFrameLeftColor",  "singleFrameColor"] ],
-	[ "singleFrameRightColor", [ "singleFrameRightColor", "singleFrameColor"] ],
-	[ "continuousFrameLeftColor", [ "continuousFrameLeftColor",  "continuousFrameColor"] ],
-	[ "continuousFrameRightColor", [ "continuousFrameRightColor", "continuousFrameColor"] ],
-	[ "tweenFrameLeftColor", [ "tweenFrameLeftColor",  "tweenFrameColor"] ],
-	[ "tweenFrameRightColor", [ "tweenFrameRightColor", "tweenFrameColor"] ],
+	[ "singleFrameColor", "singleFrameColor" ],
+	[ "continuousFrameColor", "continuousFrameLeftColor" ],
+	[ "tweenFrameColor", "tweenFrameColor" ],
 	[ "oneSecondFrameBgColor", "oneSecondFrameBgColor" ],
 	[ "halfSecondFrameBgColor", "halfSecondFrameBgColor" ],
 	[ "fifthFrameBgColor", "fifthFrameBgColor" ],
@@ -492,39 +489,21 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
-	property singleFrameLeftColor {
+	property singleFrameColor {
 		getter {
-			return widgetStyle.singleFrameLeftColor;
+			return widgetStyle.singleFrameColor;
 		}
 	}
 
-	property singleFrameRightColor {
+	property continousFrameColor {
 		getter {
-			return widgetStyle.singleFrameRightColor;
+			return widgetStyle.continuousFrameColor;
 		}
 	}
 
-	property continousFrameLeftColor {
+	property tweenFrameColor {
 		getter {
-			return widgetStyle.continuousFrameLeftColor;
-		}
-	}
-
-	property continuousFrameRightColor {
-		getter {
-			return widgetStyle.continuousFrameRightColor;
-		}
-	}
-
-	property tweenFrameLeftColor {
-		getter {
-			return widgetStyle.tweenFrameLeftColor;
-		}
-	}
-
-	property tweenFrameRightColor {
-		getter {
-			return widgetStyle.tweenFrameRightColor;
+			return widgetStyle.tweenFrameColor;
 		}
 	}
 
@@ -1266,14 +1245,11 @@ class KTimeLineItem extends KListItem
 	// フレーム配列
 	var frameList;
 	// シングルフレーム描画色
-	var _singleFrameLeftColor = void;
-	var _singleFrameRightColor = void;
+	var _singleFrameColor = void;
 	// 連続フレーム描画色
-	var _continuousFrameLeftColor = void;
-	var _continuousFrameRightColor = void;
+	var _continuousFrameColor = void;
 	// 補完フレーム描画色
-	var _tweenFrameLeftColor = void;
-	var _tweenFrameRightColor = void;
+	var _tweenFrameColor = void;
 	// 選択範囲
 	var selection = void;
 	// マーカーマスク
@@ -1686,38 +1662,27 @@ class KTimeLineItem extends KListItem
 	 ------------------------------*/
 	property singleFrameColor {
 		getter {
-			if (_singleFrameLeftColor === void)
-				return view.singleFrameLeftColor;
+			if (_singleFrameColor === void)
+				return view.singleFrameColor;
 			else
 				return _singleFrameLeftColor;
 		}
 		setter(v) {
-			_singleFrameLeftColor = v;
-			_singleFrameRightColor = v;
+			_singleFrameColor = v;
 		}
 	}
 
 	property singleFrameLeftColor {
 		getter {
-			if (_singleFrameLeftColor === void)
-				return view.singleFrameLeftColor;
-			else
-				return _singleFrameLeftColor;
-		}
-		setter(v) {
-			_singleFrameLeftColor = v;
+			var v = singleFrameColor;
+			return (v instanceof "Array") ? v[0] : v;
 		}
 	}
 
 	property singleFrameRightColor {
 		getter {
-			if (_singleFrameRightColor === void)
-				return view.singleFrameRightColor;
-			else
-				return _singleFrameRightColor;
-		}
-		setter(v) {
-			_singleFrameRightColor = v;
+			var v = singleFrameColor;
+			return (v instanceof "Array") ? v[1] : v;
 		}
 	}
 
@@ -1731,38 +1696,27 @@ class KTimeLineItem extends KListItem
 	 ------------------------------*/
 	property continuousFrameColor {
 		getter {
-			if (_continuousFrameLeftColor === void)
-				return view.continuousFrameLeftColor;
+			if (_continuousFrameColor === void)
+				return view.continuousFrameColor;
 			else
-				return _continuousFrameLeftColor;
+				return _continuousFrameColor;
 		}
 		setter(v) {
-			_continuousFrameLeftColor = v;
-			_continuousFrameRightColor = v;
+			_continuousFrameColor = v;
 		}
 	}
 
 	property continuousFrameLeftColor {
 		getter {
-			if (_continuousFrameLeftColor === void)
-				return view.continuousFrameLeftColor;
-			else
-				return _continuousFrameLeftColor;
-		}
-		setter(v) {
-			_continuousFrameLeftColor = v;
+			var v = continuousFrameColor;
+			return (v instanceof "Array") ? v[0] : v;
 		}
 	}
 
 	property continuousFrameRightColor {
 		getter {
-			if (_continuousFrameRightColor === void)
-				return view.continuousFrameRightColor;
-			else
-				return _continuousFrameRightColor;
-		}
-		setter(v) {
-			_continuousFrameRightColor = v;
+			var v = continuousFrameColor;
+			return (v instanceof "Array") ? v[1] : v;
 		}
 	}
 
@@ -1776,38 +1730,27 @@ class KTimeLineItem extends KListItem
 	 ------------------------------*/
 	property tweenFrameColor {
 		getter {
-			if (_tweenFrameLeftColor === void)
-				return view.tweenFrameLeftColor;
+			if (_tweenFrameColor === void)
+				return view.tweenFrameColor;
 			else
-				return _tweenFrameLeftColor;
+				return _tweenFrameColor;
 		}
 		setter(v) {
-			_tweenFrameLeftColor = v;
-			_tweenFrameRightColor = v;
+			_tweenFrameColor = v;
 		}
 	}
 
 	property tweenFrameLeftColor {
 		getter {
-			if (_tweenFrameLeftColor === void)
-				return view.tweenFrameLeftColor;
-			else
-				return _tweenFrameLeftColor;
-		}
-		setter(v) {
-			_tweenFrameLeftColor = v;
+			var v = tweenFrameColor;
+			return (v instanceof "Array") ? v[0] : v;
 		}
 	}
 
 	property tweenFrameRightColor {
 		getter {
-			if (_tweenFrameRightColor === void)
-				return view.tweenFrameRightColor;
-			else
-				return _tweenFrameRightColor;
-		}
-		setter(v) {
-			_tweenFrameRightColor = v;
+			var v = tweenFrameColor;
+			return (v instanceof "Array") ? v[1] : v;
 		}
 	}
 
