@@ -697,7 +697,7 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
     menu.addItem("全選択", "selectAllItem", true, this.onSelectAll);
     menu.addItem("フレームをコピーする", "copyFrameItem", true, this.onCopyFrame);
     menu.addItem("フレームをカットーする", "cutFrameItem", true, this.onCutFrame);
-    menu.addItem("フレームをペーストする", "pasteFrameItem", root.window.isLayerRangeAvailableToPaste, root.window.onPasteLayerRange);
+      menu.addItem("フレームをペーストする", "pasteFrameItem", root.window.isLayerRangeAvailableToPaste, root.window.onPasteLayerRange);
     menu.insertKeyFrameItem.shortcut = "Ins";
     menu.deleteKeyFrameItem.shortcut = "Del";
     menu.splitFrameItem.shortcut = "Home";
@@ -801,19 +801,26 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
     root.owner.selectAll();
   }
 
-  //------------------------------
+	//------------------------------
   // フレームをコピーする
   //------------------------------
   function onCopyFrame {
-    Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: [ copyFrameRange(root.owner.selectedTime, root.owner.selectedTime + 1) ] ];
+//    Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: [ copyFrameRange(root.owner.selectedTime, root.owner.selectedTime + 1) ] ];
+	  root.window.onCopyLayerRange();
   }
 
   //------------------------------
   // フレームをカットする
   //------------------------------
   function onCutFrame {
-    Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: [ cutFrameRange(root.owner.selectedTime, root.owner.selectedTime + 1) ] ];
+//    Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: [ cutFrameRange(root.owner.selectedTime, root.owner.selectedTime + 1) ] ];
+	  root.window.onCutLayerRange();
   }
+
+	function onPasteFrame {
+      var body = Clipboard.asTJS.body;
+	  timelineControl.pasteAllSelection(body);
+	}
 
   //------------------------------
   // フレームペースト時処理
@@ -1071,41 +1078,24 @@ class TimeLineSample extends KWindow
   // レイヤ範囲をコピー
   //------------------------------
   function onCopyLayerRange {
-    var body = [];
-    var drawItemList = timelineControl.drawItemList;
-    for (var i = 0; i < drawItemList.count; i++) {
-      var item = drawItemList[i];
-      if (item.hasSelection)
-        body.add(item.copyFrameRange(item.selection[0], item.selection[1]));
-    }
-    Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: body ];
+      var body = timelineControl.copyAllSelection();
+      Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: body ];
   }
 
   //------------------------------
   // レイヤ範囲をカット
   //------------------------------
   function onCutLayerRange {
-    var body = [];
-    var drawItemList = timelineControl.drawItemList;
-    for (var i = 0; i < drawItemList.count; i++) {
-      var item = drawItemList[i];
-      if (item.hasSelection)
-        body.add(item.cutFrameRange(item.selection[0], item.selection[1]));
-    }
-    Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: body ];
+      var body = timelineControl.cutAllSelection();
+      Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: body ];
   }
 
   //------------------------------
   // レイヤ範囲をペースト
   //------------------------------
   function onPasteLayerRange {
-    var body = Clipboard.asTJS.body;
-    var drawItemList = timelineControl.drawItemList;
-    for (var i = 0; i < body.count; i++) {
-      if (timelineControl.selectedLayer + i > drawItemList.count - 1)
-        return;
-      drawItemList[timelineControl.selectedLayer + i].pasteFrame(timelineControl.selectedTime, body[i]);
-    }
+      var body = Clipboard.asTJS.body;
+	  timelineControl.pasteAllSelection(body);
   }
 };
 

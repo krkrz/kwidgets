@@ -40,9 +40,8 @@ tTJSVariant createDictionary(void)
 // ”z—ñ‚ðì¬
 tTJSVariant createArray(void)
 {
-	iTJSDispatch2 *obj = TJSCreateArrayObject();
-	tTJSVariant result(obj, obj);
-	obj->Release();
+	tTJSVariant result;
+	TVPExecuteExpression(L"[]", &result);
 	return result;
 }
 
@@ -886,8 +885,6 @@ tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 	else
 		return 0;
 }
-
-
 
 NCB_REGISTER_FUNCTION(equalStruct, equalStruct);
 NCB_REGISTER_FUNCTION(equalStructNumericLoose, equalStructNumericLoose);

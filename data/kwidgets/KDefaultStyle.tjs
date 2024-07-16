@@ -9,6 +9,10 @@
 				"k_list_check_off" => "k_check_button_off",
 				"k_table_check_on" => "k_check_button_on",
 				"k_table_check_off" => "k_check_button_off",
+				"timeline_selection" => 0xff0f64d2,
+				"timeline_selected_frame_blend" => 0x40ffffff,
+				"timeline_drag_frame_blend" => 0x401cc2ff,
+				"timeline_hover_frame_blend" => 0x40ffffff,
 			]
 		],
 
@@ -627,6 +631,10 @@
 					 loopContinuousFrameColor: 0xff8080,
 					 cursorColor: 0xFFFF0000,
 					 focus: %[ cursorColor: 0xFF0000FF ],
+					 selectionColor: "timeline_selection",
+					 selectedFrameBlend: "timeline_selected_frame_blend",
+					 dragFrameBlend: "timeline_drag_frame_blend",
+					 hoverFrameBlend: "timeline_hover_frame_blend",
 				   ]
 		 ],
 

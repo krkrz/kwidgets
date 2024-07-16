@@ -20,6 +20,7 @@ class KVirtualWidget extends KEntity
 	var _canvas;
 	var _clip = void;
 	var _canvasClip = void;
+	var _delayDrawRegion;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -55,6 +56,7 @@ class KVirtualWidget extends KEntity
 			var delegate = _virtualWidgetDelegates[i];
 			mixin(this, delegate);
 		}
+		_delayDrawRegion = new KRegion();
 	};
 
 	function registerDelegateClass(delegate) {
@@ -177,13 +179,8 @@ class KVirtualWidget extends KEntity
 			return;
 
 		var rect = new KRect(vleft, vtop, vwidth, vheight);
-		rect.intersectWith(_site);
-		if (rect.isValid) {
-			setCanvasClip(rect.left, rect.top, rect.width, rect.height);
-			onDraw(rect.left, rect.top,
-				   rect.width, rect.height);
-			setCanvasClip();
-		}
+		_delayDrawRegion.include(rect);
+		update();
 	}
 
 	/**------------------------------
@@ -194,6 +191,25 @@ class KVirtualWidget extends KEntity
 	 ------------------------------*/
 	function redrawAll {
 		redrawRect(_site.left, _site.top, _site.width, _site.height);
+	}
+
+	/**------------------------------
+	 * 描画実行
+	 *
+	 * 描画リクエストが発行された領域への描画処理を実際に実行する
+	 ------------------------------*/
+	function onPaint() {
+		_delayDrawRegion.intersectWith(_site);
+		for (var i = 0; i < _delayDrawRegion.rectCount; i++) {
+			var rect = _delayDrawRegion.rectAt(i);
+			if (rect.isValid) {
+				setCanvasClip(rect.left, rect.top, rect.width, rect.height);
+				onDraw(rect.left, rect.top,
+					   rect.width, rect.height);
+				setCanvasClip();
+			}
+		}
+		_delayDrawRegion.clear();
 	}
 
 	/**------------------------------

@@ -63,6 +63,12 @@
 				"tab_bg_mousedown" => 0xff383838,
 				"primary_button_border_focus" =>  0xff3c5ba2,
 				"primary_button_bg_mousedown" => 0xffe1e1e1,
+				"timeline_range_selector" => 0x30ffcd49, // 0x400f64d2,
+				"timeline_selected_frame_blend" => 0xff4fe5ff, // 0x40b3ffc7, // ffb7b3,
+				"timeline_drag_frame_blend" => 0x401cc2ff,
+				"timeline_hover_frame_blend" => 0x40ffffff,
+				"timeline_cursor" => 0xFFb3baff,
+				"timeline_cursor_focus" => 0xFFffeab3,
 			]
 		],
 
@@ -815,8 +821,12 @@
 					 frameSignColor: 0xff696969,
 					 loopSingleFrameColor: 0xff0000,
 					 loopContinuousFrameColor: 0xff8080,
-					 cursorColor: 0xFFFF8080,
-					 focus: %[ cursorColor: 0xFF8080FF ],
+					 cursorColor: "timeline_cursor",
+					 focus: %[ cursorColor: "timeline_cursor_focus" ],
+					 rangeSelectorColor: "timeline_range_selector",
+					 selectedFrameBlend: "timeline_selected_frame_blend",
+					 dragFrameBlend: "timeline_drag_frame_blend",
+					 hoverFrameBlend: "timeline_hover_frame_blend",
 				   ]
 		 ],
 
@@ -826,6 +836,8 @@
 					 spaceVertical: 8,
 					 frameBorderColor: 0xffadadad,
 					 activeColor: 0xffff0000,
+					 cursorColor: "timeline_cursor",
+					 focus: %[ cursorColor: "timeline_cursor_focus" ],
 				   ],
 		 ],
 
