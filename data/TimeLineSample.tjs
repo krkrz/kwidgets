@@ -728,7 +728,8 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
       // Ctrl+Xでフレームをカット
     case VK_X:
       if (shift & ssCtrl)
-        onCutFrame();
+          onCutFrame();
+		break;
       // Ctrl+Vでフレームをペースト
     case VK_V:
       if ((shift & ssCtrl)

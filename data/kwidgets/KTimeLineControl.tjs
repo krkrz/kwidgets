@@ -909,6 +909,21 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
+	function pointSelectionCorner() {
+		if (selectionCount > 0) {
+			var layer = 9999999999, time = 9999999999;
+			for (var i = 0; i < list.drawItemList.count; i++) {
+				var item = list.drawItemList[i];
+				if (item.hasSelection) {
+					layer = Math.min(layer, i);
+					time = Math.min(time, item.frameAt(item.selection[0]).time);
+				}
+			}
+			owner.selectedLayer = layer;
+			owner.selectedTime = time;
+		}
+	}
+
 	function resetSelection() {
 		for (var i = 0; i < list.drawItemList.count; i++)
 			list.drawItemList[i].releaseSelection();
@@ -959,6 +974,8 @@ class KTimeLineLayerView extends KVirtualWidget
 				item.setSelection(item.fullSelection);
 			}
 		}
+
+		pointSelectionCorner();
 	}
 
 	//----------------------------------------------------------------------
@@ -1038,6 +1055,7 @@ class KTimeLineLayerView extends KVirtualWidget
 			endRangeSelector();
 			break;
 		}
+		pointSelectionCorner();
 		rangeSelectMode = RANGE_SELECT_NONE;
 	}
 
@@ -1476,11 +1494,13 @@ class KTimeLineLayerView extends KVirtualWidget
 				var item = owner.drawItemList[point[0]];
 				if (item.supportSelection)
 					item.addSelection([ point[1] ]);
+				pointSelectionCorner();
 			} else if (shift == ssCtrl
 					   && point !== void) {
 				var item = owner.drawItemList[point[0]];
 				if (item.supportSelection)
 					item.flipSelection([ point[1] ]);
+				pointSelectionCorner();
 			}
 		}
 
@@ -1602,6 +1622,28 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
+	function shiftSelection(offset) {
+		if (hasSelection) {
+			dragEnterSelection(0, 0);
+			dragMoveSelection(offset * TIMELINE_FRAME_WIDTH - TIMELINE_FRAME_WIDTH / 2, 0);
+			dragLeaveSelection();
+		} else if (owner.selectedLayer >= 0) {
+			var item = list.drawItemList[owner.selectedLayer];
+			var frameIndex = item.findFrame(owner.selectedTime);
+			if (frameIndex > 0) {
+				var frame = item.frameAt(frameIndex);
+				if (frame.type != TIMELINE_FRAME_TYPE_NULL) {
+					item.setSelection([ frameIndex ]);
+					dragEnterSelection(0, 0);
+					dragMoveSelection(offset * TIMELINE_FRAME_WIDTH - TIMELINE_FRAME_WIDTH / 2, 0);
+					dragLeaveSelection();
+					item.releaseSelection();
+					owner.onRenderFrame();
+				}
+			}
+		}
+	}
+
 	function onKeyDown(key, shift) {
 		var cursorMoved = false;
 		switch (key) {
@@ -1625,41 +1667,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		case VK_LEFT:
 			if (shift & ssCtrl) {
 				var step = (shift & ssShift) ? 10 : 1;
-				if (hasSelection) {
-					var movable = true;
-					for (var i = 0; i < list.drawItemList.count; i++) {
-						var item = list.drawItemList[i];
-						if (! item.hasSelection)
-							continue;
-						step = Math.min(step, item.selection[0] - item.leftSideFrameNum(item.selection[0]));
-						if (step <= 0) {
-							movable = false;
-							break;
-						}
-					}
-					if (movable) {
-						for (var i = 0; i < list.drawItemList.count; i++) {
-							var item = list.drawItemList[i];
-							if (item.hasSelection) {
-								item.moveFrame(item.selection[0], item.selection[0] - step, true, false);
-								item.setSelection(item.selection[0] - step, item.selection[1] - step);
-							}
-						}
-						list.redrawAllItemsView();
-						owner.onMultipleFrameDragged();
-						owner.onRenderFrame();
-					}
-				} else {
-					if (owner.selectedLayer >= 0) {
-						var item = list.drawItemList[owner.selectedLayer];
-						step = Math.min(step, owner.selectedTime - item.leftSideFrameNum(owner.selectedTime));
-						if (step > 0) {
-							item.moveFrame(owner.selectedTime, owner.selectedTime - step, true);
-							item.onFrameDragged();
-							owner.onRenderFrame();
-						}
-					}
-				}
+				shiftSelection(-step);
 				owner.selectedTime -= step;
 				noticeRect(owner.selectedTime * TIMELINE_FRAME_WIDTH,
 						   owner.selectedLayer * TIMELINE_FRAME_HEIGHT,
@@ -1690,25 +1698,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		case VK_RIGHT:
 			if (shift & ssCtrl) {
 				var step = (shift & ssShift) ? 10 : 1;
-				if (hasSelection) {
-					for (var i = 0; i < list.drawItemList.count; i++) {
-						var item = list.drawItemList[i];
-						if (item.hasSelection) {
-							item.moveFrame(item.selection[0], item.selection[0] + step, true, false);
-							item.setSelection(item.selection[0] + step, item.selection[1] + step);
-						}
-					}
-					list.redrawAllItemsView();
-					owner.onMultipleFrameDragged();
-					owner.onRenderFrame();
-				} else {
-					if (owner.selectedLayer >= 0) {
-						var item = list.drawItemList[owner.selectedLayer];
-						item.moveFrame(owner.selectedTime, owner.selectedTime + step, true);
-						item.onFrameDragged();
-						owner.onRenderFrame();
-					}
-				}
+				shiftSelection(step);
 				owner.selectedTime += step;
 				noticeRect(owner.selectedTime * TIMELINE_FRAME_WIDTH,
 						   owner.selectedLayer * TIMELINE_FRAME_HEIGHT,
@@ -2207,8 +2197,8 @@ class KTimeLineItem extends KListItem
 	}
 
 	function deleteKeyFrameAt(frameIndex) {
-		frameList.erase(frameIndex);
-		correctSelectionByRemoveIndex(frameIndex);
+		frameList[frameIndex].content = void;
+		frameList[frameIndex].type = TIMELINE_FRAME_TYPE_NULL;
 		invalidateNullFrame();
 		redrawAllFrame();
 		root.owner.onRenderFrame();
@@ -2595,6 +2585,7 @@ class KTimeLineItem extends KListItem
 	 * 選択範囲をペーストする
 	 ------------------------------*/
 	function pasteSelection(pasteTime, frames) {
+		selection = [];
 		frames.each(pasteTime, function(frame, pasteTime) {
 			frame = duplicateStruct(frame);
 			frame.time += pasteTime;
@@ -2609,6 +2600,7 @@ class KTimeLineItem extends KListItem
 				var beginIndex = findFrame(beginTime, true);
 				if (beginIndex < 0) {
 					frameList.insert(0, frame);
+					selection.add(0);
 					if (frameList[1].time > endTime) 
 						frameList.insert(1, %[ time: endTime, type: TIMELINE_FRAME_TYPE_NULL ]);
 				} else if (frameAt(beginIndex).time != beginTime) {
@@ -2627,9 +2619,9 @@ class KTimeLineItem extends KListItem
 				for (var i = endIndex - 1; i >= beginIndex; i--) 
 					frameList.erase(i);
 				frameList.insert(beginIndex, frame);
+				selection.add(beginIndex);
 			}
 		} incontextof(this) );
-		selection = [];
 		invalidateNullFrame();
 		redrawAllFrame();
 		root.owner.onRenderFrame();
@@ -4295,6 +4287,7 @@ class KTimeLineControl extends KEntity
 	}
 
 	function pasteAllSelection(rows, baseLayer = selectedLayer, baseTime = selectedTime) {
+		resetSelection();
 		var params = %[ baseTime: baseTime,
 						baseLayer: baseLayer,
 						drawItemList: _layerList.drawItemList ];
