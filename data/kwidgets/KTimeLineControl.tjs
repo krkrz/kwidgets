@@ -618,6 +618,18 @@ class KTimeLineLayerView extends KVirtualWidget
 		super.onSearchNextFocusable(owner.searchTarget);
 	}
 
+	property selectedTime {
+		getter {
+			return owner.selectedTime;
+		}
+	}
+
+	property selectedLayer {
+		getter {
+			return owner.selectedLayer;
+		}
+	}
+
 	property cursorX {
 		getter {
 			return owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2 - 1;
@@ -630,6 +642,12 @@ class KTimeLineLayerView extends KVirtualWidget
 				return -1;
 			var item = list.drawItemList[owner.selectedLayer];
 			return item.top + item.height / 2 - 1;
+		}
+	}
+
+	property cursorColor {
+		getter {
+			return widgetStyle.cursorColor;
 		}
 	}
 

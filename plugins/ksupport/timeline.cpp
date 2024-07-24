@@ -129,7 +129,8 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
   tjs_int cursorColor = widgetStyleObj.getIntValue(L"cursorColor");
   tjs_int cursorX = viewObj.getIntValue(L"cursorX");
   tjs_int cursorY = viewObj.getIntValue(L"cursorY");
-  viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, cursorX, y, 1, TIMELINE_FRAME_HEIGHT, cursorColor);
+  if (fromTime * TIMELINE_FRAME_WIDTH <= cursorX && cursorX < toTime * TIMELINE_FRAME_WIDTH)
+	  viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, cursorX, y, 1, TIMELINE_FRAME_HEIGHT, cursorColor);
   if (y <= cursorY && cursorY < y + TIMELINE_FRAME_HEIGHT)
 	  viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, fromTime * TIMELINE_FRAME_WIDTH, cursorY, (toTime - fromTime) * TIMELINE_FRAME_WIDTH, 1, cursorColor);
 }
@@ -193,6 +194,38 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int layerIndex,
 		bool rightMarker = (markerMask & TIMELINE_MARKER_MASK_RIGHT) != 0;
 		if (rightMarker && leftMarker && length == 1)
 			rightMarker = false;
+		// ÉgÉDÉCÅ[ÉìÇÃîjê¸ï`âÊ
+		tjs_int fromTime = frameTime + (leftMarker ? 1 : 0), toTime = frameTime + length - (rightMarker ? 1 : 0);
+		if (frameType == TIMELINE_FRAME_TYPE_TWEEN) {
+			tTJSVariant dashLineApp = viewObj.GetValue(L"dashLineApp", ncbTypedefs::Tag<tTJSVariant>(), 0, &dashLineAppHint);
+			tjs_int frameSignColor = viewObj.GetValue(L"frameSignColor", ncbTypedefs::Tag<tjs_int>(), 0, &frameSignColorHint);
+			if (dashLineApp.Type() != tvtVoid) {
+				viewObj.FuncCall(0, L"drawLine", &drawLineHint, NULL,
+								 dashLineApp, fromTime * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1, toTime * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1);
+			} else {
+				for (tjs_int i = fromTime; i < toTime; i++) {
+					viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
+									 i * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1, TIMELINE_FRAME_WIDTH / 2 - 2, 1, frameSignColor);
+					viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
+									 i * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2, y + TIMELINE_FRAME_HEIGHT / 2 - 1, TIMELINE_FRAME_WIDTH / 2 - 2, 1, frameSignColor);
+				}
+			}
+		}
+		// ÉJÅ[É\Éãï\é¶
+		auto selectedLayer = viewObj.getIntValue(L"selectedLayer", -1);
+		if (selectedLayer == layerIndex) {
+			auto cursorColor = viewObj.getIntValue(L"cursorColor");
+			auto cursorY = viewObj.getIntValue(L"cursorY");
+			viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
+							 frameTime * TIMELINE_FRAME_WIDTH, cursorY, length * TIMELINE_FRAME_WIDTH, 1, cursorColor);
+		}
+		auto selectedTime = viewObj.getIntValue(L"selectedTime");
+		if (frameTime <= selectedTime && selectedTime < frameTime + length) {
+			auto cursorColor = viewObj.getIntValue(L"cursorColor");
+			auto cursorX = viewObj.getIntValue(L"cursorX");
+			viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
+							 cursorX, y, 1, TIMELINE_FRAME_HEIGHT, cursorColor);
+		}
 		// ç∂É}Å[ÉJÅ[ï`âÊ
 		if (leftMarker) {
 			tTJSVariant frameLeftMarkerLayer = viewObj.GetValue(L"frameLeftMarkerLayer", ncbTypedefs::Tag<tTJSVariant>(), 0, &frameLeftMarkerLayerHint);
@@ -212,23 +245,6 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int layerIndex,
 			viewObj.FuncCall(0, L"operateRect", &operateRectHint, NULL,
 							 (frameTime + length) * TIMELINE_FRAME_WIDTH - mw, y, 
 							 frameRightMarkerLayer, 0, 0, mw, mh);
-		}
-		// ÉgÉDÉCÅ[ÉìÇÃîjê¸ï`âÊ
-		tjs_int fromTime = frameTime + (leftMarker ? 1 : 0), toTime = frameTime + length - (rightMarker ? 1 : 0);
-		if (frameType == TIMELINE_FRAME_TYPE_TWEEN) {
-			tTJSVariant dashLineApp = viewObj.GetValue(L"dashLineApp", ncbTypedefs::Tag<tTJSVariant>(), 0, &dashLineAppHint);
-			tjs_int frameSignColor = viewObj.GetValue(L"frameSignColor", ncbTypedefs::Tag<tjs_int>(), 0, &frameSignColorHint);
-			if (dashLineApp.Type() != tvtVoid) {
-				viewObj.FuncCall(0, L"drawLine", &drawLineHint, NULL,
-								 dashLineApp, fromTime * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1, toTime * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1);
-			} else {
-				for (tjs_int i = fromTime; i < toTime; i++) {
-					viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
-									 i * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT / 2 - 1, TIMELINE_FRAME_WIDTH / 2 - 2, 1, frameSignColor);
-					viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
-									 i * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2, y + TIMELINE_FRAME_HEIGHT / 2 - 1, TIMELINE_FRAME_WIDTH / 2 - 2, 1, frameSignColor);
-				}
-			}
 		}
 		// ÉtÉåÅ[ÉÄêîï`âÊ
 		if (length > 2) {
