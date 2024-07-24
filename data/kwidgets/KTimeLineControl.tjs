@@ -1010,6 +1010,8 @@ class KTimeLineLayerView extends KVirtualWidget
 	//------------------------------
 	// レンジセレクタ開始
 	function dragEnterRangeSelector(x, y, shift) {
+		if (rangeSelectorActive)
+			return;
 		shift &= ssCtrl | ssShift;
 		leftPressed = false;
 		rightPressed = false;
@@ -1067,6 +1069,8 @@ class KTimeLineLayerView extends KVirtualWidget
 	// レンジセレクタ終了
 	function dragLeaveRangeSelector(x, y) {
 		switch (rangeSelectMode) {
+		case RANGE_SELECT_NONE:
+			return;
 		case RANGE_SELECT_SET:
 		case RANGE_SELECT_ADD:
 		case RANGE_SELECT_FLIP:
@@ -1673,15 +1677,6 @@ class KTimeLineLayerView extends KVirtualWidget
 			super.onKeyDown(...);
 			break;
 
-		case VK_SHIFT:
-			if (owner.selectedTime >= 0
-				&& owner.selectedLayer >= 0) {
-				cursorKeyDragging = true;
-				cursorKeySelectionBeginTime = owner.selectedTime;
-				cursorKeySelectionBeginLayer = owner.selectedLayer;
-			}
-			break;
-
 		case VK_LEFT:
 			if (shift & ssCtrl) {
 				var step = (shift & ssShift) ? 10 : 1;
@@ -1757,11 +1752,14 @@ class KTimeLineLayerView extends KVirtualWidget
 			}
 			break;
 		case VK_SHIFT:
-			if (owner.selectedTime >= 0
+			if (! rangeSelectorActive
+				&& owner.selectedTime >= 0
 				&& owner.selectedLayer >= 0) {
 				cursorKeyDragging = true;
-				cursorKeySelectionBeginTime = owner.selectedTime;
-				cursorKeySelectionBeginLayer = owner.selectedLayer;
+				var item = list.drawItemList[owner.selectedLayer];
+				var x = int((owner.selectedTime + 0.5) * TIMELINE_FRAME_WIDTH);
+				var y = int(item.top + item.height / 2);
+				beginRangeSelector(x, y);
 			}
 			break;
 		}
@@ -1772,18 +1770,14 @@ class KTimeLineLayerView extends KVirtualWidget
 					   owner.selectedLayer * TIMELINE_FRAME_HEIGHT,
 					   TIMELINE_FRAME_WIDTH,
 					   TIMELINE_FRAME_HEIGHT);
-			owner.resetSelection();
 			if (cursorKeyDragging) {
-				var selectionEndTime, selectionEndLayer;
-				selectionEndTime = owner.selectedTime;
-				selectionEndLayer = owner.selectedLayer;
-				var fromTime, toTime, fromLayer, toLayer;
-				fromTime = int(Math.min(cursorKeySelectionBeginTime, selectionEndTime));
-				toTime =   int(Math.max(cursorKeySelectionBeginTime, selectionEndTime));
-				fromLayer = int(Math.min(cursorKeySelectionBeginLayer, selectionEndLayer));
-				toLayer =   int(Math.max(cursorKeySelectionBeginLayer, selectionEndLayer));
-				for (var i = fromLayer; i <= toLayer; i++)
-					list.drawItemList[i].setSelection(fromTime, toTime + 1);
+				var item = list.drawItemList[owner.selectedLayer];
+				var x = int((owner.selectedTime + 0.5) * TIMELINE_FRAME_WIDTH);
+				var y = int(item.top + item.height / 2);
+				updateRangeSelector(x, y);
+				var selections = getRangeSelections();
+				for (var i = 0; i < list.drawItemList.count; i++) 
+					list.drawItemList[i].setSelection(selections[i]);
 			}
 		}
 	}
@@ -1795,6 +1789,7 @@ class KTimeLineLayerView extends KVirtualWidget
 			break;
 		case VK_SHIFT:
 			cursorKeyDragging = false;
+			endRangeSelector();
 			break;
 		}
 	}
