@@ -70,7 +70,7 @@
  ----------------------------------------------------------------------*/
 global.TYPE_FRAME_TREE =  "application/x-kwidgets.timelinesample.frameTree";
 global.TYPE_LAYER =       "application/x-kwidgets.timelinesample.layer";
-global.TYPE_LAYER_RANGE = "application/x-kwidgets.timelinesample.layerRange";
+global.TYPE_LAYER_FRAMES = "application/x-kwidgets.timelinesample.layerFrames";
 global.DD_LAYER = "dd.timelinesample.layer";
 
 /*----------------------------------------------------------------------
@@ -689,10 +689,10 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
   function onTimeLineRightClick(time) {
     var menu = new KContextMenu();
     var frame = frameAt(findFrame(time));
-    menu.addItem("キーフレームを挿入する", "insertKeyFrameItem", (frame !== void && frame.type != TIMELINE_FRAME_TYPE_NULL && frame.time != time) || (frame !== void && frame.type == TIMELINE_FRAME_TYPE_NULL) || frame === void, funccall(this.onInsertFrame, time));
-    menu.addItem("キーフレームを削除する", "deleteKeyFrameItem", frame !== void && frame.type != TIMELINE_FRAME_TYPE_NULL && frame.time == time, funccall(this.onDeleteFrame, time));
-    menu.addItem("フレームを分割する", "splitFrameItem", frame !== void && frame.type != TIMELINE_FRAME_TYPE_NULL && frame.time != time, funccall(this.onSplitFrame, time));
-    menu.addItem("空フレームを挿入する", "nullFrameItem", (frame !== void && frame.type != TIMELINE_FRAME_TYPE_NULL), funccall(this.onNullFrame, time));
+      menu.addItem("キーフレームを挿入する", "insertKeyFrameItem", ! pointEffectiveFrameHead, funccall(this.onInsertFrame, time));
+      menu.addItem("キーフレームを削除する", "deleteKeyFrameItem", pointEffectiveFrameHead, funccall(this.onDeleteFrame, time));
+    menu.addItem("フレームを分割する", "splitFrameItem", pointEffectiveFrame && ! pointFrameHead, funccall(this.onSplitFrame, time));
+    menu.addItem("空フレームを挿入する", "nullFrameItem", pointEffectiveFrame, funccall(this.onNullFrame, time));
     menu.addSeparator();
     menu.addItem("全選択", "selectAllItem", true, this.onSelectAll);
     menu.addItem("フレームをコピーする", "copyFrameItem", true, this.onCopyFrame);
@@ -732,10 +732,10 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
 		break;
       // Ctrl+Vでフレームをペースト
     case VK_V:
-      if ((shift & ssCtrl)
+		if ((shift & ssCtrl)
           && root.window.isLayerRangeAvailableToPaste)
-        root.window.onPasteLayerRange();
-      break;
+			onPasteFrame();
+		break;
       // Insertでキーフレーム挿入
     case VK_INSERT:
       var time = root.owner.selectedTime;
@@ -805,22 +805,22 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
 	//------------------------------
   // フレームをコピーする
   //------------------------------
-  function onCopyFrame {
-//    Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: [ copyFrameRange(root.owner.selectedTime, root.owner.selectedTime + 1) ] ];
-	  root.window.onCopyLayerRange();
+	function onCopyFrame {
+      var body = owner.copyFrames();
+      Clipboard.asTJS = %[ type: TYPE_LAYER_FRAMES, body: body ];
   }
 
   //------------------------------
   // フレームをカットする
   //------------------------------
   function onCutFrame {
-//    Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: [ cutFrameRange(root.owner.selectedTime, root.owner.selectedTime + 1) ] ];
-	  root.window.onCutLayerRange();
+      var body = owner.cutFrames();
+      Clipboard.asTJS = %[ type: TYPE_LAYER_FRAMES, body: body ];
   }
 
 	function onPasteFrame {
       var body = Clipboard.asTJS.body;
-	  timelineControl.pasteAllSelection(body);
+	  owner.pasteFrames(body);
 	}
 
   //------------------------------
@@ -1022,9 +1022,8 @@ class TimeLineSample extends KWindow
   //------------------------------
   property isLayerRangeAvailableToCopy {
     getter {
-      return ! (rootItem.hasSelection
-                && timelineControl.hasSelection);
-    }      
+      return timelineControl.hasSelection;
+    }
   }
 
   //------------------------------
@@ -1033,8 +1032,8 @@ class TimeLineSample extends KWindow
   property isLayerRangeAvailableToPaste {
     getter {
       return Clipboard.hasFormat(cbfTJS)
-        && Clipboard.asTJS.type == TYPE_LAYER_RANGE
-        && timelineControl.selectedLayer >= 1;
+        && Clipboard.asTJS.type == TYPE_LAYER_FRAMES
+        && timelineControl.selectedLayer >= 0;
     }
   }
 
@@ -1079,16 +1078,16 @@ class TimeLineSample extends KWindow
   // レイヤ範囲をコピー
   //------------------------------
   function onCopyLayerRange {
-      var body = timelineControl.copyAllSelection();
-      Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: body ];
+      var body = timelineControl.copyFrames();
+      Clipboard.asTJS = %[ type: TYPE_LAYER_FRAMES, body: body ];
   }
 
   //------------------------------
   // レイヤ範囲をカット
   //------------------------------
   function onCutLayerRange {
-      var body = timelineControl.cutAllSelection();
-      Clipboard.asTJS = %[ type: TYPE_LAYER_RANGE, body: body ];
+      var body = timelineControl.cutFrames();
+      Clipboard.asTJS = %[ type: TYPE_LAYER_FRAMES, body: body ];
   }
 
   //------------------------------
@@ -1096,7 +1095,7 @@ class TimeLineSample extends KWindow
   //------------------------------
   function onPasteLayerRange {
       var body = Clipboard.asTJS.body;
-	  timelineControl.pasteAllSelection(body);
+	  timelineControl.pasteFrames(body);
   }
 };
 

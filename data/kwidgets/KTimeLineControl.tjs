@@ -736,8 +736,6 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	// マウスオーバー状態アップデート
 	function updateMouseOver(x, y) {
-		return;
-
 		var curTime = int(x / TIMELINE_FRAME_WIDTH);
 		var curLayer = list.findItemIndex(y);
 		if (! (curTime < 0 || curLayer < 0 || curLayer >= list.drawItemList.count)) {
@@ -1973,6 +1971,12 @@ class KTimeLineItem extends KListItem
 		frameList = [];
 	}
 
+	property owner {
+		getter {
+			return root.owner;
+		}
+	}
+
 	property view {
 		getter {
 			return root.owner._layerView;
@@ -2472,6 +2476,46 @@ class KTimeLineItem extends KListItem
 		if (root !== void) {
 			redrawFrameRange(0, Math.max(lastTime, prevLastTime));
 			root.owner.onRenderFrame();
+		}
+	}
+
+	/**------------------------------
+	 * フレームの先頭を指している
+	 ------------------------------*/
+	property pointFrameHead {
+		getter {
+			var frameIndex = findFrame(owner.selectedTime);
+			if (frameIndex >= 0) {
+				var frame = frameAt(frameIndex);
+				return frame.time == owner.selectedTime;
+			}
+		}
+	}
+
+	/**------------------------------
+	 * 有効なフレームを指している
+	 ------------------------------*/
+	property pointEffectiveFrame {
+		getter {
+			var frameIndex = findFrame(owner.selectedTime);
+			if (frameIndex >= 0) {
+				var frame = frameAt(frameIndex);
+				return frame.type != TIMELINE_FRAME_TYPE_NULL;
+			}
+		}
+	}
+
+	/**------------------------------
+	 * 有効なフレームの先頭を指している
+	 ------------------------------*/
+	property pointEffectiveFrameHead {
+		getter {
+			var frameIndex = findFrame(owner.selectedTime);
+			if (frameIndex >= 0) {
+				var frame = frameAt(frameIndex);
+				return frame.type != TIMELINE_FRAME_TYPE_NULL
+					&& frame.time == owner.selectedTime;
+			}
 		}
 	}
 
@@ -4212,7 +4256,7 @@ class KTimeLineControl extends KEntity
 		});
 	}
 
-	function copyAllSelection {
+	function copyFrames {
 		if (! hasSelection) {
 			var layer = selectedLayer;
 			var time = selectedTime;
@@ -4255,7 +4299,7 @@ class KTimeLineControl extends KEntity
 		return result;
 	}
 
-	function cutAllSelection {
+	function cutFrames {
 		if (! hasSelection) {
 			var layer = selectedLayer;
 			var time = selectedTime;
@@ -4299,7 +4343,7 @@ class KTimeLineControl extends KEntity
 		return result;
 	}
 
-	function pasteAllSelection(rows, baseLayer = selectedLayer, baseTime = selectedTime) {
+	function pasteFrames(rows, baseLayer = selectedLayer, baseTime = selectedTime) {
 		resetSelection();
 		var params = %[ baseTime: baseTime,
 						baseLayer: baseLayer,
@@ -4316,11 +4360,5 @@ class KTimeLineControl extends KEntity
 				return;
 			targetItem.pasteSelection(params.baseTime, row.frames);
 		});
-	}
-
-	function test {
-		[ "a", "b", "c", "d" ].eachWithIndex(function(a, i) {
-			Debug.message(a, i);
-		} incontextof(this));
 	}
 };
