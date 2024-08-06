@@ -1858,7 +1858,7 @@ class KTimeLineLayerList extends KList
 class KTimeLineItem extends KListItem
 {
 	// フレーム配列
-	var frameList;
+	var _frameList;
 	// シングルフレーム描画色
 	var _singleFrameColor = void;
 	// 連続フレーム描画色
@@ -1976,6 +1976,21 @@ class KTimeLineItem extends KListItem
 	property TIMELINE_FRAME_HEIGHT {
 		getter {
 			return view.TIMELINE_FRAME_HEIGHT;
+		}
+	}
+
+	/**------------------------------
+	 * フレームリスト
+	 *
+	 * @return フレームリスト
+	 ------------------------------*/
+	property frameList {
+		getter {
+			return _frameList;
+		}
+		setter (v) {
+			_frameList = v;
+			selection.reject(_frameList, function(elm, frameList) { return elm >= frameList.count || frameList[elm].type == TIMELINE_FRAME_TYPE_NULL; });
 		}
 	}
 
@@ -2753,6 +2768,17 @@ class KTimeLineItem extends KListItem
 		var added = differenceSet(selection, prevSelection);
 		redrawFrames(removed);
 		redrawFrames(added);
+	}
+
+	function setSelectionBetweenTime(beginTime, endTime) {
+		var beginIndex = findFrame(beginTime, true);
+		var endIndex = findFrame(endTime, true);
+		var newSelection = [];
+		if (endIndex >= 0) 
+			for (var i = beginIndex; i <= endIndex; i++)
+				if (frameList[i].type != TIMELINE_FRAME_TYPE_NULL)
+					newSelection.add(i);
+		setSelection(newSelection);
 	}
 
 	function setSelection(newSelection) {
