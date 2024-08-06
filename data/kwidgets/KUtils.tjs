@@ -216,6 +216,10 @@ function duplicateStruct(s) {
 	return s;
 }
 
+function dup(s) {
+	return duplicateStruct(s);
+}
+
 // クラスのミックスイン
 function mixin(dstClass, srcClass)
 {

@@ -279,13 +279,15 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int layerIndex,
 	viewObj.FuncCall(0, L"matchSelection", NULL, &matchResult, layerIndex, frameIndex);
 	if (tjs_int(matchResult)) {
 		tjs_int selectedFrameBlend = viewObj.getIntValue(L"selectedFrameBlend");
-		viewObj.FuncCall(0, L"operateColorGradientRect", NULL, NULL, frameTime * TIMELINE_FRAME_WIDTH, y, length * TIMELINE_FRAME_WIDTH - 1, TIMELINE_FRAME_HEIGHT - 1, omScreen, selectedFrameBlend);// selectedFrameBlend & 0xffffff, selectedFrameBlend >> 24);
+		auto selectedFrameColor = viewObj.GetValue(L"selectedFrameColor", ncbTypedefs::Tag<tTJSVariant>());
+		viewObj.FuncCall(0, L"operateColorRect", NULL, NULL, frameTime * TIMELINE_FRAME_WIDTH, y, length * TIMELINE_FRAME_WIDTH - 1, TIMELINE_FRAME_HEIGHT - 1, selectedFrameBlend, selectedFrameColor);
 	}
 
 	viewObj.FuncCall(0, L"matchPoint", NULL, &matchResult, layerIndex, frameIndex);
 	if (tjs_int(matchResult)) {
 		tjs_int hoverFrameBlend = viewObj.getIntValue(L"hoverFrameBlend");
-		viewObj.FuncCall(0, L"operateColorRect", NULL, NULL, frameTime * TIMELINE_FRAME_WIDTH, y, length * TIMELINE_FRAME_WIDTH - 1, TIMELINE_FRAME_HEIGHT - 1, omScreen, hoverFrameBlend);
+		auto hoverFrameColor = viewObj.GetValue(L"hoverFrameColor", ncbTypedefs::Tag<tTJSVariant>());
+		viewObj.FuncCall(0, L"operateColorRect", NULL, NULL, frameTime * TIMELINE_FRAME_WIDTH, y, length * TIMELINE_FRAME_WIDTH - 1, TIMELINE_FRAME_HEIGHT - 1, hoverFrameBlend, hoverFrameColor);
 	}
 }
 

@@ -417,9 +417,10 @@ global.KTimeLineLayerViewWidgetStyleDefinition = [
 	[ "loopSingleFrameColor", "loopSingleFrameColor" ],
 	[ "loopContinuousFrameColor", "loopContinuousFrameColor" ],
 	[ "rangeSelectorColor", "rangeSelectorColor", 0, "resolveColor" ],
-	[ "selectedFrameBlend", "selectedFrameBlend", 0, "resolveColor" ],
-	[ "dragFrameBlend", "dragFrameBlend", 0, "resolveColor" ],
-	[ "hoverFrameBlend", "hoverFrameBlend", 0, "resolveColor" ]
+	[ "selectedFrameBlend", "selectedFrameBlend" ],
+	[ "selectedFrameColor", "selectedFrameColor", 0, "resolveColor" ],
+	[ "hoverFrameBlend", "hoverFrameBlend" ],
+	[ "hoverFrameColor", "hoverFrameColor", 0, "resolveColor" ]
 ];
 
 class KTimeLineLayerView extends KVirtualWidget
@@ -564,15 +565,21 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
+	property hoverFrameColor {
+		getter {
+			return widgetStyle.hoverFrameColor;
+		}
+	}
+
 	property selectedFrameBlend {
 		getter {
 			return widgetStyle.selectedFrameBlend;
 		}
 	}
 
-	property dragFrameBlend {
+	property selectedFrameColor {
 		getter {
-			return widgetStyle.dragFrameBlend;
+			return widgetStyle.selectedFrameColor;
 		}
 	}
 
@@ -590,14 +597,12 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	function operateColorRect(l, t, w, h, om, color) {
 		bufLayer.setSize(w, h);
-		bufLayer.fillRect(0, 0, w, h, color & 0x00ffffff | 0xff000000);
-		operateRect(l, t, bufLayer, 0, 0, w, h, om, (color >> 24) & 0xff);
-	}
-
-	function operateColorGradientRect(l, t, w, h, om, color) {
-		bufLayer.setSize(w, h);
-		bufLayer.fillGradientRectUD(0, 0, w, h, 0, color & 0x00ffffff | 0xff000000);
-		operateRect(l, t, bufLayer, 0, 0, w, h, om, (color >> 24) & 0xff);
+		if (color instanceof "Array") {
+			bufLayer.fillGradientRectUD(0, 0, w, h, color[0], color[1]);
+		} else {
+			bufLayer.fillRect(0, 0, w, h, color);
+		}
+		operateRect(l, t, bufLayer, 0, 0, w, h, om, 255);
 	}
 
 	function onUpdateFrameWidth() {
@@ -948,7 +953,6 @@ class KTimeLineLayerView extends KVirtualWidget
 	function selectAll {
 		var allEmpty = true;
 		var allFull = true;
-		var hasSelectedTimeFrame = false;
 		var list = owner.selectionTargetDrawItemList;
 		for (var i = 0; i < list.count; i++) {
 			var item = list[i];
@@ -957,38 +961,22 @@ class KTimeLineLayerView extends KVirtualWidget
 				allEmpty = false;
 			if (type == TIMELINE_PARTIAL_SELECTION)
 				allFull = false;
-			var frameIndex = item.findFrame(owner.selectedTime);
-			if (frameIndex >= 0
-				&& item.frameList[frameIndex].type != TIMELINE_FRAME_TYPE_NULL)
-				hasSelectedTimeFrame = true;
 		}
 
 		if (allEmpty) {
-			if (! hasSelectedTimeFrame) {
-				for (var i = 0; i < list.count; i++) {
-					var item = list[i];
-					item.setSelection(item.fullSelection);
-				}
-			} else {
-				for (var i = 0; i < list.count; i++) {
-					var item = list[i];
-					var frameIndex = item.findFrame(owner.selectedTime);
-					if (frameIndex >= 0
-						&& item.frameList[frameIndex].type != TIMELINE_FRAME_TYPE_NULL)
-						item.setSelection([ frameIndex ]);
-				}
-			}
-		} else if (! allFull) {
-			for (var i = 0; i < list.count; i++) {
-				var item = list[i];
-				if (item.hasSelection)
-					item.setSelection(item.fullSelection);
-			}
-		} else {
-			for (var i = 0; i < list.count; i++) {
-				var item = list[i];
+			if (owner.selectedLayer >= 0
+				&& owner.drawItemList[owner.selectedLayer].supportSelection
+				&& owner.drawItemList[owner.selectedLayer].fullSelection.count > 0) {
+				var item = owner.drawItemList[owner.selectedLayer];
 				item.setSelection(item.fullSelection);
 			}
+			else {
+				list.each(function(item) { item.setSelection(item.fullSelection); });
+			}
+		} else if (! allFull) {
+			list.each(function(item) { if (item.hasSelection) item.setSelection(item.fullSelection); });
+		} else {
+			list.each(function(item) { item.setSelection(item.fullSelection); });
 		}
 
 		pointSelectionCorner();
@@ -1529,13 +1517,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		if (button == mbRight
 			&& rightPressed) {
 			if (isPointInSelection(x, y)) {
-				if (hasSingleSelection) {
-					owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
-					owner.selectedLayer = list.findItemIndex(y);
-					owner.drawItemList[point[0]].onTimeLineRightClick(owner.selectedTime);
-				} else {
-					owner.onTimeLineSelectionRightClick();
-				}
+				owner.onTimeLineSelectionRightClick();
 			} else {
 				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
 				owner.selectedLayer = list.findItemIndex(y);
@@ -1887,6 +1869,8 @@ class KTimeLineItem extends KListItem
 	var selection = [];
 	// マーカーマスク
 	var markerMask = TIMELINE_MARKER_MASK_LEFT;
+	// 範囲選択対応
+	var supportSelection = true;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -2313,7 +2297,7 @@ class KTimeLineItem extends KListItem
 			if (_singleFrameColor === void)
 				return view.singleFrameColor;
 			else
-				return _singleFrameLeftColor;
+				return _singleFrameColor;
 		}
 		setter(v) {
 			_singleFrameColor = v;
@@ -2489,6 +2473,7 @@ class KTimeLineItem extends KListItem
 				var frame = frameAt(frameIndex);
 				return frame.time == owner.selectedTime;
 			}
+			return false;
 		}
 	}
 
@@ -2502,6 +2487,7 @@ class KTimeLineItem extends KListItem
 				var frame = frameAt(frameIndex);
 				return frame.type != TIMELINE_FRAME_TYPE_NULL;
 			}
+			return false;
 		}
 	}
 
@@ -2516,6 +2502,7 @@ class KTimeLineItem extends KListItem
 				return frame.type != TIMELINE_FRAME_TYPE_NULL
 					&& frame.time == owner.selectedTime;
 			}
+			return false;
 		}
 	}
 
@@ -2736,12 +2723,6 @@ class KTimeLineItem extends KListItem
 	// 値の補完
 	function tweenIntValue(fromValue, toValue, ratio) {
 		return int(fromValue * (1 - ratio) + toValue * ratio);
-	}
-
-	property supportSelection {
-		getter {
-			return true;
-		}
 	}
 
 	function redrawFrames(frameIndices) {
@@ -3142,12 +3123,7 @@ class KTimeLineLoopItem extends KTimeLineItem
 	function KTimeLineLoopItem() {
 		super.KTimeLineItem(...);
 		markerMask = TIMELINE_MARKER_MASK_LEFT | TIMELINE_MARKER_MASK_RIGHT;
-	}
-
-	property supportSelection {
-		getter {
-			return false;
-		}
+		supportSelection = false;
 	}
 
 	property singleFrameLeftColor {
@@ -3795,6 +3771,30 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
+	property pointEffectiveFrame {
+		getter {
+			return selectedLayer >= 0
+				&& drawItemList[selectedLayer].supportSelection
+				&& drawItemList[selectedLayer].pointEffectiveFrame;
+		}
+	}
+
+	property pointFrameHead {
+		getter {
+			return selectedLayer >= 0
+				&& drawItemList[selectedLayer].supportSelection
+				&& drawItemList[selectedLayer].pointFrameHead;
+		}
+	}
+
+	property pointEffectiveFrameHead {
+		getter {
+			return selectedLayer >= 0
+				&& drawItemList[selectedLayer].supportSelection
+				&& drawItemList[selectedLayer].pointEffectiveFrameHead;
+		}
+	}
+
 	/**------------------------------
 	 * 再生中かどうか
 	 *
@@ -4360,5 +4360,28 @@ class KTimeLineControl extends KEntity
 				return;
 			targetItem.pasteSelection(params.baseTime, row.frames);
 		});
+	}
+
+	function isPasteFramesAvailable(rows, baseLayer = selectedLayer, baseTime = selectedTime) {
+		resetSelection();
+		var params = %[ baseTime: baseTime,
+						baseLayer: baseLayer,
+						drawItemList: _layerList.drawItemList,
+						success: false,
+					  ];
+
+		rows.eachWithIndex(params, function(row, index, params) {
+			if (row === void)
+				return;
+			var targetLayer = params.baseLayer + index;
+			if (targetLayer >= params.drawItemList.count)
+				return;
+			var targetItem = params.drawItemList[targetLayer];
+			if (targetItem.className != row.className)
+				return;
+			params.success = true;
+		});
+
+		return params.success;
 	}
 };

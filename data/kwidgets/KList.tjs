@@ -935,6 +935,7 @@ class KList extends KVirtualWidget
 
 		for (var i = 0; i < drawItemList.count; i++) {
 			var item = drawItemList[i];
+			item.drawIndex = i;
 			item.locate(item.depth * slideWidth, treeHeight);
 			if (! widgetStyle.variable)
 				treeWidth = Math.max(treeWidth,

@@ -9,10 +9,6 @@
 				"k_list_check_off" => "k_check_button_off",
 				"k_table_check_on" => "k_check_button_on",
 				"k_table_check_off" => "k_check_button_off",
-				"timeline_selection" => 0xff0f64d2,
-				"timeline_selected_frame_blend" => 0x40ffffff,
-				"timeline_drag_frame_blend" => 0x401cc2ff,
-				"timeline_hover_frame_blend" => 0x40ffffff,
 			]
 		],
 
@@ -22,6 +18,10 @@
 				"hint_bg" => 0xc0ffffe1,
 				"hint_border" => 0xff000000,
 				"hint_font" => 0,
+				"timeline_selection" => 0x400f64d2,
+				"timeline_selected_frame_top" => 0xff08203f,
+				"timeline_selected_frame_bottom" => 0xff1a6bd4,
+				"timeline_hover_frame" => 0x40ffffff,
 			],
 		],
 
@@ -631,10 +631,12 @@
 					 loopContinuousFrameColor: 0xff8080,
 					 cursorColor: 0xFFFF0000,
 					 focus: %[ cursorColor: 0xFF0000FF ],
-					 selectionColor: "timeline_selection",
-					 selectedFrameBlend: "timeline_selected_frame_blend",
-					 dragFrameBlend: "timeline_drag_frame_blend",
-					 hoverFrameBlend: "timeline_hover_frame_blend",
+					 rangeSelectorColor: "timeline_selection",
+					 selectedFrameColor: [ "timeline_selected_frame_top",
+										   "timeline_selected_frame_bottom" ],
+					 selectedFrameBlend: omPsOverlay,
+					 hoverFrameColor: "timeline_hover_frame",
+					 hoverFrameBlend: omPsScreen,
 				   ]
 		 ],
 

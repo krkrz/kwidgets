@@ -599,6 +599,8 @@ class KStyleRepository
 	function resolveColor(exp) {
 		if (exp instanceof "Number")
 			return exp;
+		if (exp instanceof "Array")
+			return dup(exp)._map(resolveColor);
 		return resolveAlias("color", exp);
 	}
 
