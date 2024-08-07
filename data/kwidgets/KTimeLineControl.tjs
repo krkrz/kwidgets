@@ -978,8 +978,6 @@ class KTimeLineLayerView extends KVirtualWidget
 		} else {
 			list.each(function(item) { item.setSelection(item.fullSelection); });
 		}
-
-		pointSelectionCorner();
 	}
 
 	//----------------------------------------------------------------------
@@ -1063,7 +1061,6 @@ class KTimeLineLayerView extends KVirtualWidget
 			endRangeSelector();
 			break;
 		}
-		pointSelectionCorner();
 		rangeSelectMode = RANGE_SELECT_NONE;
 	}
 
@@ -1502,13 +1499,11 @@ class KTimeLineLayerView extends KVirtualWidget
 				var item = owner.drawItemList[point[0]];
 				if (item.supportSelection)
 					item.addSelection([ point[1] ]);
-				pointSelectionCorner();
 			} else if (shift == ssCtrl
 					   && point !== void) {
 				var item = owner.drawItemList[point[0]];
 				if (item.supportSelection)
 					item.flipSelection([ point[1] ]);
-				pointSelectionCorner();
 			}
 		}
 
@@ -2775,9 +2770,13 @@ class KTimeLineItem extends KListItem
 		var endIndex = findFrame(endTime, true);
 		var newSelection = [];
 		if (endIndex >= 0) 
-			for (var i = beginIndex; i <= endIndex; i++)
-				if (frameList[i].type != TIMELINE_FRAME_TYPE_NULL)
+			for (var i = beginIndex; i <= endIndex; i++) {
+				var frame = frameAt(i);
+				if (frame.type != TIMELINE_FRAME_TYPE_NULL
+					&& frame.time >= beginTime
+					&& frameAt(i + 1).time <= endTime + 1)
 					newSelection.add(i);
+			}
 		setSelection(newSelection);
 	}
 
@@ -4295,6 +4294,7 @@ class KTimeLineControl extends KEntity
 						if (frame.type != TIMELINE_FRAME_TYPE_NULL) {
 							var nextFrame = item.frameAt(frameIndex + 1);
 							var frame = duplicateStruct(frame);
+							selectedTime = frame.time;
 							frame.length = nextFrame.time - frame.time;
 							frame.time = 0;
 							var row = %[ className: item.className, frames: [ frame ] ];
@@ -4305,6 +4305,7 @@ class KTimeLineControl extends KEntity
 			}
 			return [];
 		}
+		_layerView.pointSelectionCorner();
 		var result =
 		_layerList.drawItemList._map(function(item) {
 			var frames = item.copySelection();
@@ -4338,6 +4339,7 @@ class KTimeLineControl extends KEntity
 						if (frame.type != TIMELINE_FRAME_TYPE_NULL) {
 							var nextFrame = item.frameAt(frameIndex + 1);
 							var frame = duplicateStruct(frame);
+							selectedTime = frame.time;
 							frame.length = nextFrame.time - frame.time;
 							frame.time = 0;
 							var row = %[ className: item.className, frames: [ frame ] ];
@@ -4350,6 +4352,7 @@ class KTimeLineControl extends KEntity
 			}
 			return [];
 		}
+		_layerView.pointSelectionCorner();
 		var result =
 		_layerList.drawItemList._map(function(item) {
 			var frames = item.cutSelection();
