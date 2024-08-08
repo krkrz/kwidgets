@@ -1298,83 +1298,6 @@ class KTimeLineLayerView extends KVirtualWidget
 			leftPressed = true;
 		if (button == mbRight)
 			rightPressed = true;
-
-		return;
-
-		// 選択範囲をドラッグで、範囲ドラッグ開始
-		if (button == mbLeft
-			&& (shift & ssCtrl)
-			&& isPointInSelection(x, y)) {
-			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
-			focus();
-			owner.renderAtTimeModification = false;
-			rangeDragPrevTime = rangeDragTime = owner.selectedTime;
-			rangeDragMoving = true;
-			rangeDragSelectionList = [];
-			rangeDragFrameList = [];
-			rangeDragMinTime = 0;
-			var leftMap = %[];
-			for (var i = 0; i < list.drawItemList.count; i++) {
-				var item = list.drawItemList[i];
-				if (item.hasSelection) {
-					rangeDragSelectionList.add(duplicateStruct(item.selection));
-					rangeDragFrameList.add(ktimeline_shallow_copy_frame_list(item.frameList));
-					item.setSelection(item.selection[0], item.selection[1], true);
-					//          rangeDragMinTime = int(Math.max(rangeDragMinTime, item.leftSideFrameNum(item.selection[0])));
-					item.mapLeftSideFrame(item.selection[0], leftMap);
-					rangeDragOffset = owner.selectedTime - item.selection[0];
-					leftMap[item.selection[0]] = true;
-				} else {
-					rangeDragSelectionList.add(void);
-					rangeDragFrameList.add(void);
-				}
-			}
-			rangeDragLeftList = dictionaryKeys(leftMap);
-			for (var i = 0; i < rangeDragLeftList.count; i++)
-				rangeDragLeftList[i] = +rangeDragLeftList[i];
-			rangeDragLeftList.sort();
-			rangeDragMinTime = Math.max(rangeDragLeftList.count - 1, 0);
-			return;
-		}
-
-		// フレーム境界をドラッグで、境界ドラッグ開始
-		if (button == mbLeft
-			&& boundaryDragFrameIndex >= 0) {
-			var item = list.drawItemList[boundaryDragLayer];
-			boundaryDragFrameList = duplicateStruct(item.frameList);
-			boundaryDragPrevTime = boundaryDragTime;
-			boundaryDragMinTime = item.leftSideFrameNum(boundaryDragTime);
-			boundaryDragSaveLength = shift & ssCtrl;
-			boundaryDragMoving = true;
-			boundaryDragMoved = false;
-			return;
-		}
-
-		// 左クリック
-		if (button == mbLeft) {
-			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
-			owner.selectedLayer = list.findItemIndex(y, true);
-			focus();
-			owner.resetSelection();
-			if (owner.selectedTime >= 0
-				&& owner.selectedLayer >= 0) {
-				mouseSelectionBeginTime = owner.selectedTime;
-				mouseSelectionBeginLayer = owner.selectedLayer;
-				mouseDragging = true;
-				mouseDraggingMoved = false;
-			}
-			return;
-		}
-		// 右クリック
-		if (button == mbRight) {
-			if (hasSelection) {
-				owner.onTimeLineSelectionRightClick();
-			} else if (owner.selectedLayer >= 0) {
-				var layerItem = list.drawItemList[owner.selectedLayer];
-				layerItem.onTimeLineRightClick(owner.selectedTime);
-			}
-			boundaryDragFrameIndex = -1;
-		}
 	}
 
 	//------------------------------
@@ -1400,87 +1323,6 @@ class KTimeLineLayerView extends KVirtualWidget
 		} else {
 			updatePoint(void);
 		}
-
-		return;
-
-		// 境界ドラッグ中ならその処理
-		if (boundaryDragMoving) {
-			var item = list.drawItemList[boundaryDragLayer];
-			var curTime = int((x + TIMELINE_FRAME_WIDTH / 2) / TIMELINE_FRAME_WIDTH);
-			curTime = int(Math.max(curTime, boundaryDragMinTime));
-			if (curTime != boundaryDragPrevTime) {
-				boundaryDragMoved = true;
-				boundaryDragPrevTime = curTime;
-				item.frameList = duplicateStruct(boundaryDragFrameList);
-				item.moveFrame(boundaryDragTime, curTime, boundaryDragSaveLength);
-			}
-			return;
-		}
-
-		// カーソル更新
-		updateMouseCursor(x, y);
-
-		// 範囲ドラッグ中なら選択範囲移動
-		if (rangeDragMoving) {
-			owner.selectedTime = int(Math.max(int(x / TIMELINE_FRAME_WIDTH), rangeDragMinTime + rangeDragOffset));
-			var curTime = owner.selectedTime;
-			if (curTime != rangeDragPrevTime) {
-				rangeDragPrevTime = curTime;
-				var fromTime = rangeDragTime - rangeDragOffset;
-				var toTime = curTime - rangeDragOffset;
-				if (toTime < fromTime
-					&& rangeDragLeftList.count) {
-					var toLeft = [];
-					toLeft.assign(rangeDragLeftList);
-					for (var i = toLeft.count - 1; i >= 0; i--) {
-						if (toLeft[i] > toTime) {
-							toLeft[i] = toTime--;
-						} else {
-							break;
-						}
-					}
-					fromTime = rangeDragLeftList;
-					toTime = toLeft;
-				}
-				for (var i = 0; i < list.drawItemList.count; i++) {
-					var item = list.drawItemList[i];
-					if (! item.hasSelection)
-						continue;
-					item.frameList = ktimeline_shallow_copy_frame_list(rangeDragFrameList[i]);
-					item.moveFrame(fromTime,
-								   toTime,
-								   true);
-					item.setSelection(rangeDragSelectionList[i][0] + curTime - rangeDragTime,
-									  rangeDragSelectionList[i][1] + curTime - rangeDragTime,
-									  true);
-				}
-			}
-			return;
-		}
-
-		// マウスドラッグ中なら選択範囲更新
-		if (mouseDragging) {
-			var selectionEndTime, selectionEndLayer;
-			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
-			owner.selectedLayer = list.findItemIndex(y, true);
-			focus();
-			if (mouseDraggingMoved
-				|| (owner.selectedTime != mouseSelectionBeginTime
-					|| owner.selectedLayer != mouseSelectionBeginLayer)) {
-				mouseDraggingMoved = true;
-				var selectionEndTime, selectionEndLayer;
-				selectionEndTime = owner.selectedTime;
-				selectionEndLayer = owner.selectedLayer;
-				var fromTime, toTime, fromLayer, toLayer;
-				fromTime = int(Math.min(mouseSelectionBeginTime, selectionEndTime));
-				toTime =   int(Math.max(mouseSelectionBeginTime, selectionEndTime));
-				fromLayer = int(Math.min(mouseSelectionBeginLayer, selectionEndLayer));
-				toLayer =   int(Math.max(mouseSelectionBeginLayer, selectionEndLayer));
-				for (var i = fromLayer; i <= toLayer; i++)
-					list.drawItemList[i].setSelection(fromTime, toTime + 1);
-			}
-			return;
-		}
 	}
 
 	//------------------------------
@@ -1494,6 +1336,7 @@ class KTimeLineLayerView extends KVirtualWidget
 				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
 				owner.selectedLayer = list.findItemIndex(y);
 				owner.resetSelection();
+				owner.onSinglePoint();
 			} else if (shift == ssShift
 					   && point !== void) {
 				var item = owner.drawItemList[point[0]];
@@ -1522,49 +1365,6 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 
 		rightPressed = false;
-
-		return;
-
-		// 境界ドラッグ終了
-		if (boundaryDragMoving) {
-			boundaryDragMoving = false;
-			// 境界を結局動かしてないなら、カーソルをその位置へ移動
-			if (! boundaryDragMoved) {
-				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
-				owner.selectedLayer = list.findItemIndex(y, true);
-				focus();
-			}
-			if (boundaryDragTime != boundaryDragPrevTime) {
-				var item = list.drawItemList[boundaryDragLayer];
-				item.onFrameDragged();
-				owner.onRenderFrame();
-			}
-			return;
-		}
-
-		// 範囲ドラッグ終了
-		if (rangeDragMoving) {
-			rangeDragMoving = false;
-			owner.renderAtTimeModification = true;
-			for (var i = 0; i < list.drawItemList.count; i++) {
-				var item = list.drawItemList[i];
-				if (item.hasSelection) {
-					item.setSelection(item.selection[0], item.selection[1], false);
-				}
-			}
-			if (rangeDragTime != owner.selectedTime) {
-				owner.onMultipleFrameDragged();
-				owner.onRenderFrame();
-			}
-			return;
-		}
-
-		// マウスドラッグ終了
-		if (mouseDragging
-			&& button == mbLeft) {
-			mouseDragging = false;
-			return;
-		}
 	}
 
 	function onMouseLeave {
@@ -4412,5 +4212,8 @@ class KTimeLineControl extends KEntity
 		});
 
 		return params.success;
+	}
+
+	function onSinglePoint {
 	}
 };
