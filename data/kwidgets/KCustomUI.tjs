@@ -305,8 +305,12 @@ class KCustomUI extends KGridLayout
 			if (insertLabelToStatus
 				&& getOption("label", "", uiDef) != ""
 				&& getOption("status", "", uiDef) != ""
-				&& ! mdPat.test(uiDef.label))
-				uiDef.status = uiDef.label + ": " + uiDef.status;
+				&& ! mdPat.test(uiDef.label)) {
+				if (getOption("rawLabel", "", uiDef) != "")
+					uiDef.status = uiDef.rawLabel + ": " + uiDef.status;
+				else
+					uiDef.status = uiDef.label + ": " + uiDef.status;
+			}
 
 			if (typeof(uiDef.label) != K_UNDEFINED)
 				uiDef.label = uiDef.label.trim();
