@@ -1961,7 +1961,7 @@ class KTimeLineItem extends KListItem
 	 * 指定箇所に既存のフレームがある場合は上書きする。
 	 * 空フレームの場合は content を明示的に指定してやる。
 	 ------------------------------*/
-	function insertKeyFrame(time, type, content = void) {
+	function insertKeyFrame(time, type, content = void, doInvalidate = true) {
 		var frameIndex = findFrame(time, true);
 		var frame = frameAt(frameIndex);
 
@@ -1980,10 +1980,8 @@ class KTimeLineItem extends KListItem
 
 		frameList.insert(frameIndex + 1, newFrame);
 		correctSelectionByInsertIndex(frameIndex);
-		invalidateNullFrame();
-		redrawAllFrame();
-		root.owner.onRenderFrame();
-		root.owner.invalidateMaxTime();
+		if (doInvalidate)
+			invalidateNullFrame();
 	}
 
 	/**------------------------------
@@ -2005,7 +2003,6 @@ class KTimeLineItem extends KListItem
 		frameList[frameIndex].content = void;
 		frameList[frameIndex].type = TIMELINE_FRAME_TYPE_NULL;
 		invalidateNullFrame();
-		redrawAllFrame();
 		root.owner.onRenderFrame();
 	}
 
@@ -2361,8 +2358,6 @@ class KTimeLineItem extends KListItem
 			}
 		}
 		invalidateNullFrame();
-		redrawAllFrame();
-		root.owner.onRenderFrame();
 		return result;
 	}
 
@@ -2399,8 +2394,6 @@ class KTimeLineItem extends KListItem
 			frameList.insert(insertIndex + i, item);
 		}
 		invalidateNullFrame();
-		redrawAllFrame();
-		root.owner.onRenderFrame();
 	}
 
 	/*------------------------------
@@ -2424,8 +2417,6 @@ class KTimeLineItem extends KListItem
 		} incontextof(this) );
 		releaseSelection();
 		invalidateNullFrame();
-		redrawAllFrame();
-		root.owner.onRenderFrame();
 		return frames;
 	}
 
@@ -2471,8 +2462,6 @@ class KTimeLineItem extends KListItem
 			}
 		} incontextof(this) );
 		invalidateNullFrame();
-		redrawAllFrame();
-		root.owner.onRenderFrame();
 	}
 
 	/**------------------------------
@@ -2522,6 +2511,9 @@ class KTimeLineItem extends KListItem
 			&& (frameList[-1].type == TIMELINE_FRAME_TYPE_CONTINUOUS
 				|| frameList[-1].type == TIMELINE_FRAME_TYPE_TWEEN))
 			frameList.add(%[ time: frameList[-1].time + 1, type: TIMELINE_FRAME_TYPE_NULL, content: void]);
+		redrawAllFrame();
+		root.owner.onRenderFrame();
+		root.owner.invalidateMaxTime();
 	}
 
 	// 値の補完
