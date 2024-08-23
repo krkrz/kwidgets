@@ -276,6 +276,11 @@ class KComboBox extends KValueEntity
 		}
 	}
 
+	function updateValue() {
+		super.updateValue(...);
+		onDecide(selected);
+	}
+
 	function forwardItems() {
 		if (empty)
 			return;
@@ -424,6 +429,16 @@ class KComboBox extends KValueEntity
 		invalidate _textinput;
 		_textinput = void;
 	}
+
+
+	function onHover(index) {
+	}
+
+	function onDecide(index) {
+	}
+
+	function onCancel() {
+	}
 }
 
 class KComboTextInput extends KTextInput
@@ -480,6 +495,8 @@ class KComboDropdownWindow extends KWindow
 
 	function KComboDropdownWindow(owner) {
 		super.KWindow();
+		this.owner = owner;
+
 		borderStyle = bsNone;
 		stayOnTop = true;
 		focusable = false;
@@ -540,6 +557,7 @@ class KComboDropdownWindow extends KWindow
 	}
 
 	function onPopupHide() {
+		owner.onCancel();
 		closeSelf();
 	}
 
@@ -564,6 +582,10 @@ class KComboBoxDropdownListItem extends KListItem
 	function onMouseUp() {
 		owner.updateValue(value);
 		window.closeSelf();
+	}
+
+	function onMouseEnter {
+		owner.onHover(index);
 	}
 }
 
