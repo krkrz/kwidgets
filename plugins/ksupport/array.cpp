@@ -222,10 +222,6 @@ public:
 		return value;
 	}
 
-	void inject(tTJSVariant init, tTJSVariant func) {
-		assign(_inject(init, func));
-	}
-
 	static void _each(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -442,7 +438,6 @@ NCB_ATTACH_CLASS_WITH_HOOK(ArraySupport, Array) {
 	NCB_METHOD(filterMap);
 	NCB_METHOD_RAW_CALLBACK(select, ArraySupport::select, 0);
 	NCB_METHOD_RAW_CALLBACK(reject, ArraySupport::reject, 0);
-	NCB_METHOD(inject);
 	NCB_METHOD(all);
 	NCB_METHOD(any);
 	NCB_METHOD(min);

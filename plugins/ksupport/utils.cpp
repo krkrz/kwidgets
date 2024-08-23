@@ -886,6 +886,80 @@ tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 		return 0;
 }
 
+//----------------------------------------------------------------------
+// \‘¢‘Ì•¡»
+tTJSVariant duplicateStruct(tTJSVariant src);
+
+	class DictMemberDuplicateCaller : public tTJSDispatch
+{
+public:
+	tTJSVariantClosure &target;
+
+	DictMemberDuplicateCaller(tTJSVariantClosure &_target)
+		: target(_target) {
+	}
+
+	virtual tjs_error TJS_INTF_METHOD FuncCall
+	( // function invocation
+	 tjs_uint32 flag,			// calling flag
+	 const tjs_char * membername,// member name ( NULL for a default member )
+	 tjs_uint32 *hint,			// hint for the member name (in/out)
+	 tTJSVariant *result,		// result
+	 tjs_int numparams,			// number of parameters
+	 tTJSVariant **param,		// parameters
+	 iTJSDispatch2 *objthis		// object as "this"
+	  ) {
+		if (result)
+			*result = true;
+		if (numparams > 1) {
+			if ((int)*param[1] != TJS_HIDDENMEMBER) {
+				const tjs_char *key = param[0]->GetString();
+				tTJSVariant value = duplicateStruct(*param[2]);
+				target.PropSet(TJS_MEMBERENSURE, key, NULL, &value, NULL);
+			}
+		}
+		return TJS_S_OK;
+	}
+};
+
+
+tTJSVariant duplicateStruct(tTJSVariant src)
+{
+	if (src.Type() != tvtObject)
+		return src;
+
+	auto &o1 = src.AsObjectClosureNoAddRef();
+	if (o1.IsInstanceOf(0, NULL, NULL, L"Function", NULL) == TJS_S_TRUE)
+		return src;
+
+	if (o1.IsInstanceOf(0, NULL, NULL, L"Array", NULL) == TJS_S_TRUE) {
+		tTJSVariant dst = createArray();
+		auto &o2 = dst.AsObjectClosureNoAddRef();
+		tTJSVariant val;
+		(void)o1.PropGet(0, L"count", &countHint, &val, NULL);
+		tjs_int count = tjs_int(val);
+		for (tjs_int i = 0; i < count; i++) {
+			(void)o1.PropGetByNum(TJS_IGNOREPROP, i, &val, NULL);
+			val = duplicateStruct(val);
+			(void)o2.PropSetByNum(0, i, &val, NULL);
+		}
+		return dst;
+	}
+
+	if (o1.IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL) == TJS_S_TRUE) {
+		tTJSVariant dst = createDictionary();
+		auto keys = dictionaryKeys(src);
+		auto &o2 = dst.AsObjectClosureNoAddRef();
+		auto caller = new DictMemberDuplicateCaller(o2);
+		auto closure = tTJSVariantClosure(caller);
+		o1.EnumMembers(TJS_IGNOREPROP, &closure, NULL);
+		caller->Release();
+		return dst;
+	}
+
+	return src;
+}
+
 NCB_REGISTER_FUNCTION(equalStruct, equalStruct);
 NCB_REGISTER_FUNCTION(equalStructNumericLoose, equalStructNumericLoose);
 NCB_REGISTER_FUNCTION(compareStruct, compareStruct);
@@ -900,3 +974,5 @@ NCB_REGISTER_FUNCTION(sliceArray, sliceArray);
 NCB_REGISTER_FUNCTION(concatArray, concatArray);
 NCB_REGISTER_FUNCTION(eachArray, eachArray);
 NCB_REGISTER_FUNCTION(eachDictionary, eachDictionary);
+NCB_REGISTER_FUNCTION(duplicateStruct, duplicateStruct);
+NCB_REGISTER_FUNCTION(dup, duplicateStruct);

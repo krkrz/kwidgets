@@ -172,6 +172,27 @@ function equalStruct(s1, s2) {
 
 	return s1 === s2;
 }
+
+// 構造体の複製
+function duplicateStruct(s) {
+	if (s instanceof "Function")
+		return s;
+	if (s instanceof "Array") {
+		var result = [];
+		result.assignStruct(s);
+		return result;
+	}
+	if (s instanceof "Dictionary") {
+		var result = %[];
+		(Dictionary.assignStruct incontextof result)(s);
+		return result;
+	}
+	return s;
+}
+
+function dup(s) {
+	return duplicateStruct(s);
+}
 @endif
 
 // ディレクトリかどうかの判定
@@ -197,27 +218,6 @@ function convertColorToText(color, hasAlpha = false)
 function convertTextToColor(text, hasAlpha = false)
 {
 	return +("0x" + text);
-}
-
-// 構造体の複製
-function duplicateStruct(s) {
-	if (s instanceof "Function")
-		return s;
-	if (s instanceof "Array") {
-		var result = [];
-		result.assignStruct(s);
-		return result;
-	}
-	if (s instanceof "Dictionary") {
-		var result = %[];
-		(Dictionary.assignStruct incontextof result)(s);
-		return result;
-	}
-	return s;
-}
-
-function dup(s) {
-	return duplicateStruct(s);
 }
 
 // クラスのミックスイン
