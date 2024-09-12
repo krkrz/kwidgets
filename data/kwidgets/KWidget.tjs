@@ -401,7 +401,7 @@ class KWidget extends Layer
 			if (_isAttachedToWindow)
 				return parent;
 			else
-				return styleRepository;
+				return window;
 		}
 	}
 
