@@ -278,7 +278,8 @@ class KComboBox extends KValueEntity
 
 	function updateValue() {
 		super.updateValue(...);
-		onDecide(selected);
+		if (this isvalid)
+			onDecide(selected);
 	}
 
 	function forwardItems() {
