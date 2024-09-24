@@ -250,6 +250,12 @@ class KScrollFrame extends KEntity
 							 int(Math.max(0, -newTop)),
 							 int(Math.min(child.width, width)),
 							 int(Math.min(child.height, height)));
+
+		window.scrollObservers.each(this, function(observer, self) {
+			if (observer.nodeVisible
+				&& observer.isDescendantOf(self))
+				observer.onNotifyScroll();
+		});
 	}
 
 	// サイズ更新、アライメントに従って、childを再配置

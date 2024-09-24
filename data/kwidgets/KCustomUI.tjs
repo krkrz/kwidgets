@@ -326,6 +326,17 @@ class KCustomUI extends KGridLayout
 				setState(subGrid, 0, 0, UI_DIR_VERTICAL);
 				continue;
 			}
+			if (uiDef.type == UI_TYPE_BEGIN_FLOATER) {
+				var backgroundColor = [ "sub1_bg", "sub2_bg", "sub3_bg" ][(frameCount + 3 - 1) % 3];
+				var floater = new KFloaterLayout(window, %[ name: getOption("name", "", uiDef), style: %[ backgroundColor: backgroundColor ] ]);
+				var subGrid = new global.KGridLayout(window, %[ id: getOption("gridId", gridId, uiDef) ]);
+				floater.add(subGrid);
+				curGrid.add(insertionX, insertionY, floater, 2);
+				advanceGrid();
+				pushState();
+				setState(subGrid, 0, 0, UI_DIR_VERTICAL);
+				continue;
+			}
 			if (uiDef.type == UI_TYPE_BEGIN_HORIZONTAL
 			   || uiDef.type == UI_TYPE_BEGIN_VERTICAL) {
 				var subGrid = new global.KGridLayout(window, %[ name: getOption("name", "", uiDef), id: getOption("gridId", gridId, uiDef), visible: getOption("visible", true, uiDef) ]);
@@ -337,6 +348,10 @@ class KCustomUI extends KGridLayout
 			}
 			if (uiDef.type == UI_TYPE_END_FRAME) {
 				frameCount--;
+				popState();
+				continue;;
+			}
+			if (uiDef.type == UI_TYPE_END_FLOATER) {
 				popState();
 				continue;;
 			}

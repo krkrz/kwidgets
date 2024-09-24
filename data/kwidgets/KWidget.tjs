@@ -2856,33 +2856,35 @@ class KWidget extends Layer
 	 * ウィジェットを配置する
 	 ------------------------------*/
 	function locateChild(x, y, w, h, child) {
+		var _left, _top;
 		switch (child.alignHorizontal) {
 		case ALIGN_LEFT:
-			child.left = x + child.marginLeft;
+			_left = x + child.marginLeft;
 			break;
 
 		case ALIGN_CENTER:
-			child.left = int(x + (w - child.marginIncludeWidth) / 2 + child.marginLeft);
+			_left = int(x + (w - child.marginIncludeWidth) / 2 + child.marginLeft);
 			break;
 
 		case ALIGN_RIGHT:
-			child.left = int(x + (w - child.width - child.marginRight));
+			_left = int(x + (w - child.width - child.marginRight));
 			break;
 		}
 
 		switch (child.alignVertical) {
 		case ALIGN_TOP:
-			child.top = int(y) + child.marginTop;
+			_top = int(y) + child.marginTop;
 			break;
 
 		case ALIGN_CENTER:
-			child.top = int(y + (h - child.marginIncludeHeight) / 2 + child.marginTop);
+			_top = int(y + (h - child.marginIncludeHeight) / 2 + child.marginTop);
 			break;
 
 		case ALIGN_BOTTOM:
-			child.top = int(y + (h - child.height - child.marginBottom));
+			_top = int(y + (h - child.height - child.marginBottom));
 			break;
 		}
+		child.setPos(_left, _top);
 	}
 
 	function getChildBounds(child) {

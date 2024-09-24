@@ -81,6 +81,7 @@ class TestBed extends KWindow
 								   ]
 								 ],
 								%[ type: UI_TYPE_END_FRAME ],
+								%[ type: UI_TYPE_BEGIN_FLOATER ],
 								%[ type: UI_TYPE_BEGIN_HORIZONTAL ],
 								%[ type: UI_TYPE_TEXTBUTTON, name: "textButton", label: "テキストボタン", onValueModified: function { Debug.message("text button pressed."); }  ],
 								%[ type: UI_TYPE_TEXTBUTTON, name: "textButton2", label: "ボタン2", onValueModified: function { Debug.message("text button2 pressed."); }  ],

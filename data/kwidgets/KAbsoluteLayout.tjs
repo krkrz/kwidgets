@@ -108,32 +108,7 @@ class KAbsoluteLayout extends KLayout
         continue;
       child.setSize(width - child.marginHorizontal,
                     height - child.marginVertical);
-      switch (child.alignHorizontal) {
-      case ALIGN_LEFT:
-        child.left = child.marginLeft;
-        break;
-
-      case ALIGN_CENTER:
-        child.left = (width - child.marginIncludeWidth) / 2 + child.marginLeft;
-        break;
-
-      case ALIGN_RIGHT:
-        child.left = width - child.marginIncludeWidth;
-        break;
-      }
-      switch (child.alignVertical) {
-      case ALIGN_TOP:
-        child.top = child.marginTop;
-        break;
-
-      case ALIGN_CENTER:
-        child.top = (height - child.marginIncludeHeight) / 2 + child.marginTop;
-        break;
-
-      case ALIGN_BOTTOM:
-        child.top = height - child.marginIncludeHeight;
-        break;
-      }
+		locateChild(0, 0, width, height, child);
     }
   }
 };

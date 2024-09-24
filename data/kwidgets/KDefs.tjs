@@ -61,6 +61,8 @@ global.UI_TYPE_BEGIN_HORIZONTAL = "ui.type.begin.horiziontal";
 global.UI_TYPE_BEGIN_VERTICAL =   "ui.type.begin.vertical";
 global.UI_TYPE_END_HORIZONTAL = "ui.type.end.horizontal";
 global.UI_TYPE_END_VERTICAL = "ui.type.end.vertical";
+global.UI_TYPE_BEGIN_FLOATER = "ui.type.begin.floater";
+global.UI_TYPE_END_FLOATER = "ui.type.end.floater";
 
 global.UI_LABEL_STYLE_LEFT = 0;
 global.UI_LABEL_STYLE_LEFTTOPCORNER = 1;

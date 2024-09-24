@@ -68,6 +68,7 @@ class KWindow extends Window
 	var windowStyle = %[];
 	var _id = "";
 	var styleStates = [];
+	var scrollObservers = [];
 
 	/**------------------------------
 	 * コンストラクタ
@@ -788,6 +789,14 @@ class KWindow extends Window
 				inscribeIntoDisplay();
 			super.visible = v;
 		}
+	}
+
+	function addScrollObserver(observer) {
+		scrollObservers.add(observer);
+	}
+
+	function removeScrollObserver(observer) {
+		scrollObservers.remove(observer);
 	}
 };
 

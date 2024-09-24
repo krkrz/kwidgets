@@ -898,6 +898,9 @@
 					 spaceScaleFactor: 0.3,
 					 wordSpaceLimitScaleFactor: 0.6,
 				   ]
-		 ]
+		 ],
+
+		%[ klass: "KFloaterLayout",
+		   style: %[ padding: 4 ] ]
 ]
 

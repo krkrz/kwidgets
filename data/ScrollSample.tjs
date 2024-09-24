@@ -78,9 +78,13 @@ class ScrollSample extends KWindow
     // スプリッタにスクロールバーつきイメージラベルを詰め込み
       frame = new KFrameLayout(this);
       scroll = new KScrollLayout(this, %[ name: "scroll1" ]);
-        scroll.add(new KImageLabel(this, "cg02"));
+	  abs = new KAbsoluteLayout(this);
+	  scroll.add(abs);
+      abs.add(new KImageLabel(this, "cg02"));
+	  abs.add(new KFloaterLayout(this, %[ name: "floater", style: %[ align: ALIGN_CENTER, margin: 3 ] ]));
+	  abs.floater.add(new KImageLabel(this, %[ icon: "sphere" ]));
       frame.add(scroll);
-    vspliter.add(frame);
+      vspliter.add(frame);
 
        frame = new KFrameLayout(this);
       scroll = new KScrollLayout(this, %[ name: "scroll2" ]);
