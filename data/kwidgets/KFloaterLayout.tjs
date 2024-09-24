@@ -1,0 +1,94 @@
+class KFloaterLayout extends KLayout
+{
+	var child;
+	var realLeft, realTop;
+
+	function KFloaterLayout(window, options) {
+		super.KLayout(...);
+	}
+
+	function finalize {
+		window.removeScrollObserver(this);
+		super.finalize();
+	}
+
+	function onAttachedToWindow() {
+		window.addScrollObserver(this);
+	}
+
+	function onDetachedFromWindow() {
+		window.removeScrollObserver(this);
+	}
+
+	function add(child) {
+		this.child = child;
+		child.parent = this;
+		redrawContents();
+	}
+
+	function remove(child, doInvalidate = true) {
+		this.child = void;
+		child.parent = widgetDepot;
+		redrawContents();
+		if (doInvalidate)
+			invalidate child;
+	}
+
+	function onCalculateLayout() {
+		var minW, maxW, minH, maxH;
+		minW = maxW = borderPaddingWidth;
+		minH = maxH = borderPaddingHeight;
+
+		if (child !== void) {
+			minW += child.minWidth + child.marginHorizontal;
+			maxW += child.maxWidth + child.marginHorizontal;
+			minH += child.minHeight + child.marginVertical;
+			maxH += child.maxHeight + child.marginVertical;
+		}
+
+		setMinMaxSize(minW, minH, maxW, maxH);
+	}
+
+	function onLocateLayout() {
+		fillRect(0, 0, width, height, 0);
+		drawBorder(borderStyle, 0, 0, width, height);
+		if (child !== void) {
+			embedChildWithoutBorderPadding(borderPaddingLeft,
+										   borderPaddingTop,
+										   width - borderPaddingWidth,
+										   height - borderPaddingHeight,
+										   child);
+		}
+	}
+
+	function setPos(left, top) {
+		realLeft = left;
+		realTop = top;
+		resolveScroll();
+	}
+
+	function onNotifyScroll() {
+		resolveScroll();
+	}
+
+	function resolveScroll() {
+		bringToFront();
+		var viewBounds = parent.viewingRect;
+		var _left = realLeft, _top = realTop;
+		if (realLeft - marginLeft - parent.borderPaddingLeft  < viewBounds.left) {
+			_left = viewBounds.left + marginLeft + parent.borderPaddingLeft;
+		} else if (viewBounds.right < realLeft + width + marginRight + parent.borderPaddingRight) {
+			_left = viewBounds.right - width - marginRight - parent.borderPaddingRight;
+		}
+		if (realTop - marginTop - parent.borderPaddingTop < viewBounds.top) {
+			_top = viewBounds.top + marginTop + parent.borderPaddingTop;
+		} else if (viewBounds.bottom < realTop + height + marginBottom + parent.borderPaddingBottom) {
+			_top = viewBounds.bottom - height - marginBottom - parent.borderPaddingBottom;
+		}
+
+		_left = Math.max(parent.borderPaddingLeft + marginLeft, Math.min(parent.width - parent.borderPaddingRight - marginRight - width, _left));
+		_top  = Math.max(parent.borderPaddingTop + marginTop, Math.min(parent.height - parent.borderPaddingBottom - marginBottom - height, _top));
+
+		super.setPos(_left, _top);
+	}
+};
