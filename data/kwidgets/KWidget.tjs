@@ -3013,6 +3013,7 @@ class KWidget extends Layer
 			&& (! dragEnabledShiftMask || (shift & dragEnabledShiftMask))) {
 			// ドラッグ中にウィジェットがスクロールする事を考慮して
 			// 基準座標はprimaryLayerから取得する
+			window.curDraggingWidget = this;
 			mouseDownX = window.primaryLayer.cursorX;
 			mouseDownY = window.primaryLayer.cursorY;
 			dragStartX = x;
@@ -3125,6 +3126,7 @@ class KWidget extends Layer
 				onDragLeave(x, y, shift);
 			}
 
+			window.curDraggingWidget = void;
 			isReadyToDrag = isDragging = false;
 			updateStyleStates();
 			invalidateStyles();
