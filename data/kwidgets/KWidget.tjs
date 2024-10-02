@@ -3013,7 +3013,6 @@ class KWidget extends Layer
 			&& (! dragEnabledShiftMask || (shift & dragEnabledShiftMask))) {
 			// ドラッグ中にウィジェットがスクロールする事を考慮して
 			// 基準座標はprimaryLayerから取得する
-			window.curDraggingWidget = this;
 			mouseDownX = window.primaryLayer.cursorX;
 			mouseDownY = window.primaryLayer.cursorY;
 			dragStartX = x;
@@ -3032,6 +3031,12 @@ class KWidget extends Layer
 	}
 
 	function onMouseMove(x, y, shift) {
+		// 予期せぬドラッグ中断が起きた場合に onMouseUp を強制的に処理する
+		if ((isReadyToDrag || isDragging)
+			&& ! (shift & ssLeft)) {
+			onMouseUp(x, y, mbLeft, shift);
+		}
+
 		// 中ボタンドラッグ
 		if (_middleButtonDragging)
 			progressMiddleButonDrag();
@@ -3126,7 +3131,6 @@ class KWidget extends Layer
 				onDragLeave(x, y, shift);
 			}
 
-			window.curDraggingWidget = void;
 			isReadyToDrag = isDragging = false;
 			updateStyleStates();
 			invalidateStyles();

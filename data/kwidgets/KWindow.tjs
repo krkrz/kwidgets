@@ -714,23 +714,10 @@ class KWindow extends Window
 	function onDeactivate {
 		if (focusedLayer instanceof "KWidget")
 			focusedLayer.onWindowDeactivate();
-		validateWidgetDrag();
 	}
 
 	function onMouseMove() {
-		validateWidgetDrag();
 		super.onMouseMove(...);
-	}
-
-	function validateWidgetDrag() {
-		if (curDraggingWidget !== void
-			&& ! System.getKeyState(VK_LBUTTON)) {
-			var widget = curDraggingWidget;
-			widget.onMouseUp(widget.cursorX,
-							 widget.cursorY,
-							 mbLeft, 0);
-			widget.onMouseLeave();
-		}
 	}
 
 	function invalidateMenuIcon {
