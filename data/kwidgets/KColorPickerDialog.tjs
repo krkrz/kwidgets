@@ -362,12 +362,14 @@ class KColorPickerDialog extends KWindow
 
 	function bindPersistentDictionary(dict) {
 		super.bindPersistentDictionary(dict);
-		colorSpaceSelect.value = dict.init(name + "_colorspace", 0);
+		if (dict !== void)
+			colorSpaceSelect.value = dict.init(name + "_colorspace", 0);
 		applyColorSpace(colorSpaceSelect.value);
 	}
 
 	function finalize {
-		dict.set(name + "_colorspace", colorSpaceSelect.value);
+		if (dict !== void)
+			dict.set(name + "_colorspace", colorSpaceSelect.value);
 		super.finalize();
 	}
 
