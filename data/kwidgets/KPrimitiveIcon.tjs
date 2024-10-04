@@ -11,6 +11,7 @@ class KPrimitiveIconBuilder
 	var compositePat =  /^\$composite\((.+)\)$/;
 	var borderPat =     /^\$border\((\d+),(\d+),#([0-9a-fA-F]{6}),(none|solid|double|dashed|groove|ridge|inset|outset),#([0-9a-fA-F]{6}),(\d+),(\d+)\)$/;
 	var imagePat =      /^\$image\((.+)\)$/;
+	var paddingPat =    /^\$padding\((\d+),(u|d|l|r),(.+)\)$/;
 	var multipleArgsPat = /^(\$.+?\))((,\$.+?\))*)$/;
 	var primitiveMap = %[];
 	var definitions;
@@ -28,7 +29,8 @@ class KPrimitiveIconBuilder
 				%[ pat: circlePat,      func: drawCircleIcon     ],
 				%[ pat: elippsePat,     func: drawElippseIcon    ],
 				%[ pat: borderPat,      func: drawBorderIcon     ],
-				%[ pat: imagePat,       func: drawImageIcon      ]
+				%[ pat: imagePat,       func: drawImageIcon      ],
+				%[ pat: paddingPat,     func: drawPaddingIcon    ]
 		];
 	}
 
@@ -264,7 +266,40 @@ class KPrimitiveIconBuilder
 	function drawImageIcon(layer, name) {
 		var matches = imagePat.exec(name);
 		var filename = matches[1];
-		layer.loadImages(filename);
-		layer.setSizeToImageSize();
+		var icon = window.primaryLayer.findIcon(filename);
+		layer.assignImages(icon);
+		layer.setSize(icon.width, icon.height);
+	}
+
+	function drawPaddingIcon(layer, name) {
+		var matches = paddingPat.exec(name);
+		var offset = +matches[1];
+		var dir = matches[2];
+		var subIcon = matches[3];
+		var subIconLayer = new global.Layer(window, window.primaryLayer);
+		drawIcon(subIconLayer, subIcon);
+		switch (dir) {
+		case "l":
+			layer.setSize(subIconLayer.width + offset, subIconLayer.height);
+			layer.fillRect(0, 0, layer.width, layer.height, 0);
+			layer.copyRect(offset, 0, subIconLayer, 0, 0, subIconLayer.width, subIconLayer.height);
+			break;
+		case "u":
+			layer.setSize(subIconLayer.width, subIconLayer.height + offset);
+			layer.fillRect(0, 0, layer.width, layer.height, 0);
+			layer.copyRect(0, offset, subIconLayer, 0, 0, subIconLayer.width, subIconLayer.height);
+			break;
+		case "r":
+			layer.setSize(subIconLayer.width + offset, subIconLayer.height);
+			layer.fillRect(0, 0, layer.width, layer.height, 0);
+			layer.copyRect(0, 0, subIconLayer, 0, 0, subIconLayer.width, subIconLayer.height);
+			break;
+		case "d":
+			layer.setSize(subIconLayer.width, subIconLayer.height + offset);
+			layer.fillRect(0, 0, layer.width, layer.height, 0);
+			layer.copyRect(0, 0, subIconLayer, 0, 0, subIconLayer.width, subIconLayer.height);
+			break;
+		}
+		invalidate subIconLayer;
 	}
 }
