@@ -473,6 +473,9 @@ class KTimeLineLayerView extends KVirtualWidget
 	var rangeDragPrevOffset = 0;
 	var prevFrame;
 
+	// マウスドラッグ範囲外補完ディスパッチャ
+	var mouseDragScrollInterp;
+
 	// バッファレイヤ
 	var bufLayer;
 
@@ -1283,6 +1286,68 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	//----------------------------------------------------------------------
 	// マウス処理
+	var _viewPosition;
+
+	property viewPosition {
+		getter {
+			var rect = viewingRect;
+			return %[ left: rect.left, top: rect.top ];
+		}
+		setter(v) {
+			if (equalStruct(v, viewPosition))
+				return;
+			var rect = viewingRect;
+			noticeRect(v.left, v.top, rect.width, rect.height);
+			asyncCaller.callOnce(fakeMouseMove);
+		}
+	}
+
+	function fakeMouseMove() {
+		var keys = [
+			[ VK_SHIFT, ssShift ],
+			[ VK_CONTROL, ssCtrl ],
+			[ VK_MENU, ssAlt ],
+			[ VK_LBUTTON, ssLeft ],
+			[ VK_RBUTTON, ssRight ],
+			[ VK_MBUTTON, ssMiddle ]
+		];
+
+		var shift = keys.inject(0, function(key, value) {
+			if (System.getKeyState(key[0]))
+				return value + key[1];
+			else
+				return value;
+		});
+
+		onMouseMove(super.cursorX, super.cursorY, shift);
+	}
+
+	function nop {
+	}
+
+	property mouseIncludeViewPosition {
+		getter {
+			var rect = viewingRect;
+			var x = super.cursorX, y = super.cursorY;
+			var l, t;
+
+			if (x < rect.left)
+				l = x;
+			else if (x > rect.right)
+				l = x - rect.width;
+			else
+				l = rect.left;
+
+			if (y < rect.top)
+				t = y;
+			else if (y > rect.bottom)
+				t = y - rect.height;
+			else
+				t = rect.top;
+
+			return %[ left: l, top: t ];
+		}
+	}
 
 	//------------------------------
 	// マウスダウン
@@ -1298,6 +1363,17 @@ class KTimeLineLayerView extends KVirtualWidget
 			leftPressed = true;
 		if (button == mbRight)
 			rightPressed = true;
+
+		if (mouseDragScrollInterp === void)
+			mouseDragScrollInterp =
+			new KInterpolateDispatcher(this,
+									   %[ valueName: "viewPosition",
+										  dispatchName: "nop",
+										  interval: 120,
+										  exponent: 0.7,
+										  lerpFunction: function(a, b, t)
+										  { return %[ left: a.left + (b.left - a.left) * t,
+													  top: a.top + (b.top - a.top) * t ]; } ]);
 	}
 
 	//------------------------------
@@ -1321,6 +1397,7 @@ class KTimeLineLayerView extends KVirtualWidget
 			updateMouseCursor(x, y);
 			updatePoint(newPoint);
 		} else {
+			mouseDragScrollInterp.interpolate(mouseIncludeViewPosition);
 			updatePoint(void);
 		}
 	}

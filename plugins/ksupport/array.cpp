@@ -198,7 +198,7 @@ public:
 		return TJS_S_OK;
 	}
 
-	tTJSVariant _inject(tTJSVariant init, tTJSVariant func) {
+	tTJSVariant inject(tTJSVariant init, tTJSVariant func) {
 		ncbPropAccessor arrayObj(mObjthis);
 		auto arrayObjCount = count();
 
@@ -446,7 +446,7 @@ NCB_ATTACH_CLASS_WITH_HOOK(ArraySupport, Array) {
 	NCB_METHOD(_filterMap);
 	NCB_METHOD_RAW_CALLBACK(_select, ArraySupport::_select, 0);
 	NCB_METHOD_RAW_CALLBACK(_reject, ArraySupport::_reject, 0);
-	NCB_METHOD(_inject);
+	NCB_METHOD(inject);
 	NCB_METHOD_RAW_CALLBACK(_sort, ArraySupport::_sort, 0);
 	NCB_METHOD_RAW_CALLBACK(_reverse, ArraySupport::_reverse, 0);
 }
