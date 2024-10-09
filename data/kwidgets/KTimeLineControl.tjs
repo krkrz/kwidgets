@@ -1645,8 +1645,10 @@ class KTimeLineLayerView extends KVirtualWidget
 			super.onKeyUp(...);
 			break;
 		case VK_SHIFT:
-			cursorKeyDragging = false;
-			endRangeSelector();
+			if (rangeSelectorActive) {
+				cursorKeyDragging = false;
+				endRangeSelector();
+			}
 			break;
 		}
 	}
