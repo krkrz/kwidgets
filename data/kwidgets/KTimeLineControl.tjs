@@ -1429,6 +1429,10 @@ class KTimeLineLayerView extends KVirtualWidget
 
 		leftPressed = false;
 
+		if (button == mbLeft) {
+			onSelectionModified();
+		}
+
 		if (button == mbRight
 			&& rightPressed) {
 			if (isPointInSelection(x, y)) {
@@ -1630,6 +1634,7 @@ class KTimeLineLayerView extends KVirtualWidget
 				var selections = getRangeSelections();
 				for (var i = 0; i < list.drawItemList.count; i++) 
 					list.drawItemList[i].setSelection(selections[i]);
+				onSelectionModified();
 			}
 		}
 	}
@@ -1654,6 +1659,10 @@ class KTimeLineLayerView extends KVirtualWidget
 	// enabled=falseなら半透明で表示
 	function onNodeDisabled {
 		_canvas.opacity = 64;
+	}
+
+	function onSelectionModified() {
+		owner.onSelectionModified();
 	}
 };
 
@@ -3730,6 +3739,14 @@ class KTimeLineControl extends KEntity
 	}
 
 	/**------------------------------
+	 * セレクションが更新された
+	 *
+	 * @param time クリックされた時間
+	 ------------------------------*/
+	function onSelectionModified {
+	}
+
+	/**------------------------------
 	 * タイムロケーターが右クリックされた
 	 *
 	 * @param time クリックされた時間
@@ -3911,6 +3928,7 @@ class KTimeLineControl extends KEntity
 			if (drawItemList[i] isvalid)
 				drawItemList[i].releaseSelection();
 		}
+		_layerView.onSelectionModified();
 	}
 
 	property TIMELINE_FRAME_WIDTH {
@@ -4108,6 +4126,7 @@ class KTimeLineControl extends KEntity
 
 	function selectAll {
 		_layerView.selectAll();
+		_layerView.onSelectionModified();
 	}
 
 	property editable {

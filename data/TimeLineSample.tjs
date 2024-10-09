@@ -882,7 +882,8 @@ class TimeLineSample extends KWindow
     timelineControl.add(new TimeLineSampleRootItem("ルート", "rootItem"));
 
     timelineControl.onRenderFrame = this.onRenderFrame;
-    timelineControl.onTimeLocatorRightClick = this.onTimeLocatorRightClick;
+	  timelineControl.onSelectionModified = this.onSelectionModified;
+      timelineControl.onTimeLocatorRightClick = this.onTimeLocatorRightClick;
     timelineControl.onTimeLineSelectionRightClick = this.onTimeLineSelectionRightClick;
     timelineControl.onTimeLineSelectionKeyDown = this.onTimeLineSelectionKeyDown;
 
@@ -1097,6 +1098,10 @@ class TimeLineSample extends KWindow
       var body = Clipboard.asTJS.body;
 	  timelineControl.pasteFrames(body);
   }
+
+	function onSelectionModified() {
+		Debug.message("selection modified");
+	}
 };
 
 //----------------------------------------------------------------------

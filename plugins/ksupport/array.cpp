@@ -42,7 +42,7 @@ public:
 		return arrayObj.GetValue(L"count", ncbTypedefs::Tag<tjs_uint>(), 0, &countHint);
 	}
 
-	tTJSVariant uniq(void) {
+	tTJSVariant _uniq(void) {
 		ncbPropAccessor arrayObj(mObjthis);
 		auto arrayObjCount = count();
 
@@ -59,6 +59,10 @@ public:
 			prevElm = elm;
 		}
 		return result;
+	}
+
+	void uniq(void) {
+		assign(_uniq());
 	}
 
 	tTJSVariant _map(tTJSVariant func) {
@@ -434,6 +438,7 @@ NCB_ATTACH_CLASS_WITH_HOOK(ArraySupport, Array) {
 	NCB_METHOD_RAW_CALLBACK(each, ArraySupport::each, 0);
 	NCB_METHOD_RAW_CALLBACK(eachWithIndex, ArraySupport::eachWithIndex, 0);
 	NCB_METHOD(uniq);
+	NCB_METHOD(_uniq);
 	NCB_METHOD(map);
 	NCB_METHOD(filterMap);
 	NCB_METHOD_RAW_CALLBACK(select, ArraySupport::select, 0);
