@@ -1062,6 +1062,8 @@ class KTimeLineLayerView extends KVirtualWidget
 		case RANGE_SELECT_ADD:
 		case RANGE_SELECT_FLIP:
 			endRangeSelector();
+			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+			owner.selectedLayer = list.findItemIndex(y, true);
 			break;
 		}
 		rangeSelectMode = RANGE_SELECT_NONE;
