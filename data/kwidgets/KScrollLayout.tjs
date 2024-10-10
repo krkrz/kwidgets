@@ -600,6 +600,21 @@ class KScrollLayout extends KLayout
 			return child.height;
 		}
 	}
+
+	/**------------------------------
+	 * child view
+------------------------------*/
+	property childView {
+		getter {
+			return %[ vleft :childViewLeft,
+					  vtop: childViewTop,
+					  vwidth: childViewWidth,
+					  vheight: childViewHeight,
+					  width: childWidth,
+					  height: childHeight ];
+		}
+	}
+
 	/**------------------------------
 	 * childの位置を設定する
 	 ------------------------------*/
@@ -797,6 +812,8 @@ class KScrollLayout extends KLayout
 	}
 
 	function onChildNoticeRect(child, l, t, w, h) {
+		var prevChildView = childView;
+
 		var targetLeft, targetTop;
 		if (horizontalBar) {
 			targetLeft = horizontalBar.targetPos;
@@ -815,7 +832,9 @@ class KScrollLayout extends KLayout
 			verticalBar.targetPos = targetTop;
 		}
 		frame.setChildPos(- horizontalBar.targetPos, - verticalBar.targetPos);
-		onChildViewModified(childViewLeft, childViewTop, childViewWidth, childViewHeight, childWidth, childHeight);
+
+		if (! equalStruct(prevChildView, childView))
+			onChildViewModified(childViewLeft, childViewTop, childViewWidth, childViewHeight, childWidth, childHeight);
 	}
 
 	function onChildViewModified(childViewLeft, childViewTop, childViewWidth, childViewHeight, childWidth, childHeight) {
