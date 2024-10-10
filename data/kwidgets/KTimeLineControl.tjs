@@ -1108,7 +1108,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	//------------------------------
 	// 終了
-	function dragLeaveFrameBoundary() {
+	function dragLeaveFrameBoundary(x, y) {
 		boundaryDragMoving = false;
 		// 境界を結局動かしてないなら、カーソルをその位置へ移動
 		if (! boundaryDragMoved) {
@@ -1280,7 +1280,7 @@ class KTimeLineLayerView extends KVirtualWidget
 			dragLeaveFrameBoundary(...);
 		if (inDragSelection)
 			dragLeaveSelection(...);
-			if (inDragRangeSelector)
+		if (inDragRangeSelector)
 			dragLeaveRangeSelector(...);
 	}
 
