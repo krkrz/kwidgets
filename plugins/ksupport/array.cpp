@@ -284,24 +284,27 @@ public:
 		tTJSVariant result = createArray();
 		ncbPropAccessor resultObj(result);
 
-		auto &closure = val.AsObjectClosureNoAddRef();
+		if (val.Type() == tvtObject) {
+			auto &closure = val.AsObjectClosureNoAddRef();
 
-		if (closure.IsInstanceOf(0, NULL, NULL, L"Function", NULL) == TJS_S_OK) {
-			tTJSVariant *params[1];
-			for (tjs_uint i = 0; i < arrayObjCount; i++) {
-				tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
-				tTJSVariant funcResult;
-				params[0] = &elm;
-				closure.FuncCall(0, NULL, NULL, &funcResult, 1, params, NULL);
-				if (! tjs_int(funcResult))
-					return false;
+			if (closure.IsInstanceOf(0, NULL, NULL, L"Function", NULL) == TJS_S_TRUE) {
+				tTJSVariant *params[1];
+				for (tjs_uint i = 0; i < arrayObjCount; i++) {
+					tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+					tTJSVariant funcResult;
+					params[0] = &elm;
+					closure.FuncCall(0, NULL, NULL, &funcResult, 1, params, NULL);
+					if (! tjs_int(funcResult))
+						return false;
+				}
+				return true;
 			}
-		} else {
-			for (tjs_uint i = 0; i < arrayObjCount; i++) {
-				tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
-				if (val.DiscernCompare(elm) != 0)
-					return false;
-			}
+		}
+
+		for (tjs_uint i = 0; i < arrayObjCount; i++) {
+			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+			if (! val.DiscernCompare(elm))
+				return false;
 		}
 
 		return true;
@@ -314,24 +317,27 @@ public:
 		tTJSVariant result = createArray();
 		ncbPropAccessor resultObj(result);
 
-		auto &closure = val.AsObjectClosureNoAddRef();
+		if (val.Type() == tvtObject) {
+			auto &closure = val.AsObjectClosureNoAddRef();
 
-		if (closure.IsInstanceOf(0, NULL, NULL, L"Function", NULL) == TJS_S_OK) {
-			tTJSVariant *params[1];
-			for (tjs_uint i = 0; i < arrayObjCount; i++) {
-				tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
-				tTJSVariant funcResult;
-				params[0] = &elm;
-				closure.FuncCall(0, NULL, NULL, &funcResult, 1, params, NULL);
-				if (tjs_int(funcResult))
-					return true;
+			if (closure.IsInstanceOf(0, NULL, NULL, L"Function", NULL) == TJS_S_TRUE) {
+				tTJSVariant *params[1];
+				for (tjs_uint i = 0; i < arrayObjCount; i++) {
+					tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+					tTJSVariant funcResult;
+					params[0] = &elm;
+					closure.FuncCall(0, NULL, NULL, &funcResult, 1, params, NULL);
+					if (tjs_int(funcResult))
+						return true;
+				}
+				return false;
 			}
-		} else {
-			for (tjs_uint i = 0; i < arrayObjCount; i++) {
-				tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
-				if (val.DiscernCompare(elm) == 0)
-					return true;
-			}
+		}
+
+		for (tjs_uint i = 0; i < arrayObjCount; i++) {
+			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
+			if (val.DiscernCompare(elm))
+				return true;
 		}
 
 		return false;
