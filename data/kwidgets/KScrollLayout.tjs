@@ -211,6 +211,14 @@ class KScrollFrame extends KEntity
 		isVirtualWidgetWindowedParent = true;
 	}
 
+	function notifyObservers {
+		window.scrollObservers.each(this, function(observer, self) {
+			if (observer.nodeEnabled
+				&& observer.isDescendantOf(self))
+				observer.onNotifyScroll();
+		});
+	}
+
 	// アライメントに従って、スクロール範囲に収まるようにchildの座標を設定する
 	function setChildPos(l, t) {
 		if (children.count == 0)
@@ -251,11 +259,7 @@ class KScrollFrame extends KEntity
 							 int(Math.min(child.width, width)),
 							 int(Math.min(child.height, height)));
 
-		window.scrollObservers.each(this, function(observer, self) {
-			if (observer.nodeVisible
-				&& observer.isDescendantOf(self))
-				observer.onNotifyScroll();
-		});
+		notifyObservers();
 	}
 
 	// サイズ更新、アライメントに従って、childを再配置
