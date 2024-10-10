@@ -638,13 +638,13 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
-	property cursorX {
+	property timelineCursorX {
 		getter {
 			return owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2 - 1;
 		}
 	}
 
-	property cursorY {
+	property timelineCursorY {
 		getter {
 			if (owner.selectedLayer < 0)
 				return -1;
@@ -653,7 +653,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
-	property cursorColor {
+	property timelineCursorColor {
 		getter {
 			return widgetStyle.cursorColor;
 		}
@@ -1319,7 +1319,7 @@ class KTimeLineLayerView extends KVirtualWidget
 				return value;
 		});
 
-		onMouseMove(super.cursorX, super.cursorY, shift);
+		onMouseMove(cursorX, cursorY, shift);
 	}
 
 	function nop {
@@ -1328,7 +1328,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	property mouseIncludeViewPosition {
 		getter {
 			var rect = viewingRect;
-			var x = super.cursorX, y = super.cursorY;
+			var x = cursorX, y = cursorY;
 			var l, t;
 
 			if (x < rect.left)
@@ -1636,6 +1636,8 @@ class KTimeLineLayerView extends KVirtualWidget
 					list.drawItemList[i].setSelection(selections[i]);
 				onSelectionModified();
 			}
+			if (! hasSelection)
+				owner.onSinglePoint();
 		}
 	}
 

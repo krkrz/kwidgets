@@ -126,9 +126,9 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
   }
 
   // カーソルを描画
-  tjs_int cursorColor = widgetStyleObj.getIntValue(L"cursorColor");
-  tjs_int cursorX = viewObj.getIntValue(L"cursorX");
-  tjs_int cursorY = viewObj.getIntValue(L"cursorY");
+  tjs_int cursorColor = viewObj.getIntValue(L"timelineCursorColor");
+  tjs_int cursorX = viewObj.getIntValue(L"timelineCursorX");
+  tjs_int cursorY = viewObj.getIntValue(L"timelineCursorY");
   if (fromTime * TIMELINE_FRAME_WIDTH <= cursorX && cursorX < toTime * TIMELINE_FRAME_WIDTH)
 	  viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, cursorX, y, 1, TIMELINE_FRAME_HEIGHT, cursorColor);
   if (y <= cursorY && cursorY < y + TIMELINE_FRAME_HEIGHT)
@@ -214,15 +214,15 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int layerIndex,
 		// カーソル表示
 		auto selectedLayer = viewObj.getIntValue(L"selectedLayer", -1);
 		if (selectedLayer == layerIndex) {
-			auto cursorColor = viewObj.getIntValue(L"cursorColor");
-			auto cursorY = viewObj.getIntValue(L"cursorY");
+			auto cursorColor = viewObj.getIntValue(L"timelineCursorColor");
+			auto cursorY = viewObj.getIntValue(L"timelineCursorY");
 			viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
 							 frameTime * TIMELINE_FRAME_WIDTH, cursorY, length * TIMELINE_FRAME_WIDTH, 1, cursorColor);
 		}
 		auto selectedTime = viewObj.getIntValue(L"selectedTime");
 		if (frameTime <= selectedTime && selectedTime < frameTime + length) {
-			auto cursorColor = viewObj.getIntValue(L"cursorColor");
-			auto cursorX = viewObj.getIntValue(L"cursorX");
+			auto cursorColor = viewObj.getIntValue(L"timelineCursorColor");
+			auto cursorX = viewObj.getIntValue(L"timelineCursorX");
 			viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
 							 cursorX, y, 1, TIMELINE_FRAME_HEIGHT, cursorColor);
 		}
