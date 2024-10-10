@@ -713,6 +713,7 @@ class KTimeLineLayerView extends KVirtualWidget
 			fillRect(range.left, range.top + range.height - 1, range.width, 1, edgeColor);
 			fillRect(range.left + range.width - 1, range.top, 1, range.height, edgeColor);
 		}
+		owner.onDrawView(this, l, t, w, h);
 	}
 
 	// 選択をしているかどうか
@@ -4303,5 +4304,8 @@ class KTimeLineControl extends KEntity
 	}
 
 	function onSinglePoint {
+	}
+
+	function onDrawView() {
 	}
 };
