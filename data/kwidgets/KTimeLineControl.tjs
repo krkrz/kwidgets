@@ -518,6 +518,21 @@ class KTimeLineLayerView extends KVirtualWidget
 			dashLineApp = new GdiPlus.Appearance();
 			dashLineApp.addPen(WIN_DARKEN2, %[ width: 1, dashStyle: [ 3, 2 ] ], 0.5, 0);
 		}
+
+		mouseDragScrollInterp =
+			new KInterpolateDispatcher(this,
+									   %[ valueName: "viewPosition",
+										  dispatchName: "nop",
+										  interval: 120,
+										  exponent: 0.7,
+										  lerpFunction: function(a, b, t)
+										  { return %[ left: a.left + (b.left - a.left) * t,
+													  top: a.top + (b.top - a.top) * t ]; } ]);
+	}
+
+	function finalize {
+		invalidate mouseDragScrollInterp;
+		super.finalize();
 	}
 
 	property drawItemList {
@@ -1366,17 +1381,6 @@ class KTimeLineLayerView extends KVirtualWidget
 			leftPressed = true;
 		if (button == mbRight)
 			rightPressed = true;
-
-		if (mouseDragScrollInterp === void)
-			mouseDragScrollInterp =
-			new KInterpolateDispatcher(this,
-									   %[ valueName: "viewPosition",
-										  dispatchName: "nop",
-										  interval: 120,
-										  exponent: 0.7,
-										  lerpFunction: function(a, b, t)
-										  { return %[ left: a.left + (b.left - a.left) * t,
-													  top: a.top + (b.top - a.top) * t ]; } ]);
 	}
 
 	//------------------------------
