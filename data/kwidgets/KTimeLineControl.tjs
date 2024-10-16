@@ -417,6 +417,7 @@ global.KTimeLineLayerViewWidgetStyleDefinition = [
 	[ "loopSingleFrameColor", "loopSingleFrameColor" ],
 	[ "loopContinuousFrameColor", "loopContinuousFrameColor" ],
 	[ "rangeSelectorColor", "rangeSelectorColor", 0, "resolveColor" ],
+	[ "areaSelectorColor", "areaSelectorColor", 0x80000000, "resolveColor" ],
 	[ "selectedFrameBlend", "selectedFrameBlend" ],
 	[ "selectedFrameColor", "selectedFrameColor", 0, "resolveColor" ],
 	[ "hoverFrameBlend", "hoverFrameBlend" ],
@@ -728,6 +729,12 @@ class KTimeLineLayerView extends KVirtualWidget
 			fillRect(range.left, range.top + range.height - 1, range.width, 1, edgeColor);
 			fillRect(range.left + range.width - 1, range.top, 1, range.height, edgeColor);
 		}
+		// エリア矩形を描画
+		if (areaRect !== void) {
+			var color = widgetStyle.areaSelectorColor & 0xffffff;
+			var alpha = (widgetStyle.areaSelectorColor >> 24) & 0xff;
+			colorRect(areaRect.left, areaRect.top, areaRect.width, areaRect.height, color, alpha);
+		}
 		owner.onDrawView(this, l, t, w, h);
 	}
 
@@ -1015,6 +1022,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	function dragEnterRangeSelector(x, y, shift) {
 		if (rangeSelectorActive)
 			return;
+		resetArea();
 		shift &= ssCtrl | ssShift;
 		leftPressed = false;
 		rightPressed = false;
@@ -1101,6 +1109,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	function dragEnterFrameBoundary(x, y, shift) {
 		leftPressed = false;
 		rightPressed = false;
+		resetArea();
 		var item = list.drawItemList[boundaryDragLayer];
 		boundaryDragFrameList = duplicateStruct(item.frameList);
 		boundaryDragPrevTime = boundaryDragTime;
@@ -1157,6 +1166,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	function dragEnterSelection(x, y) {
 		leftPressed = false;
 		rightPressed = false;
+		resetArea();
 		rangeDragBeginX = x;
 		rangeDragMoving = true;
 		rangeDragFrameList = [];
@@ -1267,12 +1277,166 @@ class KTimeLineLayerView extends KVirtualWidget
 	}
 
 	//----------------------------------------------------------------------
+	// エリア指定
+	var areaAssignDragMoving = false;
+	var areaAssignDragBegin, areaAssignDragEnd;
+	var areaIndexRect, areaRect;
+
+	property inDragAreaAssign {
+		getter {
+			return areaAssignDragMoving;
+		}
+	}
+
+	function isPointInArea(x, y) {
+		return areaRect !== void
+			&& areaRect.contains(x, y);
+	}
+
+	property hasArea {
+		getter {
+			return areaRect !== void;
+		}
+	}
+
+	function resetArea() {
+		redrawArea();
+		areaRect = areaIndexRect = void;
+	}
+
+	function redrawArea() {
+		if (areaRect !== void)
+			redrawRect(areaRect.left, areaRect.top, areaRect.width, areaRect.height);
+	}
+
+	function dragEnterAreaAssign(x, y) {
+		leftPressed = false;
+		rightPressed  = false;
+		resetSelection();
+		resetArea();
+		areaAssignDragMoving = true;
+		areaAssignDragBegin = [ int(x / TIMELINE_FRAME_WIDTH), list.findItemIndex(y, true) ];
+	}
+
+	function dragMoveAreaAssign(x, y) {
+		redrawArea();
+		areaAssignDragEnd = [ int(x / TIMELINE_FRAME_WIDTH), list.findItemIndex(y, true) ];
+		var l = Math.min(areaAssignDragBegin[0], areaAssignDragEnd[0]);
+		var r = Math.max(areaAssignDragBegin[0], areaAssignDragEnd[0]);
+		var t = Math.min(areaAssignDragBegin[1], areaAssignDragEnd[1]);
+		var b = Math.max(areaAssignDragBegin[1], areaAssignDragEnd[1]);
+		var drawItemList = owner.drawItemList;
+		l = Math.max(0, l);
+		r = Math.max(0, r);
+		t = Math.max(0, Math.min(drawItemList.count - 1, t));
+		b = Math.max(0, Math.min(drawItemList.count - 1, b));
+		areaIndexRect = new KRect(l, t, r - l + 1, b - t + 1);
+		areaRect = new KRect(l * TIMELINE_FRAME_WIDTH,
+							 drawItemList[t].top,
+							 (r - l + 1) * TIMELINE_FRAME_WIDTH,
+							 drawItemList[b].top + drawItemList[b].height - drawItemList[t].top);
+		redrawArea();
+	}
+
+	function dragLeaveAreaAssign() {
+		areaAssignDragMoving = false;
+		areaAssignDragBegin = void;
+		areaAssignDragEnd = void;
+	}
+
+	//----------------------------------------------------------------------
+	// エリア移動
+	var areaMoveDragMoving = false;
+	var areaMoveDragBeginX;
+	var areaMoveDragFrames = [];
+	var areaMoveDragLefts = [];
+	var areaMoveDragTime = 0;
+	var areaMoveDragPrevTime = 0;
+	var areaMoveDragOffset = 0;
+	var areaMoveDragMinTime = 0;
+
+	property inDragAreaMove {
+		getter {
+			return areaMoveDragMoving;
+		}
+	}
+
+	function dragEnterAreaMove(x) {
+		leftPressed = false;
+		rightPressed  = false;
+		areaMoveDragMoving = true;
+		areaMoveDragFrames = [];
+		areaMoveDragTime = areaMoveDragPrevTime = int(x / TIMELINE_FRAME_WIDTH);
+		areaMoveDragOffset = areaMoveDragTime - areaIndexRect.left;
+		var leftMap = %[];
+		leftMap[areaIndexRect.left] = true;
+		for (var i = 0; i < list.drawItemList.count; i++) {
+			if (i < areaIndexRect.top || i >= areaIndexRect.bottom)
+				continue;
+			var item = list.drawItemList[i];
+			areaMoveDragFrames[i] = ktimeline_shallow_copy_frame_list(item.frameList);
+			item.mapLeftSideFrame(areaIndexRect.left, leftMap);
+		}
+		areaMoveDragLefts = dictionaryKeys(leftMap)._map(function(elm) { return +elm; })._sort();
+		areaMoveDragMinTime = Math.max(areaMoveDragLefts.count - 1, 0);
+	}
+
+	function dragMoveAreaMove(x) {
+		var curTime = int(Math.max(int(x / TIMELINE_FRAME_WIDTH), areaMoveDragMinTime + areaMoveDragOffset));
+		if (curTime == areaMoveDragPrevTime)
+			return;
+		var offset = curTime - areaMoveDragPrevTime;
+		areaMoveDragPrevTime = curTime;
+		var fromTime = areaMoveDragTime - areaMoveDragOffset;
+		var toTime = curTime - areaMoveDragOffset;
+		if (toTime < fromTime
+			&& areaMoveDragLefts.count) {
+			var toLeft = [];
+			toLeft.assign(areaMoveDragLefts);
+			for (var i = toLeft.count - 1; i >= 0; i--) {
+				if (toLeft[i] > toTime) {
+					toLeft[i] = toTime--;
+				} else {
+					break;
+				}
+			}
+			fromTime = areaMoveDragLefts;
+			toTime = toLeft;
+		}
+		for (var i = 0; i < drawItemList.count; i++) {
+			if (i < areaIndexRect.top || i >= areaIndexRect.bottom)
+				continue;
+			var item = drawItemList[i];
+			item.frameList = ktimeline_shallow_copy_frame_list(areaMoveDragFrames[i]);
+			item.moveFrame(fromTime,
+						   toTime,
+						   true);
+		}
+		redrawArea();
+		areaIndexRect.offsetBy(offset, 0);
+		areaRect.offsetBy(offset * TIMELINE_FRAME_WIDTH, 0);
+		redrawArea();
+	}
+
+	function dragLeaveAreaMove() {
+		areaMoveDragMoving = false;
+		if (areaMoveDragPrevTime != areaMoveDragTime) {
+			owner.onMultipleFrameDragged();
+			owner.onRenderFrame();
+		}
+	}
+
+	//----------------------------------------------------------------------
 	// ドラッグ処理
 
 	//------------------------------
 	// ドラッグ開始
 	function onDragEnter(x, y, shift) {
-		if (boundaryDragFrameIndex >= 0)
+		if (shift & ssAlt)
+			dragEnterAreaAssign(...);
+		else if (isPointInArea(x, y))
+			dragEnterAreaMove(...);
+		else if (boundaryDragFrameIndex >= 0)
 			dragEnterFrameBoundary(...);
 		else if (isPointInSelection(x, y))
 			dragEnterSelection(...);
@@ -1283,6 +1447,10 @@ class KTimeLineLayerView extends KVirtualWidget
 	//------------------------------
 	// ドラッグ移動
 	function onDragMove(x, y, shift) {
+		if (inDragAreaAssign)
+			dragMoveAreaAssign(...);
+		if (inDragAreaMove)
+			dragMoveAreaMove(...);
 		if (inDragFrameBoundary)
 			dragMoveFrameBoundary(...);
 		if (inDragSelection)
@@ -1294,6 +1462,10 @@ class KTimeLineLayerView extends KVirtualWidget
 	//------------------------------
 	// ドラッグ終了
 	function onDragLeave(x, y, shift) {
+		if (inDragAreaAssign)
+			dragLeaveAreaAssign(...);
+		if (inDragAreaMove)
+			dragLeaveAreaMove(...);
 		if (inDragFrameBoundary)
 			dragLeaveFrameBoundary(...);
 		if (inDragSelection)
@@ -1420,6 +1592,7 @@ class KTimeLineLayerView extends KVirtualWidget
 				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
 				owner.selectedLayer = list.findItemIndex(y);
 				owner.resetSelection();
+				resetArea();
 				owner.onSinglePoint();
 			} else if (shift == ssShift
 					   && point !== void) {
@@ -3650,6 +3823,14 @@ class KTimeLineControl extends KEntity
 	property hasSelection {
 		getter {
 			return _layerView.hasSelection;
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// エリア指定をしているかどうか
+	property hasArea {
+		getter {
+			return _layerView.hasArea;
 		}
 	}
 
