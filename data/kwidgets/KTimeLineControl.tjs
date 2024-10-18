@@ -440,40 +440,6 @@ class KTimeLineLayerView extends KVirtualWidget
 	// 破線app
 	var dashLineApp;
 
-	// カーソルキードラッグ
-	var cursorKeyDragging = false;
-	var cursorKeySelectionBeginTime;
-	var cursorKeySelectionBeginLayer;
-	// マウスドラッグ
-	var mouseDragging = false;
-	var mouseSelectionBeginTime;
-	var mouseSelectionBeginLayer;
-	var mouseDraggingMoved = false;
-
-	// フレーム境界のドラッグ
-	var boundaryDragMoving;            // ドラッグ中
-	var boundaryDragFrameList;         // 元フレームリスト
-	var boundaryDragFrameIndex;        // ドラッグ開始フレームのインデックス
-	var boundaryDragTime;              // ドラッグ時間
-	var boundaryDragLayer;             // ドラッグレイヤ
-	var boundaryDragPrevTime;          // 前回の時間
-	var boundaryDragMinTime;           // 下限
-	var boundaryDragMoved;             // 動いた
-	var boundaryDragSaveLength;        // 長さ保存
-
-	// 範囲ドラッグ
-	var rangeDragMoving;
-	var rangeDragTime;
-	var rangeDragPrevTime;
-	var rangeDragMinTime;
-	var rangeDragFrameList;
-	var rangeDragSelectionList;
-	var rangeDragOffset;
-	var rangeDragLeftList;
-	var rangeDragBeginX;
-	var rangeDragPrevOffset = 0;
-	var prevFrame;
-
 	// マウスドラッグ範囲外補完ディスパッチャ
 	var mouseDragScrollInterp;
 
@@ -483,14 +449,6 @@ class KTimeLineLayerView extends KVirtualWidget
 	// ポイント
 	var point = void;
 	var prevPoint = void;
-	// 選択範囲
-	var RANGE_SELECT_NONE = 0;
-	var RANGE_SELECT_SET = 1;
-	var RANGE_SELECT_ADD = 2;
-	var RANGE_SELECT_FLIP = 3;
-	var rangeSelectorBegin = void;
-	var rangeSelectorEnd = void;
-	var rangeSelectMode = RANGE_SELECT_NONE;
 	// 直前の選択範囲
 	var prevSelections;
 	// ボタンが押された
@@ -504,8 +462,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		list = owner._layerList;
 		setMinMaxSize(2000, list.minHeight, 2000, list.maxHeight);
 		focusable = window.defaultFocusable;
-		mouseDraggingMoved = false;
-		cursorKeyDragging = false;
+		cursorKeyRangeSelectorDragging = false;
 		rangeDragMoving = false;
 
 		frameLeftMarkerLayer = new global.Layer(window, this);
@@ -681,7 +638,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	function onFocus {
 		if (! System.getKeyState(VK_SHIFT))
-			cursorKeyDragging = false;
+			cursorKeyRangeSelectorDragging = false;
 		//		owner.updateCursor();
 		super.onFocus();
 		owner._timeLocator.addCustomStyleState("focus");
@@ -789,13 +746,24 @@ class KTimeLineLayerView extends KVirtualWidget
 		onMouseOver(void, void);
 	}
 
+	property inDrag {
+		getter {
+			return cursorKeyRangeSelectorDragging
+				|| cursorKeyAreaAssignDragging
+				|| inDragFrameBoundary
+				|| inDragRangeSelector
+				|| inDragSelection
+				|| inDragAreaAssign
+				|| inDragAreaMove;
+		}
+	}
+
 	// カーソル選択
 	function updateMouseCursor(x, y) {
 		updateMouseOver(...);
 		cursor = crDefault;
 		boundaryDragFrameIndex = -1;
-		if (mouseDragging
-			|| cursorKeyDragging
+		if (cursorKeyRangeSelectorDragging
 			|| rangeDragMoving) {
 			return;
 		}
@@ -1009,6 +977,18 @@ class KTimeLineLayerView extends KVirtualWidget
 	//----------------------------------------------------------------------
 	// レンジセレクタドラッグ動作
 
+	// 選択範囲
+	var RANGE_SELECT_NONE = 0;
+	var RANGE_SELECT_SET = 1;
+	var RANGE_SELECT_ADD = 2;
+	var RANGE_SELECT_FLIP = 3;
+	var rangeSelectorBegin = void;
+	var rangeSelectorEnd = void;
+	var rangeSelectMode = RANGE_SELECT_NONE;
+
+	// カーソルキードラッグ
+	var cursorKeyRangeSelectorDragging = false;
+
 	//------------------------------
 	// レンジセレクタ判定
 	property inDragRangeSelector {
@@ -1096,6 +1076,17 @@ class KTimeLineLayerView extends KVirtualWidget
 	//----------------------------------------------------------------------
 	// 境界ドラッグ
 
+	// フレーム境界のドラッグ
+	var boundaryDragMoving;            // ドラッグ中
+	var boundaryDragFrameList;         // 元フレームリスト
+	var boundaryDragFrameIndex;        // ドラッグ開始フレームのインデックス
+	var boundaryDragTime;              // ドラッグ時間
+	var boundaryDragLayer;             // ドラッグレイヤ
+	var boundaryDragPrevTime;          // 前回の時間
+	var boundaryDragMinTime;           // 下限
+	var boundaryDragMoved;             // 動いた
+	var boundaryDragSaveLength;        // 長さ保存
+
 	//------------------------------
 	// 判定
 	property inDragFrameBoundary {
@@ -1152,6 +1143,19 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	//----------------------------------------------------------------------
 	// 選択範囲ドラッグ
+
+	// 範囲ドラッグ
+	var rangeDragMoving;
+	var rangeDragTime;
+	var rangeDragPrevTime;
+	var rangeDragMinTime;
+	var rangeDragFrameList;
+	var rangeDragSelectionList;
+	var rangeDragOffset;
+	var rangeDragLeftList;
+	var rangeDragBeginX;
+	var rangeDragPrevOffset = 0;
+	var prevFrame;
 
 	//------------------------------
 	// 判定
@@ -1278,6 +1282,12 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	//----------------------------------------------------------------------
 	// エリア指定
+
+	// カーソルキードラッグ
+	var cursorKeyAreaAssignDragging = false;
+	var cursorKeyAreaAssignBeginTime;
+	var cursorKeyAreaAssignBeginLayer;
+
 	var areaAssignDragMoving = false;
 	var areaAssignDragBegin, areaAssignDragEnd;
 	var areaIndexRect, areaRect;
@@ -1297,6 +1307,10 @@ class KTimeLineLayerView extends KVirtualWidget
 		getter {
 			return areaRect !== void;
 		}
+	}
+
+	function isIndexInArea(y) {
+		return areaIndexRect !== void && areaIndexRect.top <= y && y < areaIndexRect.bottom;
 	}
 
 	function resetArea() {
@@ -1432,8 +1446,11 @@ class KTimeLineLayerView extends KVirtualWidget
 	//------------------------------
 	// ドラッグ開始
 	function onDragEnter(x, y, shift) {
-		if (shift & ssAlt)
-			dragEnterAreaAssign(...);
+		if (inDrag)
+			return;
+
+		if (shift & (ssCtrl | ssShift))
+			dragEnterRangeSelector(...);
 		else if (isPointInArea(x, y))
 			dragEnterAreaMove(...);
 		else if (boundaryDragFrameIndex >= 0)
@@ -1441,7 +1458,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		else if (isPointInSelection(x, y))
 			dragEnterSelection(...);
 		else
-			dragEnterRangeSelector(...);
+			dragEnterAreaAssign(...);
 	}
 
 	//------------------------------
@@ -1703,6 +1720,9 @@ class KTimeLineLayerView extends KVirtualWidget
 	}
 
 	function onKeyDown(key, shift) {
+		var prevSelectedLayer = owner.selectedLayer;
+		var prevSelectedTime = owner.selectedTime;
+
 		var cursorMoved = false;
 		switch (key) {
 		default:
@@ -1714,6 +1734,35 @@ class KTimeLineLayerView extends KVirtualWidget
 			break;
 
 		case VK_LEFT:
+			if (hasArea
+				&& (shift & ssCtrl)) {
+				var step = (shift & ssShift) ? 10 : 1;
+				var movable = true;
+				for (var i = 0; i < list.drawItemList.count; i++) {
+					if (! isIndexInArea(i))
+						continue;
+					var item = list.drawItemList[i];
+					step = Math.min(step, areaIndexRect.left - item.leftSideFrameNum(areaIndexRect.left));
+					if (step <= 0) {
+						movable = false;
+						break;
+					}
+				}
+				if (movable) {
+					for (var i = 0; i < list.drawItemList.count; i++) {
+						if (isIndexInArea(i)) {
+							var item = list.drawItemList[i];
+							item.moveFrame(areaIndexRect.left, areaIndexRect.left - step, true, false);
+						}
+					}
+					areaIndexRect.offsetBy(-step, 0);
+					areaRect.offsetBy(-step * TIMELINE_FRAME_WIDTH, 0);
+					list.redrawAllItemsView();
+					owner.onMultipleFrameDragged();
+					owner.onRenderFrame();
+				}
+				return;
+			}
 			if (shift & ssCtrl) {
 				var step = (shift & ssShift) ? 10 : 1;
 				shiftSelection(-step);
@@ -1745,6 +1794,22 @@ class KTimeLineLayerView extends KVirtualWidget
 			}
 			break;
 		case VK_RIGHT:
+			if (hasArea
+				&& (shift & ssCtrl)) {
+				var step = (shift & ssShift) ? 10 : 1;
+				for (var i = 0; i < list.drawItemList.count; i++) {
+					if (isIndexInArea(i)) {
+						var item = list.drawItemList[i];
+						item.moveFrame(areaIndexRect.left, areaIndexRect.left + step, true, false);
+					}
+				}
+				areaIndexRect.offsetBy(step, 0);
+				areaRect.offsetBy(step * TIMELINE_FRAME_WIDTH, 0);
+				list.redrawAllItemsView();
+				owner.onMultipleFrameDragged();
+				owner.onRenderFrame();
+				return;
+			}
 			if (shift & ssCtrl) {
 				var step = (shift & ssShift) ? 10 : 1;
 				shiftSelection(step);
@@ -1787,35 +1852,41 @@ class KTimeLineLayerView extends KVirtualWidget
 				cursorMoved = true;
 			}
 			break;
-		case VK_SHIFT:
-			if (! rangeSelectorActive
-				&& owner.selectedTime >= 0
-				&& owner.selectedLayer >= 0) {
-				cursorKeyDragging = true;
-				var item = list.drawItemList[owner.selectedLayer];
-				var x = int((owner.selectedTime + 0.5) * TIMELINE_FRAME_WIDTH);
-				var y = int(item.top + item.height / 2);
-				beginRangeSelector(x, y);
-			}
-			break;
 		}
 
 		if (cursorMoved) {
 			focus();
+			if (shift & ssShift
+				&& ! cursorKeyAreaAssignDragging
+				&& prevSelectedLayer >= 0) {
+				resetArea();
+				cursorKeyAreaAssignDragging = true;
+				cursorKeyAreaAssignBeginTime = prevSelectedTime;
+				cursorKeyAreaAssignBeginLayer = prevSelectedLayer;
+				resetSelection();
+			}
 			noticeRect(owner.selectedTime * TIMELINE_FRAME_WIDTH,
 					   owner.selectedLayer * TIMELINE_FRAME_HEIGHT,
 					   TIMELINE_FRAME_WIDTH,
 					   TIMELINE_FRAME_HEIGHT);
-			if (cursorKeyDragging) {
-				var item = list.drawItemList[owner.selectedLayer];
-				var x = int((owner.selectedTime + 0.5) * TIMELINE_FRAME_WIDTH);
-				var y = int(item.top + item.height / 2);
-				updateRangeSelector(x, y);
-				var selections = getRangeSelections();
-				for (var i = 0; i < list.drawItemList.count; i++) 
-					list.drawItemList[i].setSelection(selections[i]);
-				onSelectionModified();
-			}
+			if (cursorKeyAreaAssignDragging) {
+				var selectionEndTime, selectionEndLayer;
+				selectionEndTime = owner.selectedTime;
+				selectionEndLayer = owner.selectedLayer;
+				var l, t, r, b;
+				l = int(Math.min(cursorKeyAreaAssignBeginTime, selectionEndTime));
+				t = int(Math.min(cursorKeyAreaAssignBeginLayer, selectionEndLayer));
+				r = int(Math.max(cursorKeyAreaAssignBeginTime, selectionEndTime));
+				b = int(Math.max(cursorKeyAreaAssignBeginLayer, selectionEndLayer));
+				redrawArea();
+				areaIndexRect = new KRect(l, t, r - l + 1, b - t + 1);
+				areaRect = new KRect(l * TIMELINE_FRAME_WIDTH,
+									 drawItemList[t].top,
+									 (r - l + 1) * TIMELINE_FRAME_WIDTH,
+									 drawItemList[b].top + drawItemList[b].height - drawItemList[t].top);
+				redrawArea();
+			} else
+				resetArea();
 			if (! hasSelection)
 				owner.onSinglePoint();
 		}
@@ -1826,11 +1897,9 @@ class KTimeLineLayerView extends KVirtualWidget
 		default:
 			super.onKeyUp(...);
 			break;
+
 		case VK_SHIFT:
-			if (rangeSelectorActive) {
-				cursorKeyDragging = false;
-				endRangeSelector();
-			}
+			cursorKeyAreaAssignDragging = false;
 			break;
 		}
 	}
@@ -4091,6 +4160,7 @@ class KTimeLineControl extends KEntity
 		_layerViewScroll.setChildViewPos(_layerViewScroll.childViewLeft, _layerListScroll.childViewTop);
 		resetCursor();
 		resetSelection();
+		resetArea();
 		onLayerSelect(selectedLayer);
 		onRenderFrame();
 		invalidateMaxTime();
@@ -4121,6 +4191,10 @@ class KTimeLineControl extends KEntity
 				drawItemList[i].releaseSelection();
 		}
 		_layerView.onSelectionModified();
+	}
+
+	function resetArea {
+		_layerView.resetArea();
 	}
 
 	property TIMELINE_FRAME_WIDTH {
