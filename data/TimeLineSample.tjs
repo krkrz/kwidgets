@@ -1023,7 +1023,7 @@ class TimeLineSample extends KWindow
   //------------------------------
   property isLayerRangeAvailableToCopy {
     getter {
-      return timelineControl.hasSelection;
+		return timelineControl.isCopyFramesAvailable;
     }
   }
 

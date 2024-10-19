@@ -65,46 +65,62 @@ public:
 		assign(_uniq());
 	}
 
-	tTJSVariant _map(tTJSVariant func) {
-		ncbPropAccessor arrayObj(mObjthis);
-		auto arrayObjCount = count();
+	static tTJSVariant __map__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
+		ncbPropAccessor arrayObj(array);
+		auto arrayObjCount = countArray(array);
 
 		tTJSVariant result = createArray();
 		ncbPropAccessor resultObj(result);
 
 		auto &funcClosure = func.AsObjectClosureNoAddRef();
 
-		tTJSVariant *params[1];
 		for (tjs_uint i = 0; i < arrayObjCount; i++) {
 			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 			tTJSVariant funcResult;
-			params[0] = &elm;
-			funcClosure.FuncCall(0, NULL, NULL, &funcResult, 1, params, NULL);
+			args[0] = &elm;
+			funcClosure.FuncCall(0, NULL, NULL, &funcResult, args.size(), &args[0], NULL);
 			resultObj.FuncCall(0, L"add", &addHint, NULL, funcResult);
 		}
 
 		return result;
 	}
 
-	void map(tTJSVariant func) {
-		assign(_map(func));
+	static tjs_error TJS_INTF_METHOD _map(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		if (numparams < 1)
+			return TJS_E_BADPARAMCOUNT;
+		tTJSVariant func = *param[numparams - 1];
+		std::vector<tTJSVariant*> args(1);
+		for (tjs_int i = 0; i < numparams - 1; i++)
+			args.push_back(param[i]);
+		if (result)
+			*result = __map__(tTJSVariant(objthis, objthis), func, args);
+		return TJS_S_OK;
 	}
 
-	tTJSVariant _filterMap(tTJSVariant func) {
-		ncbPropAccessor arrayObj(mObjthis);
-		auto arrayObjCount = count();
+	static tjs_error TJS_INTF_METHOD map(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		tTJSVariant resultArray;
+		auto resultStatus = _map(&resultArray, numparams, param, objthis);
+		if (resultStatus == TJS_E_BADPARAMCOUNT)
+			return resultStatus;
+		tTJSVariant arrayObj(objthis, objthis);
+		assignArray(resultArray, arrayObj);
+		return TJS_S_OK;
+	}
+
+	static tTJSVariant __filterMap__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
+		ncbPropAccessor arrayObj(array);
+		auto arrayObjCount = countArray(array);
 
 		tTJSVariant result = createArray();
 		ncbPropAccessor resultObj(result);
 
 		auto &funcClosure = func.AsObjectClosureNoAddRef();
 
-		tTJSVariant *params[1];
 		for (tjs_uint i = 0; i < arrayObjCount; i++) {
 			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 			tTJSVariant funcResult;
-			params[0] = &elm;
-			funcClosure.FuncCall(0, NULL, NULL, &funcResult, 1, params, NULL);
+			args[0] = &elm;
+			funcClosure.FuncCall(0, NULL, NULL, &funcResult, args.size(), &args[0], NULL);
 			if (funcResult.Type() != tvtVoid)
 				resultObj.FuncCall(0, L"add", &addHint, NULL, funcResult);
 		}
@@ -112,8 +128,26 @@ public:
 		return result;
 	}
 
-	void filterMap(tTJSVariant func) {
-		assign(_filterMap(func));
+	static tjs_error TJS_INTF_METHOD _filterMap(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		if (numparams < 1)
+			return TJS_E_BADPARAMCOUNT;
+		tTJSVariant func = *param[numparams - 1];
+		std::vector<tTJSVariant*> args(1);
+		for (tjs_int i = 0; i < numparams - 1; i++)
+			args.push_back(param[i]);
+		if (result)
+			*result = __filterMap__(tTJSVariant(objthis, objthis), func, args);
+		return TJS_S_OK;
+	}
+
+	static tjs_error TJS_INTF_METHOD filterMap(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		tTJSVariant resultArray;
+		auto resultStatus = _filterMap(&resultArray, numparams, param, objthis);
+		if (resultStatus == TJS_E_BADPARAMCOUNT)
+			return resultStatus;
+		tTJSVariant arrayObj(objthis, objthis);
+		assignArray(resultArray, arrayObj);
+		return TJS_S_OK;
 	}
 
 	static tTJSVariant __select__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
@@ -445,16 +479,16 @@ NCB_ATTACH_CLASS_WITH_HOOK(ArraySupport, Array) {
 	NCB_METHOD_RAW_CALLBACK(eachWithIndex, ArraySupport::eachWithIndex, 0);
 	NCB_METHOD(uniq);
 	NCB_METHOD(_uniq);
-	NCB_METHOD(map);
-	NCB_METHOD(filterMap);
+	NCB_METHOD_RAW_CALLBACK(map, ArraySupport::map, 0);
+	NCB_METHOD_RAW_CALLBACK(filterMap, ArraySupport::filterMap, 0);
 	NCB_METHOD_RAW_CALLBACK(select, ArraySupport::select, 0);
 	NCB_METHOD_RAW_CALLBACK(reject, ArraySupport::reject, 0);
 	NCB_METHOD(all);
 	NCB_METHOD(any);
 	NCB_METHOD(min);
 	NCB_METHOD(max);
-	NCB_METHOD(_map);
-	NCB_METHOD(_filterMap);
+	NCB_METHOD_RAW_CALLBACK(_map, ArraySupport::_map, 0);
+	NCB_METHOD_RAW_CALLBACK(_filterMap, ArraySupport::_filterMap, 0);
 	NCB_METHOD_RAW_CALLBACK(_select, ArraySupport::_select, 0);
 	NCB_METHOD_RAW_CALLBACK(_reject, ArraySupport::_reject, 0);
 	NCB_METHOD(inject);

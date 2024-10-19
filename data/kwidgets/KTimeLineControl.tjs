@@ -695,16 +695,62 @@ class KTimeLineLayerView extends KVirtualWidget
 		owner.onDrawView(this, l, t, w, h);
 	}
 
+	property hasWorkZone {
+		getter {
+			return hasSelection || hasArea;
+		}
+	}
+
+	property workZoneIndexRect {
+		getter {
+			if (hasSelection)
+				return selectionIndexRect;
+			if (hasArea)
+				return areaIndexRect;
+			return void;
+		}
+	}
+
+	property workZoneEffectiveFrameLeftTop {
+		getter {
+			if (hasSelection)
+				return selectionEffectiveFrameLeftTop;
+			if (hasArea)
+				return areaEffectiveFrameLeftTop;
+		}
+	}
+
 	// 選択をしているかどうか
 	property hasSelection {
 		getter {
-			for (var i = 0; i < list.drawItemList.count; i++) {
-				var item = list.drawItemList[i];
-				if (item isvalid
-					&& item.hasSelection)
-					return true;
-			}
-			return false;
+			return drawItemList.any(function(item) { return item isvalid && item.hasSelection; });
+		}
+	}
+
+	property selectionIndexRect {
+		getter {
+			var result = %[ rect: void ];
+			drawItemList.eachWithIndex(result, function(item, index, result) {
+				if (item.hasSelection) {
+					var l = item.frameList[item.selection[0]].time;
+					var r = item.frameList[item.selection[-1] + 1].time;
+					if (result.rect == void) {
+						result.rect = new KRect(l, index, r - l, index + 1);
+					} else {
+						result.rect.left = Math.min(result.rect.left, l);
+						result.rect.right = Math.max(result.rect.right, r);
+						result.bottom = index + 1;
+					}
+				}
+			});
+			return result.rect;
+		}
+	}
+
+	property selectionEffectiveFrameLeftTop {
+		getter {
+			var rect = selectionIndexRect;
+			return %[ x: rect.left, y: rect.top ];
 		}
 	}
 
@@ -924,18 +970,11 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
-	function pointSelectionCorner() {
-		if (selectionCount > 0) {
-			var layer = 9999999999, time = 9999999999;
-			for (var i = 0; i < list.drawItemList.count; i++) {
-				var item = list.drawItemList[i];
-				if (item.hasSelection) {
-					layer = Math.min(layer, i);
-					time = Math.min(time, item.frameAt(item.selection[0]).time);
-				}
-			}
-			owner.selectedLayer = layer;
-			owner.selectedTime = time;
+	function pointWorkZoneCorner() {
+		var rect = workZoneEffectiveFrameLeftTop;
+		if (rect !== void) {
+			owner.selectedTime = rect.x;
+			owner.selectedLayer = rect.y;
 		}
 	}
 
@@ -1309,6 +1348,27 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
+	property areaEffectiveFrameLeftTop {
+		getter {
+			if (areaRect === void)
+				return void;
+			for (var i = areaIndexRect.top; i < areaIndexRect.bottom; i++) {
+				var item = drawItemList[i];
+				var fromIndex = item.findFrame(areaIndexRect.left, true);
+				var toIndex = item.findFrame(areaIndexRect.right - 1, true);
+				if (fromIndex != toIndex
+					|| (fromIndex >= 0 && item.frameAt(fromIndex).time == areaIndexRect.left)) {
+					return %[ x: areaIndexRect.left, y: i ];
+				}
+			}
+			return void;
+		}
+	}
+
+	function isItemInArea(item) {
+		return isIndexInArea(drawItemList.find(item));
+	}
+
 	function isIndexInArea(y) {
 		return areaIndexRect !== void && areaIndexRect.top <= y && y < areaIndexRect.bottom;
 	}
@@ -1632,7 +1692,8 @@ class KTimeLineLayerView extends KVirtualWidget
 
 		if (button == mbRight
 			&& rightPressed) {
-			if (isPointInSelection(x, y)) {
+			if (isPointInSelection(x, y)
+				|| isPointInArea(x, y)) {
 				owner.onTimeLineSelectionRightClick();
 			} else {
 				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
@@ -1726,7 +1787,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		var cursorMoved = false;
 		switch (key) {
 		default:
-			if (hasSelection)
+			if (hasWorkZone)
 				owner.onTimeLineSelectionKeyDown(key, shift);
 			else if (owner.selectedLayer >= 0)
 				list.drawItemList[owner.selectedLayer].onTimeLineKeyDown(key, shift);
@@ -2736,21 +2797,60 @@ class KTimeLineItem extends KListItem
 	}
 
 	/*------------------------------
+	 * エリア内のフレームをコピーする
+	 ------------------------------*/
+	function copyFramesByArea(beginTime, endTime) {
+		if (! supportSelection
+			|| ! view.isItemInArea(this))
+			return [];
+		var range = copyFrameRange(beginTime, endTime);
+		for (var i = 0; i < range.count - 1; i++) {
+			range[i].length = range[i + 1].time - range[i].time;
+		}
+		return range;
+	}
+
+	/*------------------------------
 	 * 選択範囲のフレームをコピーする
 	 ------------------------------*/
-	function copySelection() {
-		return selection._map(function(i) {
+	function copyFramesBySelection(beginTime) {
+		return selection._map(beginTime, function(i, beginTime) {
 			var frame = duplicateStruct(frameList[i]);
 			frame.length = frameList[i + 1].time - frame.time;
+			frame.time -= beginTime;
 			return frame;
 		} incontextof(this) );
 	}
 
 	/*------------------------------
+	 * フレームをコピーする
+	 ------------------------------*/
+	function copyFrames(beginTime, endTime) {
+		if (owner.hasSelection)
+			return copyFramesBySelection(...);
+		else
+			return copyFramesByArea(...);
+	}
+
+	/*------------------------------
+	 * エリア内のフレームをカットーする
+	 ------------------------------*/
+	function cutFramesByArea(beginTime, endTime) {
+		if (! supportSelection
+			|| ! view.isItemInArea(this))
+			return [];
+		var range = cutFrameRange(beginTime, endTime);
+		for (var i = 0; i < range.count - 1; i++) {
+			range[i].length = range[i + 1].time - range[i].time;
+		}
+		return range;
+	}
+
+	/*------------------------------
 	 * 選択範囲のフレームをカットする
 	 ------------------------------*/
-	function cutSelection() {
-		var frames = copySelection();
+	function cutFramesBySelection(beginTime) {
+		var frames = copyFramesBySelection(beginTime);
 		selection._reverse().each(function(i) {
 			frameList[i].type = TIMELINE_FRAME_TYPE_NULL;
 		} incontextof(this) );
@@ -2760,12 +2860,27 @@ class KTimeLineItem extends KListItem
 	}
 
 	/*------------------------------
+	 * フレームをカットする
+	 ------------------------------*/
+	function cutFrames(beginTime, endTime) {
+		if (owner.hasSelection)
+			return cutFramesBySelection(...);
+		else
+			return cutFramesByArea(...);
+	}
+
+	/*------------------------------
 	 * 選択範囲をペーストする
 	 ------------------------------*/
 	function pasteSelection(pasteTime, frames) {
 		selection = [];
 		frames.each(pasteTime, function(frame, pasteTime) {
 			frame = duplicateStruct(frame);
+			if (frame.length === void) {
+				delete frame.length;
+				pasteFrame(pasteTime, [ frame ]);
+				return;
+			}
 			frame.time += pasteTime;
 			var length = frame.length;
 			delete frame.length;
@@ -2773,7 +2888,7 @@ class KTimeLineItem extends KListItem
 			var endTime = frame.time + length;
 			if (frameList.count == 0) {
 				frameList.add(frame);
-				frameList.add(%[ time: endTime, type: TIMELINE_FRAME_TYPE_NULL ]);
+				frameList.add(%[ time: endTime === void ? frame.time + 1 : endTime, type: TIMELINE_FRAME_TYPE_NULL ]);
 			} else {
 				var beginIndex = findFrame(beginTime, true);
 				if (beginIndex < 0) {
@@ -3903,6 +4018,12 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
+	property hasWorkZone {
+		getter {
+			return _layerView.hasWorkZone;
+		}
+	}
+
 	/*------------------------------
 	 * 表示中のリストアイテムの一覧
 	 *
@@ -4429,7 +4550,14 @@ class KTimeLineControl extends KEntity
 		});
 	}
 
+	property isCopyFramesAvailable {
+		getter {
+			return hasWorkZone;
+		}
+	}
+
 	function copyFrames {
+		/*
 		if (! hasSelection) {
 			var layer = selectedLayer;
 			var time = selectedTime;
@@ -4453,14 +4581,19 @@ class KTimeLineControl extends KEntity
 			}
 			return [];
 		}
-		_layerView.pointSelectionCorner();
+		*/
+		if (! hasWorkZone)
+			return [];
+
+		_layerView.pointWorkZoneCorner();
+
 		var result =
-		_layerList.drawItemList._map(function(item) {
-			var frames = item.copySelection();
-			var row = %[ className: item.className, frames: frames ];
-			return row;
-		});
-		leftAlignRows(result);
+			_layerList.drawItemList._map(_layerView.workZoneIndexRect, function(item, indexRect) {
+				var frames = item.copyFrames(indexRect.left, indexRect.right);
+				var row = %[ className: item.className, frames: frames ];
+				return row;
+			});
+
 		result.map(function(row) {
 			return row.frames.count > 0 ? row : void;
 		});
@@ -4471,10 +4604,13 @@ class KTimeLineControl extends KEntity
 			   && result[-1] === void)
 			result.erase(result.count - 1);
 
+		resetArea();
+
 		return result;
 	}
 
 	function cutFrames {
+		/*
 		if (! hasSelection) {
 			var layer = selectedLayer;
 			var time = selectedTime;
@@ -4500,14 +4636,19 @@ class KTimeLineControl extends KEntity
 			}
 			return [];
 		}
-		_layerView.pointSelectionCorner();
+		*/
+		if (! hasWorkZone)
+			return [];
+
+		_layerView.pointWorkZoneCorner();
+
 		var result =
-		_layerList.drawItemList._map(function(item) {
-			var frames = item.cutSelection();
-			var row = %[ className: item.className, frames: frames ];
-			return row;
-		});
-		leftAlignRows(result);
+			_layerList.drawItemList._map(_layerView.workZoneIndexRect, function(item, indexRect) {
+				var frames = item.cutFrames(indexRect.left, indexRect.right);
+				var row = %[ className: item.className, frames: frames ];
+				return row;
+			});
+
 		result.map(function(row) {
 			return row.frames.count > 0 ? row : void;
 		});
@@ -4517,6 +4658,9 @@ class KTimeLineControl extends KEntity
 		while (result.count > 0
 			   && result[-1] === void)
 			result.erase(result.count - 1);
+
+		resetArea();
+
 		return result;
 	}
 
