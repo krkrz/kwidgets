@@ -19,11 +19,11 @@ global.KSliderArgsFormat =
 
 global.KSliderWidgetStyleDefinition =
 	[
-		[ "width", "width", void ],
-		[ "height", "height", void ],
-		[ "knobWidth", "knobWidth", void ],
-		[ "variable", "variable", false ],
-		[ "iconOverlayColor", "iconOverlayColor", 0 ]
+			%[ key: "width" ],
+			%[ key: "height" ],
+			%[ key: "knobWidth" ],
+			%[ key: "variable", defaultValue: false ],
+			%[ key: "iconOverlayColor", defaultValue: 0 ]
 	];
 
 

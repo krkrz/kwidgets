@@ -9,10 +9,10 @@ global.KCheckBoxArgsFormat =
 
 global.KCheckBoxWidgetStyle =
 	[
-		[ "icon", "icon", "" ],
-		[ "lineSpacing", "lineSpacing", 0 ],
-		[ "variable", "variable", false ],
-		[ "fullBackgroundColor", "fullBackgroundColor", 0, "resolveColor" ]
+			%[ key: "icon", defaultValue: "" ],
+			%[ key: "lineSpacing", defaultValue: 0 ],
+			%[ key: "variable", defaultValue: false ],
+			%[ key: "fullBackgroundColor", defaultValue: 0, resolver: "resolveColor" ]
 	];
 
 class KCheckBox extends KValueEntity

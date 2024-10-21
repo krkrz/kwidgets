@@ -16,9 +16,9 @@ global.KFrameLayoutArgsFormat =
 
 global.KFrameLayoutWidgetStyleDefinition =
 	[
-		[ "textAlign", "textAlign", ALIGN_CENTER ],
-		[ "checkIcon", "checkIcon", "" ],
-		[ "helpIcon", "helpIcon", "" ]
+			%[ key: "textAlign", defaultValue: ALIGN_CENTER ],
+			%[ key: "checkIcon", defaultValue: "" ],
+			%[ key: "helpIcon", defaultValue: "" ]
 	];
 
 class KFrameLayout extends KLayout

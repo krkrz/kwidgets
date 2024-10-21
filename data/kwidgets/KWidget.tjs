@@ -54,102 +54,74 @@ property defaultSpace {
 	}
 }
 
-global.K_WIDGET_MARGIN_LEFT_PROPERTY_KEYS   = [ "marginLeft",   "marginHorizontal", "margin" ];
-global.K_WIDGET_MARGIN_TOP_PROPERTY_KEYS    = [ "marginTop",    "marginVertical",   "margin" ];
-global.K_WIDGET_MARGIN_RIGHT_PROPERTY_KEYS  = [ "marginRight",  "marginHorizontal", "margin"];
-global.K_WIDGET_MARGIN_BOTTOM_PROPERTY_KEYS = [ "marginBottom", "marginVertical",   "margin" ];
-global.K_WIDGET_ALIGN_HORIZONTAL_PROPERTY_KEYS = [ "alignHorizontal", "align" ];
-global.K_WIDGET_ALIGN_VERTICAL_PROPERTY_KEYS =   [ "alignVertical",   "align" ];
-global.K_WIDGET_PADDING_OFFSET_HORIZONTAL_PROPERTY_KEYS   = [ "paddingOffsetHorizontal",   "paddingOffset" ];
-global.K_WIDGET_PADDING_OFFSET_VERTICAL_PROPERTY_KEYS   = [ "paddingOffsetVertical",   "paddingOffset" ];
-global.K_WIDGET_PADDING_INSET_HORIZONTAL_PROPERTY_KEYS   = [ "paddingInsetHorizontal",   "paddingInset" ];
-global.K_WIDGET_PADDING_INSET_VERTICAL_PROPERTY_KEYS   = [ "paddingInsetVertical",   "paddingInset" ];
-global.K_WIDGET_PADDING_LEFT_PROPERTY_KEYS   = [ "paddingLeft",   "paddingHorizontal", "padding" ];
-global.K_WIDGET_PADDING_TOP_PROPERTY_KEYS    = [ "paddingTop",    "paddingVertical",   "padding" ];
-global.K_WIDGET_PADDING_RIGHT_PROPERTY_KEYS  = [ "paddingRight",  "paddingHorizontal", "padding"];
-global.K_WIDGET_PADDING_BOTTOM_PROPERTY_KEYS = [ "paddingBottom", "paddingVertical",   "padding" ];
-global.K_WIDGET_SPACE_HORIZONTAL_PROPERTY_KEYS = [ "spaceHorizontal", "space" ];
-global.K_WIDGET_SPACE_VERTICAL_PROPERTY_KEYS =   [ "spaceVertical",   "space" ];
-global.K_WIDGET_BORDER_LEFT_WIDTH_PROPERTY_KEYS   = [ "borderWidthLeft",   "borderHorizontalWidth", "borderWidth" ];
-global.K_WIDGET_BORDER_TOP_WIDTH_PROPERTY_KEYS    = [ "borderWidthTop",    "borderVerticalWidth",   "borderWidth" ];
-global.K_WIDGET_BORDER_RIGHT_WIDTH_PROPERTY_KEYS  = [ "borderWidthRight",  "borderHorizontalWidth", "borderWidth" ];
-global.K_WIDGET_BORDER_BOTTOM_WIDTH_PROPERTY_KEYS = [ "borderWidthBottom", "borderVerticalWidth",   "borderWidth" ];
-global.K_WIDGET_BORDER_LEFT_COLOR_PROPERTY_KEYS   = [ "borderColorLeft",   "borderHorizontalColor", "borderColor" ];
-global.K_WIDGET_BORDER_TOP_COLOR_PROPERTY_KEYS    = [ "borderColorTop",    "borderVerticalColor",   "borderColor" ];
-global.K_WIDGET_BORDER_RIGHT_COLOR_PROPERTY_KEYS  = [ "borderColorRight",  "borderHorizontalColor", "borderColor" ];
-global.K_WIDGET_BORDER_BOTTOM_COLOR_PROPERTY_KEYS = [ "borderColorBottom", "borderVerticalColor",   "borderColor" ];
-global.K_WIDGET_BORDER_LEFT_STYLE_PROPERTY_KEYS   = [ "borderStyleLeft",   "borderHorizontalStyle", "borderStyle" ];
-global.K_WIDGET_BORDER_TOP_STYLE_PROPERTY_KEYS    = [ "borderStyleTop",    "borderVerticalStyle",   "borderStyle" ];
-global.K_WIDGET_BORDER_RIGHT_STYLE_PROPERTY_KEYS  = [ "borderStyleRight",  "borderHorizontalStyle", "borderStyle" ];
-global.K_WIDGET_BORDER_BOTTOM_STYLE_PROPERTY_KEYS = [ "borderStyleBottom", "borderVerticalStyle",   "borderStyle" ];
-global.K_WIDGET_BORDER_LEFTTOP_RADIUS_PROPERTY_KEYS =     [ "borderRadiusLeftTop",     "borderRadiusLeft",  "borderRadiusTop",    "borderRadius" ];
-global.K_WIDGET_BORDER_RIGHTTOP_RADIUS_PROPERTY_KEYS =    [ "borderRadiusRightTop",    "borderRadiusRight", "borderRadiusTop",    "borderRadius" ];
-global.K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS =  [ "borderRadiusLeftBottom",  "borderRadiusLeft",  "borderRadiusBottom", "borderRadius" ];
-global.K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS = [ "borderRadiusRightBottom", "borderRadiusRight", "borderRadiusBottom", "borderRadius" ];
+global.K_WIDGET_APPEARANCE_STYLE_DEFINITION =
+	[
+			%[ key: "compositeState", defaultValue: [] ],
+			%[ key: "statePriority",  defaultValue: [] ],
+			%[ key: "callback",       defaultValue: "" ],
+			%[ key: "opacity",        defaultValue: 255 ],
+			%[ key: "focusable",      defaultValue: true ]
+	];
 
-global.K_WIDGET_APPEARANCE_STYLE_DEFINITION = [
-	[ "compositeState", "compositeState", [] ],
-	[ "statePriority", "statePriority", [] ],
-	[ "callback", "callback", "" ],
-	[ "opacity",    "opacity",  255 ],
-	[ "focusable", "focusable", true ]
-];
+global.K_WIDGET_LOCATE_STYLE_DEFINITIION =
+	[
+			%[ key: "marginLeft",      defaultProperty: "_marginLeft" ],
+			%[ key: "marginTop",       defaultProperty: "_marginTop" ],
+			%[ key: "marginRight",     defaultProperty: "_marginRight" ],
+			%[ key: "marginBottom",    defaultProperty: "_marginBottom" ],
+			%[ key: "alignHorizontal", defaultProperty: "_alignHorizontal" ],
+			%[ key: "alignVertical",   defaultProperty: "_alignVertical" ]
+	];
 
-global.K_WIDGET_LOCATE_STYLE_DEFINITIION = [
-	[ "marginLeft", K_WIDGET_MARGIN_LEFT_PROPERTY_KEYS, void, void, "_marginLeft" ],
-	[ "marginTop", K_WIDGET_MARGIN_TOP_PROPERTY_KEYS, void, void, "_marginTop" ],
-	[ "marginRight", K_WIDGET_MARGIN_RIGHT_PROPERTY_KEYS, void, void, "_marginRight" ],
-	[ "marginBottom", K_WIDGET_MARGIN_BOTTOM_PROPERTY_KEYS, void, void, "_marginBottom" ],
-	[ "alignHorizontal", K_WIDGET_ALIGN_HORIZONTAL_PROPERTY_KEYS, void, void, "_alignHorizontal" ],
-	[ "alignVertical", K_WIDGET_ALIGN_VERTICAL_PROPERTY_KEYS, void, void, "_alignVertical" ]
-];
+global.K_WIDGET_FONT_STYLE_DEFINITION =
+	[
+			%[ key: "opacity", defaultValue: 255 ],
+			%[ key: "fontHeight",       defaultProperty: "_fontHeight" ],
+			%[ key: "fontFace",         defaultProperty: "_fontFace" ],
+			%[ key: "fontColor",        defaultProperty: "_fontColor", resolver: "resolveColor" ],
+			%[ key: "fontAntiAlias",    defaultValue: true ],
+			%[ key: "fontOutline",      defaultValue: false ],
+			%[ key: "fontOutlineColor", defaultValue: 0 ],
+			%[ key: "fontBold",         defaultValue: false ],
+			%[ key: "fontItalic",       defaultValue: false ],
+			%[ key: "fontStrikeout",    defaultValue: false ],
+			%[ key: "fontUnderline",    defaultValue: false ]
+	];
 
-global.K_WIDGET_FONT_STYLE_DEFINITION = [
-	[ "opacity",    "opacity",  255 ],
-	[ "fontHeight",       "fontHeight", void, void, "_fontHeight" ],
-	[ "fontFace",         "fontFace", void, void, "_fontFace" ],
-	[ "fontColor",        "fontColor", void, "resolveColor", "_fontColor" ],
-	[ "fontAntiAlias",    "fontAntiAlias",  true ],
-	[ "fontOutline",      "fontOutline", false ],
-	[ "fontOutlineColor", "fontOutlineColor", 0 ],
-	[ "fontBold",         "fontBold", false ],
-	[ "fontItalic",       "fontItalic", false ],
-	[ "fontStrikeout",    "fontStrikeout", false ],
-	[ "fontUnderline",    "fontUnderline", false ]
-];
+global.K_WIDGET_LAYOUT_STYLE_DEFINITION =
+	[
+			%[ key: "paddingOffsetHorizontal", defaultValue: 0 ],
+			%[ key: "paddingOffsetVertical",   defaultValue: 0 ],
+			%[ key: "paddingInsetHorizontal",  defaultValue: 0 ],
+			%[ key: "paddingInsetVertical",    defaultValue: 0 ],
+			%[ key: "spaceHorizontal", defaultProperty: "_spaceHorizontal" ],
+			%[ key: "spaceVertical",   defaultProperty: "_spaceVertical" ],
+			%[ key: "paddingLeft",   defaultValue: 0, localResolver: "resolvePaddingLeft" ],
+			%[ key: "paddingTop",    defaultValue: 0, localResolver: "resolvePaddingTop" ],
+			%[ key: "paddingRight",  defaultValue: 0, localResolver: "resolvePaddingRight" ],
+			%[ key: "paddingBottom", defaultValue: 0, localResolver: "resolvePaddingBottom" ]
+	];
 
-global.K_WIDGET_LAYOUT_STYLE_DEFINITION = [
-	[ "paddingOffsetHorizontal", K_WIDGET_PADDING_OFFSET_HORIZONTAL_PROPERTY_KEYS, 0 ],
-	[ "paddingOffsetVertical",   K_WIDGET_PADDING_OFFSET_VERTICAL_PROPERTY_KEYS, 0 ],
-	[ "paddingInsetHorizontal",  K_WIDGET_PADDING_INSET_HORIZONTAL_PROPERTY_KEYS, 0 ],
-	[ "paddingInsetVertical",     K_WIDGET_PADDING_INSET_VERTICAL_PROPERTY_KEYS, 0 ],
-	[ "spaceHorizontal", K_WIDGET_SPACE_HORIZONTAL_PROPERTY_KEYS, void, void, "_spaceHorizontal" ],
-	[ "spaceVertical", K_WIDGET_SPACE_VERTICAL_PROPERTY_KEYS,     void, void, "_spaceVertical" ],
-	[ "paddingLeft",   K_WIDGET_PADDING_LEFT_PROPERTY_KEYS,       0,    void, void, "resolvePaddingLeft" ],
-	[ "paddingTop",    K_WIDGET_PADDING_TOP_PROPERTY_KEYS,        0,    void, void, "resolvePaddingTop" ],
-	[ "paddingRight",  K_WIDGET_PADDING_RIGHT_PROPERTY_KEYS,      0,    void, void, "resolvePaddingRight" ],
-	[ "paddingBottom", K_WIDGET_PADDING_BOTTOM_PROPERTY_KEYS,     0,    void, void, "resolvePaddingBottom" ]
-];
-
-global.K_WIDGET_BORDER_STYLE_DEFINITION = [
-	[ "backgroundColor", "backgroundColor", 0xfff0f0f0, "resolveColor" ],
-	[ "borderWidthLeft",   K_WIDGET_BORDER_LEFT_WIDTH_PROPERTY_KEYS, 0 ],
-	[ "borderWidthTop",    K_WIDGET_BORDER_TOP_WIDTH_PROPERTY_KEYS,    0 ],
-	[ "borderWidthRight",  K_WIDGET_BORDER_RIGHT_WIDTH_PROPERTY_KEYS,  0 ],
-	[ "borderWidthBottom", K_WIDGET_BORDER_BOTTOM_WIDTH_PROPERTY_KEYS, 0 ],
-	[ "borderColorLeft",   K_WIDGET_BORDER_LEFT_COLOR_PROPERTY_KEYS,   0, "resolveColor" ],
-	[ "borderColorTop",    K_WIDGET_BORDER_TOP_COLOR_PROPERTY_KEYS,    0, "resolveColor" ],
-	[ "borderColorRight",  K_WIDGET_BORDER_RIGHT_COLOR_PROPERTY_KEYS,  0, "resolveColor" ],
-	[ "borderColorBottom", K_WIDGET_BORDER_BOTTOM_COLOR_PROPERTY_KEYS, 0, "resolveColor" ],
-	[ "borderStyleLeft",   K_WIDGET_BORDER_LEFT_STYLE_PROPERTY_KEYS,   BORDER_STYLE_NONE ],
-	[ "borderStyleTop",    K_WIDGET_BORDER_TOP_STYLE_PROPERTY_KEYS,    BORDER_STYLE_NONE ],
-	[ "borderStyleRight",  K_WIDGET_BORDER_RIGHT_STYLE_PROPERTY_KEYS,  BORDER_STYLE_NONE ],
-	[ "borderStyleBottom", K_WIDGET_BORDER_BOTTOM_STYLE_PROPERTY_KEYS, BORDER_STYLE_NONE ],
-	[ "borderRadiusLeftTop",     K_WIDGET_BORDER_LEFTTOP_RADIUS_PROPERTY_KEYS,     0 ],
-	[ "borderRadiusRightTop",    K_WIDGET_BORDER_RIGHTTOP_RADIUS_PROPERTY_KEYS,    0 ],
-	[ "borderRadiusLeftBottom",  K_WIDGET_BORDER_LEFTBOTTOM_RADIUS_PROPERTY_KEYS,  0 ],
-	[ "borderRadiusRightBottom", K_WIDGET_BORDER_RIGHTBOTTOM_RADIUS_PROPERTY_KEYS, 0 ]
-];
+global.K_WIDGET_BORDER_STYLE_DEFINITION =
+	[
+			%[ key: "backgroundColor",   defaultValue: 0xfff0f0f0, resolver: "resolveColor" ],
+			%[ key: "borderWidthLeft",   defaultValue: 0 ],
+			%[ key: "borderWidthTop",    defaultValue: 0 ],
+			%[ key: "borderWidthRight",  defaultValue: 0 ],
+			%[ key: "borderWidthBottom", defaultValue: 0 ],
+			%[ key: "borderColorLeft",   defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "borderColorTop",    defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "borderColorRight",  defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "borderColorBottom", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "borderStyleLeft",   defaultValue: BORDER_STYLE_NONE ],
+			%[ key: "borderStyleTop",    defaultValue: BORDER_STYLE_NONE ],
+			%[ key: "borderStyleRight",  defaultValue: BORDER_STYLE_NONE ],
+			%[ key: "borderStyleBottom", defaultValue: BORDER_STYLE_NONE ],
+			%[ key: "borderRadiusLeftTop",     defaultValue: 0 ],
+			%[ key: "borderRadiusRightTop",    defaultValue: 0 ],
+			%[ key: "borderRadiusLeftBottom",  defaultValue: 0 ],
+			%[ key: "borderRadiusRightBottom", defaultValue: 0 ]
+	];
 
 global.K_APPEARANCE_STYLE_MODIFIED_MASK = 1 << 0;
 global.K_LOCATE_STYLE_MODIFIED_MASK     = 1 << 1;

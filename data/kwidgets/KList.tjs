@@ -85,19 +85,19 @@ global.KListArgsFormat =
 
 global.KListWidgetStyleDefinition =
 	[
-		[ "stride", "stride", 14 ],
-		[ "slideWidth", "slideWidth", void, void, void, "resolveSlideWidth" ],
-		[ "renameTextinputId", "renameTextinputId" ],
-		[ "ignoreToggleWidth", "ignoreToggleWidth", false ],
-		[ "frameColor", "frameColor", void, "resolveColor" ],
-		[ "focusFrameColor", "focusFrameColor", void, "resolveColor" ],
-		[ "dragFrameColor", "dragFrameColor", void, "resolveColor" ],
-		[ "selectionColor", "selectionColor", void, "resolveColor" ],
-		[ "toggleOpenIcon", "toggleOpenIcon" ],
-		[ "toggleCloseIcon", "toggleCloseIcon" ],
-		[ "toggleInvisbleIcon", "toggleInvislbeIcon" ],
-		[ "variable", "variable", false ],
-		[ "spaceToggle", "spaceToggle", 4 ]
+			%[ key: "stride", defaultValue: 14 ],
+			%[ key: "slideWidth", localResolver: "resolveSlideWidth" ],
+			%[ key: "renameTextinputId"  ],
+			%[ key: "ignoreToggleWidth", defaultValue: false ],
+			%[ key: "frameColor", resolver: "resolveColor" ],
+			%[ key: "focusFrameColor",resolver: "resolveColor" ],
+			%[ key: "dragFrameColor", resolver: "resolveColor" ],
+			%[ key: "selectionColor", resolver: "resolveColor" ],
+			%[ key: "toggleOpenIcon" ],
+			%[ key: "toggleCloseIcon" ],
+			%[ key: "toggleInvisbleIcon" ],
+			%[ key: "variable", defaultValue: false ],
+			%[ key: "spaceToggle", defaultValue: 4 ]
 	];
 
 class KList extends KVirtualWidget
@@ -1799,45 +1799,44 @@ class KList extends KVirtualWidget
 /**----------------------------------------------------------------------
  * リストアイテム
  ----------------------------------------------------------------------*/
-global.KListItemArgsFormat =
-	[
-			%[ key: "label", defaultValue: "" ],
-			%[ key: "name", defaultValue: "" ],
-			%[ key: "isRecordOpenedToDictionary", defaultValue: false ]
-	];
+global.KListItemArgsFormat = [
+		%[ key: "label", defaultValue: "" ],
+		%[ key: "name", defaultValue: "" ],
+		%[ key: "isRecordOpenedToDictionary", defaultValue: false ]
+];
 
 global.K_LIST_ITEM_FONT_STYLE_DEFINITION = [
-	[ "fontFace",         "fontFace", void ],
-	[ "fontHeight",       "fontHeight", void ],
-	[ "fontColor",        "fontColor", void ],
-	[ "fontAntiAlias",    "fontAntiAlias",  void ],
-	[ "fontOutline",      "fontOutline", void ],
-	[ "fontOutlineColor", "fontOutlineColor", void ],
-	[ "fontBold",         "fontBold", void ],
-	[ "fontItalic",       "fontItalic", void ],
-	[ "fontStrikeout",    "fontStrikeout", void ],
-	[ "fontUnderline",    "fontUnderline", void ]
+		%[ key: "fontFace" ],
+		%[ key: "fontHeight" ],
+		%[ key: "fontColor" ],
+		%[ key: "fontAntiAlias" ],
+		%[ key: "fontOutline" ],
+		%[ key: "fontOutlineColor" ],
+		%[ key: "fontBold" ],
+		%[ key: "fontItalic" ],
+		%[ key: "fontStrikeout" ],
+		%[ key: "fontUnderline"   ]
 ];
 
 global.K_LIST_ITEM_LABEL_STYLE_DEFINITION = [
-	[ "labelEditable", "labelEditable", false ],
-	[ "labelTextType", "labelTextType", TEXT_SYMBOL ],
-	[ "minLabelWidth", "minLabelWidth", 1 ]
+		%[ key: "labelEditable", defaultValue: false ],
+		%[ key: "labelTextType", defaultValue: TEXT_SYMBOL ],
+		%[ key: "minLabelWidth", defaultValue: 1 ]
 ];
 
 global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
-	[ "statePriority", "statePriority", [] ],
-	[ "opacity",    "opacity", void ],
-	[ "skipHierarchy", "skipHierarchy", false ],
-	[ "toggleEnabled", "toggleEnabled", true ],
-	[ "icon", "icon", void ],
-	[ "icons", "icons", [] ],
-	[ "backgroundColor", "backgroundColor", void, "resolveColor" ],
-	[ "itemColor", "itemColor", void, "resolveColor" ],
-	[ "spaceVertical", "spaceVertical", void ],
-	[ "spaceHorizontal", "spaceHorizontal", void ],
-	[ "spaceToggle", "spaceToggle", void ],
-	[ "lineSpacing", "lineSpacing", 0 ]
+		%[ key: "statePriority", defaultValue: [] ],
+		%[ key: "opacity" ],
+		%[ key: "skipHierarchy", defaultValue: false ],
+		%[ key: "toggleEnabled", defaultValue: true ],
+		%[ key: "icon"  ],
+		%[ key: "icons", defaultValue: [] ],
+		%[ key: "backgroundColor", resolver: "resolveColor" ],
+		%[ key: "itemColor", resolver: "resolveColor" ],
+		%[ key: "spaceVertical" ],
+		%[ key: "spaceHorizontal" ],
+		%[ key: "spaceToggle",  ],
+		%[ key: "lineSpacing", defaultValue: 0 ]
 ];
 
 class KListItem
@@ -2160,7 +2159,7 @@ class KListItem
 	}
 
 	function extractWidgetStyle() {
-		var widgetStyle = extractStyle(widgetStyleDefinition);
+		var widgetStyle = extractStyle(styleRepository.getWidgetStyleDefinition(this)[0]);
 		onExtractWidgetStyle(widgetStyle);
 		return widgetStyle;
 	}

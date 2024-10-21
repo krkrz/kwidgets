@@ -6,10 +6,10 @@
 // 2Dレンジポインタ
 global.KRangePointer2DWidgetStyleDefinition =
 	[
-		[ "knobId", "knobId" ],
-		[ "innerBgId", "innerBgId", "" ],
-		[ "innerKnobId", "innerKnobId", "" ],
-		[ "directKnobDrag", "directKnobDrag", false ]
+			%[ key: "knobId" ],
+			%[ key: "innerBgId", defaultValue: "" ],
+			%[ key: "innerKnobId", defaultValue: "" ],
+			%[ key: "directKnobDrag", defaultValue: false ]
 	];
 
 class KRangePointer2D extends KValueEntity

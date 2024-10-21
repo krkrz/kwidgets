@@ -481,27 +481,27 @@ class KMarkdownRow
 
 global.KMarkdownWidgetStyleDefinition =
 	[
-		[ "paragraphSpacing", "paragraphSpacing", 12 ],
-		[ "lineSpacing", "lineSpacing", 6 ],
-		[ "firstIndent", "firstIndent", 12 ],
-		[ "imagePadding", "imagePadding", 2 ],
-		[ "headingScaleFactor", "headingScaleFactor", [ 2 ] ],
-		[ "headingStrong", "headingStrong", [ true ] ],
-		[ "headingEm", "headingEm", [ false ] ],
-		[ "headingUnderline", "headingUnderline", [ true ] ],
-		[ "listMarkIcon", "listMarkIcon", [ "$circle(8,#000000)" ] ],
-		[ "listIndent", "listIndent", 16 ],
-		[ "listIconPadding", "listIconPadding", 4 ],
-		[ "orderedListMarkWidth", "orderedListMarkWidth", 24 ],
-		[ "orderedListMarkDigits", "orderedListMarkDigits", [ [] ] ],
-		[ "jpBOLRule", "jpBOLRule", "" ],
-		[ "jpBOLLimit", "jpBOLLimit", 0 ],
-		[ "jpEOLRule", "jpEOLRule", "" ],
-		[ "jpEOLLimit", "jpEOLLimit", 0 ],
-		[ "spaceScaleFactor", "spaceScaleFactor", 0.5 ],
-		[ "wordSpaceLimitScaleFactor", "wordSpaceLimitScaleFactor", 1 ],
-		[ "textAlign", "textAlign", ALIGN_BOTTOM ],
-		[ "imageAlign", "imageAlign", ALIGN_BOTTOM ]
+			%[ key: "paragraphSpacing", defaultValue: 12 ],
+			%[ key: "lineSpacing", defaultValue: 6 ],
+			%[ key: "firstIndent", defaultValue: 12 ],
+			%[ key: "imagePadding", defaultValue: 2 ],
+			%[ key: "headingScaleFactor", defaultValue: [ 2 ] ],
+			%[ key: "headingStrong", defaultValue: [ true ] ],
+			%[ key: "headingEm", defaultValue: [ false ] ],
+			%[ key: "headingUnderline", defaultValue: [ true ] ],
+			%[ key: "listMarkIcon", defaultValue: [ "$circle(8,#000000)" ] ],
+			%[ key: "listIndent", defaultValue: 16 ],
+			%[ key: "listIconPadding", defaultValue: 4 ],
+			%[ key: "orderedListMarkWidth", defaultValue: 24 ],
+			%[ key: "orderedListMarkDigits", defaultValue: [ [] ] ],
+			%[ key: "jpBOLRule", defaultValue: "" ],
+			%[ key: "jpBOLLimit", defaultValue: 0 ],
+			%[ key: "jpEOLRule", defaultValue: "" ],
+			%[ key: "jpEOLLimit", defaultValue: 0 ],
+			%[ key: "spaceScaleFactor", defaultValue: 0.5 ],
+			%[ key: "wordSpaceLimitScaleFactor", defaultValue: 1 ],
+			%[ key: "textAlign", defaultValue: ALIGN_BOTTOM ],
+			%[ key: "imageAlign", defaultValue: ALIGN_BOTTOM ]
 	];
 
 

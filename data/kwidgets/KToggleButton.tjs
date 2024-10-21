@@ -7,11 +7,12 @@ global.KToggleButtonArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
-global.KToggleButtonWidgetStyleDefiiotion = [
-	[ "variable", "variable", false ],
-	[ "width", "width", void ],
-	[ "height", "height", void ]
-];
+global.KToggleButtonWidgetStyleDefiiotion =
+	[
+			%[ key: "variable", defaultValue: false ],
+			%[ key: "width", defaultValue: void ],
+			%[ key: "height", defaultValue: void ]
+	];
 
 class KToggleButton extends KValueEntity
 {

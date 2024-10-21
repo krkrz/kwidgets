@@ -83,11 +83,12 @@ function ktimeline_fix_invalid_frame(frameList)
 /*----------------------------------------------------------------------
  * タイムロケーター(内部パーツ)
  ----------------------------------------------------------------------*/
-global.KTimeLineTimeLocatorWidgetStyleDefinition = [
-	[ "frameBorderColor", "frameBorderColor" ],
-	[ "activeColor", "activeColor" ],
-	[ "cursorColor", "cursorColor", 0, "resolveColor" ]
-];
+global.KTimeLineTimeLocatorWidgetStyleDefinition =
+	[
+			%[ key: "frameBorderColor" ],
+			%[ key: "activeColor" ],
+			%[ key: "cursorColor", defaultValue: 0, resolver: "resolveColor" ]
+	];
 
 
 class KTimeLineTimeLocator extends KVirtualWidget
@@ -403,26 +404,27 @@ class KTimeLineTimeLocator extends KVirtualWidget
 /*----------------------------------------------------------------------
  * レイヤビュー(内部パーツ)
  ----------------------------------------------------------------------*/
-global.KTimeLineLayerViewWidgetStyleDefinition = [
-	[ "singleFrameColor", "singleFrameColor" ],
-	[ "continuousFrameColor", "continuousFrameLeftColor" ],
-	[ "tweenFrameColor", "tweenFrameColor" ],
-	[ "oneSecondFrameBgColor", "oneSecondFrameBgColor" ],
-	[ "halfSecondFrameBgColor", "halfSecondFrameBgColor" ],
-	[ "fifthFrameBgColor", "fifthFrameBgColor" ],
-	[ "normalFrameBgColor", "normalFrameBgColor" ],
-	[ "frameSignColor", "frameSignColor" ],
-	[ "frameBorderColor", "frameBorderColor" ],
-	[ "cursorColor", "cursorColor", 0, "resolveColor" ],
-	[ "loopSingleFrameColor", "loopSingleFrameColor" ],
-	[ "loopContinuousFrameColor", "loopContinuousFrameColor" ],
-	[ "rangeSelectorColor", "rangeSelectorColor", 0, "resolveColor" ],
-	[ "areaSelectorColor", "areaSelectorColor", 0x80000000, "resolveColor" ],
-	[ "selectedFrameBlend", "selectedFrameBlend" ],
-	[ "selectedFrameColor", "selectedFrameColor", 0, "resolveColor" ],
-	[ "hoverFrameBlend", "hoverFrameBlend" ],
-	[ "hoverFrameColor", "hoverFrameColor", 0, "resolveColor" ]
-];
+global.KTimeLineLayerViewWidgetStyleDefinition =
+	[
+			%[ key: "singleFrameColor" ],
+			%[ key: "continuousFrameColor" ],
+			%[ key: "tweenFrameColor" ],
+			%[ key: "oneSecondFrameBgColor" ],
+			%[ key: "halfSecondFrameBgColor" ],
+			%[ key: "fifthFrameBgColor" ],
+			%[ key: "normalFrameBgColor" ],
+			%[ key: "frameSignColor" ],
+			%[ key: "frameBorderColor" ],
+			%[ key: "cursorColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "loopSingleFrameColor" ],
+			%[ key: "loopContinuousFrameColor" ],
+			%[ key: "rangeSelectorColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "areaSelectorColor", defaultValue: 0x80000000, resolver: "resolveColor" ],
+			%[ key: "selectedFrameBlend" ],
+			%[ key: "selectedFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "hoverFrameBlend" ],
+			%[ key: "hoverFrameColor", defaultValue: 0, resolver: "resolveColor" ]
+	];
 
 class KTimeLineLayerView extends KVirtualWidget
 {
@@ -3596,14 +3598,15 @@ class KFrameTextInput extends KTextInput
 /**----------------------------------------------------------------------
  * タイムラインコントロール
  ----------------------------------------------------------------------*/
-global.KTimelineControlWidgetStyleDefinition = [
-	[ "layerListId", "layerListId", "" ],
-	[ "layerViewId", "layerViewId", "" ],
-	[ "timeLocatorId", "timeLocatorId", "" ],
-	[ "titleLabelId", "titleLabelId", "" ],
-	[ "statusBarId", "statusBarId", "" ],
-	[ "frameTextId", "frameTextId", "" ]
-];
+global.KTimelineControlWidgetStyleDefinition =
+	[
+			%[ key: "layerListId", defaultValue: "" ],
+			%[ key: "layerViewId", defaultValue: "" ],
+			%[ key: "timeLocatorId", defaultValue: "" ],
+			%[ key: "titleLabelId", defaultValue: "" ],
+			%[ key: "statusBarId", defaultValue: "" ],
+			%[ key: "frameTextId", defaultValue: "" ]
+	];
 
 
 class KTimeLineControl extends KEntity

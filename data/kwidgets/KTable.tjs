@@ -566,14 +566,14 @@ class KTableTextAreaEdit extends KFrameLayout
  ----------------------------------------------------------------------*/
 global.KTableVirtualWidgetStyleDefinition =
 	[
-		[ "gridBorderColor", "gridBorderColor", void, "resolveColor" ],
-		[ "tabBorderColor", "tabBorderColor", void, "resolveColor" ],
-		[ "innerSplitColor", "innerSplitColor" ,void, "resolveColor" ],
-		[ "frameColor", "frameColor", void, "resolveColor" ],
-		[ "focusFrameColor", "focusFrameColor", void, "resolveColor" ],
-		[ "dragFrameColor", "dragFrameColor", void, "resolveColor" ],
-		[ "selectionColor", "selectionColor", void, "resolveColor" ],
-		[ "focusBackgroundColor", "focusBackgroundColor", void, "resolveColor" ]
+			%[ key: "gridBorderColor", resolver: "resolveColor" ],
+			%[ key: "tabBorderColor", resolver: "resolveColor" ],
+			%[ key: "innerSplitColor", resolver: "resolveColor" ],
+			%[ key: "frameColor", resolver: "resolveColor" ],
+			%[ key: "focusFrameColor", resolver: "resolveColor" ],
+			%[ key: "dragFrameColor", resolver: "resolveColor" ],
+			%[ key: "selectionColor", resolver: "resolveColor" ],
+			%[ key: "focusBackgroundColor", resolver: "resolveColor" ]
 	];
 
 class KTableVirtualWidget extends KVirtualWidget
@@ -2252,13 +2252,13 @@ global.KTableArgsFormat =
 
 global.KTableWidgetStyleDefinition =
 	[
-		[ "leftTopCornerId", "leftTopCornerId", "" ],
-		[ "rowTabId", "rowTabId", "" ],
-		[ "columnTabId", "columnTabId", "" ],
-		[ "mainViewId", "mainViewId", "" ],
-		[ "textEditFrameId", "textEditFrameId", "" ],
-		[ "checkboxOnIcon", "checkboxOnIcon", "" ],
-		[ "checkboxOffIcon", "checkboxOffIcon", "" ]
+			%[ key: "leftTopCornerId", defaultValue: "" ],
+			%[ key: "rowTabId", defaultValue: "" ],
+			%[ key: "columnTabId", defaultValue: "" ],
+			%[ key: "mainViewId", defaultValue: "" ],
+			%[ key: "textEditFrameId", defaultValue: "" ],
+			%[ key: "checkboxOnIcon", defaultValue: "" ],
+			%[ key: "checkboxOffIcon", defaultValue: "" ]
 	];
 
 class KTable extends KEntity

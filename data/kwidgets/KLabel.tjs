@@ -7,10 +7,11 @@ global.KLabelArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
-global.KLabelWidgetStyleDefinition = [
-	[ "variable", "variable", false ],
-	[ "width", "width", void ]
-];
+global.KLabelWidgetStyleDefinition =
+	[
+			%[ key: "variable", defaultValue: false ],
+			%[ key: "width", defaultValue: void ]
+	];
 
 class KLabel extends KEntity
 {
@@ -86,11 +87,12 @@ class KLabel extends KEntity
 /*----------------------------------------------------------------------
  * テキストケイパビリティ
  ----------------------------------------------------------------------*/
-global.KTextCapabilityWidgetStyleDefinition = [
-	[ "lineSpacing", "lineSpacing", 0 ],
-	[ "textAlign", "textAlign", ALIGN_LEFT ],
-	[ "maxLabelWidth", "maxLabelWidth", 0 ]
-];
+global.KTextCapabilityWidgetStyleDefinition =
+	[
+			%[ key: "lineSpacing",   defaultValue: 0 ],
+			%[ key: "textAlign",     defaultValue: ALIGN_LEFT ],
+			%[ key: "maxLabelWidth", defaultValue: 0 ]
+	];
 
 class KTextCapability
 {
@@ -144,9 +146,10 @@ mixin(KTextLabel, KTextCapability);
 /*----------------------------------------------------------------------
  * イメージケイパビリティ
  ----------------------------------------------------------------------*/
-global.KImageCapabilityWidgetStyleDefinition = [
-	[ "icon", "icon", void ]
-];
+global.KImageCapabilityWidgetStyleDefinition =
+	[
+			%[ key: "icon", defaultValue: void ]
+	];
 
 class KImageCapability
 {
@@ -211,12 +214,13 @@ mixin(KImageLabel, KImageCapability);
 /*----------------------------------------------------------------------
  * マークダウンケイパビリティ
  ----------------------------------------------------------------------*/
-global.KMarkCapabilityWidgetStyleDefinition = [
-	[ "multiline", "multiline", false ],
-	[ "textWidth", "textWidth", 200 ],
-	[ "textAlign", "textAlign", ALIGN_LEFT ],
-	[ "text", "text", void ]
-];
+global.KMarkCapabilityWidgetStyleDefinition =
+	[
+			%[ key: "multiline", defaultValue: false ],
+			%[ key: "textWidth", defaultValue: 200 ],
+			%[ key: "textAlign", defaultValue: ALIGN_LEFT ],
+			%[ key: "text",      defaultValue: void ]
+	];
 
 class KMarkdownCapability
 {

@@ -73,9 +73,9 @@ global.KSpliterLayoutArgsFormat =
 
 global.KSpliterLayoutWidgetStyleDefinition =
 	[
-		[ "handleSize", "handleSize", 5 ],
-		[ "handleId", "handleId", "" ],
-		[ "shutterToggleId", "shutterToggleId", "" ]
+			%[ key: "handleSize", defaultValue: 5 ],
+			%[ key: "handleId", defaultValue: "" ],
+			%[ key: "shutterToggleId", defaultValue: "" ]
 	];
 
 class KSpliterLayout extends KLayout

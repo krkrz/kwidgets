@@ -444,9 +444,9 @@ global.KTextEditArgsFormat =
 
 global.KTextEditWidgetStyleDefinition =
 	[
-		[ "selectionBackgroundColor", "selectionBackgroundColor", WIN_SELECTED, "resolveColor" ],
-		[ "selectionFontColor", "selectionFontColor", 0xffffff, "resolveColor" ],
-		[ "lineSpacing", "lineSpacing", 4 ]
+			%[ key: "selectionBackgroundColor", defaultValue: WIN_SELECTED, resolver: "resolveColor" ],
+			%[ key: "selectionFontColor", defaultValue: 0xffffff, resolver: "resolveColor" ],
+			%[ key: "lineSpacing", defaultValue: 4 ]
 	];
 
 class KTextEdit extends KVirtualWidget

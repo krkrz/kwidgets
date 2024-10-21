@@ -126,15 +126,16 @@ global.KTabLayoutArgsFormat =
 			%[ key: "name", defaultValue: "" ]
 	];
 
-global.KTabLayoutWidgetStyleDefinition = [
-	[ "tabId", "tabId", "" ],
-	[ "tabStyle", "tabStyle", void ],
-	[ "tabAlign", "tabAlign", ALIGN_LEFT ],
-	[ "buttonId", "buttonId", "" ],
-	[ "noteIcon", "noteIcon", "" ],
-	[ "scrollLeftIcon", "scrollLeftIcon", "" ],
-	[ "scrollRightIcon", "scrollRightIcon", "" ]
-];
+global.KTabLayoutWidgetStyleDefinition =
+	[
+			%[ key: "tabId", defaultValue: "" ],
+			%[ key: "tabStyle" ],
+			%[ key: "tabAlign", defaultValue: ALIGN_LEFT ],
+			%[ key: "buttonId", defaultValue: "" ],
+			%[ key: "noteIcon", defaultValue: "" ],
+			%[ key: "scrollLeftIcon", defaultValue: "" ],
+			%[ key: "scrollRightIcon", defaultValue: "" ]
+	];
 
 /**----------------------------------------------------------------------
  * タブレイアウト

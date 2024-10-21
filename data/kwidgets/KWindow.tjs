@@ -9,9 +9,10 @@ global._existentWindowList = [];
 /**----------------------------------------------------------------------
  * ウィジェットを格納するウィンドウ
  ----------------------------------------------------------------------*/
-global.K_WINDOW_STYLE_DEFINITION = [
-	[ "defaultFocusable", "defaultFocusable", void ]
-];
+global.K_WINDOW_STYLE_DEFINITION =
+	[
+			%[ key: "defaultFocusable" ]
+	];
 
 class KWindow extends Window
 {

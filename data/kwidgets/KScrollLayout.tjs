@@ -13,10 +13,10 @@ global.SCROLL_HANDLE_MIN_SIZE = 10;
 // スクロールバー
 global.KScrollBarWidgetStyleDefinition =
 	[
-		[ "backwardButtonId", "backwardButtonId" ],
-		[ "forwardButtonId", "forwardButtonId" ],
-		[ "rangepointerId", "rangepointerId" ],
-		[ "buttonStride", "buttonStride" ]
+			%[ key: "backwardButtonId" ],
+			%[ key: "forwardButtonId" ],
+			%[ key: "rangepointerId" ],
+			%[ key: "buttonStride" ]
 	];
 
 class KScrollBar extends KEntity
@@ -354,8 +354,8 @@ global.KScrollLayoutArgsFormat =
 
 global.KScrollLayoutWidgetStyleDefinition =
 	[
-		[ "mouseWheelFactor", "mouseWheelFactor", 0.25 ],
-		[ "accelMouseWheelFactor", "accelMouseWheelFactor", 1 ]
+			%[ key: "mouseWheelFactor", defaultValue: 0.25 ],
+			%[ key: "accelMouseWheelFactor", defaultValue: 1 ]
 	];
 
 class KScrollLayout extends KLayout

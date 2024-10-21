@@ -13,11 +13,11 @@ global.KComboBoxArgsFormat =
 
 global.KComboBoxWidgetStyleDefinition =
 	[
-		[ "dropdownButtonId", "dropdownButtonId" ],
-		[ "placeButtonInsideBorder", "placeButtonInsideBorder" ],
-		[ "dropdownInterval", "dropdownInterval" ],
-		[ "dispCount", "dispCount", 10 ],
-		[ "variable", "variable", false ]
+			%[ key: "dropdownButtonId" ],
+			%[ key: "placeButtonInsideBorder" ],
+			%[ key: "dropdownInterval" ],
+			%[ key: "dispCount",defaultValue: 10 ],
+			%[ key: "variable", defaultValue: false ]
 	];
 
 class KComboBox extends KValueEntity

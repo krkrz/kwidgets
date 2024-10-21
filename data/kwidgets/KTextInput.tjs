@@ -224,10 +224,10 @@ global.KTextInputArgsFormat =
 
 global.KTextInputWidgetStyleDefinition =
 	[
-		[ "width", "width", void ],
-		[ "height", "height", void ],
-		[ "texteditId", "texteditId", "" ],
-		[ "variable", "variable", false ]
+			%[ key: "width" ],
+			%[ key: "height" ],
+			%[ key: "texteditId", defaultValue: "" ],
+			%[ key: "variable", defaultValue: false ]
 	];
 
 class KTextInput extends KValueEntity

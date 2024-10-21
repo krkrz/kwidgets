@@ -8,7 +8,7 @@
  ----------------------------------------------------------------------*/
 global.KGridLayoutWidgetStyle =
 	[
-		[ "drawBordersAroundIndividualWidgets", "drawBordersAroundIndividualWidgets", false ]
+			%[ key: "drawBordersAroundIndividualWidgets", defaultValue: false ]
 	];
 
 
