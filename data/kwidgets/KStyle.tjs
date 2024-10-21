@@ -35,6 +35,33 @@ global.K_WIDGET_DEFAULT_FRAME_TYPE_BORDER_STYLES =
 			],
 	];
 
+global.K_WIDGET_DEFAULT_ATTRIBUTES_ABBEVIATION = [
+	[ "margin", "marginHorizontal", "marginVertical" ],
+	[ "marginHorizontal", "marginLeft", "marginRight" ],
+	[ "marginVertical", "marginTop", "marginBottom" ],
+	[ "align", "alignHorizontal", "alignVertical" ],
+	[ "paddingOffset", "paddingOffsetHorizontal", "paddingOffsetVertical" ],
+	[ "paddingInset", "paddingInsetHorizontal", "paddingInsetVertical" ],
+	[ "padding", "paddingHozriontal", "paddingVertical" ],
+	[ "paddingHorizontal", "paddingLeft", "paddingRight" ],
+	[ "paddingVertical", "paddingTop", "paddingBottom" ],
+	[ "space", "spaceHorizontal", "spaceVertical" ],
+	[ "borderWidth", "borderWidthHorizontal", "borderWidthVertical" ],
+	[ "borderWidthHorizontal", "borderWidthLeft", "borderWidthRight" ],
+	[ "borderWidthVertical", "borderWidthTop", "borderWidthBottom" ],
+	[ "borderColor", "borderColorHorizontal", "borderColorVertical" ],
+	[ "borderColorHorizontal", "borderColorLeft", "borderColorRight" ],
+	[ "borderColorVertical", "borderColorTop", "borderColorBottom" ],
+	[ "borderStyle", "borderStyleHorizontal", "borderStyleVertical" ],
+	[ "borderStyleHorizontal", "borderStyleLeft", "borderStyleRight" ],
+	[ "borderStyleVertical", "borderStyleTop", "borderStyleBottom" ],
+	[ "borderRadiusLeft",   "borderRadiusLeftTop",    "borderRadiusLeftBottom" ],
+	[ "borderRadiusRight",  "borderRadiusRightTop",   "borderRadiusRightBottom" ],
+	[ "borderRadiusTop",    "borderRadiusLeftTop",    "borderRadiusRightTop" ],
+	[ "borderRadiusBottom", "borderRadiusLeftBottom", "borderRadiusRightBottom" ],
+	[ "borderRadius", "borderRadiusLeftTop", "borderRadiusRightTop", "borderRadiusLeftBottom", "borderRadiusRightBottom" ]
+];
+
 global.K_STYLE_DEF_INDEX_PROPERTY_KEY     = 0;
 global.K_STYLE_DEF_INDEX_SEARCH_KEY       = 1;
 global.K_STYLE_DEF_INDEX_DEFAULT_VALUE    = 2;
@@ -635,9 +662,33 @@ class KStyleRepository
 		var defines = %[ frameType: K_WIDGET_DEFAULT_FRAME_TYPE_BORDER_STYLES ];
 		var defineKeys = dictionaryKeys(defines);
 		extractDefinedProperties(style, defines, defineKeys);
+		expandStyleAbbeviation(style, K_WIDGET_DEFAULT_ATTRIBUTES_ABBEVIATION);
 		return style;
 	}
 
+	function _expandStyleAbbeviation(style, defs) {
+		defs.each(style, function(abb, style) {
+			if (typeof(style[abb[0]]) != K_UNDEFINED) {
+				var value = style[abb[0]];
+				delete style[abb[0]];
+				for (var i = 1; i < abb.count; i++) {
+					var key = abb[i];
+					if (typeof(style[key]) == K_UNDEFINED)
+						style[key] = value;
+				}
+			}
+		});
+	}
+
+	function expandStyleAbbeviation(style, defs) {
+		var keys = dictionaryKeys(style);
+		keys.each(style, defs, function(key, style, defs) {
+			if (typeof(style[key]) == "Dictionary")
+				_expandStyleAbbeviation(style[key], defs);
+		});
+		_expandStyleAbbeviation(style, defs);
+	}
+ 
 	function getPropertyFromStyle(style, key, result) {
 		// BEGIN  reference implementation.
 		// This code is actually optimized and executed in C++.
