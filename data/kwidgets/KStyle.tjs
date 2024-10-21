@@ -42,7 +42,7 @@ global.K_WIDGET_DEFAULT_ATTRIBUTES_ABBEVIATION = [
 	[ "align", "alignHorizontal", "alignVertical" ],
 	[ "paddingOffset", "paddingOffsetHorizontal", "paddingOffsetVertical" ],
 	[ "paddingInset", "paddingInsetHorizontal", "paddingInsetVertical" ],
-	[ "padding", "paddingHozriontal", "paddingVertical" ],
+	[ "padding", "paddingHorizontal", "paddingVertical" ],
 	[ "paddingHorizontal", "paddingLeft", "paddingRight" ],
 	[ "paddingVertical", "paddingTop", "paddingBottom" ],
 	[ "space", "spaceHorizontal", "spaceVertical" ],
@@ -68,6 +68,12 @@ global.K_STYLE_DEF_INDEX_DEFAULT_VALUE    = 2;
 global.K_STYLE_DEF_INDEX_GLOBAL_RESOLVER  = 3;
 global.K_STYLE_DEF_INDEX_DEFAULT_PROPERTY = 4;
 global.K_STYLE_DEF_INDEX_LOCAL_RESOLVER   = 5;
+
+global.K_STYLE_DEF_KEY_PROPERTY_KEY     = "key";
+global.K_STYLE_DEF_KEY_DEFAULT_VALUE    = "defaultValue";
+global.K_STYLE_DEF_KEY_GLOBAL_RESOLVER  = "resolver";
+global.K_STYLE_DEF_KEY_DEFAULT_PROPERTY = "defaultProperty";
+global.K_STYLE_DEF_KEY_LOCAL_RESOLVER   = "localResolver";
 
 class KStyleObject
 {
@@ -219,28 +225,13 @@ class KStyleObject
 			var defs = definitionsSet[i];
 			for (var j = 0; j < defs.count; j++) {
 				var def = defs[j];
-				var propKey = def[K_STYLE_DEF_INDEX_PROPERTY_KEY];
-				var searchKey = def[K_STYLE_DEF_INDEX_SEARCH_KEY];
-				var resolver = def[K_STYLE_DEF_INDEX_GLOBAL_RESOLVER];
-				if (searchKey instanceof "Array") {
-					for (var k = 0; k < searchKey.count; k++) {
-						var key = searchKey[k];
-						if (typeof(style[key]) != K_UNDEFINED) {
-							modified = true;
-							result[propKey] = style[key];
-							if (resolver !== void)
-								result[propKey] = styleRepository[resolver](result[propKey]);
-							break;
-						}
-					}
-				} else {
-					var key = searchKey;
-					if (typeof(style[key]) != K_UNDEFINED) {
-						modified = true;
-						result[propKey] = style[key];
-						if (resolver !== void)
-							result[propKey] = styleRepository[resolver](result[propKey]);
-					}
+				var propKey = def[K_STYLE_DEF_KEY_PROPERTY_KEY];
+				var resolver = def[K_STYLE_DEF_KEY_GLOBAL_RESOLVER];
+				if (typeof(style[propKey]) != K_UNDEFINED) {
+					modified = true;
+					result[propKey] = style[propKey];
+					if (resolver !== void)
+						result[propKey] = styleRepository[resolver](result[propKey]);
 				}
 			}
 		}
@@ -282,18 +273,18 @@ class KStyleObject
 		var style = %[];
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
-			var key = def[K_STYLE_DEF_INDEX_PROPERTY_KEY];
+			var key = def[K_STYLE_DEF_KEY_PROPERTY_KEY];
 			if (typeof(_styleComp[key]) != K_UNDEFINED) 
 				style[key] = _styleComp[key];
 			else
-				style[key] = def[K_STYLE_DEF_INDEX_DEFAULT_VALUE];
+				style[key] = def[K_STYLE_DEF_KEY_DEFAULT_VALUE];
 		}
 		applyAdditionalFunction(style, definition);
 
 		return style;
 	}
 
-	function applyAdditionalFunction(style, definition) {
+    function applyAdditionalFunction(style, definition) {
 		global.applyAdditionalFunction(this, style, definition);
 		return;
 
@@ -303,13 +294,13 @@ class KStyleObject
 			var def = definition[i];
 			var memberKey = def[0];
 			if (style[memberKey] === void) {
-				var initialProperty = def[K_STYLE_DEF_INDEX_DEFAULT_PROPERTY];
+				var initialProperty = def[K_STYLE_DEF_KEY_DEFAULT_PROPERTY];
 				if (initialProperty !== void)
 					style[memberKey] = this[initialProperty];
 			}
-			var resolveFunction = def[K_STYLE_DEF_INDEX_LOCAL_RESOLVER];
+			var resolveFunction = def[K_STYLE_DEF_KEY_LOCAL_RESOLVER];
 			if (resolveFunction !== void) {
-				var memberKey = def[K_STYLE_DEF_INDEX_PROPERTY_KEY];
+				var memberKey = def[K_STYLE_DEF_KEY_PROPERTY_KEY];
 				style[memberKey] = this[resolveFunction](style[memberKey], style);
 			}
 		}
@@ -413,9 +404,9 @@ class KStyleObject
 		var style = %[];
 		for (var i = 0; i < definition.count; i++) {
 			var def = definition[i];
-			var memberKey = def[0];
-			var styleKey = def[1];
-			var defaultValue = def[2];
+			var memberKey = def[K_STYLE_DEF_KEY_PROPERTY_KEY];
+			var styleKey = memberKey;
+			var defaultValue = def[K_STYLE_DEF_KEY_DEFAULT_VALUE];
 			style[memberKey] = styleRepository.getPropertyFromStyleChain(chain, states, styleKey, defaultValue);
 		}
 		applyAdditionalFunction(style, definition);
@@ -523,16 +514,35 @@ class KStyleRepository
 
 	function getWidgetStyleDefinition(widget) {
 		var key = widget.className;
-		if (typeof(widgetStyleDefinitionCache[key]) == K_UNDEFINED)
+		if (typeof(widgetStyleDefinitionCache[key]) == K_UNDEFINED) {
 			widgetStyleDefinitionCache[key] = [ widget.widgetStyleDefinition ];
+			completeDefaultDefinitions(widgetStyleDefinitionCache[key]);
+		}
 		return widgetStyleDefinitionCache[key];
 	}
 
 	function getDefaultDefinitions(widget) {
 		var key = widget.className;
-		if (typeof(defaultDefinitionsCache[key]) == K_UNDEFINED)
+		if (typeof(defaultDefinitionsCache[key]) == K_UNDEFINED) {
 			defaultDefinitionsCache[key] = widget.defaultDefinitions;
+			completeDefaultDefinitions(defaultDefinitionsCache[key]);
+		}
 		return defaultDefinitionsCache[key];
+	}
+
+	function completeDefaultDefinitions(definitions) {
+		definitions.each(function(definitionSet) {
+			if (! definitionSet[0] instanceof "Array")
+				return;
+			definitionSet.map(function(def) {
+				return %[ K_STYLE_DEF_KEY_PROPERTY_KEY     => def[K_STYLE_DEF_INDEX_PROPERTY_KEY],
+						  K_STYLE_DEF_KEY_DEFAULT_VALUE    => def[K_STYLE_DEF_INDEX_DEFAULT_VALUE],
+						  K_STYLE_DEF_KEY_GLOBAL_RESOLVER  => def[K_STYLE_DEF_INDEX_GLOBAL_RESOLVER],
+						  K_STYLE_DEF_KEY_DEFAULT_PROPERTY => def[K_STYLE_DEF_INDEX_DEFAULT_PROPERTY],
+						  K_STYLE_DEF_KEY_LOCAL_RESOLVER   => def[K_STYLE_DEF_INDEX_LOCAL_RESOLVER],
+						];
+			});
+		});
 	}
 
 	function registerClassStyle(className, style) {
@@ -683,12 +693,12 @@ class KStyleRepository
 	function expandStyleAbbeviation(style, defs) {
 		var keys = dictionaryKeys(style);
 		keys.each(style, defs, function(key, style, defs) {
-			if (typeof(style[key]) == "Dictionary")
-				_expandStyleAbbeviation(style[key], defs);
-		});
+			if (style[key] instanceof "Dictionary")
+				expandStyleAbbeviation(style[key], defs);
+		} incontextof(this));
 		_expandStyleAbbeviation(style, defs);
 	}
- 
+
 	function getPropertyFromStyle(style, key, result) {
 		// BEGIN  reference implementation.
 		// This code is actually optimized and executed in C++.

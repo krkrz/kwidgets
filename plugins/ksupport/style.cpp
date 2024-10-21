@@ -19,12 +19,11 @@ extern tTJSVariant _unionDictionary(tTJSVariant v1, tTJSVariant v2, bool recursi
 
 //----------------------------------------------------------------------
 // íËêî
-static const tjs_int K_STYLE_DEF_INDEX_PROPERTY_KEY     = 0;
-static const tjs_int K_STYLE_DEF_INDEX_SEARCH_KEY       = 1;
-static const tjs_int K_STYLE_DEF_INDEX_DEFAULT_VALUE    = 2;
-static const tjs_int K_STYLE_DEF_INDEX_GLOBAL_RESOLVER  = 3;
-static const tjs_int K_STYLE_DEF_INDEX_DEFAULT_PROPERTY = 4;
-static const tjs_int K_STYLE_DEF_INDEX_LOCAL_RESOLVER   = 5;
+static const wchar_t *K_STYLE_DEF_KEY_PROPERTY_KEY     = L"key";
+static const wchar_t *K_STYLE_DEF_KEY_DEFAULT_VALUE    = L"defaultValue";
+static const wchar_t *K_STYLE_DEF_KEY_GLOBAL_RESOLVER  = L"resolver";
+static const wchar_t *K_STYLE_DEF_KEY_DEFAULT_PROPERTY = L"defaultProperty";
+static const wchar_t *K_STYLE_DEF_KEY_LOCAL_RESOLVER   = L"localResolver";
 
 
 //----------------------------------------------------------------------
@@ -185,9 +184,9 @@ tTJSVariant extractStyleWithChain(tTJSVariant chain, tTJSVariant states, tTJSVar
 	for (tjs_uint i = 0; i < definitionCount; i++) {
 		tTJSVariant def = definitionObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 		ncbPropAccessor defObj(def);
-		ttstr memberKey = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
-		tTJSVariant styleKey = defObj.GetValue(tjs_int(1), ncbTypedefs::Tag<tTJSVariant>());
-		tTJSVariant defaultValue = defObj.GetValue(tjs_int(2), ncbTypedefs::Tag<tTJSVariant>());
+		ttstr memberKey = defObj.GetValue(K_STYLE_DEF_KEY_PROPERTY_KEY, ncbTypedefs::Tag<ttstr>());
+		tTJSVariant styleKey = memberKey;
+		tTJSVariant defaultValue = defObj.GetValue(K_STYLE_DEF_KEY_DEFAULT_VALUE, ncbTypedefs::Tag<tTJSVariant>());
 		styleObj.SetValue(memberKey.c_str(), getPropertyFromStyleChain(chain, states, styleKey, defaultValue));
 	}
 	return style;
@@ -201,18 +200,18 @@ void applyAdditionalFunction(tTJSVariant widget, tTJSVariant style, tTJSVariant 
 	for (tjs_uint i = 0; i < definitionCount; i++) {
 		tTJSVariant def = definitionObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 		ncbPropAccessor defObj(def);
-		ttstr memberKey = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_PROPERTY_KEY), ncbTypedefs::Tag<ttstr>());
+		ttstr memberKey = defObj.GetValue(K_STYLE_DEF_KEY_PROPERTY_KEY, ncbTypedefs::Tag<ttstr>());
 
 		tTJSVariant memberValue = styleObj.GetValue(memberKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
 		if (memberValue.Type() == tvtVoid) {
-			tTJSVariant initialProperty = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_DEFAULT_PROPERTY), ncbTypedefs::Tag<tTJSVariant>());
+			tTJSVariant initialProperty = defObj.GetValue(K_STYLE_DEF_KEY_DEFAULT_PROPERTY, ncbTypedefs::Tag<tTJSVariant>());
 			if (initialProperty.Type() != tvtVoid) {
 				ttstr initialKey = ttstr(initialProperty);
 				tTJSVariant initialValue = widgetObj.GetValue(initialKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
 				styleObj.SetValue(memberKey.c_str(), initialValue);
 			}
 		}
-		tTJSVariant resolveFunction = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_LOCAL_RESOLVER), ncbTypedefs::Tag<tTJSVariant>());
+		tTJSVariant resolveFunction = defObj.GetValue(K_STYLE_DEF_KEY_LOCAL_RESOLVER, ncbTypedefs::Tag<tTJSVariant>());
 		if (resolveFunction.Type() == tvtVoid)
 			continue;
 		ttstr functionName = ttstr(resolveFunction);
@@ -338,12 +337,11 @@ tTJSVariant extractStyle(tTJSVariant widget, tTJSVariant definition)
 	for (tjs_int i = 0; i < definitionCount; i++) {
 		tTJSVariant def = definitionObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 		ncbPropAccessor defObj(def);
-		ttstr key = defObj.GetValue(tjs_int(0), ncbTypedefs::Tag<ttstr>());
+		ttstr key = defObj.GetValue(K_STYLE_DEF_KEY_PROPERTY_KEY, ncbTypedefs::Tag<ttstr>());
 		if (styleCompObj.HasValue(key.c_str()))
 			styleObj.SetValue(key.c_str(), styleCompObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>()));
 		else
-			styleObj.SetValue(key.c_str(), defObj.GetValue(tjs_int(2), ncbTypedefs::Tag<tTJSVariant>()));
-
+			styleObj.SetValue(key.c_str(), defObj.GetValue(K_STYLE_DEF_KEY_DEFAULT_VALUE, ncbTypedefs::Tag<tTJSVariant>()));
 	}
 	applyAdditionalFunction(widget, style, definition);
 
@@ -378,32 +376,14 @@ tTJSVariant extractStyleFrag(tTJSVariant style, tTJSVariant definitionsSet, tTJS
 		for (tjs_int j = 0; j < defsCount; j++) {
 			tTJSVariant def = defsObj.GetValue(j, ncbTypedefs::Tag<tTJSVariant>());
 			ncbPropAccessor defObj(def);
-			ttstr propKey = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_PROPERTY_KEY), ncbTypedefs::Tag<ttstr>());
-			tTJSVariant searchKey = defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_SEARCH_KEY), ncbTypedefs::Tag<tTJSVariant>());
-			tTJSVariant resolver =  defObj.GetValue(tjs_int(K_STYLE_DEF_INDEX_GLOBAL_RESOLVER), ncbTypedefs::Tag<tTJSVariant>());
-			if (searchKey.Type() == tvtObject) {
-				ncbPropAccessor searchKeyObj(searchKey);
-				tjs_int searchKeyCount = countArray(searchKey);
-				for (tjs_int k = 0; k < searchKeyCount; k++) {
-					ttstr key = searchKeyObj.GetValue(k, ncbTypedefs::Tag<ttstr>());
-					if (styleObj.HasValue(key.c_str())) {
-						modified = true;
-						tTJSVariant value = styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
-						if (resolver.Type() != tvtVoid)
-							value = resolveGlobalFunction(resolver, value);
-						resultObj.SetValue(propKey.c_str(), value);
-						break;
-					}
-				}
-			} else {
-				ttstr key = searchKey;
-				if (styleObj.HasValue(key.c_str())) {
-					modified = true;
-					tTJSVariant value = styleObj.GetValue(key.c_str(), ncbTypedefs::Tag<tTJSVariant>());
-						if (resolver.Type() != tvtVoid)
-							value = resolveGlobalFunction(resolver, value);
-					resultObj.SetValue(propKey.c_str(), value);
-				}
+			ttstr propKey = defObj.GetValue(K_STYLE_DEF_KEY_PROPERTY_KEY, ncbTypedefs::Tag<ttstr>());
+			tTJSVariant resolver =  defObj.GetValue(K_STYLE_DEF_KEY_GLOBAL_RESOLVER, ncbTypedefs::Tag<tTJSVariant>());
+			if (styleObj.HasValue(propKey.c_str())) {
+				modified = true;
+				tTJSVariant value = styleObj.GetValue(propKey.c_str(), ncbTypedefs::Tag<tTJSVariant>());
+				if (resolver.Type() != tvtVoid)
+					value = resolveGlobalFunction(resolver, value);
+				resultObj.SetValue(propKey.c_str(), value);
 			}
 		}
 	}

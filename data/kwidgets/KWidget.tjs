@@ -1303,7 +1303,7 @@ class KWidget extends Layer
 	}
 
 	function extractWidgetStyle {
-		var widgetStyle = extractStyle(widgetStyleDefinition);
+		var widgetStyle = extractStyle(styleRepository.getWidgetStyleDefinition(this)[0]);
 		onExtractWidgetStyle(widgetStyle);
 		return widgetStyle;
 	}
