@@ -687,26 +687,14 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
   // タイムラインを右クリック時のコンテキストメニュー
   //------------------------------
   function onTimeLineRightClick(time) {
-    var menu = new KContextMenu();
-    var frame = frameAt(findFrame(time));
+      var menu = new KContextMenu();
+      var frame = frameAt(findFrame(time));
       menu.addItem("キーフレームを挿入する", "insertKeyFrameItem", ! pointEffectiveFrameHead, funccall(this.onInsertFrame, time));
       menu.addItem("キーフレームを削除する", "deleteKeyFrameItem", pointEffectiveFrameHead, funccall(this.onDeleteFrame, time));
-    menu.addItem("フレームを分割する", "splitFrameItem", pointEffectiveFrame && ! pointFrameHead, funccall(this.onSplitFrame, time));
-    menu.addItem("空フレームを挿入する", "nullFrameItem", pointEffectiveFrame, funccall(this.onNullFrame, time));
-    menu.addSeparator();
-    menu.addItem("全選択", "selectAllItem", true, this.onSelectAll);
-    menu.addItem("フレームをコピーする", "copyFrameItem", true, this.onCopyFrame);
-    menu.addItem("フレームをカットーする", "cutFrameItem", true, this.onCutFrame);
-      menu.addItem("フレームをペーストする", "pasteFrameItem", root.window.isLayerRangeAvailableToPaste, root.window.onPasteLayerRange);
-    menu.insertKeyFrameItem.shortcut = "Ins";
-    menu.deleteKeyFrameItem.shortcut = "Del";
-    menu.splitFrameItem.shortcut = "Home";
-    menu.nullFrameItem.shortcut = "End";
-    menu.selectAllItem.shortcut = "Ctrl+A";
-    menu.copyFrameItem.shortcut = "Ctrl+C";
-    menu.cutFrameItem.shortcut = "Ctrl+X";
-    menu.pasteFrameItem.shortcut = "Ctrl+V";
-    menu.show();
+      menu.addItem("フレームを分割する", "splitFrameItem", pointEffectiveFrame && ! pointFrameHead, funccall(this.onSplitFrame, time));
+      menu.addItem("空フレームを挿入する", "nullFrameItem", pointEffectiveFrame, funccall(this.onNullFrame, time));
+	  owner.onBuildCommonTimeLineContextMenu(menu);
+	  menu.show();
   }
 
   //------------------------------
@@ -714,29 +702,9 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
   //------------------------------
   function onTimeLineKeyDown(key, shift) {
     switch (key) {
-      // Ctrl+Aで全選択
-    case VK_A:
-      if (shift & ssCtrl) 
-	onSelectAll();
-      break;
-
-      // Ctrl+Cでフレームをコピー
-    case VK_C:
-      if (shift & ssCtrl)
-        onCopyFrame();
-      break;
-      // Ctrl+Xでフレームをカット
-    case VK_X:
-      if (shift & ssCtrl)
-          onCutFrame();
+	default:
+		owner.onTimeLineKeyDown(...);
 		break;
-      // Ctrl+Vでフレームをペースト
-    case VK_V:
-		if ((shift & ssCtrl)
-          && root.window.isLayerRangeAvailableToPaste)
-			onPasteFrame();
-		break;
-      // Insertでキーフレーム挿入
     case VK_INSERT:
       var time = root.owner.selectedTime;
       var frame = frameAt(findFrame(time));
@@ -765,7 +733,7 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
         onNullFrame(time);
       break;
     }
-  }
+ } 
 
   //------------------------------
   // キーフレーム挿入
@@ -794,34 +762,6 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
   function onNullFrame(time) {
     insertKeyFrame(time, TIMELINE_FRAME_TYPE_NULL);
   }
-
-  //------------------------------
-  // 全選択
-  //------------------------------
-  function onSelectAll {
-    root.owner.selectAll();
-  }
-
-	//------------------------------
-  // フレームをコピーする
-  //------------------------------
-	function onCopyFrame {
-      var body = owner.copyFrames();
-      Clipboard.asTJS = %[ type: TYPE_LAYER_FRAMES, body: body ];
-  }
-
-  //------------------------------
-  // フレームをカットする
-  //------------------------------
-  function onCutFrame {
-      var body = owner.cutFrames();
-      Clipboard.asTJS = %[ type: TYPE_LAYER_FRAMES, body: body ];
-  }
-
-	function onPasteFrame {
-      var body = Clipboard.asTJS.body;
-	  owner.pasteFrames(body);
-	}
 
   //------------------------------
   // フレームペースト時処理
@@ -884,8 +824,8 @@ class TimeLineSample extends KWindow
     timelineControl.onRenderFrame = this.onRenderFrame;
 	  timelineControl.onSelectionModified = this.onSelectionModified;
       timelineControl.onTimeLocatorRightClick = this.onTimeLocatorRightClick;
-    timelineControl.onTimeLineSelectionRightClick = this.onTimeLineSelectionRightClick;
-    timelineControl.onTimeLineSelectionKeyDown = this.onTimeLineSelectionKeyDown;
+      timelineControl.onBuildCommonTimeLineContextMenu = this.onBuildCommonTimeLineContextMenu;
+      timelineControl.onTimeLineKeyDown = this.onTimeLineKeyDown;
 
     // キャンバスの中央を表示
     canvasScroll.setChildViewPos((canvas.width - canvasScroll.childViewWidth) / 2,
@@ -1041,34 +981,51 @@ class TimeLineSample extends KWindow
   //------------------------------
   // タイムラインセレクション右クリック時のコンテキストメニュー
   //------------------------------
-  function onTimeLineSelectionRightClick {
-    var menu = new KContextMenu();
-    menu.addItem("全選択", "selectAllItem", true, onSelectAll);
-    menu.addItem("コピーする",   "copyLayerRangeItem", isLayerRangeAvailableToCopy, funccall(this.onCopyLayerRange));
-    menu.addItem("カットする",   "cutLayerRangeItem",  isLayerRangeAvailableToCopy, funccall(this.onCutLayerRange));
-    menu.addItem("ペーストする", "pasteLayerRangeItem", isLayerRangeAvailableToPaste, funccall(this.onPasteLayerRange));
-    menu.selectAllItem.shortcut = "Ctrl+A";
-    menu.copyLayerRangeItem.shortcut = "Ctrl+C";
-    menu.cutLayerRangeItem.shortcut = "Ctrl+X";
-    menu.pasteLayerRangeItem.shortcut = "Ctrl+V";
-    menu.show();
-  }
+	function onBuildCommonTimeLineContextMenu(menu) {
+		if (menu.childCount)
+			menu.addSeparator();
+		menu.addItem("1フレーム伸ばす", "expand1", timelineControl.hasWorkZone, funccall(onExpandFrames, 1));
+		menu.addItem("1フレーム縮める", "shrink1", timelineControl.hasWorkZone, funccall(onShrinkFrames, 1));
+		menu.addItem("10フレーム伸ばす", "expand10", timelineControl.hasWorkZone, funccall(onExpandFrames, 10));
+		menu.addItem("10フレーム縮める", "shrink10", timelineControl.hasWorkZone, funccall(onShrinkFrames, 10));
+		menu.addSeparator();
+		menu.addItem("全選択", "selectAllItem", true, onSelectAll);
+		menu.addItem("コピーする",   "copyLayerRangeItem", isLayerRangeAvailableToCopy, funccall(this.onCopyLayerRange));
+		menu.addItem("カットする",   "cutLayerRangeItem",  isLayerRangeAvailableToCopy, funccall(this.onCutLayerRange));
+		menu.addItem("ペーストする", "pasteLayerRangeItem", isLayerRangeAvailableToPaste, funccall(this.onPasteLayerRange));
+		menu.selectAllItem.shortcut = "Ctrl+A";
+		menu.copyLayerRangeItem.shortcut = "Ctrl+C";
+		menu.cutLayerRangeItem.shortcut = "Ctrl+X";
+		menu.pasteLayerRangeItem.shortcut = "Ctrl+V";
+		menu.expand1.shortcut = "Pageg Up";
+		menu.shrink1.shortcut = "Pageg Down";
+		menu.expand10.shortcut = "Ctrl+Pageg Up";
+		menu.shrink10.shortcut = "Ctrl+Pageg Down";
+	}
 
   //------------------------------
   // タイムラインセレクションキー処理
   //------------------------------
-  function onTimeLineSelectionKeyDown(key, shift) {
-    if (key == VK_A && shift == ssCtrl)
-      onSelectAll();
-    else if (key == VK_C && shift == ssCtrl
-        && isLayerRangeAvailableToCopy)
-      onCopyLayerRange();
-    else if (key == VK_X && shift == ssCtrl
-             && isLayerRangeAvailableToCopy)
-      onCutLayerRange();
-    else if (key == VK_V && shift == ssCtrl
-             && isLayerRangeAvailableToPaste)
-      onPasteLayerRange();
+  function onTimeLineKeyDown(key, shift) {
+      if (key == VK_A && shift == ssCtrl)
+		  onSelectAll();
+      else if (key == VK_C && shift == ssCtrl
+			   && isLayerRangeAvailableToCopy)
+		  onCopyLayerRange();
+      else if (key == VK_X && shift == ssCtrl
+               && isLayerRangeAvailableToCopy)
+		  onCutLayerRange();
+      else if (key == VK_V && shift == ssCtrl
+               && isLayerRangeAvailableToPaste)
+		  onPasteLayerRange();
+	  else if (key == VK_PRIOR && shift == ssCtrl)
+		  onExpandFrames(10);
+	  else if (key == VK_NEXT && shift == ssCtrl)
+		  onShrinkFrames(10);
+	  else if (key == VK_PRIOR)
+		  onExpandFrames(1);
+	  else if (key == VK_NEXT)
+		  onShrinkFrames(1);
   }
 
   function onSelectAll {
@@ -1099,8 +1056,23 @@ class TimeLineSample extends KWindow
 	  timelineControl.pasteFrames(body);
   }
 
+	//------------------------------
+	// フレームを伸ばす
+	//------------------------------
+	function onExpandFrames(stride) {
+		if (timelineControl.hasWorkZone)
+			timelineControl.expandFrames(stride);
+	}
+
+	//------------------------------
+	// フレームを縮める
+	//------------------------------
+	function onShrinkFrames(stride) {
+		if (timelineControl.hasWorkZone)
+			timelineControl.shrinkFrames(stride);
+	}
+
 	function onSelectionModified() {
-		Debug.message("selection modified");
 	}
 };
 

@@ -71,6 +71,19 @@ class KMenuItem extends MenuItem
   }
 
   /**------------------------------
+   * 子ウィジェットへの参照(互換インターフェース
+   ------------------------------*/
+	property childCount {
+		getter {
+			return children.count;
+		}
+	}
+
+	function childAt(index) {
+		return children[index];
+	}
+
+  /**------------------------------
    * 子孫ウィジェットから特定の名前を持った子ウィジェットを捜す
    ------------------------------*/
   function find(name) {

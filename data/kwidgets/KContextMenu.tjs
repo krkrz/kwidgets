@@ -29,6 +29,19 @@ class KContextMenu extends KWindow
   }
 
   /**------------------------------
+   * 子ウィジェットへの参照(互換インターフェース
+   ------------------------------*/
+	property childCount {
+		getter {
+			return rootItem.childCount;
+		}
+	}
+
+	function childAt(index) {
+		return rootItem.childAt(index);
+	}
+
+  /**------------------------------
    * アイテムを全削除
    ------------------------------*/
   function clearItmes {
