@@ -1637,10 +1637,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	//------------------------------
 	// マウスムーブ
-	function onMouseMove(x, y, shift) {
-		super.onMouseMove(...);
-
-		// マウスホバーしているフレームの表示更新
+	function generateNewPoint(x, y) {
 		var newPoint = void;
 		var pointLayer = list.findItemIndex(y);
 		if (pointLayer >= 0) {
@@ -1652,6 +1649,14 @@ class KTimeLineLayerView extends KVirtualWidget
 					newPoint = [ pointLayer, frameIndex ];
 			}
 		}
+		return newPoint;
+	}
+
+	function onMouseMove(x, y, shift) {
+		super.onMouseMove(...);
+
+		// マウスホバーしているフレームの表示更新
+		var newPoint = generateNewPoint(x, y);
 		if ((shift & (ssLeft | ssRight | ssMiddle)) == 0) {
 			updateMouseCursor(x, y);
 			updatePoint(newPoint);
@@ -1675,6 +1680,8 @@ class KTimeLineLayerView extends KVirtualWidget
 					owner.selectedLayer = list.findItemIndex(y);
 					owner.resetSelection();
 					resetArea();
+					updateMouseCursor(x, y);
+					updatePoint(generateNewPoint(x, y));
 					if (point !== void) {
 						var item = owner.drawItemList[point[0]];
 						if (item.supportSelection)
@@ -1983,6 +1990,7 @@ class KTimeLineLayerView extends KVirtualWidget
 							resetSelection();
 							item.setSelection([ frameIndex ]);
 							onSelectionModified();
+							owner.onSinglePoint();
 						}
 					} else if (hasSelection) {
 						resetSelection();
@@ -1990,9 +1998,6 @@ class KTimeLineLayerView extends KVirtualWidget
 					}
 				}
 			}
-
-			if (! hasSelection)
-				owner.onSinglePoint();
 		}
 	}
 
@@ -2119,8 +2124,10 @@ class KTimeLineLayerView extends KVirtualWidget
 				|| ! item.supportSelection)
 				return;
 			var frameList = item.frameList;
+			var step = 1;
 			for (var i = 0; i < frameList.count; i++)
-				frameList[i].time += (i + 1) * stride;
+				if (frameList[i].time != 0)
+					frameList[i].time += (step++) * stride;
 			item.redrawAllFrame();
 		});
 	}
@@ -2145,7 +2152,8 @@ class KTimeLineLayerView extends KVirtualWidget
 				return;
 			var frameList = item.frameList;
 			var offset = 0;
-			if (selection.find(0) >= 0)
+			if (selection.find(0) >= 0
+				&& frameList[0].time > 0)
 				frameList[0].time += (offset += stride);
 			for (var i = 1; i < frameList.count; i++) {
 				if (selection.find(i - 1) >= 0
@@ -4249,6 +4257,18 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
+	property hasSingleSelection {
+		getter {
+			return view.hasSingleSelection;
+		}
+	}
+
+	property hasMultipleSelection {
+		getter {
+			return view.hasMultipleSelection;
+		}
+	}
+	
 	//----------------------------------------------------------------------
 	// エリア指定をしているかどうか
 	property hasArea {

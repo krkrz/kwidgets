@@ -3,7 +3,7 @@
 //
 
 
-
+#include <cstdio>
 #include "ncbind.hpp"
 
 ///----------------------------------------------------------------------
@@ -216,15 +216,19 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int layerIndex,
 		if (selectedLayer == layerIndex) {
 			auto cursorColor = viewObj.getIntValue(L"timelineCursorColor");
 			auto cursorY = viewObj.getIntValue(L"timelineCursorY");
-			viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
-							 frameTime * TIMELINE_FRAME_WIDTH, cursorY, length * TIMELINE_FRAME_WIDTH, 1, cursorColor);
+			auto alpha = ((cursorColor >> 24) & 0xff) / 2;
+			auto color = cursorColor & 0xffffff;
+			viewObj.FuncCall(0, L"colorRect", &colorRectHint, NULL,
+							 frameTime * TIMELINE_FRAME_WIDTH, cursorY, length * TIMELINE_FRAME_WIDTH, 1, 0xffffff, 128); // color, alpha);
 		}
 		auto selectedTime = viewObj.getIntValue(L"selectedTime");
 		if (frameTime <= selectedTime && selectedTime < frameTime + length) {
 			auto cursorColor = viewObj.getIntValue(L"timelineCursorColor");
 			auto cursorX = viewObj.getIntValue(L"timelineCursorX");
-			viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
-							 cursorX, y, 1, TIMELINE_FRAME_HEIGHT, cursorColor);
+			auto alpha = ((cursorColor >> 24) & 0xff) / 2;
+			auto color = cursorColor & 0xffffff;
+			viewObj.FuncCall(0, L"colorRect", &colorRectHint, NULL,
+							 cursorX, y, 1, TIMELINE_FRAME_HEIGHT, color, alpha);
 		}
 		// 左マーカー描画
 		if (leftMarker) {
