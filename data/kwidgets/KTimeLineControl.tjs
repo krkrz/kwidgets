@@ -2138,7 +2138,8 @@ class KTimeLineLayerView extends KVirtualWidget
 				|| ! item.supportSelection)
 				return;
 			var frameList = item.frameList;
-			frameList[0].time = Math.max(0, frameList[0].time - stride);
+			if (frameList.count > 0)
+				frameList[0].time = Math.max(0, frameList[0].time - stride);
 			for (var i = 1; i < frameList.count; i++)
 				frameList[i].time = int(Math.max(frameList[i - 1].time + 1, frameList[i].time - (i + 1) * stride));
 			item.redrawAllFrame();
