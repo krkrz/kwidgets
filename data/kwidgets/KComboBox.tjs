@@ -53,6 +53,10 @@ class KComboBox extends KValueEntity
 		if (_values.count)
 			_selected = 0;
 
+		var initialValue = getOption("value");
+		if (initialValue !== void) 
+			value = initialValue;
+
 		var h = getOption("height");
 		dropdownButton = new KImageButton(window, %[ focusable: false, name: "_dropdownButton", style: %[ variable: false ] ]);
 		dropdownButton.parent = this;
