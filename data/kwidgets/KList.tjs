@@ -1442,6 +1442,7 @@ class KList extends KVirtualWidget
 
 	function onDragLeave(x, y, shift) {
 		cursorLock = false;
+		updatePresentation(x, y);
 
 		if (inMouseSelection) {
 			var range = curMouseSelectionRect;
