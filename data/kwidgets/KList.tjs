@@ -126,7 +126,8 @@ class KList extends KVirtualWidget
 	var delayMouseEvent = false;
 	var mouseSelectionBaseX, mouseSelectionBaseY;
 	var curMouseSelectionRect;
-
+	var cursorLock = false;
+	
 	var DRAG_ACCEPT_TYPE_NONE   = 0;
 	var DRAG_ACCEPT_TYPE_DIRECT = 1;
 	var DRAG_ACCEPT_TYPE_CHILD  = 2;
@@ -1298,16 +1299,23 @@ class KList extends KVirtualWidget
 			invalidateItemStyleStates(curPointItem);
 		}
 
+		updatePresentation(x, y);
+	}
+
+	function updatePresentation(x, y) {
+		var item = findItem(y);
 		if (item !== void) {
 			if (hint != item.hint)
 				hint = item.hint;
 			status = item.status;
-			cursor = item.cursor;
+			if (! cursorLock)
+				cursor = item.cursor;
 		} else {
 			if (hint != "")
 				hint = "";
 			status = "";
-			cursor = crDefault;
+			if (! cursorLock)
+				cursor = crDefault;
 		}
 	}
 
@@ -1325,6 +1333,7 @@ class KList extends KVirtualWidget
 	function beginDragPacket() {
 		super.beginDragPacket(...);
 		isReadyToClick = false;
+		cursorLock = true;
 	}
 
 	function onDoubleClick(x, y) {
@@ -1432,6 +1441,8 @@ class KList extends KVirtualWidget
 	}
 
 	function onDragLeave(x, y, shift) {
+		cursorLock = false;
+
 		if (inMouseSelection) {
 			var range = curMouseSelectionRect;
 			curMouseSelectionRect = void;
