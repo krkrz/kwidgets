@@ -1493,14 +1493,15 @@ class KWidget extends Layer
 	 *
 	 * @param dict バインドする辞書
 	 ------------------------------*/
-	function bindPersistentDictionary(dict) {
+	function bindPersistentDictionary(dict, recursive = true) {
 		if (_isAvoidDictionaryRegistration)
 			return;
 
 		_dict = dict;
 		onBindPersistentDictionary(dict);
 
-		if (! _allowChildDictionaryRegistration)
+		if (! recursive
+			|| ! _allowChildDictionaryRegistration)
 			return;
 
 		for (var i = 0; i < children.count; i++) {
