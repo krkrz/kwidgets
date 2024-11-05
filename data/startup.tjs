@@ -63,7 +63,7 @@ class SampleLauncher extends KWindow
 
 	// コンストラクタ
 	function SampleLauncher {
-		super.KWindow(%[ namme: "sample_launcher",
+		super.KWindow(%[ name: "sample_launcher",
 						 theme: "dialog",
 						 style: %[
 							 isClassWeak: %[
