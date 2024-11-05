@@ -5,10 +5,26 @@
 // 二重起動回避
 if (! System.createAppLock("kwidgets_sample"))
 	System.exit();
+
 // デバッグコンソールを表示
-@if (!kirikiriz)
+@if (! kirikiriz)
 Debug.console.visible = true;
+Storages.addAutoPath("plugin/");
 @endif
+
+@if (kirikiriz)
+switch (System.exeBits) {
+case 32: Storages.addAutoPath("plugin/"); break;
+case 64: Storages.addAutoPath("plugin64/"); break;
+}
+var k2compatPath = System.exePath + "k2compat.xp3";
+if (Storages.isExistentStorage(k2compatPath)) {
+	Storages.addAutoPath(k2compatPath + ">");
+	Scripts.execStorage("k2compat.tjs");
+	Krkr2CompatUtils.scriptBase = k2compatPath + ">";
+}
+@endif
+
 // テストベッドの有効・無効
 global.enableTestBed = true;
 
@@ -19,7 +35,6 @@ Plugins.link("json.dll");
 // kwidgetsをロード
 Storages.addAutoPath("kwidgets/");
 Scripts.execStorage("KInitialize.tjs");
-
 
 // サンプルリストをロード
 Scripts.execStorage("WidgetSample.tjs");

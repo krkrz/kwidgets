@@ -1,6 +1,14 @@
 #ifndef _ncb_invoke_hpp_
 #define _ncb_invoke_hpp_
 
+#ifndef NCB_METHODTRAIT_NOEXCEPT
+#if (defined(__cplusplus) && (__cplusplus >= 201703L)) || (defined(_MSVC_LANG) && (_MSVC_LANG >= 201703L))
+#define NCB_METHODTRAIT_NOEXCEPT 1
+#else
+#define NCB_METHODTRAIT_NOEXCEPT 0
+#endif
+#endif
+
 struct MethodCaller {
 	//--------------------------------------
 	// template prototypes
@@ -147,20 +155,33 @@ template <>           struct MC::tMethodHasResult<void> { enum { HasResult = fal
 			static inline ClassT* Factory(FncT io) { (void)io; return new ClassT           (   FOREACH_COMMA_EXT(MCIMPL_READ_ARGS_EXT)); }               \
 			static inline ClassT* Factory(FncT io, MethodType const &mptr) { return (*mptr)(   FOREACH_COMMA_EXT(MCIMPL_READ_ARGS_EXT)); }               \
 		}
-#define METHODRESOLVER_SPECIALIZATION(cls, cnst) \
+#define METHODRESOLVER_SPECIALIZATION_TYPE(cls, cnst) \
 	template <         typename ResultT /**/               cls ## _DEF /**/ FOREACH_COMMA /**/ FOREACH_COMMA_EXT(MCIMPL_TMPL_ARGS_EXT) >                     \
 		struct MC::tMethodResolver< ResultT,      cnst ## _REF cls ## _REF2, MC::tMethodArgs < FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT) > > {                 \
 			typedef             ResultT                   (cls ## _REF           *MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF;        \
-			typedef MethodType Type; };                                                                                                                      \
+			typedef MethodType Type; }
+#define METHODRESOLVER_SPECIALIZATION_TRAITS(cls, cnst, methodopt) \
 	template <         typename ResultT /**/               cls ## _DEF /**/ FOREACH_COMMA /**/ FOREACH_COMMA_EXT(MCIMPL_TMPL_ARGS_EXT) >                     \
-	struct MC::tMethodTraits<   ResultT                   (cls ## _REF           *          )( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF> {      \
-			typedef             ResultT                   (cls ## _REF           *MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) cnst ## _REF;        \
+	struct MC::tMethodTraits<   ResultT                   (cls ## _REF           *          )( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) methodopt> {  \
+			typedef             ResultT                   (cls ## _REF           *MethodType)( FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT)) methodopt;    \
 			typedef             ResultT                                                                                                  ResultType;         \
 			typedef                                        cls ## _REF2                                                                  ClassType;          \
 			typedef                           cnst ## _REF cls ## _REF2                                                                  ClassWithConstType; \
 			typedef                                                        tMethodArgs<        FOREACH_COMMA_EXT(MCIMPL_METH_ARGS_EXT) > ArgsType;           \
 			enum { HasResult = tMethodHasResult<ResultType>::HasResult, IsStatic = cls ## _BOOL, IsConst = cnst ## _BOOL, ArgsCount = FOREACH_COUNT };       \
 		}
+#if NCB_METHODTRAIT_NOEXCEPT
+//#pragma message("NCB_METHODTRAIT_NOEXCEPT=1")
+#define METHODRESOLVER_SPECIALIZATION(cls, cnst) \
+	METHODRESOLVER_SPECIALIZATION_TYPE(cls, cnst); \
+	METHODRESOLVER_SPECIALIZATION_TRAITS(cls, cnst, cnst ## _REF); \
+	METHODRESOLVER_SPECIALIZATION_TRAITS(cls, cnst, cnst ## _REF noexcept)
+#else
+//#pragma message("NCB_METHODTRAIT_NOEXCEPT=0")
+#define METHODRESOLVER_SPECIALIZATION(cls, cnst) \
+	METHODRESOLVER_SPECIALIZATION_TYPE(cls, cnst); \
+	METHODRESOLVER_SPECIALIZATION_TRAITS(cls, cnst, cnst ## _REF)
+#endif
 
 #define MCIMPL_TMPL_ARGS_EXT(n) typename T ## n
 #define MCIMPL_METH_ARGS_EXT(n) T ## n
