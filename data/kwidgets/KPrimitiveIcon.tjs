@@ -12,6 +12,7 @@ class KPrimitiveIconBuilder
 	var borderPat =     /^\$border\((\d+),(\d+),#([0-9a-fA-F]{6}),(none|solid|double|dashed|groove|ridge|inset|outset),#([0-9a-fA-F]{6}),(\d+),(\d+)\)$/;
 	var imagePat =      /^\$image\((.+)\)$/;
 	var paddingPat =    /^\$padding\((\d+),(u|d|l|r),(.+)\)$/;
+	var scalePat =      /^\$scale\(([0-9.]+)(S|),(.+)\)$/;
 	var multipleArgsPat = /^(\$.+?\))((,\$.+?\))*)$/;
 	var primitiveMap = %[];
 	var definitions;
@@ -30,7 +31,8 @@ class KPrimitiveIconBuilder
 				%[ pat: elippsePat,     func: drawElippseIcon    ],
 				%[ pat: borderPat,      func: drawBorderIcon     ],
 				%[ pat: imagePat,       func: drawImageIcon      ],
-				%[ pat: paddingPat,     func: drawPaddingIcon    ]
+				%[ pat: paddingPat,     func: drawPaddingIcon    ],
+				%[ pat: scalePat,       func: drawScaleIcon    ]
 		];
 	}
 
@@ -300,6 +302,20 @@ class KPrimitiveIconBuilder
 			layer.copyRect(0, 0, subIconLayer, 0, 0, subIconLayer.width, subIconLayer.height);
 			break;
 		}
+		invalidate subIconLayer;
+	}
+
+	function drawScaleIcon(layer, name) {
+		var matches = scalePat.exec(name);
+		var scale = +matches[1];
+		var opts = matches[2];
+		var subIcon = matches[3];
+		var subIconLayer = new global.Layer(window, window.primaryLayer);
+		drawIcon(subIconLayer, subIcon);
+		layer.setSize(subIconLayer.width * scale, subIconLayer.height * scale);
+		layer.stretchCopy(0, 0, layer.width, layer.height,
+						  subIconLayer, 0, 0, subIconLayer.width, subIconLayer.height,
+						  opts.indexOf("S") < 0 ? stNearest : stFastLinear);
 		invalidate subIconLayer;
 	}
 }
