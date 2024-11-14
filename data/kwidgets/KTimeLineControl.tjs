@@ -1710,22 +1710,27 @@ class KTimeLineLayerView extends KVirtualWidget
 
 		if (button == mbRight
 			&& rightPressed) {
-			var layerIndex = list.findItemIndex(y);;
-			if (layerIndex >= 0) {
-				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
-				owner.selectedLayer = layerIndex;
-				if (! hasMultipleSelection) {
-					resetSelection();
-					if (point !== void) {
-						var item = owner.drawItemList[point[0]];
-						if (item.supportSelection)
-							item.setSelection([ point[1] ]);
+			if (hasArea
+				&& areaRect.contains(x, y)) {
+				owner.onTimeLineRightClick(owner.selectedTime);
+			} else {
+				var layerIndex = list.findItemIndex(y);;
+				if (layerIndex >= 0) {
+					owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
+					owner.selectedLayer = layerIndex;
+					if (! hasMultipleSelection) {
+						resetSelection();
+						resetArea();
+						if (point !== void) {
+							var item = owner.drawItemList[point[0]];
+							if (item.supportSelection)
+								item.setSelection([ point[1] ]);
+						}
+						owner.onSelectionModified();
 					}
-					owner.onSelectionModified();
+					var item = owner.drawItemList[owner.selectedLayer];
+					item.onTimeLineRightClick(owner.selectedTime);
 				}
-
-				var item = owner.drawItemList[owner.selectedLayer];
-				item.onTimeLineRightClick(owner.selectedTime);
 			}
 		}
 
