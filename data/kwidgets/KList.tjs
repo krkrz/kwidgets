@@ -1847,7 +1847,9 @@ global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
 		%[ key: "itemColor", resolver: "resolveColor" ],
 		%[ key: "spaceVertical" ],
 		%[ key: "spaceHorizontal" ],
-		%[ key: "spaceToggle",  ],
+		%[ key: "spaceToggle"  ],
+		%[ key: "paddingTop", defaultValue: 0 ],
+		%[ key: "paddingBottom", defaultValue: 0 ],
 		%[ key: "lineSpacing", defaultValue: 0 ]
 ];
 
@@ -2389,6 +2391,27 @@ class KListItem
 		}
 		setter(v) {
 			overwriteStyle(%[ spaceToggle: v ]);
+		}
+	}
+
+	/*------------------------------
+	 * パディング
+	 ------------------------------*/
+	property paddingTop {
+		getter {
+			return appearanceStyle.paddingTop;
+		}
+		setter(v) {
+			overwriteStyle(%[ paddingTop: v ]);
+		}
+	}
+
+	property paddingBottom {
+		getter {
+			return appearanceStyle.paddingBottom;
+		}
+		setter(v) {
+			overwriteStyle(%[ paddingBottom: v ]);
 		}
 	}
 
@@ -3753,7 +3776,7 @@ class KListItem
 		textInfo = labelSize = root.extractTextArea(currentFontStyle, label, lineSpacing);
 		root.applyFontStyle(root.font, root.fontStyle);
 		width = toggleWidth + iconWidth + labelSize.width;
-		height = Math.max(height, labelSize.height + spaceVertical);
+		height = Math.max(height, labelSize.height + spaceVertical + paddingTop + paddingBottom);
 		return width != prevWidth || height != prevHeight;
 	}
 
@@ -3779,7 +3802,8 @@ class KListItem
 
 	function inIcon(x, y) {
 		x -= left;
-		return x >= toggleWidth && x < toggleWidth + iconWidth;
+		var rect = labelRect;
+		return x >= toggleWidth && x < toggleWidth + iconWidth && rect.top <= y && y <= rect.top + rect.height;
 	}
 
 	function inLabel(x, y) {
@@ -3984,7 +4008,7 @@ class KListItem
 			var x = left + toggleWidth;
 			for (var i = 0; i < iconList.count; i++) {
 				var iconLayer = iconLayerList[i];
-				root.operateRect(x, int(top + (height - iconLayer.height) / 2), iconLayer, 0, 0, iconLayer.width, iconLayer.height, omAuto, opacity);
+				root.operateRect(x, int(top + rect.top + (rect.height - iconLayer.height) / 2), iconLayer, 0, 0, iconLayer.width, iconLayer.height, omAuto, opacity);
 				x += iconLayer.width + spaceHorizontal;
 			}
 		}
@@ -3993,9 +4017,8 @@ class KListItem
 	// ラベル矩形
 	property labelRect {
 		getter {
-			var hmargin = height - labelSize.height;
-			return %[ left:(toggleWidth + iconWidth), top:int(hmargin / 2),
-					  width:width - (toggleWidth + iconWidth), height:labelSize.height];
+			return %[ left:(toggleWidth + iconWidth), top:int(spaceVertical / 2 + paddingTop),
+					  width:width - (toggleWidth + iconWidth), height: labelSize.height];
 		}
 	}
 

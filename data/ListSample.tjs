@@ -62,7 +62,7 @@ class ContextMenuListItem extends KListItem
   var checkValue2;
 
   function ContextMenuListItem(label, name) {
-    super.KListItem(label, name);
+      super.KListItem(label, name);
     // チェック値の初期値
     checkValue = true;
     checkValue2 = true;
@@ -155,7 +155,7 @@ class ListSample extends KWindow
     // スクロールレイアウトを作リ、その中にリストを配置
     primaryWidget.add(new KScrollLayout(this, true, true, "scroll"));
     scroll.resize = true;
-    scroll.add(new KList(this, "list"));
+      scroll.add(new KList(this, %[ name: "list" ]));
 
     // リスト項目を配置しまくる
     list.spaceVertical = 2;
@@ -169,6 +169,7 @@ class ListSample extends KWindow
     list.add(new KListItem("トップ項目7はヒントが設定されている", "listitem7"));
     list.add(new KListItem("トップ項目8はトグルを操作できない", "listitem8"));
     list.add(new KListItem("トップ項目9は太く大きい", "listitem9"));
+      list.add(new KListItem(%[ label: "トップ項目10は下側のパディングが大きい", name: "listitem10", style: %[ paddingBottom: 20, icon: "gotta_mail" ] ]));
     listitem7.hint = "こんな風にリストアイテムに対して\nヒントを設定することができる";
     listitem9.fontBold = true;
     listitem9.fontItalic = true;
