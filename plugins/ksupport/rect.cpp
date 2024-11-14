@@ -9,7 +9,7 @@
 
 
 /**------------------------------
- * ‹éŒ`
+ * çŸ©å½¢
  ------------------------------*/
 class KRect
 {
@@ -17,12 +17,12 @@ public:
   tjs_real left, top, right, bottom;
 
   /**------------------------------
-   * ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+   * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
    *
-   * @param l ¶’[
-   * @param t ã’[
-   * @param w •
-   * @param h ‚‚³
+   * @param l å·¦ç«¯
+   * @param t ä¸Šç«¯
+   * @param w å¹…
+   * @param h é«˜ã•
    ------------------------------*/
   KRect(tjs_real l, tjs_real t, tjs_real w, tjs_real h) {
     left = l;
@@ -32,16 +32,16 @@ public:
   }
 
   /**------------------------------
-   * ‹éŒ`‚ª—LŒø‚©‚Ç‚¤‚©”»’è‚·‚é
+   * çŸ©å½¢ãŒæœ‰åŠ¹ã‹ã©ã†ã‹åˆ¤å®šã™ã‚‹
    *
-   * @return ‹éŒ`‚ª—LŒø‚©‚Ç‚¤‚©
+   * @return çŸ©å½¢ãŒæœ‰åŠ¹ã‹ã©ã†ã‹
    ------------------------------*/
   bool getIsValid(void) const  {
     return (left <= right && top <= bottom);
   }
 
   /*------------------------------
-   * ¶
+   * å·¦
    ------------------------------*/
   tjs_real getLeft(void) const {
     return left;
@@ -52,7 +52,7 @@ public:
   }
 
   /*------------------------------
-   * ‰E
+   * å³
    ------------------------------*/
   tjs_real getRight(void) const {
     return right;
@@ -63,7 +63,7 @@ public:
   }
 
   /*------------------------------
-   * ã
+   * ä¸Š
    ------------------------------*/
   tjs_real getTop(void) const {
     return top;
@@ -74,7 +74,7 @@ public:
   }
   
   /*------------------------------
-   * ‰º
+   * ä¸‹
    ------------------------------*/
   tjs_real getBottom(void) const {
     return bottom;
@@ -85,9 +85,9 @@ public:
   }
 
   /**------------------------------
-   * •
+   * å¹…
    *
-   * @return ‹éŒ`‚Ì•
+   * @return çŸ©å½¢ã®å¹…
    ------------------------------*/
   tjs_real getWidth(void) const {
     return right - left;
@@ -98,9 +98,9 @@ public:
   }
 
   /**------------------------------
-   * ‚‚³
+   * é«˜ã•
    *
-   * @return ‹éŒ`‚Ì‚‚³
+   * @return çŸ©å½¢ã®é«˜ã•
    ------------------------------*/
   tjs_real getHeight(void) const {
     return bottom - top;
@@ -110,20 +110,20 @@ public:
   }
 
   /**------------------------------
-   * ‹éŒ`‚Ì•¡»
+   * çŸ©å½¢ã®è¤‡è£½
    *
-   * @return ©•ª©g‚ğ•¡»‚µ‚½‹éŒ`
+   * @return è‡ªåˆ†è‡ªèº«ã‚’è¤‡è£½ã—ãŸçŸ©å½¢
    ------------------------------*/
   KRect *dup(void) const {
     return new KRect(left, top, getWidth(), getHeight());
   }
 
   /**------------------------------
-   * ‹éŒ`‚ÌŠ„‚è“–‚Ä
+   * çŸ©å½¢ã®å‰²ã‚Šå½“ã¦
    * 
-   * @param rect Š„‚è“–‚ÄŒ³
+   * @param rect å‰²ã‚Šå½“ã¦å…ƒ
    * 
-   * rect‚Ì“à—e‚ğ©•ª©g‚ÉƒRƒs[‚·‚é
+   * rectã®å†…å®¹ã‚’è‡ªåˆ†è‡ªèº«ã«ã‚³ãƒ”ãƒ¼ã™ã‚‹
    ------------------------------*/
   void assign(const KRect *rect) {
     left = rect->left;
@@ -133,12 +133,12 @@ public:
   }
 
   /**------------------------------
-   * Œğ·”»’è
+   * äº¤å·®åˆ¤å®š
    *
-   * @param rect ‹éŒ`
-   * @return Œğ·‚µ‚Ä‚¢‚é‚©H
+   * @param rect çŸ©å½¢
+   * @return äº¤å·®ã—ã¦ã„ã‚‹ã‹ï¼Ÿ
    *
-   * rect‚Æ©•ª©g‚Éd‚È‚è‚ª‚ ‚é‚©”»’è‚·‚é
+   * rectã¨è‡ªåˆ†è‡ªèº«ã«é‡ãªã‚ŠãŒã‚ã‚‹ã‹åˆ¤å®šã™ã‚‹
    ------------------------------*/
   bool intersects(const KRect *rect) const {
     return ! (rect->right <= left
@@ -148,24 +148,24 @@ public:
   }
 
   /**------------------------------
-   * •ïŠÜ”»’è
+   * åŒ…å«åˆ¤å®š
    *
-   * @param x XÀ•W
-   * @param y YÀ•W
-   * @return •ïŠÜ‚µ‚Ä‚¢‚é‚©H
+   * @param x Xåº§æ¨™
+   * @param y Yåº§æ¨™
+   * @return åŒ…å«ã—ã¦ã„ã‚‹ã‹ï¼Ÿ
    *
-   * ‹éŒ`‚ªÀ•W(X,Y)‚ğ•ïŠÜ‚µ‚Ä‚¢‚é‚©”»’è‚·‚é
+   * çŸ©å½¢ãŒåº§æ¨™(X,Y)ã‚’åŒ…å«ã—ã¦ã„ã‚‹ã‹åˆ¤å®šã™ã‚‹
    ------------------------------*/
   bool contains(tjs_real x, tjs_real y) const {
     return left <=x && x < right && top <= y && y <= bottom;
   }
 
   /**------------------------------
-   * •ïŠÜ‰‰Z
+   * åŒ…å«æ¼”ç®—
    *
-   * @param rect ‹éŒ`
+   * @param rect çŸ©å½¢
    *
-   * rect‚Æ©•ª©g‚Ì—¼•û‚ğŠÜ‚ŞÅ‘å‚Ì‹éŒ`‚ğA©•ª©g‚ÉŠ„‚è“–‚Ä’¼‚·
+   * rectã¨è‡ªåˆ†è‡ªèº«ã®ä¸¡æ–¹ã‚’å«ã‚€æœ€å¤§ã®çŸ©å½¢ã‚’ã€è‡ªåˆ†è‡ªèº«ã«å‰²ã‚Šå½“ã¦ç›´ã™
    ------------------------------*/
   void include(const KRect *rect) {
     left = left < rect->left ? left : rect->left;
@@ -175,11 +175,11 @@ public:
   }
 
   /**------------------------------
-   * Œğ·‰‰Z
+   * äº¤å·®æ¼”ç®—
    *
-   * @param rect ‹éŒ`
+   * @param rect çŸ©å½¢
    *
-   * rect‚Æ©•ª©g‚Ìd‚È‚é•”•ª‚ğA©•ª©g‚ÉŠ„‚è“–‚Ä’¼‚·
+   * rectã¨è‡ªåˆ†è‡ªèº«ã®é‡ãªã‚‹éƒ¨åˆ†ã‚’ã€è‡ªåˆ†è‡ªèº«ã«å‰²ã‚Šå½“ã¦ç›´ã™
    ------------------------------*/
   void intersectWith(const KRect *rect) {
     left = left > rect->left ? left : rect->left;
@@ -189,11 +189,11 @@ public:
   }
 
   /**------------------------------
-   * •ïŠÜ‰‰Z
+   * åŒ…å«æ¼”ç®—
    *
-   * @param rect ‹éŒ`
+   * @param rect çŸ©å½¢
    *
-   * rect‚Æ©•ª©g‚Ì‹¤’Ê‹éŒ`‚ğA©•ª©g‚ÉŠ„‚è“–‚Ä’¼‚·
+   * rectã¨è‡ªåˆ†è‡ªèº«ã®å…±é€šçŸ©å½¢ã‚’ã€è‡ªåˆ†è‡ªèº«ã«å‰²ã‚Šå½“ã¦ç›´ã™
    ------------------------------*/
   void unionWith(const KRect *rect) {
     left = left < rect->left ? left : rect->left;
@@ -271,7 +271,7 @@ NCB_REGISTER_CLASS(KRect)
 
 
 /**----------------------------------------------------------------------
- * —Ìˆæ
+ * é ˜åŸŸ
  ----------------------------------------------------------------------*/
 class KRegion
 {
@@ -279,48 +279,48 @@ public:
   std::vector<KRect> rectList;
 
   /**------------------------------
-   * ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+   * ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
    ------------------------------*/
   KRegion(void) {
   }
 
   /**------------------------------
-   * “à•”‚ÉŠÜ‚Ş‹éŒ`‚Ì”
+   * å†…éƒ¨ã«å«ã‚€çŸ©å½¢ã®æ•°
    ------------------------------*/
   tjs_uint getRectCount(void) const {
     return tjs_uint(rectList.size());
   }
 
   /**------------------------------
-   * ‹éŒ`‚ğ’¼ÚQÆ‚·‚é
+   * çŸ©å½¢ã‚’ç›´æ¥å‚ç…§ã™ã‚‹
    * 
-   * @param index ƒCƒ“ƒfƒbƒNƒX
-   * @return ‹éŒ`
+   * @param index ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
+   * @return çŸ©å½¢
    ------------------------------*/
   KRect *rectAt(tjs_uint index) {
     return rectList[index].dup();
   }
 
   /**------------------------------
-   * —Ìˆæ‚Í‹ó‚©‚Ç‚¤‚©”»’è‚·‚é
+   * é ˜åŸŸã¯ç©ºã‹ã©ã†ã‹åˆ¤å®šã™ã‚‹
    *
-   * @return —Ìˆæ‚Í‹ó‚©H
+   * @return é ˜åŸŸã¯ç©ºã‹ï¼Ÿ
    ------------------------------*/
   bool getEmpty(void) const {
     return rectList.empty();
   }
 
   /**------------------------------
-   * —Ìˆæ‚ğ‹ó‚É‚·‚é
+   * é ˜åŸŸã‚’ç©ºã«ã™ã‚‹
    ------------------------------*/
   void clear(void) {
     rectList.clear();
   }
 
   /**------------------------------
-   * —Ìˆæ‚ğİ’è‚·‚é
+   * é ˜åŸŸã‚’è¨­å®šã™ã‚‹
    *
-   * @param r KRect‚à‚µ‚­‚ÍKRegionƒIƒuƒWƒFƒNƒg
+   * @param r KRectã‚‚ã—ãã¯KRegionã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
    ------------------------------*/
   void assign(tTJSVariant r) {
     KRect *rect = ncbInstanceAdaptor<KRect>::AdaptorT::GetNativeInstance(r.AsObjectNoAddRef());
@@ -337,11 +337,11 @@ public:
   }
 
   /**------------------------------
-   * —Ìˆæ‚ğŠg’£‚·‚é
+   * é ˜åŸŸã‚’æ‹¡å¼µã™ã‚‹
    *
-   * @param r KRect‚à‚µ‚­‚ÍKRegionƒIƒuƒWƒFƒNƒg
+   * @param r KRectã‚‚ã—ãã¯KRegionã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
    *
-   * w’è‚µ‚½”ÍˆÍ‚ğ—Ìˆæ‚É‚Â‚¯‰Á‚¦‚é
+   * æŒ‡å®šã—ãŸç¯„å›²ã‚’é ˜åŸŸã«ã¤ã‘åŠ ãˆã‚‹
    ------------------------------*/
   void include(tTJSVariant r) {
     KRect *rect = ncbInstanceAdaptor<KRect>::AdaptorT::GetNativeInstance(r.AsObjectNoAddRef());
@@ -358,11 +358,11 @@ public:
   }
 
   /**------------------------------
-   * —Ìˆæ‚ğíŒ¸‚·‚é
+   * é ˜åŸŸã‚’å‰Šæ¸›ã™ã‚‹
    *
-   * @param r KRect‚à‚µ‚­‚ÍKRegionƒIƒuƒWƒFƒNƒg
+   * @param r KRectã‚‚ã—ãã¯KRegionã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
    *
-   * w’è‚µ‚½”ÍˆÍ‚ğ—Ìˆæ‚©‚çæ‚èœ‚­
+   * æŒ‡å®šã—ãŸç¯„å›²ã‚’é ˜åŸŸã‹ã‚‰å–ã‚Šé™¤ã
    ------------------------------*/
   void exclude(tTJSVariant r) {
     KRect *rect = ncbInstanceAdaptor<KRect>::AdaptorT::GetNativeInstance(r.AsObjectNoAddRef());
@@ -379,11 +379,11 @@ public:
   }
 
   /**------------------------------
-   * Œğ·‰‰Z
+   * äº¤å·®æ¼”ç®—
    * 
-   * @param r KRect‚à‚µ‚­‚ÍKRegionƒIƒuƒWƒFƒNƒg
+   * @param r KRectã‚‚ã—ãã¯KRegionã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
    *
-   * w’è‚µ‚½”ÍˆÍ‚ğ‚ª—Ìˆæ‚Ì‹¤’Ê•”•ª‚¾‚¯‚ğc‚µ‚Äc‚è‚ğíœ‚·‚é
+   * æŒ‡å®šã—ãŸç¯„å›²ã‚’ãŒé ˜åŸŸã®å…±é€šéƒ¨åˆ†ã ã‘ã‚’æ®‹ã—ã¦æ®‹ã‚Šã‚’å‰Šé™¤ã™ã‚‹
    ------------------------------*/
   void intersectWith(tTJSVariant r) {
     KRect *rect = ncbInstanceAdaptor<KRect>::AdaptorT::GetNativeInstance(r.AsObjectNoAddRef());
@@ -400,12 +400,12 @@ public:
   }
 
   /**------------------------------
-   * Œğ·”»’è
+   * äº¤å·®åˆ¤å®š
    *
-   * @param rect ‹éŒ`
-   * @return ‹éŒ`‚ÆŒğ·‚µ‚Ä‚¢‚é‚©H
+   * @param rect çŸ©å½¢
+   * @return çŸ©å½¢ã¨äº¤å·®ã—ã¦ã„ã‚‹ã‹ï¼Ÿ
    *
-   * ‹éŒ`‚ÆŒğ·‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğ”»’è‚·‚é
+   * çŸ©å½¢ã¨äº¤å·®ã—ã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
    ------------------------------*/
   bool intersects(const KRect * rect) const {
     for (tjs_uint i = 0; i < rectList.size(); i++)
@@ -416,13 +416,13 @@ public:
   }
 
   /**------------------------------
-   * •ïŠÜ”»’è
+   * åŒ…å«åˆ¤å®š
    *
-   * @param x XÀ•W
-   * @param y YÀ•W
-   * @return À•W‚ğ•ïŠÜ‚µ‚Ä‚¢‚é‚©H
+   * @param x Xåº§æ¨™
+   * @param y Yåº§æ¨™
+   * @return åº§æ¨™ã‚’åŒ…å«ã—ã¦ã„ã‚‹ã‹ï¼Ÿ
    *
-   * À•W(X,Y)‚ğ—Ìˆæ“à‚É•ïŠÜ‚µ‚Ä‚¢‚é‚©‚Ç‚¤‚©‚ğ”»’è‚·‚é
+   * åº§æ¨™(X,Y)ã‚’é ˜åŸŸå†…ã«åŒ…å«ã—ã¦ã„ã‚‹ã‹ã©ã†ã‹ã‚’åˆ¤å®šã™ã‚‹
    ------------------------------*/
   bool contains(tjs_real x, tjs_real y) const {
     for (tjs_uint i = 0; i < rectList.size(); i++)
@@ -433,20 +433,20 @@ public:
   }
 
   /*----------------------------------------------------------------------
-   * ˆÈ‰ºA“à•”ˆ—
+   * ä»¥ä¸‹ã€å†…éƒ¨å‡¦ç†
    ----------------------------------------------------------------------*/
-  // ‹éŒ`Š„‚è“–‚Ä
+  // çŸ©å½¢å‰²ã‚Šå½“ã¦
   void assignRect(const KRect *rect) {
     rectList.clear();
     rectList.push_back(*rect);
   }
 
-  // —ÌˆæŠ„‚è“–‚Ä
+  // é ˜åŸŸå‰²ã‚Šå½“ã¦
   void assignRegion(const KRegion *region) {
     rectList = region->rectList;
   }
 
-  // ‹éŒ`’Ç‰Á
+  // çŸ©å½¢è¿½åŠ 
   void includeRect(const KRect *rect) {
     KRegion r;
     r.assignRect(rect);
@@ -455,7 +455,7 @@ public:
       rectList.push_back(r.rectList[i]);
   }
 
-  // —Ìˆæ’Ç‰Á
+  // é ˜åŸŸè¿½åŠ 
   void includeRegion(const KRegion *region) {
     if (region->getEmpty())
       return;
@@ -467,7 +467,7 @@ public:
       rectList.push_back(r.rectList[i]);
   }
 
-  // ‹éŒ`œ‹
+  // çŸ©å½¢é™¤å»
   void excludeRect(const KRect *rect) {
     std::vector<KRect> newRectList;
 
@@ -494,13 +494,13 @@ public:
     rectList.swap(newRectList);
   }
 
-  // —Ìˆæœ‹
+  // é ˜åŸŸé™¤å»
   void excludeRegion(const KRegion *region) {
     for (tjs_uint32 i = 0; i < region->rectList.size(); i++)
       excludeRect(&(region->rectList[i]));
   }
   
-  // ‹éŒ`‚Æ‚ÌŒğ·
+  // çŸ©å½¢ã¨ã®äº¤å·®
   void intersectWithRect(const KRect *rect) {
     std::vector<KRect> newRectList;
 
@@ -514,7 +514,7 @@ public:
     rectList.swap(newRectList);
   }
 
-  // —Ìˆæ‚Æ‚ÌŒğ·
+  // é ˜åŸŸã¨ã®äº¤å·®
   void intersectWithRegion(const KRegion *region) {
     std::vector<KRect> newRectList;
 

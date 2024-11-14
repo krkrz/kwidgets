@@ -3,7 +3,7 @@
 static tjs_uint32 posHint, sizeHint, addHint, getTextWidthHint;
 
 //----------------------------------------------------------------------
-// ”z—ñ‚ğì¬
+// é…åˆ—ã‚’ä½œæˆ
 static tTJSVariant createArray(void)
 {
   iTJSDispatch2 *obj = TJSCreateArrayObject();
@@ -114,6 +114,6 @@ tTJSVariant table_find_text_range(tTJSVariant font, ttstr text, tjs_int w, tjs_i
 }
 
 //----------------------------------------------------------------------
-// ƒoƒCƒ“ƒh
+// ãƒã‚¤ãƒ³ãƒ‰
 NCB_REGISTER_FUNCTION(table_find_list_range, table_find_list_range);
 NCB_REGISTER_FUNCTION(table_find_text_range, table_find_text_range);

@@ -7,7 +7,7 @@
 #include "ncbind.hpp"
 
 //----------------------------------------------------------------------
-// éŒ¾
+// å®£è¨€
 extern tTJSVariant createDictionary(void);
 extern tTJSVariant createArray(void);
 extern tTJSVariant &getTempArray();
@@ -18,7 +18,7 @@ extern bool intersectsArray(tTJSVariant a1, tTJSVariant a2);
 extern tTJSVariant _unionDictionary(tTJSVariant v1, tTJSVariant v2, bool recursive);
 
 //----------------------------------------------------------------------
-// ’è”
+// å®šæ•°
 static const wchar_t *K_STYLE_DEF_KEY_PROPERTY_KEY     = L"key";
 static const wchar_t *K_STYLE_DEF_KEY_DEFAULT_VALUE    = L"defaultValue";
 static const wchar_t *K_STYLE_DEF_KEY_GLOBAL_RESOLVER  = L"resolver";
@@ -27,11 +27,11 @@ static const wchar_t *K_STYLE_DEF_KEY_LOCAL_RESOLVER   = L"localResolver";
 
 
 //----------------------------------------------------------------------
-// •Ï”
+// å¤‰æ•°
 tjs_uint32 countHint, _styleHint, addHint, ancestorsHint, reverseHint, windowHint, styleRepositoryHint, _idStyleKeysHint, idHint, findHint, isIdHint, _classStyleKeysHint, isClassHint, _classWeakStyleKeysHint, isClassWeakHint, isAttachedToWindowHint, insertHint, removeHint, _styleCompHint, classNameHint, styleParentHint, _styleFragCacheHint, classTreesHint, styleStatesHint, eraseHint;
 
 //----------------------------------------------------------------------
-// ”z—ñ‚ğƒJƒEƒ“ƒg
+// é…åˆ—ã‚’ã‚«ã‚¦ãƒ³ãƒˆ
 static tjs_uint
 countArray(tTJSVariant array)
 {
@@ -41,7 +41,7 @@ countArray(tTJSVariant array)
 }
 
 //----------------------------------------------------------------------
-// ƒXƒ^ƒCƒ‹ƒŒƒ|ƒWƒgƒŠQÆ
+// ã‚¹ã‚¿ã‚¤ãƒ«ãƒ¬ãƒã‚¸ãƒˆãƒªå‚ç…§
 static tTJSVariant *sStyleRepository;
 
 tTJSVariant &getStyleRepository() {
@@ -69,7 +69,7 @@ NCB_PRE_UNREGIST_CALLBACK(releaseStyleRepository);
 
 
 //----------------------------------------------------------------------
-// ƒvƒƒpƒeƒBæ“¾
+// ãƒ—ãƒ­ãƒ‘ãƒ†ã‚£å–å¾—
 bool getPropertyFromStyle(tTJSVariant style, tTJSVariant key, tTJSVariant result)
 {
 	ncbPropAccessor styleObj(style);

@@ -78,7 +78,7 @@ public:
 			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 			tTJSVariant funcResult;
 			args[0] = &elm;
-			funcClosure.FuncCall(0, NULL, NULL, &funcResult, args.size(), &args[0], NULL);
+			funcClosure.FuncCall(0, NULL, NULL, &funcResult, tjs_int(args.size()), &args[0], NULL);
 			resultObj.FuncCall(0, L"add", &addHint, NULL, funcResult);
 		}
 
@@ -120,7 +120,7 @@ public:
 			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 			tTJSVariant funcResult;
 			args[0] = &elm;
-			funcClosure.FuncCall(0, NULL, NULL, &funcResult, args.size(), &args[0], NULL);
+			funcClosure.FuncCall(0, NULL, NULL, &funcResult, tjs_int(args.size()), &args[0], NULL);
 			if (funcResult.Type() != tvtVoid)
 				resultObj.FuncCall(0, L"add", &addHint, NULL, funcResult);
 		}
@@ -163,7 +163,7 @@ public:
 			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 			tTJSVariant funcResult;
 			args[0] = &elm;
-			funcClosure.FuncCall(0, NULL, NULL, &funcResult, args.size(), &args[0], NULL);
+			funcClosure.FuncCall(0, NULL, NULL, &funcResult, tjs_int(args.size()), &args[0], NULL);
 			if (tjs_int(funcResult))
 				resultObj.FuncCall(0, L"add", &addHint, NULL, elm);
 		}
@@ -206,7 +206,7 @@ public:
 			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 			tTJSVariant funcResult;
 			args[0] = &elm;
-			funcClosure.FuncCall(0, NULL, NULL, &funcResult, args.size(), &args[0], NULL);
+			funcClosure.FuncCall(0, NULL, NULL, &funcResult, tjs_int(args.size()), &args[0], NULL);
 			if (! tjs_int(funcResult))
 				resultObj.FuncCall(0, L"add", &addHint, NULL, elm);
 		}
@@ -269,7 +269,7 @@ public:
 		for (tjs_uint i = 0; i < arrayObjCount; i++) {
 			tTJSVariant elm = arrayObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>());
 			args[0] = &elm;
-			funcClosure.FuncCall(0, NULL, NULL, NULL, args.size(), &args[0], NULL);
+			funcClosure.FuncCall(0, NULL, NULL, NULL, tjs_int(args.size()), &args[0], NULL);
 		}
 	}
 
@@ -296,7 +296,7 @@ public:
 			index = tjs_int(i);
 			args[0] = &elm;
 			args[1] = &index;
-			funcClosure.FuncCall(0, NULL, NULL, NULL, args.size(), &args[0], NULL);
+			funcClosure.FuncCall(0, NULL, NULL, NULL, tjs_int(args.size()), &args[0], NULL);
 		}
 	}
 
@@ -464,11 +464,11 @@ public:
 
 NCB_GET_INSTANCE_HOOK(ArraySupport)
 {
-  NCB_INSTANCE_GETTER(objthis) { // objthis Ç iTJSDispatch2* å^ÇÃà¯êîÇ∆Ç∑ÇÈ
-    ClassT* obj = GetNativeInstance(objthis);	// ÉlÉCÉeÉBÉuÉCÉìÉXÉ^ÉìÉXÉ|ÉCÉìÉ^éÊìæ
+  NCB_INSTANCE_GETTER(objthis) { // objthis „Çí iTJSDispatch2* Âûã„ÅÆÂºïÊï∞„Å®„Åô„Çã
+    ClassT* obj = GetNativeInstance(objthis);	// „Éç„Ç§„ÉÜ„Ç£„Éñ„Ç§„É≥„Çπ„Çø„É≥„Çπ„Éù„Ç§„É≥„ÇøÂèñÂæó
     if (!obj) {
-      obj = new ClassT(objthis);				// Ç»Ç¢èÍçáÇÕê∂ê¨Ç∑ÇÈ
-      SetNativeInstance(objthis, obj);		// objthis Ç… obj ÇÉlÉCÉeÉBÉuÉCÉìÉXÉ^ÉìÉXÇ∆ÇµÇƒìoò^Ç∑ÇÈ
+      obj = new ClassT(objthis);				// „Å™„ÅÑÂ†¥Âêà„ÅØÁîüÊàê„Åô„Çã
+      SetNativeInstance(objthis, obj);		// objthis „Å´ obj „Çí„Éç„Ç§„ÉÜ„Ç£„Éñ„Ç§„É≥„Çπ„Çø„É≥„Çπ„Å®„Åó„Å¶ÁôªÈå≤„Åô„Çã
     }
     return obj;
   }

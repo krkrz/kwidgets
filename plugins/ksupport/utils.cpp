@@ -13,21 +13,21 @@
 
 
 //----------------------------------------------------------------------
-// Šeíƒ†[ƒeƒBƒŠƒeƒBŠÖ”ŒQ
+// å„ç¨®ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£é–¢æ•°ç¾¤
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// •Ï”
+// å¤‰æ•°
 static tjs_uint32 countHint, clearHint, findHint;
 
 //----------------------------------------------------------------------
-// éŒ¾
+// å®£è¨€
 bool equalStruct(tTJSVariant v1, tTJSVariant v2);
 bool equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2);
 
 
 //----------------------------------------------------------------------
-// «‘‚ğì¬
+// è¾æ›¸ã‚’ä½œæˆ
 tTJSVariant createDictionary(void)
 {
 	iTJSDispatch2 *obj = TJSCreateDictionaryObject();
@@ -37,7 +37,7 @@ tTJSVariant createDictionary(void)
 }
 
 //----------------------------------------------------------------------
-// ”z—ñ‚ğì¬
+// é…åˆ—ã‚’ä½œæˆ
 tTJSVariant createArray(void)
 {
 	tTJSVariant result;
@@ -78,7 +78,7 @@ void releaseTempArray()
 NCB_PRE_UNREGIST_CALLBACK(releaseTempArray);
 
 //----------------------------------------------------------------------
-// ”z—ñ‚ğƒJƒEƒ“ƒg
+// é…åˆ—ã‚’ã‚«ã‚¦ãƒ³ãƒˆ
 static tjs_uint
 countArray(tTJSVariant array)
 {
@@ -88,7 +88,7 @@ countArray(tTJSVariant array)
 }
 
 //----------------------------------------------------------------------
-// ”z—ñ‚ÌŒğ·‚ğ”»’è
+// é…åˆ—ã®äº¤å·®ã‚’åˆ¤å®š
 bool
 intersectsArray(tTJSVariant a1, tTJSVariant a2)
 {
@@ -111,7 +111,7 @@ intersectsArray(tTJSVariant a1, tTJSVariant a2)
 
 
 //----------------------------------------------------------------------
-// «‘‚Ì—v‘f‚ğ‘S”äŠr‚·‚éCaller
+// è¾æ›¸ã®è¦ç´ ã‚’å…¨æ¯”è¼ƒã™ã‚‹Caller
 class DictMemberEquvalentCaller : public tTJSDispatch
 {
 public:
@@ -153,10 +153,10 @@ public:
 };
 
 //----------------------------------------------------------------------
-// \‘¢‘Ì”äŠrŠÖ”
+// æ§‹é€ ä½“æ¯”è¼ƒé–¢æ•°
 bool equalStruct(tTJSVariant v1, tTJSVariant v2)
 {
-	// ƒ^ƒCƒv‚ªƒIƒuƒWƒFƒNƒg‚È‚ç“Áê”»’è
+	// ã‚¿ã‚¤ãƒ—ãŒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãªã‚‰ç‰¹æ®Šåˆ¤å®š
 	if (v1.Type() == tvtObject
 		&& v2.Type() == tvtObject) {
 		if (v1.AsObjectNoAddRef() == v2.AsObjectNoAddRef())
@@ -165,21 +165,21 @@ bool equalStruct(tTJSVariant v1, tTJSVariant v2)
 		tTJSVariantClosure &o1 = v1.AsObjectClosureNoAddRef();
 		tTJSVariantClosure &o2 = v2.AsObjectClosureNoAddRef();
 
-		// ŠÖ”‚Ç‚¤‚µ‚È‚ç“Á•Êˆµ‚¢‚ÅŠÖ””äŠr
+		// é–¢æ•°ã©ã†ã—ãªã‚‰ç‰¹åˆ¥æ‰±ã„ã§é–¢æ•°æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Function", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Function", NULL)== TJS_S_TRUE)
 			return v1.DiscernCompare(v2);
 
-		// Array‚Ç‚¤‚µ‚È‚ç‘S€–Ú‚ğ”äŠr
+		// Arrayã©ã†ã—ãªã‚‰å…¨é …ç›®ã‚’æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Array", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Array", NULL)== TJS_S_TRUE) {
-			// ’·‚³‚ªˆê’v‚µ‚Ä‚¢‚È‚¯‚ê‚Î”äŠr¸”s
+			// é•·ã•ãŒä¸€è‡´ã—ã¦ã„ãªã‘ã‚Œã°æ¯”è¼ƒå¤±æ•—
 			tTJSVariant o1Count, o2Count;
 			(void)o1.PropGet(0, L"count", &countHint, &o1Count, NULL);
 			(void)o2.PropGet(0, L"count", &countHint, &o2Count, NULL);
 			if (! o1Count.DiscernCompare(o2Count))
 				return false;
-			// ‘S€–Ú‚ğ‡”Ô‚É”äŠr
+			// å…¨é …ç›®ã‚’é †ç•ªã«æ¯”è¼ƒ
 			tjs_int count = o1Count;
 			tTJSVariant o1Val, o2Val;
 			for (tjs_int i = 0; i < count; i++) {
@@ -191,16 +191,16 @@ bool equalStruct(tTJSVariant v1, tTJSVariant v2)
 			return true;
 		}
 
-		// Dictionary‚Ç‚¤‚µ‚È‚ç‘S€–Ú‚ğ”äŠr
+		// Dictionaryã©ã†ã—ãªã‚‰å…¨é …ç›®ã‚’æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL)== TJS_S_TRUE) {
-			// €–Ú”‚ªˆê’v‚µ‚Ä‚¢‚È‚¯‚ê‚Î”äŠr¸”s
+			// é …ç›®æ•°ãŒä¸€è‡´ã—ã¦ã„ãªã‘ã‚Œã°æ¯”è¼ƒå¤±æ•—
 			tjs_int o1Count, o2Count;
 			(void)o1.GetCount(&o1Count, NULL, NULL, NULL);
 			(void)o2.GetCount(&o2Count, NULL, NULL, NULL);
 			if (o1Count != o2Count)
 				return false;
-			// ‘S€–Ú‚ğ‡”Ô‚É”äŠr
+			// å…¨é …ç›®ã‚’é †ç•ªã«æ¯”è¼ƒ
 			DictMemberEquvalentCaller *caller = new DictMemberEquvalentCaller(o2);
 			tTJSVariantClosure closure(caller);
 			tTJSVariant(o1.EnumMembers(TJS_IGNOREPROP, &closure, NULL));
@@ -214,7 +214,7 @@ bool equalStruct(tTJSVariant v1, tTJSVariant v2)
 }
 
 //----------------------------------------------------------------------
-// «‘‚Ì—v‘f‚ğ‘S”äŠr‚·‚éCaller(”š‚Ì”äŠr‚Í‚ä‚é‚¢)
+// è¾æ›¸ã®è¦ç´ ã‚’å…¨æ¯”è¼ƒã™ã‚‹Caller(æ•°å­—ã®æ¯”è¼ƒã¯ã‚†ã‚‹ã„)
 class DictMemberEquvalentNumericLooseCaller : public tTJSDispatch
 {
 public:
@@ -255,10 +255,10 @@ public:
 };
 
 //----------------------------------------------------------------------
-// \‘¢‘Ì”äŠrŠÖ”(”š‚Ì”äŠr‚Í‚ä‚é‚¢)
+// æ§‹é€ ä½“æ¯”è¼ƒé–¢æ•°(æ•°å­—ã®æ¯”è¼ƒã¯ã‚†ã‚‹ã„)
 bool equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
 {
-	// ƒ^ƒCƒv‚ªƒIƒuƒWƒFƒNƒg‚È‚ç“Áê”»’è
+	// ã‚¿ã‚¤ãƒ—ãŒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãªã‚‰ç‰¹æ®Šåˆ¤å®š
 	if (v1.Type() == tvtObject
 		&& v2.Type() == tvtObject) {
 		if (v1.AsObjectNoAddRef() == v2.AsObjectNoAddRef()) {
@@ -268,24 +268,24 @@ bool equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
 		tTJSVariantClosure &o1 = v1.AsObjectClosureNoAddRef();
 		tTJSVariantClosure &o2 = v2.AsObjectClosureNoAddRef();
 
-		// ŠÖ”‚Ç‚¤‚µ‚È‚ç“Á•Êˆµ‚¢‚ÅŠÖ””äŠr
+		// é–¢æ•°ã©ã†ã—ãªã‚‰ç‰¹åˆ¥æ‰±ã„ã§é–¢æ•°æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Function", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Function", NULL)== TJS_S_TRUE) {
 
 			return v1.DiscernCompare(v2);
 		}
 
-		// Array‚Ç‚¤‚µ‚È‚ç‘S€–Ú‚ğ”äŠr
+		// Arrayã©ã†ã—ãªã‚‰å…¨é …ç›®ã‚’æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Array", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Array", NULL)== TJS_S_TRUE) {
-			// ’·‚³‚ªˆê’v‚µ‚Ä‚¢‚È‚¯‚ê‚Î”äŠr¸”s
+			// é•·ã•ãŒä¸€è‡´ã—ã¦ã„ãªã‘ã‚Œã°æ¯”è¼ƒå¤±æ•—
 			tTJSVariant o1Count, o2Count;
 			(void)o1.PropGet(0, L"count", &countHint, &o1Count, NULL);
 			(void)o2.PropGet(0, L"count", &countHint, &o2Count, NULL);
 			if (! o1Count.DiscernCompare(o2Count)) {
 				return false;
 			}
-			// ‘S€–Ú‚ğ‡”Ô‚É”äŠr
+			// å…¨é …ç›®ã‚’é †ç•ªã«æ¯”è¼ƒ
 			tjs_int count = o1Count;
 			tTJSVariant o1Val, o2Val;
 			for (tjs_int i = 0; i < count; i++) {
@@ -298,17 +298,17 @@ bool equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
 			return true;
 		}
 
-		// Dictionary‚Ç‚¤‚µ‚È‚ç‘S€–Ú‚ğ”äŠr
+		// Dictionaryã©ã†ã—ãªã‚‰å…¨é …ç›®ã‚’æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL)== TJS_S_TRUE) {
-			// €–Ú”‚ªˆê’v‚µ‚Ä‚¢‚È‚¯‚ê‚Î”äŠr¸”s
+			// é …ç›®æ•°ãŒä¸€è‡´ã—ã¦ã„ãªã‘ã‚Œã°æ¯”è¼ƒå¤±æ•—
 			tjs_int o1Count, o2Count;
 			(void)o1.GetCount(&o1Count, NULL, NULL, NULL);
 			(void)o2.GetCount(&o2Count, NULL, NULL, NULL);
 			if (o1Count != o2Count) {
 				return false;
 			}
-			// ‘S€–Ú‚ğ‡”Ô‚É”äŠr
+			// å…¨é …ç›®ã‚’é †ç•ªã«æ¯”è¼ƒ
 			DictMemberEquvalentNumericLooseCaller *caller = new DictMemberEquvalentNumericLooseCaller(o2);
 			tTJSVariantClosure closure(caller);
 			tTJSVariant(o1.EnumMembers(TJS_IGNOREPROP, &closure, NULL));
@@ -318,12 +318,12 @@ bool equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
 		}
 	}
 
-	// Real“¯m‚È‚çfloat‚É•ÏŠ·‚µ‚Ä”äŠr
+	// RealåŒå£«ãªã‚‰floatã«å¤‰æ›ã—ã¦æ¯”è¼ƒ
 	if (v1.Type() == tvtReal && v2.Type() == tvtReal) {
 		return  (fabs(float(tjs_real(v1)) - float(tjs_real(v2))) < FLT_EPSILON);
 	}
 
-	// ”š‚Ìê‡‚Í
+	// æ•°å­—ã®å ´åˆã¯
 	if ((v1.Type() == tvtInteger || v1.Type() == tvtReal)
 		&& (v2.Type() == tvtInteger || v2.Type() == tvtReal)) {
 		return v1.NormalCompare(v2);
@@ -333,7 +333,7 @@ bool equalStructNumericLoose(tTJSVariant v1, tTJSVariant v2)
 }
 
 //----------------------------------------------------------------------
-// «‘‚ÌƒL[‚ğ”z—ñ‚Å•Ô‚·Caller
+// è¾æ›¸ã®ã‚­ãƒ¼ã‚’é…åˆ—ã§è¿”ã™Caller
 class DictKeysCountCaller : public tTJSDispatch
 {
 public:
@@ -367,7 +367,7 @@ public:
 };
 
 //----------------------------------------------------------------------
-// «‘‚ÌƒL[‚ğ”z—ñ‚É‚µ‚Ä•Ô‚·
+// è¾æ›¸ã®ã‚­ãƒ¼ã‚’é…åˆ—ã«ã—ã¦è¿”ã™
 tTJSVariant dictionaryKeys(tTJSVariant dictionary)
 {
 	tTJSVariant result = createArray();
@@ -381,7 +381,7 @@ tTJSVariant dictionaryKeys(tTJSVariant dictionary)
 }
 
 //----------------------------------------------------------------------
-// «‘‚Ì’l‚ğ”z—ñ‚Å•Ô‚·Caller
+// è¾æ›¸ã®å€¤ã‚’é…åˆ—ã§è¿”ã™Caller
 class DictValuesCountCaller : public tTJSDispatch
 {
 public:
@@ -415,7 +415,7 @@ public:
 };  
 
 //----------------------------------------------------------------------
-// «‘‚Ì’l‚ğ”z—ñ‚É‚µ‚Ä•Ô‚·
+// è¾æ›¸ã®å€¤ã‚’é…åˆ—ã«ã—ã¦è¿”ã™
 tTJSVariant dictionaryValues(tTJSVariant dictionary)
 {
 	tTJSVariant result = createArray();
@@ -429,7 +429,7 @@ tTJSVariant dictionaryValues(tTJSVariant dictionary)
 }
 
 //----------------------------------------------------------------------
-// ”z—ñ‚Ì’l‚ğƒL[‚É‚Â«‘‚ğ•Ô‚·B
+// é…åˆ—ã®å€¤ã‚’ã‚­ãƒ¼ã«æŒã¤è¾æ›¸ã‚’è¿”ã™ã€‚
 tTJSVariant arrayHash(tTJSVariant array)
 {
 	tTJSVariant result = createDictionary();
@@ -453,7 +453,7 @@ tTJSVariant arrayHash(tTJSVariant array)
 tTJSVariant _unionDictionary(tTJSVariant v1, tTJSVariant v2, bool recursive);
 
 //----------------------------------------------------------------------
-// «‘‚ğŒ‹‡‚·‚écaller
+// è¾æ›¸ã‚’çµåˆã™ã‚‹caller
 
 class DictUnionCaller : public tTJSDispatch
 {
@@ -501,7 +501,7 @@ public:
 };
 
 //----------------------------------------------------------------------
-// «‘‚ğŒ‹‡‚µ‚½«‘‚ğ•Ô‚·
+// è¾æ›¸ã‚’çµåˆã—ãŸè¾æ›¸ã‚’è¿”ã™
 tTJSVariant _unionDictionary(tTJSVariant v1, tTJSVariant v2, bool recursive)
 {
 	tTJSVariant result = createDictionary();
@@ -544,7 +544,7 @@ tjs_error TJS_INTF_METHOD unionDictionary(tTJSVariant *result,
 }
 
 //----------------------------------------------------------------------
-// ”z—ñ‚Ì’†g‚ğvector‚É“WŠJ
+// é…åˆ—ã®ä¸­èº«ã‚’vectorã«å±•é–‹
 void array_to_vector(tTJSVariant &array, std::vector<tTJSVariant> &vec)
 {
 	tTJSVariantClosure &obj = array.AsObjectClosureNoAddRef();
@@ -560,14 +560,14 @@ void array_to_vector(tTJSVariant &array, std::vector<tTJSVariant> &vec)
 }
 
 //----------------------------------------------------------------------
-// TJSVariant”äŠr
+// TJSVariantæ¯”è¼ƒ
 bool TJSVariantCompare(const tTJSVariant &v1, const tTJSVariant &v2)
 {
 	return v1.LittlerThan(v2);
 }
 
 //----------------------------------------------------------------------
-// ˜aW‡
+// å’Œé›†åˆ
 tTJSVariant unionSet(tTJSVariant v1, tTJSVariant v2)
 {
 	std::vector<tTJSVariant> a1, a2, r;
@@ -593,7 +593,7 @@ tTJSVariant unionSet(tTJSVariant v1, tTJSVariant v2)
 }
 
 //----------------------------------------------------------------------
-// ×W‡
+// ç¢©é›†åˆ
 tTJSVariant intersectionSet(tTJSVariant v1, tTJSVariant v2)
 {
 	std::vector<tTJSVariant> a1, a2, r;
@@ -619,7 +619,7 @@ tTJSVariant intersectionSet(tTJSVariant v1, tTJSVariant v2)
 }
 
 //----------------------------------------------------------------------
-// ·W‡
+// å·®é›†åˆ
 tTJSVariant differenceSet(tTJSVariant v1, tTJSVariant v2)
 {
 	std::vector<tTJSVariant> a1, a2, r;
@@ -645,7 +645,7 @@ tTJSVariant differenceSet(tTJSVariant v1, tTJSVariant v2)
 }
 
 //----------------------------------------------------------------------
-// ”z—ñ‚ÌƒXƒ‰ƒCƒX
+// é…åˆ—ã®ã‚¹ãƒ©ã‚¤ã‚¹
 tTJSVariant sliceArray(tTJSVariant v, tjs_int from, tjs_int size)
 {
 	tTJSVariantClosure &src = v.AsObjectClosureNoAddRef();
@@ -666,7 +666,7 @@ tTJSVariant sliceArray(tTJSVariant v, tjs_int from, tjs_int size)
 }
 
 //----------------------------------------------------------------------
-// ”z—ñ‚Ì˜AŒ‹
+// é…åˆ—ã®é€£çµ
 tTJSVariant concatArray(tTJSVariant a1, tTJSVariant a2)
 {
 	tTJSVariant result = createArray();
@@ -702,7 +702,7 @@ tTJSVariant concatArray(tTJSVariant a1, tTJSVariant a2)
 }
 
 //----------------------------------------------------------------------
-// ‘S”z—ñ„‰ñ
+// å…¨é…åˆ—å·¡å›
 tjs_error TJS_INTF_METHOD eachArray(tTJSVariant *result,
 									tjs_int numparams,
 									tTJSVariant **param,
@@ -734,7 +734,7 @@ tjs_error TJS_INTF_METHOD eachArray(tTJSVariant *result,
 }
 
 //----------------------------------------------------------------------
-// «‘‚ğ„‰ñ‚·‚écaller
+// è¾æ›¸ã‚’å·¡å›ã™ã‚‹caller
 class DictIterateCaller : public tTJSDispatch
 {
 public:
@@ -773,7 +773,7 @@ public:
 };
 
 //----------------------------------------------------------------------
-// ‘S«‘„‰ñ
+// å…¨è¾æ›¸å·¡å›
 tjs_error TJS_INTF_METHOD eachDictionary(tTJSVariant *result,
 										 tjs_int numparams,
 										 tTJSVariant **param,
@@ -800,10 +800,10 @@ tjs_error TJS_INTF_METHOD eachDictionary(tTJSVariant *result,
 }
 
 //----------------------------------------------------------------------
-// \‘¢‘Ì”äŠr
+// æ§‹é€ ä½“æ¯”è¼ƒ
 tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 {
-	// ƒ^ƒCƒv‚ªƒIƒuƒWƒFƒNƒg‚È‚ç“Áê”»’è
+	// ã‚¿ã‚¤ãƒ—ãŒã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãªã‚‰ç‰¹æ®Šåˆ¤å®š
 	if (v1.Type() == tvtObject
 		&& v2.Type() == tvtObject) {
 		if (v1.AsObjectNoAddRef() == v2.AsObjectNoAddRef())
@@ -812,7 +812,7 @@ tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 		tTJSVariantClosure &o1 = v1.AsObjectClosureNoAddRef();
 		tTJSVariantClosure &o2 = v2.AsObjectClosureNoAddRef();
 
-		// ŠÖ”‚Ç‚¤‚µ‚È‚ç“Á•Êˆµ‚¢‚ÅŠÖ””äŠr
+		// é–¢æ•°ã©ã†ã—ãªã‚‰ç‰¹åˆ¥æ‰±ã„ã§é–¢æ•°æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Function", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Function", NULL)== TJS_S_TRUE) {
 			if (v1.LittlerThan(v2))
@@ -823,10 +823,10 @@ tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 				return 0;
 		}
 
-		// Array‚Ç‚¤‚µ‚È‚ç”äŠr‚Å‚«‚é€–Ú‚ğ”äŠr
+		// Arrayã©ã†ã—ãªã‚‰æ¯”è¼ƒã§ãã‚‹é …ç›®ã‚’æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Array", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Array", NULL)== TJS_S_TRUE) {
-			// ’·‚³‚Ì’Z‚¢•û‚Ü‚Å”äŠr
+			// é•·ã•ã®çŸ­ã„æ–¹ã¾ã§æ¯”è¼ƒ
 			tTJSVariant o1Count, o2Count;
 			(void)o1.PropGet(0, L"count", &countHint, &o1Count, NULL);
 			(void)o2.PropGet(0, L"count", &countHint, &o2Count, NULL);
@@ -839,7 +839,7 @@ tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 				if (result != 0)
 					return result;
 			}
-			// ”äŠr‚Å‚«‚é€–Ú‚Ü‚Åˆê’v‚µ‚½ê‡”z—ñ‚Ì’·‚³‚Å”äŠr
+			// æ¯”è¼ƒã§ãã‚‹é …ç›®ã¾ã§ä¸€è‡´ã—ãŸå ´åˆé…åˆ—ã®é•·ã•ã§æ¯”è¼ƒ
 			if (tjs_int(o1Count) < tjs_int(o2Count))
 				return -1;
 			else if (tjs_int(o2Count) < tjs_int(o1Count))
@@ -848,10 +848,10 @@ tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 				return 0;
 		}
 
-		// Dictionary‚Ç‚¤‚µ‚È‚ç‘S€–Ú‚ğ”äŠr
+		// Dictionaryã©ã†ã—ãªã‚‰å…¨é …ç›®ã‚’æ¯”è¼ƒ
 		if (o1.IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL)== TJS_S_TRUE
 			&& o2.IsInstanceOf(0, NULL, NULL, L"Dictionary", NULL)== TJS_S_TRUE) {
-			// —¼«‘‚ÌƒL[‚ğ“‡‚µ‚Ä”äŠr
+			// ä¸¡è¾æ›¸ã®ã‚­ãƒ¼ã‚’çµ±åˆã—ã¦æ¯”è¼ƒ
 			tTJSVariant o1Keys, o2Keys;
 			o1Keys = dictionaryKeys(v1);
 			o2Keys = dictionaryKeys(v2);
@@ -873,7 +873,7 @@ tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 						return result;
 				}
 			}
-			// ‘SƒL[‚ğ”äŠr‚µ‚Ä·‚ª‚È‚¯‚ê‚Îˆê’v
+			// å…¨ã‚­ãƒ¼ã‚’æ¯”è¼ƒã—ã¦å·®ãŒãªã‘ã‚Œã°ä¸€è‡´
 			return 0;
 		}
 	}
@@ -887,7 +887,7 @@ tjs_int compareStruct(tTJSVariant v1, tTJSVariant v2)
 }
 
 //----------------------------------------------------------------------
-// \‘¢‘Ì•¡»
+// æ§‹é€ ä½“è¤‡è£½
 tTJSVariant duplicateStruct(tTJSVariant src);
 
 	class DictMemberDuplicateCaller : public tTJSDispatch

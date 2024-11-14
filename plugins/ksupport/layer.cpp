@@ -15,7 +15,7 @@
 
 
 //----------------------------------------------------------------------
-// ƒ†[ƒeƒBƒŠƒeƒBŠÖ”
+// ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£é–¢æ•°
 enum map_t
 {
   MAP_CONST,
@@ -38,26 +38,26 @@ enum color_space_t {
 
 struct rgb_t
 {
-  int b; // 0.0-255
-  int g; // 0.0-255
-  int r; // 0.0-255
+	double b; // 0.0-255
+	double g; // 0.0-255
+	double r; // 0.0-255
 
-	rgb_t(int _r, int _g, int _b) : b(_b), g(_g), r(_r) {}
+	rgb_t(double _r, double _g, double _b) : b(_b), g(_g), r(_r) {}
 	rgb_t() {}
 };
 
 struct argb_t
 {
 	rgb_t rgb;
-	int a;
-	argb_t (int _r, int _g, int _b, int _a) : rgb(_r, _g, _b), a(_a) {}
+	double a;
+	argb_t (double _r, double _g, double _b, double _a) : rgb(_r, _g, _b), a(_a) {}
 	argb_t () {}
 	argb_t (uint32_t color)
 		: rgb((color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff)
 		, a((color >> 24) & 0xff) {
 	}
 	uint32_t toUint32(void) const {
-		return (a << 24) | (rgb.r << 16) | (rgb.g << 8) | rgb.b;
+		return (uint32_t(a) << 24) | (uint32_t(rgb.r) << 16) | (uint32_t(rgb.g) << 8) | uint32_t(rgb.b);
 	}
 };
 
@@ -69,7 +69,7 @@ struct color_tuple_t
 struct color_tuple_a_t
 {
 	color_tuple_t color;
-	int a;
+	double a;
 };
 
 struct range_t
@@ -80,7 +80,7 @@ struct range_t
 };
 
 //----------------------------------------------------------------------
-// ƒJƒ‰[ƒRƒ“ƒo[ƒWƒ‡ƒ“
+// ã‚«ãƒ©ãƒ¼ã‚³ãƒ³ãƒãƒ¼ã‚¸ãƒ§ãƒ³
 
 class ColorSpaceConverter
 {
@@ -262,7 +262,7 @@ public:
 		p = v * (1 - s);
 		q = v * (1 - f * s);
 		t = v * (1 - (1 - f) * s);
-		float r, g, b;
+		double r, g, b;
 		switch (hi) {
 		case 0: r = v; g = t; b = p; break;
 		case 1: r = q; g = v; b = p; break;
@@ -416,7 +416,11 @@ private:
 	static color_tuple_a_t fromArray(tTJSVariant array) {
 		if (array.Type() != tvtObject) {
 			tjs_uint32 color = tjs_uint32(tjs_int(array));
-			color_tuple_a_t result = { (color >> 16) & 0xff, (color >> 8) & 0xff,  color & 0xff, (color >> 24) & 0xff };
+			color_tuple_a_t result = {
+				double((color >> 16) & 0xff),
+				double((color >> 8) & 0xff),
+				double(color & 0xff),
+				double((color >> 24) & 0xff) };
 			return result;
 		} else {
 			ncbPropAccessor arrayObj(array);
@@ -444,7 +448,12 @@ private:
 
 public:
 	static tTJSVariant colorToArgbTuple(tjs_uint32 color) {
-		color_tuple_a_t rgbTuple = { (color >> 16) & 0xff, (color >> 8) & 0xff,  color & 0xff, (color >> 24) & 0xff };
+		color_tuple_a_t rgbTuple = {
+			double((color >> 16) & 0xff),
+			double((color >> 8) & 0xff),
+			double(color & 0xff),
+			double((color >> 24) & 0xff)
+		};
 		return toArray(rgbTuple);
 	}
 
@@ -509,7 +518,7 @@ NCB_REGISTER_CLASS(ColorSpace)
 class LayerSupport
 {
 private:
-  iTJSDispatch2 *mObjthis; //< ƒIƒuƒWƒFƒNƒgî•ñ‚ÌQÆ
+  iTJSDispatch2 *mObjthis; //< ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆæƒ…å ±ã®å‚ç…§
 
 public:
   LayerSupport(iTJSDispatch2 *objthis) : mObjthis(objthis) {
@@ -992,7 +1001,7 @@ public:
   }
   
   tjs_uint32 samplingBuffer(unsigned char* buffer, tjs_int width, tjs_int height, tjs_real sx, tjs_real sy) {
-    tjs_int ix = floor(sx), iy = floor(sy);
+	  tjs_int ix = int(floor(sx)), iy = int(floor(sy));
     tjs_real fx = sx - ix, fy = sy - iy;
     tjs_uint32 c0 = fetchBuffer(buffer, width, height, ix    , iy);
     tjs_uint32 c1 = fetchBuffer(buffer, width, height, ix + 1, iy);
@@ -1013,7 +1022,6 @@ public:
     layerHeight = layerObj.GetValue(L"height",  ncbTypedefs::Tag<tjs_int>());
     pitch = layerObj.GetValue(L"mainImageBufferPitch", ncbTypedefs::Tag<tjs_int>());
     imageBuffer = reinterpret_cast<unsigned char*>(layerObj.GetValue(L"mainImageBufferForWrite", ncbTypedefs::Tag<tjs_int64>()));
-    tjs_int clipLeft, clipTop, clipWidth, clipHeight;
     
     auto srcBuffer = new unsigned char [ width * height * 4 ];
     
@@ -1044,11 +1052,11 @@ public:
 
 NCB_GET_INSTANCE_HOOK(LayerSupport)
 {
-  NCB_INSTANCE_GETTER(objthis) { // objthis ‚ğ iTJSDispatch2* Œ^‚Ìˆø”‚Æ‚·‚é
-    ClassT* obj = GetNativeInstance(objthis);	// ƒlƒCƒeƒBƒuƒCƒ“ƒXƒ^ƒ“ƒXƒ|ƒCƒ“ƒ^æ“¾
+  NCB_INSTANCE_GETTER(objthis) { // objthis ã‚’ iTJSDispatch2* å‹ã®å¼•æ•°ã¨ã™ã‚‹
+    ClassT* obj = GetNativeInstance(objthis);	// ãƒã‚¤ãƒ†ã‚£ãƒ–ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ãƒã‚¤ãƒ³ã‚¿å–å¾—
     if (!obj) {
-      obj = new ClassT(objthis);				// ‚È‚¢ê‡‚Í¶¬‚·‚é
-      SetNativeInstance(objthis, obj);		// objthis ‚É obj ‚ğƒlƒCƒeƒBƒuƒCƒ“ƒXƒ^ƒ“ƒX‚Æ‚µ‚Ä“o˜^‚·‚é
+      obj = new ClassT(objthis);				// ãªã„å ´åˆã¯ç”Ÿæˆã™ã‚‹
+      SetNativeInstance(objthis, obj);		// objthis ã« obj ã‚’ãƒã‚¤ãƒ†ã‚£ãƒ–ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã¨ã—ã¦ç™»éŒ²ã™ã‚‹
     }
     return obj;
   }
@@ -1069,7 +1077,7 @@ NCB_ATTACH_CLASS_WITH_HOOK(LayerSupport, Layer) {
 //----------------------------------------------------------------------
 static  void setConstants(void)
 {
-  // ’è”‚ğ“o˜^
+  // å®šæ•°ã‚’ç™»éŒ²
   TVPExecuteExpression(L"global.csRGB = 0");
   TVPExecuteExpression(L"global.csSRGB = 1");
   TVPExecuteExpression(L"global.csHSV = 2");
@@ -1082,7 +1090,7 @@ NCB_PRE_REGIST_CALLBACK(setConstants);
 
 static void TJS_USERENTRY tryDeleteConstants(void *data)
 {
-  // ’è”‚ğíœ
+  // å®šæ•°ã‚’å‰Šé™¤
   TVPExecuteScript(L"delete global[\"csRGB\"];");
   TVPExecuteScript(L"delete global[\"csSRGB\"];");
   TVPExecuteScript(L"delete global[\"csHSV\"];");
