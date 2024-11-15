@@ -383,6 +383,21 @@ class KInterpolateDispatcher {
 		}
 	}
 
+	property value {
+		getter {
+			return owner[valueName];
+		}
+		setter(v) {
+			owner[valueName] = v;
+		}
+	}
+
+	function dispatch() {
+		if (dispatchName == "")
+			return;
+		owner[dispatchName]();
+	}
+
 	function complete() {
 		if (running) {
 			stopTick();
@@ -412,13 +427,13 @@ class KInterpolateDispatcher {
 		var lapsTime = System.getTickCount() - beginTick;
 		if (lapsTime >= interval) {
 			stopTick();
-			owner[valueName] = toValue;
-			owner[dispatchName]();
+			value = toValue;
+			dispatch();
 		} else {
 			var t = lapsTime / interval;
 			t = Math.pow(t, getOption("exponent", 0.5));
-			owner[valueName] = lerpFunction(fromValue, toValue, t);
-			owner[dispatchName]();
+			value = lerpFunction(fromValue, toValue, t);
+			dispatch();
 		}
 	}
 

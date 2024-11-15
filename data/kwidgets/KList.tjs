@@ -867,6 +867,14 @@ class KList extends KVirtualWidget
 		// 選択アイテムの背景色を変更
 		redrawAll();
 
+		// コールバック
+		if (reconstructRequired)
+			onReconstruct();
+		if (relocateRequired)
+			onRelocate();
+		if (resizeRequired)
+			onResize();
+
 		// フラグリセット
 		relocateRequired = false;
 		reconstructRequired = false;
@@ -946,6 +954,15 @@ class KList extends KVirtualWidget
 									 K_WIDGET_MIN_POSSIBLE_WIDTH + item.depth * slideWidth);
 			treeHeight += item.height;
 		}
+	}
+
+	function onRelocate() {
+	}
+
+	function onReconstruct() {
+	}
+
+	function onResize() {
 	}
 
 	// 開いたばかりのアイテムを注視

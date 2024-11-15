@@ -3359,6 +3359,10 @@ class KTimeLineItem extends KListItem
 
 	// フレームを描画する
 	function drawFrame(view, layerIndex, frameIndex, y, frame, length) {
+		onDrawFrame(...);
+	}
+
+	function onDrawFrame(view, layerIndex, frameIndex, y, frame, length) {
 		timeline_draw_frame(this, view, layerIndex, frameIndex, y, frame, length, markerMask);
 		return;
 
@@ -3881,6 +3885,8 @@ class KTimeLineControl extends KEntity
 	var _playBeginTime;
 	// ビュー表示サイズ
 	var _viewWidth = 2;
+	var _frameWidth;
+	var frameWidthDispatcher;
 	// 時間選択時の再レンダリング
 	var renderAtTimeModification = true;
 	// 検索対象
@@ -3985,6 +3991,7 @@ class KTimeLineControl extends KEntity
 		_layerViewScroll.onChildViewModified = this.onLayerViewModified;
 		_layerListScroll.onChildViewModified = this.onLayerListModified;
 		_layerList.timeLineView = _layerView;
+		_layerList.onRelocate = onListRelocate;
 		_viewWidthButton.focusable = false;
 		_viewWidthButton.onValueModified = this.onViewWidthChange;
 
@@ -3997,12 +4004,19 @@ class KTimeLineControl extends KEntity
 		// ステータスバー生成
 		timeInputEnabled = 0;
 		redrawStatusBar();
+
+		frameWidthDispatcher = new KInterpolateDispatcher(this, %[ valueName: "frameWidth",
+																   dispatchName: "",
+																   exponent: 0.2 ]);
+
+		_frameWidth = TIMELINE_FRAME_WIDTH_LIST[_viewWidth];
 	}
 
 	/*------------------------------
 	 * ファイナライザ
 	 ------------------------------*/
 	function finalize {
+		invalidate frameWidthDispatcher;
 		discard(_playTimer);
 		super.finalize(...);
 	}
@@ -4037,7 +4051,8 @@ class KTimeLineControl extends KEntity
 	 * 辞書登録
 	 ------------------------------*/
 	function onUnserialize(dict, key) {
-		viewWidth = dict.init(key + "_view_width", viewWidth);
+		_viewWidth = dict.init(key + "_view_width", viewWidth);
+		_frameWidth = TIMELINE_FRAME_WIDTH_LIST[viewWidth];
 	}
 
 	function onSerialize(dict, key) {
@@ -4586,6 +4601,10 @@ class KTimeLineControl extends KEntity
 		invalidateMaxTime();
 	}
 
+	function onListRelocate {
+		view.redrawAll();
+	}
+
 	// レイヤリストの選択アイテム変更を監視
 	function onListSelect {
 		resetCursor();
@@ -4619,7 +4638,7 @@ class KTimeLineControl extends KEntity
 
 	property TIMELINE_FRAME_WIDTH {
 		getter {
-			return global.TIMELINE_FRAME_WIDTH_LIST[_viewWidth];
+			return frameWidth;
 		}
 	}
 
@@ -4628,9 +4647,27 @@ class KTimeLineControl extends KEntity
 			return _viewWidth;
 		}
 		setter (v) {
+			v = int(v);
+			if (_viewWidth == v)
+				return;
 			_viewWidth = v;
 			_viewWidthButton.label = TIMELINE_FRAME_WIDTH_LABEL_LIST[v];
+			frameWidthDispatcher.interpolate(TIMELINE_FRAME_WIDTH_LIST[_viewWidth]);
+		}
+	}
+
+	property frameWidth {
+		getter {
+			return _frameWidth;
+		}
+		setter (v) {
+			if (v == _frameWidth)
+				return;
+			var time = _layerViewScroll.horizontalBar.targetPos  / _frameWidth;
+			_frameWidth = v;
+			var pos = time * _frameWidth;
 			invalidateMaxTime();
+			_layerViewScroll.setChildViewPos(int(pos), _layerViewScroll.verticalBar.targetPos);
 			_timeLocator.redrawAll();
 			_layerView.onUpdateFrameWidth();
 			_layerView.redrawAll();
