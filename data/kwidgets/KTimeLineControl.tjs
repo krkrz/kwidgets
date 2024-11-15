@@ -4007,7 +4007,7 @@ class KTimeLineControl extends KEntity
 
 		frameWidthDispatcher = new KInterpolateDispatcher(this, %[ valueName: "frameWidth",
 																   dispatchName: "",
-																   exponent: 0.2 ]);
+																   exponent: 1 ]);
 
 		_frameWidth = TIMELINE_FRAME_WIDTH_LIST[_viewWidth];
 	}
@@ -4638,7 +4638,7 @@ class KTimeLineControl extends KEntity
 
 	property TIMELINE_FRAME_WIDTH {
 		getter {
-			return frameWidth;
+			return _frameWidth;
 		}
 	}
 
@@ -4652,7 +4652,8 @@ class KTimeLineControl extends KEntity
 				return;
 			_viewWidth = v;
 			_viewWidthButton.label = TIMELINE_FRAME_WIDTH_LABEL_LIST[v];
-			frameWidthDispatcher.interpolate(TIMELINE_FRAME_WIDTH_LIST[_viewWidth]);
+			frameWidth = TIMELINE_FRAME_WIDTH_LIST[_viewWidth];
+//			frameWidthDispatcher.interpolate(TIMELINE_FRAME_WIDTH_LIST[_viewWidth], 1000);
 		}
 	}
 
