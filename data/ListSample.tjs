@@ -135,6 +135,10 @@ class IconListItem extends KListItem
     else
       icons = [ "k_list_check_on", "gotta_mail" ];
   }
+
+	function onIconRightClick(index) {
+		onIconClick(...);
+	}
 }
 
 //----------------------------------------------------------------------

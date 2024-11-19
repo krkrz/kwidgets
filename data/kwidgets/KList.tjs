@@ -1195,7 +1195,7 @@ class KList extends KVirtualWidget
 				}
 
 				// 選択範囲右クリックコールバック
-				if (pressSelection)
+				if (pressSelection) 
 					onSelectionRightClick(...);
 				// バックグラウンド右クリックコールバック
 				else
@@ -1779,10 +1779,16 @@ class KList extends KVirtualWidget
 			defaultKeyDownFunc(...);
 	}
 
-	function onSelectionRightClick() {
-		if (focusedItem !== void) {
-			if (focusedItem.rightClickable)
-				focusedItem.onRightClick(...);
+	function onSelectionRightClick(targetItem, x, y, button, shift) {
+		if (targetItem !== void) {
+			if (targetItem.rightClickable) {
+				if (targetItem.hasIcon
+					&& targetItem.iconClickable
+					&& targetItem.inIcon(x, y- targetItem.top))
+					targetItem.onIconRightClick(targetItem.iconIndexAt(x));
+				else
+					targetItem.onRightClick(...);
+			}
 			else
 				onBackgroundRightClick(...);
 		}
@@ -2831,6 +2837,9 @@ class KListItem
 		root.focus();
 	}
 
+	function onIconRightClick(iconIndex) {
+	}
+
 	// 全選択状態をリセット
 	function clearAllSelection() {
 		selected = false;
@@ -3644,8 +3653,13 @@ class KListItem
 			onIconClick(iconIndexAt(x));
 		}
 		else if (button == mbRight
-			&& rightClickable) {
-			onRightClick(x, y, shift);
+				 && rightClickable) {
+			if (hasIcon
+				&& iconClickable
+				&& inIcon(x, y)) {
+				onIconRightClick(iconIndexAt(x));
+			} else
+				onRightClick(x, y, shift);
 		}
 		onMouseDown(...);
 	}
