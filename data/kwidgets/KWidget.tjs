@@ -1509,17 +1509,8 @@ class KWidget extends Layer
 	}
 
 	function storePersistentDictionary(recursive = true) {
-		if (_isAvoidDictionaryRegistration)
-			return;
-
-		if (_dict === void)
-			return;
-
-		onStorePersistentDictionary(_dict);
-
-		if (! recursive
-			|| ! _allowChildDictionaryRegistration)
-			return;
+		if (_dict !== void)
+			onStorePersistentDictionary(_dict);
 
 		for (var i = 0; i < children.count; i++) {
 			var child = children[i];

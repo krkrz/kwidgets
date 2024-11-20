@@ -398,24 +398,15 @@ class KList extends KVirtualWidget
 			|| ! _allowChildDictionaryRegistration)
 			return;
 
-		if (! recursive
-			|| ! _allowChildDictionaryRegistration)
-			return;
-
 		for (var i = 0; i < childList.count; i++) {
 			var child = childList[i];
 			child.bindPersistentDictionary(dict);
 		}
 	}
 
-	function storePersistentDictionary(dict, recursive = true) {
-		if (_isAvoidDictionaryRegistration)
-			return;
-
-		if (_dict === void)
-			return;
-
-		onStorePersistentDictionary(_dict);
+	function storePersistentDictionary(recursive = true) {
+		if (_dict !== void)
+			onStorePersistentDictionary(_dict);
 
 		for (var i = 0; i < childList.count; i++) {
 			var child = childList[i];
@@ -3196,17 +3187,13 @@ class KListItem
 	}
 
 	function storePersistentDictionary() {
-		if (_isAvoidDictionaryRegistration)
-			return;
-
-		if (_dict === void)
-			return;
-
-		if (name != ""
-			&& _isRecordOpenedToDictionary) {
-			_dict.set(name + "_opened", opened);
+		if (_dict !== void) {
+			if (name != ""
+				&& _isRecordOpenedToDictionary) {
+				_dict.set(name + "_opened", opened);
+			}
+			onStorePersistentDictionary(_dict);
 		}
-		onStorePersistentDictionary(_dict);
 
 		for (var i = 0; i < childList.count; i++) {
 			var child = childList[i];
@@ -4406,9 +4393,6 @@ class KWidgetHolderListItem extends KListItem
 	}
 
 	function storePersistentDictionary() {
-		if (_isAvoidDictionaryRegistration)
-			return;
-
 		super.storePersistentDictionary();
 		if (_widget !== void)
 			_widget.storePersistentDictionary();

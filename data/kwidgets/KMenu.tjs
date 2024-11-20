@@ -258,13 +258,8 @@ class KMenuItem extends MenuItem
 	}
 
 	function storePersistentDictionary(dict) {
-		if (_isAvoidDictionaryRegistration)
-			return;
-
-		if (_dict === void)
-			return;
-
-		onStorePersistentDictionary(_dict);
+		if (_dict !== void)
+			onStorePersistentDictionary(_dict);
 
 		for (var i = 0; i < children.count; i++) {
 			var child = children[i];
