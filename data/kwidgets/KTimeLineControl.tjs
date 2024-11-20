@@ -799,7 +799,8 @@ class KTimeLineLayerView extends KVirtualWidget
 				|| inDragRangeSelector
 				|| inDragSelection
 				|| inDragAreaAssign
-				|| inDragAreaMove;
+				|| inDragAreaMove
+				|| inDragCustomMouseEvent;
 		}
 	}
 
@@ -808,6 +809,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		updateMouseOver(...);
 		cursor = crDefault;
 		boundaryDragFrameIndex = -1;
+		curCustomMouseEvent = void;
 		if (cursorKeyRangeSelectorDragging
 			|| rangeDragMoving) {
 			return;
@@ -838,6 +840,11 @@ class KTimeLineLayerView extends KVirtualWidget
 			cursor = crHSplit;
 			return;
 		}
+		curCustomMouseEvent = item.getCustomMouseEvent(x, y);
+		if (curCustomMouseEvent !== void) {
+			cursor = curCustomMouseEvent.cursor;
+			return;
+		}
 	}
 
 	function matchPoint(layer, frameIndex) {
@@ -866,6 +873,14 @@ class KTimeLineLayerView extends KVirtualWidget
 		point = newPoint;
 		redrawPoint(prevPoint);
 		redrawPoint(point);
+		callPointCallback(prevPoint, "onPointLeave");
+		callPointCallback(point, "onPointEnter");
+	}
+
+	function callPointCallback(point, callback) {
+		if (point === void)
+			return;
+		list.drawItemList[point[0]][callback](point[1]);
 	}
 
 	function beginRangeSelector(x, y) {
@@ -1504,6 +1519,34 @@ class KTimeLineLayerView extends KVirtualWidget
 	}
 
 	//----------------------------------------------------------------------
+	// マウスイベント処理
+	var customMouseEventDragging = false;
+	var curCustomMouseEvent;
+
+	property inDragCustomMouseEvent {
+		getter {
+			return customMouseEventDragging;
+		}
+	}
+
+	function dragEnterCustomMouseEvent(x, y, shift) {
+		leftPressed = false;
+		rightPressed  = false;
+		customMouseEventDragging = true;
+		curCustomMouseEvent.callbacks.onDragEnter(curCustomMouseEvent.frameIndex, x, y, shift);
+	}
+
+	function dragMoveCustomMouseEvent(x, y, shift) {
+		curCustomMouseEvent.callbacks.onDragMove(curCustomMouseEvent.frameIndex, x, y, shift);
+	}
+
+	function dragLeaveCustomMouseEvent(x, y, shift) {
+		curCustomMouseEvent.callbacks.onDragLeave(curCustomMouseEvent.frameIndex, x, y, shift);
+		customMouseEventDragging = false;
+		curCustomMouseEvent = void;
+	}
+
+	//----------------------------------------------------------------------
 	// ドラッグ処理
 
 	//------------------------------
@@ -1518,6 +1561,8 @@ class KTimeLineLayerView extends KVirtualWidget
 			dragEnterAreaMove(...);
 		else if (boundaryDragFrameIndex >= 0)
 			dragEnterFrameBoundary(...);
+		else if (curCustomMouseEvent !== void)
+			dragEnterCustomMouseEvent(...);
 		else if (isPointInSelection(x, y))
 			dragEnterSelection(...);
 		else
@@ -1533,6 +1578,8 @@ class KTimeLineLayerView extends KVirtualWidget
 			dragMoveAreaMove(...);
 		if (inDragFrameBoundary)
 			dragMoveFrameBoundary(...);
+		if (inDragCustomMouseEvent)
+			dragMoveCustomMouseEvent(...);
 		if (inDragSelection)
 			dragMoveSelection(...);
 		if (inDragRangeSelector)
@@ -1548,6 +1595,8 @@ class KTimeLineLayerView extends KVirtualWidget
 			dragLeaveAreaMove(...);
 		if (inDragFrameBoundary)
 			dragLeaveFrameBoundary(...);
+		if (inDragCustomMouseEvent)
+			dragLeaveCustomMouseEvent(...);
 		if (inDragSelection)
 			dragLeaveSelection(...);
 		if (inDragRangeSelector)
@@ -3620,6 +3669,46 @@ class KTimeLineItem extends KListItem
 			else
 				redrawAllFrame();
 		}
+	}
+
+	//----------------------------------------------------------------------
+	// ポイントフック
+	function onPointEnter(frameIndex) {
+	}
+
+	function onPointLeave(frameIndex) {
+	}
+
+	//----------------------------------------------------------------------
+	// マウスイベント管理
+	var _customMouseEvents = [];
+
+	function clearCustomMouseEvents() {
+		_customMouseEvents.clear();
+	}
+
+	function registerCustomMouseEvent(frameIndex, range, cursor, callbacks) {
+		_customMouseEvents.add(%[ frameIndex: frameIndex,
+								  range: range,
+								  cursor: cursor,
+								  callbacks: callbacks ]);
+	}
+
+	function getCustomMouseEvent(x, y) {
+		var events = _customMouseEvents._select(x, y, function(event, x, y) {
+			return event.range.contains(x, y);
+		});
+		if (events.count)
+			return events[0];
+		else
+			return void;
+	}
+
+	function getFrameRange(frameIndex) {
+		var frame = frameList[frameIndex];
+		var nextFrame = frameList[frameIndex + 1];
+		var length = nextFrame.time - frame.time;
+		return new KRect(TIMELINE_FRAME_WIDTH * frame.time, top, TIMELINE_FRAME_WIDTH * length, height);
 	}
 };
 

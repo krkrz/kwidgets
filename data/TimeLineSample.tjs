@@ -771,6 +771,39 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
     frameAt(findFrame(time)).content = content;
     redrawAllFrame();
   }
+
+	//----------------------------------------------------------------------
+	// カスタムマウスイベントのテスト
+	// (フレームの真ん中にカーソルを合わせるとカーソルが指カーソルになり、そのままドラッグしてマウスイベントを受け取れる
+
+	function onPointEnter(frameIndex) {
+		var range = getFrameRange(frameIndex);
+		var cx = (range.left + range.right) / 2;
+		var cy = (range.top + range.bottom) / 2;
+		clearCustomMouseEvents();
+		registerCustomMouseEvent(frameIndex,
+								 new KRect(cx - 4, cy - 4, 8, 8),
+								 crHandPoint,
+								 %[ onDragEnter: onFrameDragEnter,
+									onDragMove:  onFrameDragMove,
+									onDragLeave: onFrameDragLeave ]);
+	}
+
+	function onPointLeave {
+		clearCustomMouseEvents();
+	}
+
+	function onFrameDragEnter(frameIndex, x, y, shift) {
+		Debug.message("onFrameDragEnter", frameIndex, x, y, shift);
+	}
+
+	function onFrameDragMove(frameIndex, x, y, shift) {
+		Debug.message("onFrameDragMove", frameIndex, x, y, shift);
+	}
+
+	function onFrameDragLeave(frameIndex, x, y, shift) {
+		Debug.message("onFrameDragLeave", frameIndex, x, y, shift);
+	}
 }
 
 /*----------------------------------------------------------------------
