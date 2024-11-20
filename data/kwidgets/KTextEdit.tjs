@@ -500,9 +500,6 @@ class KTextEdit extends KVirtualWidget
 	var _respondToValueModification;
 	// テキストを隠す？
 	var _hideText;
-	// 辞書
-	var dictKey;
-	var dict;
 	// フォントサイズキャッシュ
 	var fontWidthCache = %[];
 
@@ -581,9 +578,6 @@ class KTextEdit extends KVirtualWidget
 	 ------------------------------*/
 	function finalize {
 		// タイマを消去
-		if (dict) {
-			dict.set(dictKey, value);
-		}
 		discard(pointerTimer);
 		super.finalize(...);
 	}
@@ -592,15 +586,12 @@ class KTextEdit extends KVirtualWidget
 	/*------------------------------
 	 * 永続化辞書を値にバインドする
 	 ------------------------------*/
-	function bindPersistentDictionary(dict) {
-		if (_isAvoidDictionaryRegistration)
-			return;
+	function onUnserialize(dict, key) {
+		value = dict.init(key, value);
+	}
 
-		if (name !== void) {
-			this.dict = dict;
-			dictKey = window.name + "_" + name;
-			value = dict.init(dictKey, value);
-		}
+	function onSerialize(dict, key) {
+		dict.set(key, value);
 	}
 
 	property widgetStyleDefinition {

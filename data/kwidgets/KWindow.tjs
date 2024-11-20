@@ -181,6 +181,17 @@ class KWindow extends Window
 			}
 		} incontextof(menu);
 
+		menu.storePersistentDictionary = function(dict) {
+			if (isAvoidDictionaryRegistration)
+				return;
+
+			for (var i = 0; i < children.count; i++) {
+				var child = children[i];
+				if (child instanceof "KMenuItem")
+					child.storePersistentDictionary(dict);
+			}
+		} incontextof(menu);
+
 		menu.clearItems = function {
 			discardArray(children);
 		} incontextof(menu);
@@ -239,14 +250,8 @@ class KWindow extends Window
 
 	function finalize {
 		visible = false;
-		if (dict) {
-			dict.set(name + "_left", left);
-			dict.set(name + "_top", top);
-			if (onceResize) {
-				dict.set(name + "_width", primaryLayer.width + width - innerWidth);
-				dict.set(name + "_height", primaryLayer.height + height - innerHeight);
-			}
-		}
+		if (dict !== void)
+			storePersistentDictionary(dict);
 		_existentWindowList.remove(this);
 		invalidate(menu);
 		super.finalize(...);
@@ -526,11 +531,11 @@ class KWindow extends Window
 	}
 
 	/**------------------------------
-	 * プロパティをバインドする
+	 * 永続化辞書をバインドする
 	 *
-	 * ツリー内のウィジェットを KProperty クラスのオブジェクトにバインドします。
+	 * ツリー内のウィジェットを KPersistentDictionary クラスのオブジェクトにバインドします。
 	 *
-	 * @param バインドするプロパティ
+	 * @param バインドする辞書
 	 ------------------------------*/
 	function bindPersistentDictionary(dict) {
 		// ウィジェットをバインド
@@ -546,6 +551,38 @@ class KWindow extends Window
 			left = dict.init(name + "_left", left);
 			top = dict.init(name + "_top", top);
 		}
+
+		onBindPersistentDictionary(dict);
+	}
+
+	//----------------------------------------------------------------------
+	// 永続化辞書に値をストアする
+	function storePersistentDictionary() {
+		primaryWidget.storePersistentDictionary();
+		menu.storePersistentDictionary();
+
+		if (dict !== void) {
+			if (name != "") {
+				dict.set(name + "_left", left);
+				dict.set(name + "_top", top);
+				if (onceResize) {
+					dict.set(name + "_width", primaryLayer.width + width - innerWidth);
+					dict.set(name + "_height", primaryLayer.height + height - innerHeight);
+				}
+			}
+
+			onStorePersistentDictionary(dict);
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// バインド時コールバック
+	function onBindPersistentDictionary(dict) {
+	}
+
+	//----------------------------------------------------------------------
+	// ストア時コールバック
+	function onStorePersistentDictionary(dict) {
 	}
 
 	/**------------------------------

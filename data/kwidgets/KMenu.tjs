@@ -18,6 +18,8 @@ class KMenuItem extends MenuItem
   var iconCheckedLayer = void, iconUncheckedLayer = void;
   // アイテムの値
   var value = void;
+	// バインドした辞書
+	var _dict;
 
   /**------------------------------
    * コンストラクタ
@@ -241,16 +243,41 @@ class KMenuItem extends MenuItem
    *
    * @param dict バインドする辞書
    ------------------------------*/
-  function bindPersistentDictionary(dict) {
-    if (_isAvoidDictionaryRegistration)
-      return;
+	function bindPersistentDictionary(dict) {
+		if (_isAvoidDictionaryRegistration)
+			return;
 
-    for (var i = 0; i < children.count; i++) {
-      var child = children[i];
-      if (child instanceof "KMenuItem") 
-        child.bindPersistentDictionary(dict);
-    }
-  }
+		_dict = dict;
+		onBindPersistentDictionary(dict);
+
+		for (var i = 0; i < children.count; i++) {
+			var child = children[i];
+			if (child instanceof "KMenuItem")
+				child.bindPersistentDictionary(dict);
+		}
+	}
+
+	function storePersistentDictionary(dict) {
+		if (_isAvoidDictionaryRegistration)
+			return;
+
+		if (_dict === void)
+			return;
+
+		onStorePersistentDictionary(_dict);
+
+		for (var i = 0; i < children.count; i++) {
+			var child = children[i];
+			if (child instanceof "KMenuItem")
+				child.storePersistentDictionary();
+		}
+	}
+
+	function onBindPersistentDictionary(dict) {
+	}
+
+	function onStorePersistentDictionary(dict) {
+	}
 
   /**------------------------------
    * 「値」が変わった時に呼ばれるフック関数
@@ -494,8 +521,6 @@ class KToggleMenuItem extends KMenuItem
    * ファイナライザ
    ------------------------------*/
   function finalize {
-    if (dict)
-      dict.set(name, value);
     super.finalize(...);
   }
 
@@ -540,15 +565,15 @@ class KToggleMenuItem extends KMenuItem
   /*------------------------------
    * 永続化辞書を値にバインドする
    ------------------------------*/
-  function bindPersistentDictionary(dict) {
-    if (isAvoidDictionaryRegistration)
-      return;
+	function onBindPersistentDictionary(dict) {
+		if (name !== void)
+			value = dict.init(name, value);
+	}
 
-    if (name !== void) {
-      this.dict = dict;
-      value = dict.init(name, value);
-    }
-  }
+	function onStorePersistentDictionary(dict) {
+		if (name !== void)
+			dict.set(name, value);
+	}
 }
 
 /*----------------------------------------------------------------------
@@ -576,24 +601,23 @@ class KRadioMenuItem extends KMenuItem
    * ファイナライザ
    ------------------------------*/
   function finalize {
-    if (dict && checked)
-      dict.set(name, _value);
     super.finalize(...);
   }
 
   /*------------------------------
    * 永続化辞書を値にバインドする
    ------------------------------*/
-  function bindPersistentDictionary(dict) {
-    super.bindPersistentDictionary(dict);
-    if (isAvoidDictionaryRegistration)
-      return;
-    if (name !== void) {
-      this.dict = dict;
-      if (checked)
-	value = dict.init(name, _value);
-    }
-  }
+	function onBindPersistentDictionary(dict) {
+		if (name !== void
+			&& checked)
+			value = dict.init(name, _value);
+	}
+
+	function onStorePersistentDictionary(dict) {
+		if (name !== void
+			&& checked)
+			dict.set(name, _value);
+	}
 
   /*------------------------------
    * 親にaddされたら

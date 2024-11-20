@@ -64,7 +64,7 @@ class KEntity extends KWidget
 	function onUnserialize(dict, key) {
 	}
 
-	function onUnbindPersistentDictionary(dict) {
+	function onStorePersistentDictionary(dict) {
 		if ( ! hasEffectiveName)
 			return;
 		onSerialize(dict, dictKey);

@@ -387,8 +387,19 @@ class KList extends KVirtualWidget
 	/**------------------------------
 	 * 永続化辞書をバインドする
 	 ------------------------------*/
-	function bindPersistentDictionary(dict) {
+	function bindPersistentDictionary(dict, recursive = true) {
 		if (_isAvoidDictionaryRegistration)
+			return;
+
+		_dict = dict;
+		onBindPersistentDictionary(dict);
+
+		if (! recursive
+			|| ! _allowChildDictionaryRegistration)
+			return;
+
+		if (! recursive
+			|| ! _allowChildDictionaryRegistration)
 			return;
 
 		for (var i = 0; i < childList.count; i++) {
@@ -397,6 +408,20 @@ class KList extends KVirtualWidget
 		}
 	}
 
+	function storePersistentDictionary(dict, recursive = true) {
+		if (_isAvoidDictionaryRegistration)
+			return;
+
+		if (_dict === void)
+			return;
+
+		onStorePersistentDictionary(_dict);
+
+		for (var i = 0; i < childList.count; i++) {
+			var child = childList[i];
+			child.storePersistentDictionary();
+		}
+	}
 
 	/*------------------------------
 	 * 非選択状態のアイテムが受け入れる操作のマスク
@@ -3162,11 +3187,37 @@ class KListItem
 			if (_isRecordOpenedToDictionary)  {
 				opened = _dict.init(name + "_opened", opened);
 			}
+			onBindPersistentDictionary(dict);
 		}
 		for (var i = 0; i < childList.count; i++) {
 			var child = childList[i];
 			child.bindPersistentDictionary(dict);
 		}
+	}
+
+	function storePersistentDictionary() {
+		if (_isAvoidDictionaryRegistration)
+			return;
+
+		if (_dict === void)
+			return;
+
+		if (name != ""
+			&& _isRecordOpenedToDictionary) {
+			_dict.set(name + "_opened", opened);
+		}
+		onStorePersistentDictionary(_dict);
+
+		for (var i = 0; i < childList.count; i++) {
+			var child = childList[i];
+			child.storePersistentDictionary();
+		}
+	}
+
+	function onBindPersistentDictionary(dict) {
+	}
+
+	function onStorePersistentDictionary(dict) {
 	}
 
 	// 自分の次の位置にD&Dで挿入可能な階層のリスト
@@ -4352,6 +4403,15 @@ class KWidgetHolderListItem extends KListItem
 		super.bindPersistentDictionary(dict);
 		if (_widget !== void)
 			_widget.bindPersistentDictionary(dict);
+	}
+
+	function storePersistentDictionary() {
+		if (_isAvoidDictionaryRegistration)
+			return;
+
+		super.storePersistentDictionary();
+		if (_widget !== void)
+			_widget.storePersistentDictionary();
 	}
 
 	function invalidateNodeEnability() {

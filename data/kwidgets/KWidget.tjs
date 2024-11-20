@@ -330,9 +330,6 @@ class KWidget extends Layer
 	 ------------------------------*/
 	function finalize {
 		invalidate(_middleButtonDragInterp);
-		// 辞書を解除
-		if (_dict !== void)
-			onUnbindPersistentDictionary(_dict);
 		// 子レイヤーを全て破棄する
 		discardArray(children);
 		super.finalize(...);
@@ -1511,10 +1508,30 @@ class KWidget extends Layer
 		}
 	}
 
+	function storePersistentDictionary(recursive = true) {
+		if (_isAvoidDictionaryRegistration)
+			return;
+
+		if (_dict === void)
+			return;
+
+		onStorePersistentDictionary(_dict);
+
+		if (! recursive
+			|| ! _allowChildDictionaryRegistration)
+			return;
+
+		for (var i = 0; i < children.count; i++) {
+			var child = children[i];
+			if (child instanceof "KWidget")
+				child.storePersistentDictionary();
+		}
+	}
+
 	function onBindPersistentDictionary(dict) {
 	}
 
-	function onUnbindPersistentDictionary(dict) {
+	function onStorePersistentDictionary(dict) {
 	}
 
 	/**------------------------------
