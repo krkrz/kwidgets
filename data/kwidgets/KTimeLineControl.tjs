@@ -4691,7 +4691,10 @@ class KTimeLineControl extends KEntity
 	}
 
 	function onListRelocate {
-		view.redrawAll();
+		_layerView.setMinMaxSize(_layerView.minWidth, _layerList.minHeight,
+								 _layerView.maxWidth, _layerList.maxHeight);
+		_layerView.redrawAll();
+		_layerViewScroll.setChildViewPos(_layerViewScroll.childViewLeft, _layerListScroll.childViewTop);
 	}
 
 	// レイヤリストの選択アイテム変更を監視
