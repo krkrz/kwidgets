@@ -648,7 +648,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	function updateCursor {
 		if (owner.selectedTime >= 0) {
 			verticalCursorLayer.fillRect(0, 0, verticalCursorLayer.width, verticalCursorLayer.height, timelineCursorColor);
-			verticalCursorLayer.setPos(owner.selectedTime * TIMELINE_FRAME_WIDTH, 0);
+			verticalCursorLayer.setPos(owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2, 0);
 			verticalCursorLayer.visible = true;
 		} else
 			verticalCursorLayer.visible = false;
