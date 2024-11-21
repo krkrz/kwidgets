@@ -475,8 +475,10 @@ class KTimeLineLayerView extends KVirtualWidget
 		frameRightMarkerLayer = new global.Layer(window, this);
 
 		verticalCursorLayer = new global.Layer(window, this);
+		verticalCursorLayer.hitThreshold = 256;
 		verticalCursorLayer.setSize(1, 10000);
 		horizontalCursorLayer = new global.Layer(window, this);
+		horizontalCursorLayer.hitThreshold = 256;
 		horizontalCursorLayer.setSize(10000, 1);
 
 //		onUpdateFrameWidth();
