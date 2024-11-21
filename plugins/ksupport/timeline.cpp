@@ -125,6 +125,7 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
 	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y + TIMELINE_FRAME_HEIGHT - 1, TIMELINE_FRAME_WIDTH, 1, frameBorderColor);
   }
 
+  /*
   // カーソルを描画
   tjs_int cursorColor = viewObj.getIntValue(L"timelineCursorColor");
   tjs_int cursorX = viewObj.getIntValue(L"timelineCursorX");
@@ -133,6 +134,7 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
 	  viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, cursorX, y, 1, TIMELINE_FRAME_HEIGHT, cursorColor);
   if (y <= cursorY && cursorY < y + TIMELINE_FRAME_HEIGHT)
 	  viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, fromTime * TIMELINE_FRAME_WIDTH, cursorY, (toTime - fromTime) * TIMELINE_FRAME_WIDTH, 1, cursorColor);
+  */
 }
 
 ///----------------------------------------------------------------------
