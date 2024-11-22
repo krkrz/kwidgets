@@ -859,6 +859,13 @@ class KTimeLineLayerView extends KVirtualWidget
 			return;
 		}
 		var item = list.drawItemList[curLayer];
+
+		curCustomMouseEvent = item.getCustomMouseEvent(x, y);
+		if (curCustomMouseEvent !== void) {
+			cursor = curCustomMouseEvent.cursor;
+			return;
+		}
+
 		var frameIndex = item.findFrame(curTime);
 		var frame = item.frameAt(frameIndex);
 		if (frame !== void
@@ -877,11 +884,6 @@ class KTimeLineLayerView extends KVirtualWidget
 			boundaryDragTime = frame.time;
 			boundaryDragLayer = curLayer;
 			cursor = crHSplit;
-			return;
-		}
-		curCustomMouseEvent = item.getCustomMouseEvent(x, y);
-		if (curCustomMouseEvent !== void) {
-			cursor = curCustomMouseEvent.cursor;
 			return;
 		}
 	}
@@ -1598,10 +1600,10 @@ class KTimeLineLayerView extends KVirtualWidget
 			dragEnterRangeSelector(...);
 		else if (isPointInArea(x, y))
 			dragEnterAreaMove(...);
-		else if (boundaryDragFrameIndex >= 0)
-			dragEnterFrameBoundary(...);
 		else if (curCustomMouseEvent !== void)
 			dragEnterCustomMouseEvent(...);
+		else if (boundaryDragFrameIndex >= 0)
+			dragEnterFrameBoundary(...);
 		else if (isPointInSelection(x, y))
 			dragEnterSelection(...);
 		else
