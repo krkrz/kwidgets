@@ -121,7 +121,7 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
 		color = normalFrameBgColor;
     }
 	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y, TIMELINE_FRAME_WIDTH, TIMELINE_FRAME_HEIGHT, color);
-	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x + TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, frameBorderColor);
+	//	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x + TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, frameBorderColor);
 	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y + TIMELINE_FRAME_HEIGHT - 1, TIMELINE_FRAME_WIDTH, 1, frameBorderColor);
   }
 
@@ -147,11 +147,13 @@ void timeline_draw_content(tTJSVariant item, tTJSVariant view, tjs_int layerInde
 	iTJSDispatch2 *global = TVPGetScriptDispatch();
 	ncbPropAccessor globalObj(global);
 	global->Release();
-	tjs_int WIN_DARKEN2 = globalObj.GetValue(L"WIN_DARKEN2", ncbTypedefs::Tag<tjs_uint>(), 0, &winDarken2Hint);
 	tjs_int TIMELINE_FRAME_WIDTH = viewObj.GetValue(L"TIMELINE_FRAME_WIDTH", ncbTypedefs::Tag<tjs_int>(), 0, &timeLineFrameWidthHint);
 	tjs_int TIMELINE_FRAME_HEIGHT = itemObj.GetValue(L"height", ncbTypedefs::Tag<tjs_int>(), 0, &timelineFrameHeightHint);
 	tjs_int frameType = frameObj.GetValue(L"type", ncbTypedefs::Tag<tjs_int>(), 0, &typeHint);
 	tjs_int frameTime = frameObj.GetValue(L"time", ncbTypedefs::Tag<tjs_int>(), 0, &timeHint);
+	tTJSVariant widgetStyle = viewObj.GetValue(L"widgetStyle", ncbTypedefs::Tag<tTJSVariant>());
+	ncbPropAccessor widgetStyleObj(widgetStyle);
+	tjs_int frameBorderColor = widgetStyleObj.getIntValue(L"frameBorderColor");
 
 	switch (frameType) {
 	case TIMELINE_FRAME_TYPE_NULL:
@@ -182,9 +184,9 @@ void timeline_draw_content(tTJSVariant item, tTJSVariant view, tjs_int layerInde
 		rightColor |= 0xFF000000;
 		// BG描画
 		viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
-						 (frameTime + length) * TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, WIN_DARKEN2);
+						 (frameTime + length) * TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, frameBorderColor);
 		viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL,
-						 frameTime * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT - 1, length * TIMELINE_FRAME_WIDTH, 1, WIN_DARKEN2);
+						 frameTime * TIMELINE_FRAME_WIDTH, y + TIMELINE_FRAME_HEIGHT - 1, length * TIMELINE_FRAME_WIDTH, 1, frameBorderColor);
 		viewObj.FuncCall(0, L"fillGradientRectLR", &fillGradientRectLRHint, NULL,
 						 frameTime * TIMELINE_FRAME_WIDTH, y,
 						 length * TIMELINE_FRAME_WIDTH - 1,
@@ -217,6 +219,8 @@ void timeline_draw_content(tTJSVariant item, tTJSVariant view, tjs_int layerInde
 
 void timeline_draw_cursor(tTJSVariant item, tTJSVariant view, tjs_int layerIndex, tjs_int frameIndex, tjs_int y, tTJSVariant frame, tjs_int length, tjs_uint markerMask)
 {
+	return;
+
 	ncbPropAccessor itemObj(item);
 	ncbPropAccessor viewObj(view);
 	ncbPropAccessor frameObj(frame);
@@ -332,7 +336,7 @@ void timeline_draw_highlight(tTJSVariant item, tTJSVariant view, tjs_int layerIn
 void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int layerIndex, tjs_int frameIndex, tjs_int y, tTJSVariant frame, tjs_int length, tjs_uint markerMask)
 {
 	timeline_draw_content(item, view, layerIndex, frameIndex, y, frame, length, markerMask);
-	timeline_draw_cursor(item, view, layerIndex, frameIndex, y, frame, length, markerMask);
+	//	timeline_draw_cursor(item, view, layerIndex, frameIndex, y, frame, length, markerMask);
 	timeline_draw_marker(item, view, layerIndex, frameIndex, y, frame, length, markerMask);
 	timeline_draw_highlight(item, view, layerIndex, frameIndex, y, frame, length, markerMask);
 }

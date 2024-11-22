@@ -406,18 +406,18 @@ class KTimeLineTimeLocator extends KVirtualWidget
  ----------------------------------------------------------------------*/
 global.KTimeLineLayerViewWidgetStyleDefinition =
 	[
-			%[ key: "singleFrameColor" ],
-			%[ key: "continuousFrameColor" ],
-			%[ key: "tweenFrameColor" ],
-			%[ key: "oneSecondFrameBgColor" ],
-			%[ key: "halfSecondFrameBgColor" ],
-			%[ key: "fifthFrameBgColor" ],
-			%[ key: "normalFrameBgColor" ],
-			%[ key: "frameSignColor" ],
-			%[ key: "frameBorderColor" ],
+			%[ key: "singleFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "continuousFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "tweenFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "oneSecondFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "halfSecondFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "fifthFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "normalFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "frameSignColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "frameBorderColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "cursorColor", defaultValue: 0, resolver: "resolveColor" ],
-			%[ key: "loopSingleFrameColor" ],
-			%[ key: "loopContinuousFrameColor" ],
+			%[ key: "loopSingleFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "loopContinuousFrameColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "rangeSelectorColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "areaSelectorColor", defaultValue: 0x80000000, resolver: "resolveColor" ],
 			%[ key: "selectedFrameBlend" ],
@@ -648,7 +648,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	function updateCursor {
 		if (owner.selectedTime >= 0) {
 			verticalCursorLayer.fillRect(0, 0, verticalCursorLayer.width, verticalCursorLayer.height, timelineCursorColor);
-			verticalCursorLayer.setPos(owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2, 0);
+			verticalCursorLayer.setPos(owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2 - 1, 0);
 			verticalCursorLayer.visible = true;
 		} else
 			verticalCursorLayer.visible = false;
@@ -656,11 +656,15 @@ class KTimeLineLayerView extends KVirtualWidget
 		if (owner.selectedLayer >= 0) {
 			var item = owner.drawItemList[owner.selectedLayer];
 			horizontalCursorLayer.fillRect(0, 0, horizontalCursorLayer.width, horizontalCursorLayer.height, timelineCursorColor);
-			horizontalCursorLayer.setPos(0, item.top + item.height / 2);
+			horizontalCursorLayer.setPos(0, item.top + item.height / 2 - 1);
 			horizontalCursorLayer.visible = true;
 		} else
 			horizontalCursorLayer.visible = false;
-}
+
+		// adhoc implementation to avoid layer composite gritch.
+		_canvas.left++;
+		_canvas.left--;
+	}
 
 	function onFocus {
 		if (! System.getKeyState(VK_SHIFT))
