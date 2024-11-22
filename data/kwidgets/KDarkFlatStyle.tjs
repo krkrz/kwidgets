@@ -846,6 +846,8 @@
 					 spaceVertical: 8,
 					 frameBorderColor: 0xffadadad,
 					 activeColor: 0xffff0000,
+					 indicatorBackgroundColor: 0xff3f8cff,
+					 indicatorFontColor: 0xffffff,
 					 cursorColor: "timeline_cursor",
 					 focus: %[ cursorColor: "timeline_cursor_focus" ],
 				   ],

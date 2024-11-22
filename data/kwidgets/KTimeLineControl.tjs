@@ -85,9 +85,11 @@ function ktimeline_fix_invalid_frame(frameList)
  ----------------------------------------------------------------------*/
 global.KTimeLineTimeLocatorWidgetStyleDefinition =
 	[
-			%[ key: "frameBorderColor" ],
-			%[ key: "activeColor" ],
-			%[ key: "cursorColor", defaultValue: 0, resolver: "resolveColor" ]
+			%[ key: "frameBorderColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "activeColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "cursorColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "indicatorBackgroundColor", resolveColor: "resolveColor" ],
+			%[ key: "indicatorFontColor", resolveColor: "resolveColor" ]
 	];
 
 
@@ -137,8 +139,8 @@ class KTimeLineTimeLocator extends KVirtualWidget
 	}
 
 	function updateCursor {
-		var x = owner.selectedTime;
-		redrawRect(x * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, height);
+//		var x = owner.selectedTime;
+//		redrawRect(x * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, height);
 	}
 
 	function setActiveRange(begin, end) {
@@ -201,24 +203,33 @@ class KTimeLineTimeLocator extends KVirtualWidget
 
 		// ロケータのバックグラウンドを描画
 		for (var x = fromX; x < toX; x ++) {
-			if (x != owner.selectedTime) {
-				fillRect(x * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, height, borderStyle.backgroundColor);
-			} else {
-				var cursorColor = widgetStyle.cursorColor;
-//				fillRect(x * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, height, cursorColor);
-				//				fillRect(x * TIMELINE_FRAME_WIDTH + 1, 1, TIMELINE_FRAME_WIDTH - 2, height - 2, blendColor(cursorColor, borderStyle.backgroundColor));
-				fillRect(x * TIMELINE_FRAME_WIDTH, height - 4, TIMELINE_FRAME_WIDTH, 3, cursorColor);
-			}
+			fillRect(x * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, height, borderStyle.backgroundColor);
 			fillRect(x * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH - 1, height - 5, 1, 4, widgetStyle.frameBorderColor);
 			fillRect(x * TIMELINE_FRAME_WIDTH, height - 1, TIMELINE_FRAME_WIDTH, 1, widgetStyle.frameBorderColor);
 		}
 		// 5マス単位で時刻表示
+		var stride;
+		if (TIMELINE_FRAME_WIDTH >= 10)
+			stride = 5;
+		else
+			stride = 10;
 		var dFromX, dToX;
-		dFromX = int(fromX / 5);
-		dToX = int((toX + 5 - 1) / 5);
+		dFromX = int(fromX / stride);
+		dToX = int((toX + stride - 1) / stride);
 		for (var x = dFromX; x < dToX; x++) {
-			drawUIText(fontStyle, x * 5 * TIMELINE_FRAME_WIDTH, (height - fontStyle.fontHeight) / 2, string(x * 5));
+			drawUIText(fontStyle, x * stride * TIMELINE_FRAME_WIDTH, (height - fontStyle.fontHeight) / 2, string(x * stride));
 		}
+		// 現在時刻表示
+		var indStyle = duplicateStruct(fontStyle);
+		indStyle.fontColor = widgetStyle.indicatorFontColor;
+		var time = owner.selectedTime;
+		var x = (time * TIMELINE_FRAME_WIDTH) + TIMELINE_FRAME_WIDTH / 2 - 1;
+		var w = font.getTextWidth(time);
+		var x = x - 2 - w / 2;
+		x = Math.max(0, x);
+		fillRect(x, 0, w + 4, height, widgetStyle.indicatorBackgroundColor);
+		drawUIText(indStyle, x + 2, (height - fontStyle.fontHeight) / 2, time);
+
 		// アクティブ強調
 		if (activeBegin !== void
 			|| activeEnd !== void) {
@@ -4304,8 +4315,8 @@ class KTimeLineControl extends KEntity
 			var prevSelectedFrame = _selectedTime;
 			_selectedTime = v;
 			//      if (! playing) {
-			_timeLocator.redrawRect(prevSelectedFrame * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, _timeLocator.height);
-			_timeLocator.redrawRect(_selectedTime * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, _timeLocator.height);
+			_timeLocator.redrawRect((prevSelectedFrame - 2) * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH * 5, _timeLocator.height);
+			_timeLocator.redrawRect((_selectedTime - 2) * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH * 5, _timeLocator.height);
 			updateCursor();
 			//      }
 			onTimeSelect(v);
