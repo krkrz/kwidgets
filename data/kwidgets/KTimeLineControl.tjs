@@ -4315,8 +4315,9 @@ class KTimeLineControl extends KEntity
 			var prevSelectedFrame = _selectedTime;
 			_selectedTime = v;
 			//      if (! playing) {
-			_timeLocator.redrawRect((prevSelectedFrame - 2) * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH * 5, _timeLocator.height);
-			_timeLocator.redrawRect((_selectedTime - 2) * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH * 5, _timeLocator.height);
+			var w = 50;
+			_timeLocator.redrawRect(prevSelectedFrame * TIMELINE_FRAME_WIDTH - w /  2, 0, w, _timeLocator.height);
+			_timeLocator.redrawRect(_selectedTime * TIMELINE_FRAME_WIDTH - w / 2, 0, w, _timeLocator.height);
 			updateCursor();
 			//      }
 			onTimeSelect(v);
