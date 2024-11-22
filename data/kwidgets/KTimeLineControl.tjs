@@ -4180,8 +4180,7 @@ class KTimeLineControl extends KEntity
 	 * 辞書登録
 	 ------------------------------*/
 	function onUnserialize(dict, key) {
-		_viewWidth = dict.init(key + "_view_width", viewWidth);
-		_frameWidth = TIMELINE_FRAME_WIDTH_LIST[viewWidth];
+		viewWidth = dict.init(key + "_view_width", viewWidth);
 	}
 
 	function onSerialize(dict, key) {
