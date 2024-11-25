@@ -93,9 +93,7 @@
 				mouseDownLeft: %[
 					backgroundColor: 0xffffffff,
 					paddingOffset: 1,
-					padding: 1,
 					borderStyle: BORDER_STYLE_SOLID,
-					borderWidth: 1,
 					borderColor: 0xffacacac,
 				],
 			],
