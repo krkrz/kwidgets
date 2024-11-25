@@ -236,6 +236,8 @@ class KWidget extends Layer
 	// スタイルコールバック
 	var styleCallback = "";
 	var omitText = "...";
+	// 最大サイズを制限する
+	var restrictMaxSize = true;
 	
 	/**------------------------------
 	 * コンストラクタ
@@ -1680,9 +1682,15 @@ class KWidget extends Layer
 	 * 最大最小サイズを更新
 	 ------------------------------*/
 	function invalidateMinMaxSize() {
-		var maxw = int(Math.min(K_WIDGET_MAX_POSSIBLE_WIDTH, Math.max(_specified.maxw, _marginal.maxw)));
+		var maxw = Math.max(_specified.maxw, _marginal.maxw);
+		if (restrictMaxSize)
+			maxw = Math.min(maxw, K_WIDGET_MAX_POSSIBLE_WIDTH);
+		maxw = int(maxw);
 		var minw = int(Math.min(maxw, Math.max(_specified.minw, _marginal.minw)));
-		var maxh = int(Math.min(K_WIDGET_MAX_POSSIBLE_WIDTH, Math.max(_specified.maxh, _marginal.maxh)));
+		var maxh = Math.max(_specified.maxh, _marginal.maxh);
+		if (restrictMaxSize)
+			maxh = Math.min(maxh, K_WIDGET_MAX_POSSIBLE_WIDTH);
+		maxh = int(maxh);
 		var minh = int(Math.min(maxh, Math.max(_specified.minh, _marginal.minh)));
 		var newer = %[ minw: minw, minh: minh, maxw: maxw, maxh: maxh ];
 		// 変更があった時のみ処理

@@ -57,6 +57,7 @@ class KVirtualWidget extends KEntity
 			mixin(this, delegate);
 		}
 		_delayDrawRegion = new KRegion();
+		restrictMaxSize = false;
 	};
 
 	function registerDelegateClass(delegate) {
