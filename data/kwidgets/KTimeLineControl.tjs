@@ -460,8 +460,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	var bufLayer;
 
 	// カーソル
-	var verticalCursorLayer;
-	var horizontalCursorLayer;
+	var cursorLayerU, cursorLayerC, cursorLayerL;
 
 	// ポイント
 	var point = void;
@@ -485,12 +484,14 @@ class KTimeLineLayerView extends KVirtualWidget
 		frameLeftMarkerLayer = new global.Layer(window, this);
 		frameRightMarkerLayer = new global.Layer(window, this);
 
-		verticalCursorLayer = new global.Layer(window, this);
-		verticalCursorLayer.hitThreshold = 256;
-		verticalCursorLayer.setSize(1, 10000);
-		horizontalCursorLayer = new global.Layer(window, this);
-		horizontalCursorLayer.hitThreshold = 256;
-		horizontalCursorLayer.setSize(10000, 1);
+		cursorLayerU = new global.Layer(window, this);
+		cursorLayerU.hitThreshold = 256;
+		cursorLayerU.setSize(1, 10000);
+		cursorLayerL = new global.Layer(window, this);
+		cursorLayerL.hitThreshold = 256;
+		cursorLayerL.setSize(1, 10000);
+		cursorLayerC = new global.Layer(window, this);
+		cursorLayerC.hitThreshold = 256;
 
 //		onUpdateFrameWidth();
 
@@ -658,19 +659,35 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	function updateCursor {
 		if (owner.selectedTime >= 0) {
-			verticalCursorLayer.fillRect(0, 0, verticalCursorLayer.width, verticalCursorLayer.height, timelineCursorColor);
-			verticalCursorLayer.setPos(owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2 - 1, 0);
-			verticalCursorLayer.visible = true;
-		} else
-			verticalCursorLayer.visible = false;
-
-		if (owner.selectedLayer >= 0) {
-			var item = owner.drawItemList[owner.selectedLayer];
-			horizontalCursorLayer.fillRect(0, 0, horizontalCursorLayer.width, horizontalCursorLayer.height, timelineCursorColor);
-			horizontalCursorLayer.setPos(0, item.top + item.height / 2 - 1);
-			horizontalCursorLayer.visible = true;
-		} else
-			horizontalCursorLayer.visible = false;
+			var x = owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2 - 1;
+			if (owner.selectedLayer < 0) {
+				cursorLayerU.setPos(x, 0);
+				cursorLayerU.fillRect(0, 0, cursorLayerU.width, cursorLayerU.height, timelineCursorColor);
+				cursorLayerU.visible = true;
+				cursorLayerC.visible = false;
+				cursorLayerL.visible = false;
+			} else {
+				var item = owner.drawItemList[owner.selectedLayer];
+				var t = item.top;
+				var h = item.height;
+				var b = t + h;
+				cursorLayerU.fillRect(0, 0, cursorLayerU.width, cursorLayerU.height, timelineCursorColor);
+				cursorLayerL.fillRect(0, 0, cursorLayerL.width, cursorLayerL.height, timelineCursorColor);
+				cursorLayerU.setPos(x, t - cursorLayerU.height);
+				cursorLayerL.setPos(x, b);
+				cursorLayerC.setSize(TIMELINE_FRAME_WIDTH, h);
+				cursorLayerC.fillRect(0, 0, TIMELINE_FRAME_WIDTH, h, timelineCursorColor);
+				cursorLayerC.fillRect(1, 1, TIMELINE_FRAME_WIDTH - 2, h - 2, (timelineCursorColor & 0xffffff) | 0x40000000);
+				cursorLayerC.setPos(TIMELINE_FRAME_WIDTH * owner.selectedTime, t);
+				cursorLayerU.visible = true;
+				cursorLayerC.visible = true;
+				cursorLayerL.visible = true;
+			}
+		} else {
+			cursorLayerU.visible = false;
+			cursorLayerC.visible = false;
+			cursorLayerL.visible = false;
+		}
 
 		// adhoc implementation to avoid layer composite gritch.
 		_canvas.left++;
