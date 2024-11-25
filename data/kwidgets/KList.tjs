@@ -4353,8 +4353,13 @@ class KWidgetHolderListItem extends KListItem
 		}
 		var prevWidth = width;
 		var prevHeight = height;
-		_widgetFrame.setSize(root.width - _widgetFrame.left, _widget.minHeight);
-		width = _widget.width + _widget.marginHorizontal;
+		if (! root.widgetStyle.variable) {
+			_widgetFrame.setSize(_widget.minWidth, _widget.minHeight);
+			width = _widget.minWidth + _widget.marginHorizontal;
+		} else {
+			_widgetFrame.setSize(root.width - _widgetFrame.left, _widget.minHeight);
+			width = _widget.width + _widget.marginHorizontal;
+		}
 		height = _widget.minHeight + _widget.marginVertical + root.spaceVertical;
 		return width != prevWidth || height != prevHeight;
 	}
