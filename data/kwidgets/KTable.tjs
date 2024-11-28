@@ -4051,7 +4051,7 @@ class KRealTableColumn extends KNumberTableColumn
 	 * 浮動小数点数カラム
 	 */
 	function KRealTableColumn(owner, label, key, opts = %[]) {
-		defaultFormat = "%f";
+		defaultFormat = "%g";
 		super.KNumberTableColumn(...);
 	}
 
