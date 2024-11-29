@@ -106,7 +106,9 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
   tjs_int fifthFrameBgColor = widgetStyleObj.getIntValue(L"fifthFrameBgColor");
   tjs_int normalFrameBgColor = widgetStyleObj.getIntValue(L"normalFrameBgColor");
   tjs_int frameBorderColor = widgetStyleObj.getIntValue(L"frameBorderColor");
-  
+  bool showVerticalBorder = widgetStyleObj.getIntValue(L"showVerticalBorder");
+  bool showHorizontalBorder = widgetStyleObj.getIntValue(L"showHorizontalBorder");
+ 
   // バックグラウンドを描画
   for (tjs_int time = fromTime; time < toTime; time ++) {
     tjs_int x = time * TIMELINE_FRAME_WIDTH;
@@ -121,20 +123,11 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
 		color = normalFrameBgColor;
     }
 	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y, TIMELINE_FRAME_WIDTH, TIMELINE_FRAME_HEIGHT, color);
-	//	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x + TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, frameBorderColor);
-	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y + TIMELINE_FRAME_HEIGHT - 1, TIMELINE_FRAME_WIDTH, 1, frameBorderColor);
+	if (showVerticalBorder)
+		viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x + TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, frameBorderColor);
+	if (showHorizontalBorder)
+		viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y + TIMELINE_FRAME_HEIGHT - 1, TIMELINE_FRAME_WIDTH, 1, frameBorderColor);
   }
-
-  /*
-  // カーソルを描画
-  tjs_int cursorColor = viewObj.getIntValue(L"timelineCursorColor");
-  tjs_int cursorX = viewObj.getIntValue(L"timelineCursorX");
-  tjs_int cursorY = viewObj.getIntValue(L"timelineCursorY");
-  if (fromTime * TIMELINE_FRAME_WIDTH <= cursorX && cursorX < toTime * TIMELINE_FRAME_WIDTH)
-	  viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, cursorX, y, 1, TIMELINE_FRAME_HEIGHT, cursorColor);
-  if (y <= cursorY && cursorY < y + TIMELINE_FRAME_HEIGHT)
-	  viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, fromTime * TIMELINE_FRAME_WIDTH, cursorY, (toTime - fromTime) * TIMELINE_FRAME_WIDTH, 1, cursorColor);
-  */
 }
 
 ///----------------------------------------------------------------------

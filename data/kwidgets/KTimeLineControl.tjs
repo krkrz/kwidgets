@@ -434,7 +434,9 @@ global.KTimeLineLayerViewWidgetStyleDefinition =
 			%[ key: "selectedFrameBlend" ],
 			%[ key: "selectedFrameColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "hoverFrameBlend" ],
-			%[ key: "hoverFrameColor", defaultValue: 0, resolver: "resolveColor" ]
+			%[ key: "hoverFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "showVerticalBorder", defaultValue: true ],
+			%[ key: "showHorizontalBorder", defaultValue: true ]
 	];
 
 class KTimeLineLayerView extends KVirtualWidget
