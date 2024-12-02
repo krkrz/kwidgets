@@ -2332,9 +2332,13 @@ class KTable extends KEntity
 		columnTabScroll.hideHorizontalBar = true;
 		rowTabScroll.hideVerticalBar = true;
 		rowTabScroll.hideHorizontalBar = true;
+		viewScroll.hideVerticalBar = getOption("hideVerticalBar", false);
+		viewScroll.hideHorizontalBar = getOption("hideHorizontalBar", false);
 
 		baseGrid.add(2, 0, new KSpacer(window, %[ width: viewScroll.verticalBar.width, height: 0, name: "_columnSpacer" ]));
 		baseGrid.add(0, 2, new KSpacer(window, %[ width: 0, height: viewScroll.horizontalBar.height, name: "_rowSpacer" ]));
+
+		invalidateSpacerSize();
 
 		viewScroll.onChildViewModified = onViewModified;
 
@@ -2459,6 +2463,18 @@ class KTable extends KEntity
 		}
 	}
 
+	function invalidateSpacerSize {
+		if (viewScroll.hideVerticalBar)
+			_columnSpacer.setFixedSize(0, 0);
+		else
+			_columnSpacer.setFixedSize(viewScroll.verticalBar.width, 0);
+
+		if (viewScroll.hideHorizontalBar)
+			_rowSpacer.setFixedSize(0, 0);
+		else
+			_rowSpacer.setFixedSize(0, viewScroll.horizontalBar.height);
+	}
+
 	// カラムを再表示
 	function invalidateColumnVisibility(column) {
 		var ofst = 0;
@@ -2492,8 +2508,7 @@ class KTable extends KEntity
 		rowTab.id = widgetStyle.rowTabId;
 		columnTab.id = widgetStyle.columnTabId;
 		view.id = widgetStyle.mainViewId;
-		_columnSpacer.setFixedSize(viewScroll.verticalBar.width, 0);
-		_rowSpacer.setFixedSize(0, viewScroll.horizontalBar.height);
+		invalidateSpacerSize();
 		if (requireRowHeightModify) {
 			initAllRows();
 			updateMinMaxSize();

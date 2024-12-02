@@ -183,8 +183,10 @@ class KCustomUIGenerator
 											   attributes: getValue(def, "attributes", []),
 											  showRowTab: getValue(def, "showRowTab", false),
 											  respondToValueModification: getValue(def, "respondToValueModification", false),
-											  defaultColumnOptions: getValue(def, "defaultColumnOptions", %[])
-											 ]);
+											  defaultColumnOptions: getValue(def, "defaultColumnOptions", %[]),
+											  hideVerticalBar: getValue(def, "hideVerticalBar", false),
+											  hideHorizontalBar: getValue(def, "hideHorizontalBar", false),
+											]);
 		table.setMarginalFixedSize(getValue(def, "marginalWidth", 100), getValue(def, "marginalHeight", 100));
 		table.value = getValue(def, "value", []);
 		var frame = new KFrameLayout(grid.window, %[ id: "focusable_frame" ]);
