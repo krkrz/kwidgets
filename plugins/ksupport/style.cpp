@@ -42,18 +42,10 @@ countArray(tTJSVariant array)
 
 //----------------------------------------------------------------------
 // スタイルレポジトリ参照
-static tTJSVariant *sStyleRepository;
-
-tTJSVariant &getStyleRepository() {
-	if (! sStyleRepository) {
-		sStyleRepository = new tTJSVariant();
-		TVPExecuteExpression(L"styleRepository", sStyleRepository);
-	}
-	return (*sStyleRepository);
-}
-
-void releaseStyleRepository() {
-	delete sStyleRepository;
+tTJSVariant getStyleRepository() {
+	tTJSVariant result;
+	TVPExecuteExpression(L"styleRepository", &result);
+	return result;
 }
 
 tTJSVariant
@@ -64,8 +56,6 @@ resolveGlobalFunction(ttstr funcname, tTJSVariant value)
 	styleRepositoryObj.FuncCall(0, funcname.c_str(), NULL, &result, value);
 	return result;
 }
-
-NCB_PRE_UNREGIST_CALLBACK(releaseStyleRepository);
 
 
 //----------------------------------------------------------------------

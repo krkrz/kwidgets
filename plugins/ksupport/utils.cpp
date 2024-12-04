@@ -69,6 +69,14 @@ tTJSVariant &getTempArray2()
 	return *sTempArray2;
 }
 
+void requireTempArray()
+{
+	getTempArray();
+	getTempArray2();
+}
+
+NCB_PRE_REGIST_CALLBACK(requireTempArray);
+
 void releaseTempArray()
 {
 	delete sTempArray;
