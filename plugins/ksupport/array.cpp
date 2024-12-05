@@ -25,27 +25,16 @@ static void assignArray(tTJSVariant &from, tTJSVariant &to) {
 	toObj.FuncCall(0, L"assign", &assignHint, NULL, from);
 }
 
+//----------------------------------------------------------------------
+// Arrayサポート
 class ArraySupport
 {
-private:
-	iTJSDispatch2 *mObjthis;
-
 public:
-	ArraySupport(iTJSDispatch2 *objthis) : mObjthis(objthis) {}
-
-	void assign(tTJSVariant src) {
-		ncbPropAccessor arrayObj(mObjthis, mObjthis);
-		arrayObj.FuncCall(0, L"assign", &assignHint, NULL, src);
-	}
-
-	tjs_uint count(void) const {
-		ncbPropAccessor arrayObj(mObjthis, mObjthis);
-		return arrayObj.GetValue(L"count", ncbTypedefs::Tag<tjs_uint>(), 0, &countHint);
-	}
-
-	tTJSVariant _uniq(void) {
-		ncbPropAccessor arrayObj(mObjthis);
-		auto arrayObjCount = count();
+	//----------------------------------------------------------------------
+	// uniq関数
+	static tTJSVariant __uniq__(tTJSVariant array) {
+		ncbPropAccessor arrayObj(array);
+		auto arrayObjCount = countArray(array);
 
 		tTJSVariant result = createArray();
 		ncbPropAccessor resultObj(result);
@@ -62,10 +51,26 @@ public:
 		return result;
 	}
 
-	void uniq(void) {
-		assign(_uniq());
+	static tjs_error TJS_INTF_METHOD _uniq(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		if (numparams != 0)
+			return TJS_E_BADPARAMCOUNT;
+		if (result)
+			*result = __uniq__(tTJSVariant(objthis, objthis));
+		return TJS_S_OK;
 	}
 
+	static tjs_error TJS_INTF_METHOD uniq(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		tTJSVariant resultArray;
+		auto resultStatus = _uniq(&resultArray, numparams, param, objthis);
+		if (resultStatus == TJS_E_BADPARAMCOUNT)
+			return resultStatus;
+		tTJSVariant arrayObj(objthis, objthis);
+		assignArray(resultArray, arrayObj);
+		return TJS_S_OK;
+	}
+
+	//----------------------------------------------------------------------
+	// map関数
 	static tTJSVariant __map__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -108,6 +113,8 @@ public:
 		return TJS_S_OK;
 	}
 
+	//----------------------------------------------------------------------
+	// filterMap関数
 	static tTJSVariant __filterMap__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -151,6 +158,8 @@ public:
 		return TJS_S_OK;
 	}
 
+	//----------------------------------------------------------------------
+	// select関数
 	static tTJSVariant __select__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -194,6 +203,8 @@ public:
 		return TJS_S_OK;
 	}
 
+	//----------------------------------------------------------------------
+	// reject関数
 	static tTJSVariant __reject__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -237,9 +248,11 @@ public:
 		return TJS_S_OK;
 	}
 
-	tTJSVariant inject(tTJSVariant init, tTJSVariant func) {
-		ncbPropAccessor arrayObj(mObjthis);
-		auto arrayObjCount = count();
+	//----------------------------------------------------------------------
+	// inject関数
+	static tTJSVariant __inject__(tTJSVariant array, tTJSVariant init, tTJSVariant func) {
+		ncbPropAccessor arrayObj(array);
+		auto arrayObjCount = countArray(array);
 
 		tTJSVariant result = createArray();
 		ncbPropAccessor resultObj(result);
@@ -261,6 +274,18 @@ public:
 		return value;
 	}
 
+	static tjs_error TJS_INTF_METHOD inject(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		if (numparams != 2)
+			return TJS_E_BADPARAMCOUNT;
+		tTJSVariant init = *param[0];
+		tTJSVariant func = *param[1];
+		if (result)
+			*result = __inject__(tTJSVariant(objthis, objthis), init, func);
+		return TJS_S_OK;
+	}
+
+	//----------------------------------------------------------------------
+	// each関数
 	static void _each(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -285,6 +310,8 @@ public:
 		return TJS_S_OK;
 	}
 
+	//----------------------------------------------------------------------
+	// eachWithIndex関数
 	static void _eachWithIndex(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -312,6 +339,8 @@ public:
 		return TJS_S_OK;
 	}
 
+	//----------------------------------------------------------------------
+	// all関数
 	static bool __all__(tTJSVariant array, tTJSVariant val, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -356,6 +385,7 @@ public:
 		return TJS_S_OK;
 	}
 
+	// any関数
 	static bool __any__(tTJSVariant array, tTJSVariant val, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -400,6 +430,7 @@ public:
 		return TJS_S_OK;
 	}
 
+	// _sort 関数(sortの複製バージョン)
 	static tTJSVariant __sort(tTJSVariant array, tTJSVariant cond, bool stable) {
 		tTJSVariant result = createArray();
 		ncbPropAccessor resultObj(result);
@@ -421,8 +452,9 @@ public:
 			*result = __sort(tTJSVariant(objthis, objthis), cond, stable);
 
 		return TJS_S_OK;
-  }
+	}
 
+	// _reverse 関数(reverseの複製バージョン)
 	static tTJSVariant __reverse(tTJSVariant array) {
 		tTJSVariant result = createArray();
 		ncbPropAccessor resultObj(result);
@@ -443,9 +475,11 @@ public:
 		return TJS_S_OK;
 	}
 
-	tTJSVariant min(void) {
-		ncbPropAccessor arrayObj(mObjthis);
-		auto arrayObjCount = count();
+	//----------------------------------------------------------------------
+	// min関数
+	static tTJSVariant __min__(tTJSVariant array) {
+		ncbPropAccessor arrayObj(array);
+		auto arrayObjCount = countArray(array);
 
 		tTJSVariant result;
 
@@ -463,9 +497,19 @@ public:
 		return result;
 	}
 
-	tTJSVariant max(void) {
-		ncbPropAccessor arrayObj(mObjthis);
-		auto arrayObjCount = count();
+	static tjs_error TJS_INTF_METHOD min(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		if (numparams != 0)
+			return TJS_E_BADPARAMCOUNT;
+		if (result)
+			*result = __min__(tTJSVariant(objthis, objthis));
+		return TJS_S_OK;
+	}
+
+	//----------------------------------------------------------------------
+	// max関数
+	static tTJSVariant __max__(tTJSVariant array) {
+		ncbPropAccessor arrayObj(array);
+		auto arrayObjCount = countArray(array);
 
 		tTJSVariant result;
 
@@ -483,6 +527,16 @@ public:
 		return result;
 	}
 
+	static tjs_error TJS_INTF_METHOD max(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		if (numparams != 0)
+			return TJS_E_BADPARAMCOUNT;
+		if (result)
+			*result = __max__(tTJSVariant(objthis, objthis));
+		return TJS_S_OK;
+	}
+
+	//----------------------------------------------------------------------
+	// findIf関数 (findの関数を引数に取るバージョン
 	static tjs_int __findIf__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -516,6 +570,8 @@ public:
 		return TJS_S_OK;
 	}
 
+	//----------------------------------------------------------------------
+	// slice関数
 	static tTJSVariant __slice__(tTJSVariant array, tjs_int startIndex, tjs_int size) {
 		ncbPropAccessor arrayObj(array);
 		auto arrayObjCount = countArray(array);
@@ -546,7 +602,9 @@ public:
 		return TJS_S_OK;
 	}
 
-	tTJSVariant flatten() {
+	//----------------------------------------------------------------------
+	// flatten関数
+	static tTJSVariant __flatten__(iTJSDispatch2 *rootArray) {
 		auto result = createArray();
 		ncbPropAccessor resultObj(result);
 
@@ -563,7 +621,7 @@ public:
 		};
 		std::stack<ArrayTravel> arrayTravelStack;
 
-		arrayTravelStack.push(ArrayTravel(mObjthis, count(), 0));
+		arrayTravelStack.push(ArrayTravel(rootArray, countArray(tTJSVariant(rootArray, rootArray)), 0));
 
 		iTJSDispatch2 *current;
 		tjs_uint count = 0;
@@ -597,43 +655,58 @@ public:
 		}
 		return result;
 	}
+
+	static tjs_error TJS_INTF_METHOD _flatten(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		if (numparams != 0)
+			return TJS_E_BADPARAMCOUNT;
+		if (result)
+			*result = __flatten__(objthis);
+		return TJS_S_OK;
+	}
+
+	static tjs_error TJS_INTF_METHOD flatten(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		tTJSVariant resultArray;
+		auto resultStatus = _flatten(&resultArray, numparams, param, objthis);
+		if (resultStatus == TJS_E_BADPARAMCOUNT)
+			return resultStatus;
+		tTJSVariant arrayObj(objthis, objthis);
+		assignArray(resultArray, arrayObj);
+		return TJS_S_OK;
+	}
 };
 
 
-NCB_GET_INSTANCE_HOOK(ArraySupport)
-{
-  NCB_INSTANCE_GETTER(objthis) { // objthis を iTJSDispatch2* 型の引数とする
-    ClassT* obj = GetNativeInstance(objthis);	// ネイティブインスタンスポインタ取得
-    if (!obj) {
-      obj = new ClassT(objthis);				// ない場合は生成する
-      SetNativeInstance(objthis, obj);		// objthis に obj をネイティブインスタンスとして登録する
-    }
-    return obj;
-  }
-};
+NCB_ATTACH_CLASS(ArraySupport, Array) {
+	NCB_METHOD_RAW_CALLBACK(uniq, ArraySupport::uniq, 0);
+	NCB_METHOD_RAW_CALLBACK(_uniq, ArraySupport::_uniq, 0);
 
-NCB_ATTACH_CLASS_WITH_HOOK(ArraySupport, Array) {
+	NCB_METHOD_RAW_CALLBACK(map, ArraySupport::map, 0);
+	NCB_METHOD_RAW_CALLBACK(_map, ArraySupport::_map, 0);
+
+	NCB_METHOD_RAW_CALLBACK(filterMap, ArraySupport::filterMap, 0);
+	NCB_METHOD_RAW_CALLBACK(_filterMap, ArraySupport::_filterMap, 0);
+
+	NCB_METHOD_RAW_CALLBACK(select, ArraySupport::select, 0);
+	NCB_METHOD_RAW_CALLBACK(_select, ArraySupport::_select, 0);
+
+	NCB_METHOD_RAW_CALLBACK(reject, ArraySupport::reject, 0);
+	NCB_METHOD_RAW_CALLBACK(_reject, ArraySupport::_reject, 0);
+
+	NCB_METHOD_RAW_CALLBACK(flatten, ArraySupport::flatten, 0);
+	NCB_METHOD_RAW_CALLBACK(_flatten, ArraySupport::_flatten, 0);
+
+	NCB_METHOD_RAW_CALLBACK(_sort, ArraySupport::_sort, 0);
+
+	NCB_METHOD_RAW_CALLBACK(_reverse, ArraySupport::_reverse, 0);
+
 	NCB_METHOD_RAW_CALLBACK(each, ArraySupport::each, 0);
 	NCB_METHOD_RAW_CALLBACK(eachWithIndex, ArraySupport::eachWithIndex, 0);
-	NCB_METHOD(uniq);
-	NCB_METHOD(_uniq);
-	NCB_METHOD_RAW_CALLBACK(map, ArraySupport::map, 0);
-	NCB_METHOD_RAW_CALLBACK(filterMap, ArraySupport::filterMap, 0);
-	NCB_METHOD_RAW_CALLBACK(select, ArraySupport::select, 0);
-	NCB_METHOD_RAW_CALLBACK(reject, ArraySupport::reject, 0);
 	NCB_METHOD_RAW_CALLBACK(all, ArraySupport::all, 0);
 	NCB_METHOD_RAW_CALLBACK(any, ArraySupport::any, 0);
-	NCB_METHOD(min);
-	NCB_METHOD(max);
-	NCB_METHOD_RAW_CALLBACK(_map, ArraySupport::_map, 0);
-	NCB_METHOD_RAW_CALLBACK(_filterMap, ArraySupport::_filterMap, 0);
-	NCB_METHOD_RAW_CALLBACK(_select, ArraySupport::_select, 0);
-	NCB_METHOD_RAW_CALLBACK(_reject, ArraySupport::_reject, 0);
-	NCB_METHOD(inject);
-	NCB_METHOD_RAW_CALLBACK(_sort, ArraySupport::_sort, 0);
-	NCB_METHOD_RAW_CALLBACK(_reverse, ArraySupport::_reverse, 0);
+	NCB_METHOD_RAW_CALLBACK(min, ArraySupport::min, 0);
+	NCB_METHOD_RAW_CALLBACK(max, ArraySupport::max, 0);
+	NCB_METHOD_RAW_CALLBACK(inject, ArraySupport::inject, 0);
 	NCB_METHOD_RAW_CALLBACK(findIf, ArraySupport::findIf, 0);
 	NCB_METHOD_RAW_CALLBACK(slice, ArraySupport::slice, 0);
-	NCB_METHOD(flatten);
 }
 

@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <cstdio>
 #include "ncbind.hpp"
 
 
@@ -61,6 +62,9 @@ EXPORT(HRESULT) V2Unlink()
 	// ここでは、TVPPluginGlobalRefCount が GlobalRefCountAtInit よりも
 	// 大きくなっていれば失敗ということにする。
 	if (TVPPluginGlobalRefCount > GlobalRefCountAtInit) {
+		char buf[1024];
+		sprintf_s(buf, "V2Unlink failed, %d, %d", TVPPluginGlobalRefCount, GlobalRefCountAtInit);
+		TVPAddLog(ttstr(buf));
 		NCB_LOG_W("V2Unlink ...failed");
 		return E_FAIL;
 		// E_FAIL が帰ると、Plugins.unlink メソッドは偽を返す

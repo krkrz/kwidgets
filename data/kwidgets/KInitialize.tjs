@@ -1,33 +1,30 @@
-@if (! kirikiriz)
-if (Storages.isExistentStorage(System.exePath + "kwidgets.xp3"))
-	Storages.addAutoPath(System.exePath + "kwidgets.xp3>plugin/");
-else
-	Storages.addAutoPath("kwidgets/plugin/");
-@endif
+global.k_kirikiriz = (typeof(System.exeBits) != "undefined");
 
-@if (kirikiriz)
-if (Storages.isExistentStorage(System.exePath + "kwidgets.xp3")) {
-	switch (System.exeBits) {
-	case 32: Storages.addAutoPath(System.exePath + "kwidgets.xp3>plugin/"); break;
-	case 64: Storages.addAutoPath(System.exePath + "kwidgets.xp3>plugin64/"); break;
-	}
+if (! k_kirikiriz) {
+	if (Storages.isExistentStorage(System.exePath + "kwidgets.xp3"))
+		Storages.addAutoPath(System.exePath + "kwidgets.xp3>plugin/");
+	else
+		Storages.addAutoPath("kwidgets/plugin/");
 } else {
-	switch (System.exeBits) {
-	case 32: Storages.addAutoPath("kwidgets/plugin/"); break;
-	case 64: Storages.addAutoPath("kwidgets/plugin64/"); break;
+	if (Storages.isExistentStorage(System.exePath + "kwidgets.xp3")) {
+		switch (System.exeBits) {
+		case 32: Storages.addAutoPath(System.exePath + "kwidgets.xp3>plugin/"); break;
+		case 64: Storages.addAutoPath(System.exePath + "kwidgets.xp3>plugin64/"); break;
+		}
+	} else {
+		switch (System.exeBits) {
+		case 32: Storages.addAutoPath("kwidgets/plugin/"); break;
+		case 64: Storages.addAutoPath("kwidgets/plugin64/"); break;
+		}
 	}
 }
-@endif
 
-if (typeof(global["Krkr2CompatUtils"]) !== "undefined") {
-  global.k_kirikiriz = 1;
-} else if (typeof(Debug["console"]) === "undefined") {
-  global.k_kirikiriz = 1;
-  Plugins.link("menu.dll");
-  global.Pad = %[];
-  Debug.console = %[];
-} else {
-  global.k_kirikiriz = 0;
+if (k_kirikiriz) {
+	if (typeof(Debug["console"]) === "undefined") {
+		Plugins.link("menu.dll");
+		global.Pad = %[];
+		Debug.console = %[];
+	}
 }
 
 Plugins.link("ksupport.dll");

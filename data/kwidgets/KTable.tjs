@@ -2378,6 +2378,12 @@ class KTable extends KEntity
 		showColumnTab = getOption("showColumnTab", true);
 	}
 
+	function finalize {
+		super.finalize();
+		discardArray(columnList);
+		discardArray(rowList);
+	}
+
 	property widgetStyleDefinition {
 		getter {
 			return concatArray(super.widgetStyleDefinition, KTableWidgetStyleDefinition);
