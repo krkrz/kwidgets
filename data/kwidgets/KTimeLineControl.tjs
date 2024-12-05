@@ -115,6 +115,8 @@ class KTimeLineTimeLocator extends KVirtualWidget
 	var activeDragBeginTime;
 	var _activeRangeEnabled = false;
 
+	var mouseDragScrollInterp;
+
 	// コンストラクタ
 	function KTimeLineTimeLocator(window, owner, name) {
 		super.KVirtualWidget(window, name);
@@ -124,6 +126,20 @@ class KTimeLineTimeLocator extends KVirtualWidget
 //		canvas.fontHeight = 12;
 //		canvas.font.bold = true;
 		dragging = false;
+
+		mouseDragScrollInterp =
+			new KInterpolateDispatcher(this,
+									   %[ valueName: "viewPosition",
+										  dispatchName: "",
+										  interval: 120,
+										  exponent: 0.5,
+										  lerpFunction: function(a, b, t)
+										  { return %[ left: a.left + (b.left - a.left) * t ]; } ]);
+	}
+
+	function finalize {
+		invalidate mouseDragScrollInterp;
+		super.finalize();
 	}
 
 	property widgetStyleDefinition {
@@ -257,8 +273,67 @@ class KTimeLineTimeLocator extends KVirtualWidget
 		}
 	}
 
+	//----------------------------------------------------------------------
+	// マウス処理
+	property viewPosition {
+		getter {
+			var rect = viewingRect;
+			return %[ left: rect.left ];
+		}
+		setter(v) {
+			if (equalStruct(v, viewPosition))
+				return;
+			var layerViewRect = owner._layerView.viewingRect;
+			noticeRect(v.left, 0, layerViewRect.width, height);
+			owner._layerView.noticeRect(v.left, layerViewRect.top, layerViewRect.width, layerViewRect.height);
+			asyncCaller.callOnce(fakeMouseMove);
+		}
+	}
+
+	function fakeMouseMove() {
+		var keys = [
+			[ VK_SHIFT, ssShift ],
+			[ VK_CONTROL, ssCtrl ],
+			[ VK_MENU, ssAlt ],
+			[ VK_LBUTTON, ssLeft ],
+			[ VK_RBUTTON, ssRight ],
+			[ VK_MBUTTON, ssMiddle ]
+		];
+
+		var shift = keys.inject(0, function(key, value) {
+			if (System.getKeyState(key[0]))
+				return value + key[1];
+			else
+				return value;
+		});
+
+		onMouseMove(cursorX, cursorY, shift);
+	}
+
+	function nop {
+	}
+
+	property mouseIncludeViewPosition {
+		getter {
+			var rect = viewingRect;
+			var x = cursorX;
+			var l;
+
+			if (x < rect.left)
+				l = x;
+			else if (x > rect.right)
+				l = x - rect.width;
+			else
+				l = rect.left;
+
+			return %[ left: l ];
+		}
+	}
+
 	// マウスダウン
 	function onMouseDown(x, y, button, shift) {
+		super.onMouseDown(...);
+
 		// オーナーが「再生中」のクリックなら、即座に再生停止
 		if (owner.playing)
 			owner.playing = false;
@@ -321,7 +396,12 @@ class KTimeLineTimeLocator extends KVirtualWidget
 	}
 
 	// マウスムーブ
-	function onMouseMove(x, y, button, shift) {
+	function onMouseMove(x, y, shift) {
+		super.onMouseMove(...);
+
+		if ((shift & (ssLeft | ssRight | ssMiddle)) != 0) 
+			mouseDragScrollInterp.interpolate(mouseIncludeViewPosition);
+
 		// フレームドラッグ中なら、処理
 		if (frameDragMoving) {
 			owner.selectedTime = int(Math.max(int(x / TIMELINE_FRAME_WIDTH), frameDragMinTime));
@@ -373,6 +453,8 @@ class KTimeLineTimeLocator extends KVirtualWidget
 
 	// マウスアップ
 	function onMouseUp(x, y, button, shift) {
+		super.onMouseUp(...);
+
 		// フレームドラッグを解除
 		if (frameDragMoving
 			&& button == mbLeft) {
@@ -507,9 +589,9 @@ class KTimeLineLayerView extends KVirtualWidget
 		mouseDragScrollInterp =
 			new KInterpolateDispatcher(this,
 									   %[ valueName: "viewPosition",
-										  dispatchName: "nop",
+										  dispatchName: "",
 										  interval: 120,
-										  exponent: 0.7,
+										  exponent: 0.5,
 										  lerpFunction: function(a, b, t)
 										  { return %[ left: a.left + (b.left - a.left) * t,
 													  top: a.top + (b.top - a.top) * t ]; } ]);
@@ -1665,8 +1747,6 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	//----------------------------------------------------------------------
 	// マウス処理
-	var _viewPosition;
-
 	property viewPosition {
 		getter {
 			var rect = viewingRect;
@@ -4730,7 +4810,8 @@ class KTimeLineControl extends KEntity
 	// レイヤビューのスクロール状況を監視
 	function onLayerViewModified(childViewLeft, childViewTop, childViewWidth, childViewHeight, childWidth, childHeight) {
 		_layerListScroll.setChildViewPos(_layerListScroll.childViewLeft, childViewTop);
-		_timeLocatorScroll.setChildViewPos(childViewLeft, _timeLocatorScroll.childViewTop);
+		if (! _timeLocator.mouseDragScrollInterp.running)
+			_timeLocatorScroll.setChildViewPos(childViewLeft, _timeLocatorScroll.childViewTop);
 	}
 
 	// レイヤリストのスクロール状況を監視
