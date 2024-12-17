@@ -480,16 +480,6 @@ class KTimeLineTimeLocator extends KVirtualWidget
 		}
 	}
 
-	// enabled==trueならそのまま表示
-	function onNodeEnabled {
-		_canvas.opacity = 255;
-	}
-
-	// enabled=falseなら半透明で表示
-	function onNodeDisabled {
-		_canvas.opacity = 64;
-	}
-
 	function onHoverMouseWheel {
 	}
 }
@@ -835,6 +825,8 @@ class KTimeLineLayerView extends KVirtualWidget
 			colorRect(areaRect.left, areaRect.top, areaRect.width, areaRect.height, color, alpha);
 		}
 		owner.onDrawView(this, l, t, w, h);
+		if (! nodeEnabled)
+			colorRect(l, t, w, h, borderStyle.backgroundColor & 0xffffff, 128);
 	}
 
 	property hasWorkZone {
@@ -2396,16 +2388,6 @@ class KTimeLineLayerView extends KVirtualWidget
 			shrinkFramesByArea(stride);
 		else if (hasSelection)
 			shrinkFramesBySelection(stride);
-	}
-
-	// enabled==trueならそのまま表示
-	function onNodeEnabled {
-		_canvas.opacity = 255;
-	}
-
-	// enabled=falseなら半透明で表示
-	function onNodeDisabled {
-		_canvas.opacity = 64;
 	}
 
 	function onSelectionModified() {
