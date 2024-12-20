@@ -309,6 +309,8 @@
       ロウのY座標
     size (int)
       ロウの幅
+    editable (bool)
+	  行を編集可能かどうか
 
    [Point]
    ・解説
@@ -325,7 +327,7 @@
    ・プロパティ、関数
      value
        エレメントの配列を設定、取得する
-     findColumnByKery(key)
+     findColumnByKey(key)
        キーを元にカラムを検索する
      selectedPointList (array of Point)
        選択中のポイント配列を返す
@@ -1745,6 +1747,11 @@ class KTableView extends KTableVirtualWidget
 		return generatePoint(column, row);
 	}
 
+	// ポイントが編集可能
+	function isPointEditable(point) {
+		return point.column.editable && point.row.editable;
+	}
+
 	// ポイントが現在も有効か判定する
 	function isValidPoint(point) {
 		return point !== void
@@ -2086,7 +2093,7 @@ class KTableView extends KTableVirtualWidget
 		if (point === void)
 			return;
 		// テーブル本体を呼ぶ
-		if (point.column.editable)
+		if (isPointEditable(point))
 			point.column.onMouseDown(point.row, x, y, button, shift);
 	}
 
@@ -2598,8 +2605,8 @@ class KTable extends KEntity
 	 *
 	 * @param element エレメントの値
 	 ------------------------------*/
-	function addElement(element) {
-		insertElement(rowList.count, element);
+	function addElement(element, editable = true) {
+		return insertElement(rowList.count, element, editable);
 	}
 
 	/**------------------------------
@@ -2608,11 +2615,12 @@ class KTable extends KEntity
 	 * @param index エレメントの挿入位置
 	 * @param element エレメントの値
 	 ------------------------------*/
-	function insertElement(index, element) {
+	function insertElement(index, element, editable = true) {
 		var attached = isAttachedToWindow;
 		beginRedrawRegion();
 		element = duplicateStruct(element);
 		var row = new KTableRow(this, element);
+		row.editable = editable;
 		row.index = index;
 		if (attached) {
 			row.size = fontHeight + spaceVertical;;
@@ -2634,6 +2642,7 @@ class KTable extends KEntity
 		endRedrawRegion();
 		notifyValueModification();
 		rowTab.redrawAll();
+		return row;
 	}
 
 	/**------------------------------
@@ -3133,7 +3142,7 @@ class KTable extends KEntity
 			super.onKeyDown(...);
 			if (curFocusPoint !== void) {
 				if (cellSelection) {
-					if (curFocusPoint.column.editable) {
+					if (isPointEditable(curFocusPoint)) {
 						curFocusPoint.column.onKeyDown(curFocusPoint.row, key, shift);
 					}
 				}
@@ -3739,6 +3748,7 @@ class KTableRow
 	var pos;
 	var size;
 	var selected;
+	var editable = false;
 
 	/**
 	 * テーブルロウ
