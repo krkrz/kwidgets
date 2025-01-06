@@ -1123,6 +1123,19 @@ class KTimeLineLayerView extends KVirtualWidget
 		}
 	}
 
+	function selectCurrentPoint() {
+		var layer = owner.selectedLayer;
+		var time = owner.selectedTime;
+		if (layer >= 0
+			&& layer < owner.drawItemList.count) {
+			var item = owner.drawItemList[layer];
+			var frameIndex = item.findFrame(time);
+			if (frameIndex > 0) {
+				item.setSelection([ frameIndex ]);
+			}
+		}
+	}
+
 	function pointWorkZoneCorner() {
 		var rect = workZoneEffectiveFrameLeftTop;
 		if (rect !== void) {
@@ -4503,7 +4516,11 @@ class KTimeLineControl extends KEntity
 			return view.hasMultipleSelection;
 		}
 	}
-	
+
+	function selectCurrentPoint() {
+		view.selectCurrentPoint();
+	}
+
 	//----------------------------------------------------------------------
 	// エリア指定をしているかどうか
 	property hasArea {
