@@ -447,7 +447,7 @@ class KColorPickerDialog extends KWindow
 		close();
 	}
 
-	function applyRGB(r, g, b) {
+	function applyRGB(r, g, b, updateText = true) {
 		p0Input.value = r;
 		p1Input.value = g;
 		p2Input.value = b;
@@ -456,7 +456,8 @@ class KColorPickerDialog extends KWindow
 		s1Input.value = int(sc[1]);
 		s2Input.value = int(sc[2]);
 		color = (r << 16) | (g << 8) | b | (hasAlpha ? (alpha << 24) : 0);
-		textInput.value = convertColorToText(color, hasAlpha);
+		if (updateText)
+			textInput.value = convertColorToText(color, hasAlpha);
 	}
 
 	function applyPrimary() {
@@ -622,7 +623,14 @@ class KColorPickerDialog extends KWindow
 		}
 		case "textInput": {
 			value = convertTextToColor(value, hasAlpha);
-			// FOLLOW THROUGH
+			if (hasAlpha) 
+				alpha = (value >> 24) & 0xFF;
+			applyRGB((value >> 16) & 0xff,
+					 (value >> 8) & 0xff,
+					 (value) & 0xff,
+					 false);
+			updateSelecter();
+			break;
 		}
 		case "oldColor": {
 			if (hasAlpha) 
