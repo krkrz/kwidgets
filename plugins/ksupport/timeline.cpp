@@ -105,7 +105,7 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
   tjs_int halfSecondFrameBgColor = widgetStyleObj.getIntValue(L"halfSecondFrameBgColor");
   tjs_int fifthFrameBgColor = widgetStyleObj.getIntValue(L"fifthFrameBgColor");
   tjs_int normalFrameBgColor = widgetStyleObj.getIntValue(L"normalFrameBgColor");
-  tjs_int frameBorderColor = widgetStyleObj.getIntValue(L"frameBorderColor");
+  tjs_int backgroundBorderColor = widgetStyleObj.getIntValue(L"backgroundBorderColor");
   bool showVerticalBorder = widgetStyleObj.getIntValue(L"showVerticalBorder");
   bool showHorizontalBorder = widgetStyleObj.getIntValue(L"showHorizontalBorder");
  
@@ -124,9 +124,9 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
     }
 	viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y, TIMELINE_FRAME_WIDTH, TIMELINE_FRAME_HEIGHT, color);
 	if (showVerticalBorder)
-		viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x + TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, frameBorderColor);
+		viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x + TIMELINE_FRAME_WIDTH - 1, y, 1, TIMELINE_FRAME_HEIGHT, backgroundBorderColor);
 	if (showHorizontalBorder)
-		viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y + TIMELINE_FRAME_HEIGHT - 1, TIMELINE_FRAME_WIDTH, 1, frameBorderColor);
+		viewObj.FuncCall(0, L"fillRect", &fillRectHint, NULL, x, y + TIMELINE_FRAME_HEIGHT - 1, TIMELINE_FRAME_WIDTH, 1, backgroundBorderColor);
   }
 }
 

@@ -498,6 +498,7 @@ global.KTimeLineLayerViewWidgetStyleDefinition =
 			%[ key: "normalFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "frameSignColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "frameBorderColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "backgroundBorderColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "cursorColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "loopSingleFrameColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "loopContinuousFrameColor", defaultValue: 0, resolver: "resolveColor" ],
