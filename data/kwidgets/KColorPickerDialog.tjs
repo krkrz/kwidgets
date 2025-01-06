@@ -256,6 +256,7 @@ class KColorPickerDialog extends KWindow
 
 		caption = getOption("caption", "カラーピッカー");
 		borderStyle = bsDialog;
+		alwaysSetToMinSize = true;
 
 		this.color = prevColor = color;
 		this.hasAlpha = hasAlpha;
@@ -277,45 +278,47 @@ class KColorPickerDialog extends KWindow
 			alphaFrame.add(new KColorPickerAlphaSelecter(this, "alphaSelecter"));
 		}
 		rootGrid.add(1, 0, new KGridLayout(this, %[ name: "colorOuterGrid" ]));
-		colorOuterGrid.add(0, 0, new KTextLabel(this, %[ label: "新しい色", style: %[ align: ALIGN_CENTER ] ]));
+		colorOuterGrid.add(0, 0, new KTextLabel(this, %[ label: "新しい色", style: %[ align: ALIGN_CENTER, fontHeight: 10 ] ]));
 		colorOuterGrid.add(0, 1, new KFrameLayout(this, %[ name: "colorFrame" ]));
-		colorOuterGrid.add(0, 2, new KTextLabel(this, %[ label: "現在の色", style: %[ align: ALIGN_CENTER  ] ]));
+		colorOuterGrid.add(0, 2, new KTextLabel(this, %[ label: "現在の色", style: %[ align: ALIGN_CENTER, fontHeight: 10  ] ]));
 		colorFrame.add(new KGridLayout(this, %[ name: "colorGrid" ]));
-		colorGrid.add(0, 0, new KColorPickerColorBox(this, 64, 32, "newColor"));
-		colorGrid.add(0, 1, new KColorPickerColorBox(this, 64, 32, "oldColor"));
+		colorGrid.add(0, 0, new KColorPickerColorBox(this, 48, 32, "newColor"));
+		colorGrid.add(0, 1, new KColorPickerColorBox(this, 48, 32, "oldColor"));
  
-		rootGrid.add(1, 1, new KGridLayout(this, %[ name: "paramGrid", id: "widget_grid_narrow" ]));
+		rootGrid.add(1, 1, new KGridLayout(this, %[ name: "paramGrid", id: "widget_grid_narrow", style: %[ spaceHorizontal: 4 ] ]));
 		defaultAlignVertical = ALIGN_CENTER;
-		paramGrid.add(0, 0, new KComboBox(this, %[ name: "colorSpaceSelect", width: 80, items: [ "HSV-RGB", 0, "HSL-RGB", 1, "HCL-RGB", 2 ], value: 0 ]), 3);
+		paramGrid.add(0, 0, new KComboBox(this, %[ name: "colorSpaceSelect", width: 100, items: [ "HSV-RGB", 0, "HSL-RGB", 1, "HCL-RGB", 2 ], value: 0 ]), 6);
 		paramGrid.add(0, 1, new KRadioButton(this, %[ label: "H:", name: "s0Select" ]));
 		paramGrid.add(1, 1, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "s0Input" ]));
 		paramGrid.add(2, 1, new KTextLabel(this, %[ label: "°", name: "s0Postfix"] ));
 		paramGrid.add(0, 2, new KRadioButton(this, %[ label: "S:", name: "s1Select" ]));
 		paramGrid.add(1, 2, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "s1Input" ]));
-		paramGrid.add(2, 2, new KTextLabel(this, %[ label: "％", name: "s1Postfix" ]));
+		paramGrid.add(2, 2, new KTextLabel(this, %[ label: "%", name: "s1Postfix" ]));
 		paramGrid.add(0, 3, new KRadioButton(this, %[ label: "V:", name: "s2Select" ]));
 		paramGrid.add(1, 3, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "s2Input"]));
-		paramGrid.add(2, 3, new KTextLabel(this, %[ label: "％", name: "s2Postfix" ]));
+		paramGrid.add(2, 3, new KTextLabel(this, %[ label: "%", name: "s2Postfix" ]));
 
-		paramGrid.add(0, 5, new KRadioButton(this, %[ label: "R:", name: "p0Select" ]));
-		paramGrid.add(1, 5, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "p0Input" ]));
-		paramGrid.add(0, 6, new KRadioButton(this, %[ label: "G:", name: "p1Select" ]));
-		paramGrid.add(1, 6, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "p1Input" ]));
-		paramGrid.add(0, 7, new KRadioButton(this, %[ label: "B:", name: "p2Select" ]));
-		paramGrid.add(1, 7, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "p2Input" ]));
+		paramGrid.add(3, 0, new KSpacer(this, %[ width: 4, height: 0 ]));
+
+		paramGrid.add(4, 1, new KRadioButton(this, %[ label: "R:", name: "p0Select" ]));
+		paramGrid.add(5, 1, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "p0Input" ]));
+		paramGrid.add(4, 2, new KRadioButton(this, %[ label: "G:", name: "p1Select" ]));
+		paramGrid.add(5, 2, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "p1Input" ]));
+		paramGrid.add(4, 3, new KRadioButton(this, %[ label: "B:", name: "p2Select" ]));
+		paramGrid.add(5, 3, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "p2Input" ]));
 
 		var textRow;
 		if (hasAlpha) {
-			paramGrid.add(0, 8, new KTextLabel(this, "A:", "aSelect"));
-			paramGrid.add(1, 8, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "aInput" ]));
+			paramGrid.add(4, 4, new KTextLabel(this, "A:", "aSelect"));
+			paramGrid.add(5, 4, new KTextInput(this, %[ width: 30, type: TEXT_DIGIT, name: "aInput" ]));
 			aSelect.alignHorizontal = ALIGN_RIGHT;
-			textRow = 10;
+			textRow = 5;
 		} else 
-			textRow = 9;
+			textRow = 4;
 
-		paramGrid.add(0, textRow, new KTextLabel(this, "#", "labelSharp"));
-		labelSharp.alignHorizontal = ALIGN_RIGHT;
-		paramGrid.add(1, textRow, new KTextInput(this, %[ width: 60, type: TEXT_ANY, name: "textInput" ]), 2, 1);
+		paramGrid.add(0, textRow, new KGridLayout(this, %[ name: "textGrid", id: "widget_grid_closely", style: %[ alignHorizontal: ALIGN_LEFT ] ]), 6);
+		textGrid.add(0, textRow, new KTextLabel(this, "#"));
+		textGrid.add(1, textRow, new KTextInput(this, %[ width: 60, type: TEXT_ANY, name: "textInput" ]));
 
 		s0Select.focusable = false;
 		s1Select.focusable = false;
@@ -334,10 +337,11 @@ class KColorPickerDialog extends KWindow
 			aInput.respondToValueModification = true;
 		textInput.respondToValueModification = true;
 
-		rootGrid.add(0, 2, new KGridLayout(this, %[ name: "buttonGrid", id: "button_grid" ]), 2, 1);
-		buttonGrid.alignHorizontal = ALIGN_RIGHT;
+//		rootGrid.add(0, 2, new KGridLayout(this, %[ name: "buttonGrid", id: "button_grid" ]), 2, 1);
+//		buttonGrid.alignHorizontal = ALIGN_RIGHT;
+		colorOuterGrid.add(1, 0, new KGridLayout(this, %[ name: "buttonGrid", id: "button_grid", style: %[ isClass: %[ KButton: %[ variable: true, paddingVertical: 3, paddingHorizontal: 7 ] ] ] ]), 1, 3);
 		buttonGrid.add(0, 0, new KTextButton(this, %[ label: getOption("okLabel", "OK"), name: "okButton", id: "primary_button" ]));
-		buttonGrid.add(1, 0, new KTextButton(this, getOption("cancelLabel", "キャンセル"), "cancelButton"));
+		buttonGrid.add(0, 1, new KTextButton(this, getOption("cancelLabel", "キャンセル"), "cancelButton"));
 
 		newColor.hasAlpha = oldColor.hasAlpha = hasAlpha;
 		newColor.value = oldColor.value = color;
@@ -490,7 +494,7 @@ class KColorPickerDialog extends KWindow
 		secondaryColorSpace = secondaryColorSpaces[index];
 		for (var i = 0; i < secondaryColorSpace.components.count; i++) {
 			var component = secondaryColorSpace.components[i];
-			this[format("s{0}Select", i)].label = component.label;
+			this[format("s{0}Select", i)].label = component.label + ":";
 			this[format("s{0}Postfix", i)].label = component.postfix;
 		}
 	}
