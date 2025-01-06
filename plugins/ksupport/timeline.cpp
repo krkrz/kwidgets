@@ -292,6 +292,29 @@ void timeline_draw_marker(tTJSVariant item, tTJSVariant view, tjs_int layerIndex
 							 text);
 			tjs_int l = frameTime * TIMELINE_FRAME_WIDTH + ((length * TIMELINE_FRAME_WIDTH) - tjs_int(textWidth)) / 2;
 			tjs_int t = y + int((TIMELINE_FRAME_HEIGHT - fontHeight) / 2) - 1;
+
+
+			// 数字のバックグラウンド切り抜き
+			tjs_int leftColor, rightColor;
+			if (frameType == TIMELINE_FRAME_TYPE_CONTINUOUS) {
+				leftColor = itemObj.GetValue(L"continuousFrameLeftColor", ncbTypedefs::Tag<tjs_int>(), 0, &_continuousFrameLeftColorHint);
+				rightColor = itemObj.GetValue(L"continuousFrameRightColor", ncbTypedefs::Tag<tjs_int>(), 0, &_continuousFrameRightColorHint);
+			} else {
+				leftColor = itemObj.GetValue(L"tweenFrameLeftColor", ncbTypedefs::Tag<tjs_int>(), 0, &_tweenFrameLeftColorHint);
+				rightColor = itemObj.GetValue(L"tweenFrameRightColor", ncbTypedefs::Tag<tjs_int>(), 0, &_tweenFrameRightColorHint);
+			}
+			leftColor |= 0xFF000000;
+			rightColor |= 0xFF000000;
+			viewObj.FuncCall(0, L"setClip", &setClipHint, NULL,
+							 l - 1, t - 1, tjs_int(textWidth) + 2, fontHeight + 2);
+			viewObj.FuncCall(0, L"fillGradientRectLR", &fillGradientRectLRHint, NULL,
+							 frameTime * TIMELINE_FRAME_WIDTH, y,
+							 length * TIMELINE_FRAME_WIDTH - 1,
+							 TIMELINE_FRAME_HEIGHT - 1,
+							 leftColor, rightColor);
+			viewObj.FuncCall(0, L"setClip", &setClipHint, NULL);
+
+			// 数字描画
 			viewObj.FuncCall(0, L"drawUIText", &drawUITextHint, NULL,
 							 fontStyle, l, t, text, tjs_int(frameSignColor & 0xFFFFFF));
 		}
