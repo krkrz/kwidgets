@@ -1130,7 +1130,7 @@ class KTimeLineLayerView extends KVirtualWidget
 			&& layer < owner.drawItemList.count) {
 			var item = owner.drawItemList[layer];
 			var frameIndex = item.findFrame(time);
-			if (frameIndex > 0) {
+			if (frameIndex >= 0) {
 				item.setSelection([ frameIndex ]);
 			}
 		}
