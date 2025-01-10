@@ -4803,8 +4803,18 @@ class KTimeLineControl extends KEntity
 		size = int(size);
 		if (size <= _layerView.maxWidth)
 			return;
+		invalidateMaxWidth(size);
+	}
+
+	function invalidateMaxWidth(size) {
+		size = Math.max(size, width);
 		_layerView.setMinMaxSize(size, _layerView.minHeight, size, _layerView.maxHeight);
 		_timeLocator.setMinMaxSize(size, _timeLocator.minHeight, size, _timeLocator.maxHeight);
+	}
+
+	function onSizeModified(w, h) {
+		invalidateMaxWidth(_layerView.maxWidth);
+		super.onSizeModified(w, h);
 	}
 
 	// レイヤビューのスクロール状況を監視
