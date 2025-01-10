@@ -4180,7 +4180,7 @@ class KTimeLineControl extends KEntity
 	 * - onPlay() 再生開始時に呼ばれる
 	 * - onStop(playOverLastFrame) 再生停止時に呼ばれる
 	 ------------------------------*/
-	function KTimeLineControl(window, name) {
+	function KTimeLineControl(window, options) {
 		super.KEntity(...);
 
 		// ウィジェット生成
