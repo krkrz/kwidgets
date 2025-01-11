@@ -8,7 +8,7 @@
 
 ///----------------------------------------------------------------------
 /// 変数
-tjs_uint32 timeHint, typeHint ,timeLineFrameWidthHint, timelineFrameHeightHint, fillRectHint, winDarken2Hint, winDarken1Hint, winLighten1Hint, winWhiteHint, canvasHint, fontHeightHint, getTextWidthHint, drawTextHint, frameListHint, drawFrameHint, selectionHint, colorRectHint, layerHint, topHint, oneSecondFrameBgLayerHint, halfSecondFrameBgLayerHint, fifthFrameBgLayerHint, normalFrameBgLayerHint, copyRectHint, operateRectHint, widthHint, heightHint, frameLeftMarkerLayerHint, frameRightMarkerLayerHint, dashLineAppHint, drawLineHint, fontHint, rootHint, ownerHint, framePerSecondHint, fillGradientRectLRHint, setClipHint, frameSignColorHint, fontStyleHint, applyFontStyleHint, drawUITextHint;
+static tjs_uint32 timeHint, typeHint ,timeLineFrameWidthHint, timelineFrameHeightHint, fillRectHint, winDarken2Hint, winDarken1Hint, winLighten1Hint, winWhiteHint, canvasHint, fontHeightHint, getTextWidthHint, drawTextHint, frameListHint, drawFrameHint, selectionHint, colorRectHint, layerHint, topHint, oneSecondFrameBgLayerHint, halfSecondFrameBgLayerHint, fifthFrameBgLayerHint, normalFrameBgLayerHint, copyRectHint, operateRectHint, widthHint, heightHint, frameLeftMarkerLayerHint, frameRightMarkerLayerHint, dashLineAppHint, drawLineHint, fontHint, rootHint, ownerHint, framePerSecondHint, fillGradientRectLRHint, setClipHint, frameSignColorHint, fontStyleHint, applyFontStyleHint, drawUITextHint, eraseHint, addHint;
 
 tjs_uint32 _singleFrameLeftColorHint, _tweenFrameLeftColorHint, _continuousFrameLeftColorHint;
 tjs_uint32 _singleFrameRightColorHint, _tweenFrameRightColorHint, _continuousFrameRightColorHint;
@@ -26,6 +26,59 @@ enum
   TIMELINE_MARKER_MASK_LEFT = 1,
   TIMELINE_MARKER_MASK_RIGHT = 2,
 };
+
+//----------------------------------------------------------------------
+static tTJSVariant createDictionary(void)
+{
+	iTJSDispatch2 *obj = TJSCreateDictionaryObject();
+	tTJSVariant result(obj, obj);
+	obj->Release();
+	return result;
+}
+
+
+//----------------------------------------------------------------------
+// ヌルフレームを適正化する
+void timeline_invalidate_null_frame(tTJSVariant frameList)
+{
+	ncbPropAccessor frameListObj(frameList);
+	tjs_int frameListCount = frameListObj.GetArrayCount();
+
+	// 連続するヌルフレームを統合する
+	for (tjs_int i = 1; i < frameListCount; i++) {
+		ncbPropAccessor prevFrameObj(frameListObj.GetValue(i - 1, ncbTypedefs::Tag<tTJSVariant>()));
+		ncbPropAccessor curFrameObj(frameListObj.GetValue(i, ncbTypedefs::Tag<tTJSVariant>()));
+		if (prevFrameObj.getIntValue(L"type") == TIMELINE_FRAME_TYPE_NULL
+			&& curFrameObj.getIntValue(L"type") == TIMELINE_FRAME_TYPE_NULL) {
+			frameListObj.FuncCall(0, L"erase", &eraseHint, NULL, i);
+			i--;
+			frameListCount--;
+			continue;
+		}
+	}
+	// 先頭のヌルフレームを削除する
+	if (frameListCount) {
+		ncbPropAccessor topFrameObj(frameListObj.GetValue(0, ncbTypedefs::Tag<tTJSVariant>()));
+		if (topFrameObj.getIntValue(L"type") == TIMELINE_FRAME_TYPE_NULL) {
+			frameListObj.FuncCall(0, L"erase", &eraseHint, NULL, 0);
+			frameListCount--;
+		}
+	}
+	// 連続フレームか補完フレームの場合、空リストで無ければ末尾に必ずヌルフレームを追加する
+	if (frameListCount) {
+		ncbPropAccessor lastFrameObj(frameListObj.GetValue(frameListCount - 1, ncbTypedefs::Tag<tTJSVariant>()));
+		auto lastFrameType = lastFrameObj.getIntValue(L"type");
+		if (lastFrameType == TIMELINE_FRAME_TYPE_CONTINUOUS
+			|| lastFrameType == TIMELINE_FRAME_TYPE_TWEEN) {
+			tTJSVariant newFrame = createDictionary();
+			ncbPropAccessor newFrameObj(newFrame);
+			newFrameObj.SetValue(L"time", lastFrameType + 1);
+			newFrameObj.SetValue(L"type", TIMELINE_FRAME_TYPE_NULL);
+			newFrameObj.SetValue(L"content", tTJSVariant());
+			frameListObj.FuncCall(0, L"add", &addHint, NULL, newFrame);
+		}
+	}
+}
 
 
 ///----------------------------------------------------------------------
@@ -413,6 +466,7 @@ void timeline_draw_frame(tTJSVariant item, tTJSVariant view, tjs_int layerIndex,
 
 //----------------------------------------------------------------------
 // バインド
+NCB_REGISTER_FUNCTION(timeline_invalidate_null_frame, timeline_invalidate_null_frame);
 NCB_REGISTER_FUNCTION(timeline_find_frame, timeline_find_frame);
 NCB_REGISTER_FUNCTION(timeline_draw_bg, timeline_draw_bg);
 NCB_REGISTER_FUNCTION(timeline_draw_frame, timeline_draw_frame);

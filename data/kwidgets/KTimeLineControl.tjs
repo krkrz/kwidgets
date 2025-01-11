@@ -41,6 +41,9 @@ function ktimeline_shallow_copy_frame_list(frameList)
 
 function ktimeline_invalidate_null_frame(frameList)
 {
+	timeline_invalidate_null_frame(frameList);
+	return;
+
 	// 連続するヌルフレームを統合する
 	for (var i = 1; i < frameList.count; i++) {
 		if (frameList[i - 1].type == TIMELINE_FRAME_TYPE_NULL
