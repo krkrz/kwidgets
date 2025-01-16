@@ -9,6 +9,8 @@ global._existentWindowList = [];
 /**----------------------------------------------------------------------
  * ウィジェットを格納するウィンドウ
  ----------------------------------------------------------------------*/
+global.K_INDEPENDENT_WINDOW = "k.independent.window";
+
 global.K_WINDOW_STYLE_DEFINITION =
 	[
 			%[ key: "defaultFocusable" ]
@@ -97,7 +99,9 @@ class KWindow extends Window
 			this.hintLayer = void;
 
 			// メインウィンドウ以外のウィンドウを全て直系の子にするかどうか
-			if (parentWindow == null
+			if (parentWindow === K_INDEPENDENT_WINDOW)
+				super.Window(null);
+			else if (parentWindow == null
 				&& global.Window.mainWindow != null
 				&& global.Window.mainWindow.createNewWindowAsChild)
 				super.Window(global.Window.mainWindow);
