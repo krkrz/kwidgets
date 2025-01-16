@@ -499,7 +499,7 @@ class KComboDropdownWindow extends KWindow
 	var owner;
 
 	function KComboDropdownWindow(owner) {
-		super.KWindow();
+		super.KWindow("", owner.window);
 		this.owner = owner;
 
 		borderStyle = bsNone;

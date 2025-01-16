@@ -3914,7 +3914,7 @@ class KTimeLineLoopItem extends KTimeLineItem
 	}
 
 	function onTimeLineRightClick(time) {
-		var menu = new KContextMenu();
+		var menu = new KContextMenu(window);
 		onBuildTimeLineContextMenu(menu, time);
 		owner.onBuildCommonTimeLineContextMenu(menu);
 		menu.show();
@@ -4676,7 +4676,7 @@ class KTimeLineControl extends KEntity
 	 * タイムラインが右クリックされた
 	 ------------------------------*/
 	function onTimeLineRightClick {
-		var menu = new KContextMenu();
+		var menu = new KContextMenu(window);
 		onBuildCommonTimeLineContextMenu(menu);
 		if (menu.childCount == 0)
 			invalidate menu;
@@ -4925,7 +4925,7 @@ class KTimeLineControl extends KEntity
 	}
 
 	function onViewWidthChange {
-		var menu = new KContextMenu();
+		var menu = new KContextMenu(window);
 		for (var i = 0; i < TIMELINE_FRAME_WIDTH_LABEL_LIST.count; i++)
 			menu.addRadioItem(TIMELINE_FRAME_WIDTH_LABEL_LIST[i], i, "viewWidth", true, this.onViewWidthDecide);
 		menu.viewWidth.value = viewWidth;

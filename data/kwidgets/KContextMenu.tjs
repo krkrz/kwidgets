@@ -15,11 +15,13 @@ class KContextMenu extends KWindow
    * 
    * @param toExit 一回メニューを開いた後、自動的に消滅するかどうかを設定する。
    ------------------------------*/
-  function KContextMenu(_toExit = true) {
-    if (! k_kirikiriz)
-      super.KWindow("", null, true);
-    else
-      super.KWindow("", global.Window.mainWindow, true);
+	function KContextMenu(parentWindow = null, _toExit = true) {
+		if (! k_kirikiriz)
+			super.KWindow("", null, true);
+		else if (parentWindow)
+			super.KWindow("", parentWindow, true);
+		else
+			super.KWindow("", global.Window.mainWindow, true);
     toExit = _toExit;
     // 表示座標を得るために、プライマリレイヤをサイズ設定
     primaryLayer.setFixedSize(1, 1);
