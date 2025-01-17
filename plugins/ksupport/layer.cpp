@@ -103,7 +103,7 @@ public:
 						fromV += (range.max - range.min);
 				}
 				result.v[i] = fmod((fromV * (1 - t) + toV * t), range.max - range.min) + range.min;
-					} else {
+			} else {
 				result.v[i] = fromV * (1 - t) + toV * t;
 			}
 		}
@@ -222,7 +222,7 @@ public:
 		if (max_v == min_v) {
 			to.v[0] = 0;
 			to.v[1] = 0;
-			to.v[2] = max_v / 255;
+			to.v[2] = max_v / 255 * 100;
 			return to;
 		}
 		if (max_v == r)
@@ -334,21 +334,21 @@ private:
 	bool cyclic;
 
 	double rgb255(double v) const {
-		v += 0.5;
+		//		v += 0.5;
 		return (v < 255 ? (v > 0 ? v : 0) : 255);
 	}
 
 	double b1(double v) const {
-		return v * 255;
+		return v * 255.0;
 	}
 	double b2(double v) const {
-		return (v > 0.2068965 ? std::pow(v, 3) : (v - 4.0 / 29) * (108.0 / 841));
+		return (v > 0.2068965 ? std::pow(v, 3.0) : (v - 4.0 / 29.0) * (108.0 / 841.0));
 	}
 	double a1(double v) const {
-		return v / 255;
+		return v / 255.0; 
 	}
 	double a2(double v) const {
-		return (v > 0.0088564 ? std::pow(v, (1.0 / 3)) : v / (108.0 / 841) + 4.0 / 29);
+		return (v > 0.0088564 ? std::pow(v, (1.0 / 3.0)) : v / (108.0 / 841.0) + 4.0 / 29.0);
 	}
 
 public:
@@ -364,20 +364,20 @@ public:
 		auto y = a2(r * 0.222488403 + g * 0.716873169 + b * 0.06060791);
 		auto l = 500 * (a2(r * 0.452247074 + g * 0.399439023 + b * 0.148375274) - y);
 		auto q = 200 * (y - a2(r * 0.016863605 + g * 0.117638439 + b * 0.865350722));
-		auto h = std::atan2(q, l) * (180 / M_PI);
+		auto h = std::atan2(q, l) * (180.0 / M_PI);
 		to.v[0] = h < 0 ? h + 360 : h;
 		to.v[1] = sqrt(l * l + q * q);
-		to.v[2] = 116 * y - 16;
+		to.v[2] = 116.0 * y - 16.0;
 		return to;
 	}
 	virtual rgb_t ToRGB(const color_tuple_t &from) const {
 		rgb_t to;
-		auto h = from.v[0] * M_PI / 180;
+		auto h = from.v[0] * M_PI / 180.0;
 		auto c = from.v[1];
-		auto l = (from.v[2] + 16) / 116;
+		auto l = (from.v[2] + 16.0) / 116.0;
 		auto y = b2(l);
-		auto x = b2(l + (c / 500) * std::cos(h));
-		auto z = b2(l - (c / 200) * std::sin(h));
+		auto x = b2(l + (c / 500.0) * std::cos(h));
+		auto z = b2(l - (c / 200.0) * std::sin(h));
         to.r = rgb255(b1(x * 3.021973625 - y * 1.617392459 - z * 0.404875592));
         to.g = rgb255(b1(x * -0.943766287 + y * 1.916279586 + z * 0.027607165));
         to.b = rgb255(b1(x * 0.069407491 - y * 0.22898585 + z * 1.159737864));
@@ -459,7 +459,7 @@ public:
 
 	static tjs_uint32 argbTupleToColor(tTJSVariant argbTuple) {
 		auto c = fromArray(argbTuple);
-		return (int(c.color.v[0]) << 16) | (int(c.color.v[1]) << 8) | int(c.color.v[2]) | (int(c.a) << 24);
+		return (int(c.color.v[0] + 0.5) << 16) | (int(c.color.v[1] + 0.5) << 8) | int(c.color.v[2] + 0.5) | (int(c.a + 0.5) << 24);
 	}
 
 	static tTJSVariant convertColorTuple(tjs_int fromCS, tjs_int toCS, tTJSVariant colorTuple) {

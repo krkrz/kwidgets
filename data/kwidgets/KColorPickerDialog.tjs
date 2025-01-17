@@ -26,13 +26,9 @@ class KColorPickerXYSelecter extends KValueWidget
 
 	function getLuminance(x, y, cs, c0, c1, c2, c3) {
 		cs |= csNonCyclic;
-		c0 = ColorSpace.convertColorTuple(csRGB, cs, c0);
-		c1 = ColorSpace.convertColorTuple(csRGB, cs, c1);
-		c2 = ColorSpace.convertColorTuple(csRGB, cs, c2);
-		c3 = ColorSpace.convertColorTuple(csRGB, cs, c3);
 		var c01 = ColorSpace.lerpColorTuple(cs, c0, c1, x);
 		var c23 = ColorSpace.lerpColorTuple(cs, c2, c3, x);
-		var color = ColorSpace.lerpColorTuple(cs, c01, c23, y);
+		var color = ColorSpace.lerpColorTuple(cs, c01, c23, 1 - y);
 		var hsc = ColorSpace.convertColorTuple(cs, csHCL, color);
 		return hsc[2];
 	}
