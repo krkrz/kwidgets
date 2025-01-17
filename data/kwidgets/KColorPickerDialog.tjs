@@ -577,6 +577,7 @@ class KColorPickerDialog extends KWindow
 		this.alpha = alpha;
 		aInput.value = alpha;
 		textInput.value = convertColorToText(primaryColorARGB, hasAlpha);
+		applyCurrent();
 		updateSelecter();
 	}
 
