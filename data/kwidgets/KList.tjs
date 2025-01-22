@@ -1877,6 +1877,7 @@ global.K_LIST_ITEM_LABEL_STYLE_DEFINITION = [
 
 global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
 		%[ key: "statePriority", defaultValue: [] ],
+		%[ key: "callback", defaultValue: "" ],
 		%[ key: "opacity" ],
 		%[ key: "skipHierarchy", defaultValue: false ],
 		%[ key: "toggleEnabled", defaultValue: true ],
@@ -1928,11 +1929,12 @@ class KListItem
 	var _styleChain;
 	var fontStyle;
 	var labelStyle;
-	var appearanceStyle = %[ icons: [], toggleEnabled: true, statePriority: [], skipHierarchy: false ];
+	var appearanceStyle = %[ icons: [], toggleEnabled: true, statePriority: [], callback: "", skipHierarchy: false ];
 	var widgetStyle;
 	var styleStates = [];
 	var customStyleStates = [];
 	var prevIconList = [];
+	var styleCallback = "";
 
 	/**------------------------------
 	 * コンストラクタ
@@ -2130,6 +2132,9 @@ class KListItem
 		modified ||= updateLabelStyle();
 		modified ||= updateAppearanceStyle();
 		modified ||= updateWidgetStyle();
+
+		invalidateStyleCallback();
+
 		if (forceUpdate && modified) {
 			if (itemVisible) {
 				var iconList = validIconList;
@@ -2151,6 +2156,15 @@ class KListItem
 				}
 			}
 		}
+	}
+
+	function invalidateStyleCallback() {
+		if (styleCallback == appearanceStyle.callback)
+			return;
+		styleCallback = appearanceStyle.callback;
+		if (styleCallback != ""
+			&& typeof(this[styleCallback]) != K_UNDEFINED)
+			this[styleCallback]();
 	}
 
 	var _requireStyleUpdate = true;
@@ -4077,7 +4091,9 @@ class KListItem
 			var x = left + toggleWidth;
 			for (var i = 0; i < iconList.count; i++) {
 				var iconLayer = iconLayerList[i];
-				root.operateRect(x, int(top + rect.top + (rect.height - iconLayer.height) / 2), iconLayer, 0, 0, iconLayer.width, iconLayer.height, omAuto, opacity);
+				var y = int(top + rect.top + (rect.height - iconLayer.height) / 2);
+				y = Math.max(top, Math.min(top + height - iconLayer.height, y));
+				root.operateRect(x, y, iconLayer, 0, 0, iconLayer.width, iconLayer.height, omAuto, opacity);
 				x += iconLayer.width + spaceHorizontal;
 			}
 		}
