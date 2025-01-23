@@ -1555,6 +1555,13 @@ class KTableView extends KTableVirtualWidget
 		return equalPoint(curFocusPoint, point);
 	}
 
+	function seeFocusedPoint() {
+		if (curFocusPoint === void)
+			return;
+		noticeRect(curFocusPoint.column.pos, curFocusPoint.row.pos,
+				   curFocusPoint.column.size, curFocusPoint.row.size);
+	}
+
 	// ポイントの選択状態を設定する
 	function selectPoint(point, value = true) {
 		if (! multipleSelection) {
@@ -3033,6 +3040,10 @@ class KTable extends KEntity
 		view.focusPoint(point);
 	}
 
+	function seeFocusedPoint() {
+		view.seeFocusedPoint();
+	}
+
 	// ポイントを生成する
 	function generatePoint(column, row) {
 		return view.generatePoint(column, row);
@@ -3142,7 +3153,7 @@ class KTable extends KEntity
 			super.onKeyDown(...);
 			if (curFocusPoint !== void) {
 				if (cellSelection) {
-					if (isPointEditable(curFocusPoint)) {
+					if (view.isPointEditable(curFocusPoint)) {
 						curFocusPoint.column.onKeyDown(curFocusPoint.row, key, shift);
 					}
 				}
