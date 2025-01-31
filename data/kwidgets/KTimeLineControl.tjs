@@ -25,6 +25,9 @@ global.TIMELINE_NO_SELECTION = 0;
 global.TIMELINE_PARTIAL_SELECTION = 1;
 global.TIMELINE_FULL_SELECTION = 2;
 
+global.TIMELINE_PRIOR_DRAG_AREA = 0;
+global.TIMELINE_PRIOR_DRAG_SELECTION = 1;
+
 /*----------------------------------------------------------------------
  * タイムラインユーティリティ
  ----------------------------------------------------------------------*/
@@ -1214,7 +1217,8 @@ class KTimeLineLayerView extends KVirtualWidget
 		shift &= ssCtrl | ssShift;
 		leftPressed = false;
 		rightPressed = false;
-		if (shift == 0) {
+		if (shift == 0
+		   || shift == ssAlt) {
 			rangeSelectMode = RANGE_SELECT_SET;
 			beginRangeSelector(x, y);
 
@@ -1590,7 +1594,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	//----------------------------------------------------------------------
 	// エリア移動
 	var areaMoveDragMoving = false;
-	var areaMoveDragBeginX;
+	var areaMoveDrageginX;
 	var areaMoveDragFrames = [];
 	var areaMoveDragLefts = [];
 	var areaMoveDragTime = 0;
@@ -1708,6 +1712,12 @@ class KTimeLineLayerView extends KVirtualWidget
 
 		if (shift & (ssCtrl | ssShift))
 			dragEnterRangeSelector(...);
+		else if (shift & ssAlt) {
+			switch (owner.priorDragMode) {
+			case TIMELINE_PRIOR_DRAG_AREA: dragEnterRangeSelector(...); break;
+			case TIMELINE_PRIOR_DRAG_SELECTION: dragEnterAreaAssign(...); break;
+			}
+		}
 		else if (isPointInArea(x, y))
 			dragEnterAreaMove(...);
 		else if (curCustomMouseEvent !== void)
@@ -1716,8 +1726,12 @@ class KTimeLineLayerView extends KVirtualWidget
 			dragEnterFrameBoundary(...);
 		else if (isPointInSelection(x, y))
 			dragEnterSelection(...);
-		else
-			dragEnterAreaAssign(...);
+		else {
+			switch (owner.priorDragMode) {
+			case TIMELINE_PRIOR_DRAG_AREA: dragEnterAreaAssign(...); break;
+			case TIMELINE_PRIOR_DRAG_SELECTION: dragEnterRangeSelector(...); break;
+			}
+		}
 	}
 
 	//------------------------------
@@ -4130,6 +4144,8 @@ class KTimeLineControl extends KEntity
 	var _editable = true;
 
 	var baseWidget;
+
+	var priorDragMode = TIMELINE_PRIOR_DRAG_AREA;
 
 	/**------------------------------
 	 * コンストラクタ
