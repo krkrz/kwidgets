@@ -837,7 +837,10 @@ class TimeLineSample extends KWindow
           buttonGrid.add(0, 0, new KImageButton(this, "button_stop", "stop"));
           buttonGrid.add(1, 0, new KImageButton(this, "button_play", "play"));
           buttonGrid.add(2, 0, new KImageButton(this, "button_rewind", "rewind"));
-      vsplit.add(new KTimeLineControl(this, "timelineControl"));
+      vsplit.add(new KTimeLineControl(this, %[ name: "timelineControl",
+											   multipleSelection: true,
+											   expandListSelectionFromView: true ]
+											 ));
 
     // パラメータ初期化
     buttonGrid.margin = 13;

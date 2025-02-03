@@ -1034,6 +1034,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		rangeSelectorEnd = [ x, y ];
 		range.unionWith(rangeSelectorRect);
 		redrawRect(range.left, range.top, range.width, range.height);
+		owner.expandListSelection();
 	}
 
 	function endRangeSelector() {
@@ -1278,8 +1279,10 @@ class KTimeLineLayerView extends KVirtualWidget
 		case RANGE_SELECT_ADD:
 		case RANGE_SELECT_FLIP:
 			endRangeSelector();
-			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
-			owner.selectedLayer = list.findItemIndex(y, true);
+			if (! owner.expandListSelectionFromView) {
+				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+				owner.selectedLayer = list.findItemIndex(y, true);
+			}
 			break;
 		}
 		rangeSelectMode = RANGE_SELECT_NONE;
@@ -1583,6 +1586,7 @@ class KTimeLineLayerView extends KVirtualWidget
 							 (r - l + 1) * TIMELINE_FRAME_WIDTH,
 							 drawItemList[b].top + drawItemList[b].height - drawItemList[t].top);
 		redrawArea();
+		owner.expandListSelection();
 	}
 
 	function dragLeaveAreaAssign() {
@@ -4146,6 +4150,7 @@ class KTimeLineControl extends KEntity
 	var baseWidget;
 
 	var priorDragMode = TIMELINE_PRIOR_DRAG_AREA;
+	var expandListSelectionFromView = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -4204,6 +4209,8 @@ class KTimeLineControl extends KEntity
 
 		// ウィジェット生成
 		_selectedTime = 0;
+		priorDragMode = getOption("priorDragMode", TIMELINE_PRIOR_DRAG_AREA);
+		expandListSelectionFromView = getOption("expandListSelectionFromView", false);
 
 		baseWidget = new KHorizontalSpliterLayout(window, %[ name: name + "_spliter", splitRatio: 0,
 															 style: %[ margin: 0,
@@ -4256,6 +4263,7 @@ class KTimeLineControl extends KEntity
 																   exponent: 1 ]);
 
 		_frameWidth = TIMELINE_FRAME_WIDTH_LIST[_viewWidth];
+		multipleSelection = getOption("multipleSelection", false);
 	}
 
 	/*------------------------------
@@ -5172,5 +5180,46 @@ class KTimeLineControl extends KEntity
 	}
 
 	function onDrawView() {
+	}
+
+	function expandListSelection() {
+		if (! expandListSelectionFromView)
+			return;
+		if (! multipleSelection)
+			return;
+
+		if (hasArea) {
+			expandListSelectionByArea();
+			return;
+		}
+
+		if (view.rangeSelectorActive) {
+			expandListSelectionBySelection();
+			return;
+		}
+	}
+
+	function expandListSelectionByArea() {
+		var indexRect = view.areaIndexRect;
+		for (var i = 0; i < drawItemList.count; i++) {
+			var item = drawItemList[i];
+			if (item.supportSelection
+				&& indexRect.top <= i
+				&& i < indexRect.bottom)
+				item.selected = true;
+			else
+				item.selected = false;
+		}
+	}
+
+	function expandListSelectionBySelection() {
+		var indexRect = view.rangeSelectorIndexRect;
+		for (var i = 0; i < drawItemList.count; i++) {
+			var item = drawItemList[i];
+			if (item.supportSelection
+				&& indexRect.top <= i
+				&& i <= indexRect.bottom)
+				item.selected = true;
+		}
 	}
 };
