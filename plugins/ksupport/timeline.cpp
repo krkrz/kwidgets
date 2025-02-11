@@ -157,7 +157,9 @@ void timeline_draw_bg(tTJSVariant item, tTJSVariant view, tjs_int y, tjs_int fro
   tjs_int oneSecondFrameBgColor = widgetStyleObj.getIntValue(L"oneSecondFrameBgColor");
   tjs_int halfSecondFrameBgColor = widgetStyleObj.getIntValue(L"halfSecondFrameBgColor");
   tjs_int fifthFrameBgColor = widgetStyleObj.getIntValue(L"fifthFrameBgColor");
-  tjs_int normalFrameBgColor = widgetStyleObj.getIntValue(L"normalFrameBgColor");
+  tjs_int normalFrameBgColor = itemObj.getIntValue(L"selected")
+	  ? viewObj.getIntValue(L"itemSelectedNormalFrameBgColor")
+	  : widgetStyleObj.getIntValue(L"normalFrameBgColor");
   tjs_int backgroundBorderColor = widgetStyleObj.getIntValue(L"backgroundBorderColor");
   bool showVerticalBorder = widgetStyleObj.getIntValue(L"showVerticalBorder");
   bool showHorizontalBorder = widgetStyleObj.getIntValue(L"showHorizontalBorder");

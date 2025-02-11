@@ -515,7 +515,8 @@ global.KTimeLineLayerViewWidgetStyleDefinition =
 			%[ key: "hoverFrameBlend" ],
 			%[ key: "hoverFrameColor", defaultValue: 0, resolver: "resolveColor" ],
 			%[ key: "showVerticalBorder", defaultValue: true ],
-			%[ key: "showHorizontalBorder", defaultValue: true ]
+			%[ key: "showHorizontalBorder", defaultValue: true ],
+			%[ key: "itemSelectedNormalFrameBgColor", defaultValue: 0, resolver: "resolveColor" ]
 	];
 
 class KTimeLineLayerView extends KVirtualWidget
@@ -662,6 +663,15 @@ class KTimeLineLayerView extends KVirtualWidget
 	property selectedFrameColor {
 		getter {
 			return widgetStyle.selectedFrameColor;
+		}
+	}
+
+	property itemSelectedNormalFrameBgColor {
+		getter {
+			if (widgetStyle.itemSelectedNormalFrameBgColor !== 0)
+				return widgetStyle.itemSelectedNormalFrameBgColor;
+			else
+				return widgetStyle.normalFrameBgColor;
 		}
 	}
 
@@ -1027,6 +1037,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	function beginRangeSelector(x, y) {
 		rangeSelectorBegin = [ x, y ];
 		rangeSelectorEnd = [ x, y ];
+		owner.beginListSelection();
 	}
 
 	function updateRangeSelector(x, y) {
@@ -1034,7 +1045,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		rangeSelectorEnd = [ x, y ];
 		range.unionWith(rangeSelectorRect);
 		redrawRect(range.left, range.top, range.width, range.height);
-		owner.expandListSelection();
+		owner.extendListSelection();
 	}
 
 	function endRangeSelector() {
@@ -1279,7 +1290,7 @@ class KTimeLineLayerView extends KVirtualWidget
 		case RANGE_SELECT_ADD:
 		case RANGE_SELECT_FLIP:
 			endRangeSelector();
-			if (! owner.expandListSelectionFromView) {
+			if (! owner.extendListSelectionFromView) {
 				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
 				owner.selectedLayer = list.findItemIndex(y, true);
 			}
@@ -1586,7 +1597,7 @@ class KTimeLineLayerView extends KVirtualWidget
 							 (r - l + 1) * TIMELINE_FRAME_WIDTH,
 							 drawItemList[b].top + drawItemList[b].height - drawItemList[t].top);
 		redrawArea();
-		owner.expandListSelection();
+		owner.extendListSelection();
 	}
 
 	function dragLeaveAreaAssign() {
@@ -1933,8 +1944,9 @@ class KTimeLineLayerView extends KVirtualWidget
 				var layerIndex = list.findItemIndex(y);;
 				if (layerIndex >= 0) {
 					owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
-					owner.selectedLayer = layerIndex;
-					if (! hasMultipleSelection) {
+					if (! hasMultipleSelection
+						&& ! owner.hasMultipleListSelection) {
+						owner.selectedLayer = layerIndex;
 						resetSelection();
 						resetArea();
 						if (point !== void) {
@@ -3037,6 +3049,12 @@ class KTimeLineItem extends KListItem
 		}
 	}
 
+	function redraw() {
+		super.redraw();
+		if (itemVisible)
+			redrawAllFrame();
+	}
+
 	/**------------------------------
 	 * フレームを再描画する
 	 *
@@ -3469,6 +3487,14 @@ class KTimeLineItem extends KListItem
 					newSelection.add(i);
 			}
 		setSelection(newSelection);
+	}
+
+	function selectAllFrames() {
+		var indices = [];
+		for (var i = 0; i < frameList.count; i++)
+			if (frameList[i].type != TIMELINE_FRAME_TYPE_NULL)
+				indices.add(i);
+		setSelection(indices);
 	}
 
 	function setSelection(newSelection) {
@@ -4150,7 +4176,7 @@ class KTimeLineControl extends KEntity
 	var baseWidget;
 
 	var priorDragMode = TIMELINE_PRIOR_DRAG_AREA;
-	var expandListSelectionFromView = false;
+	var extendListSelectionFromView = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -4210,7 +4236,7 @@ class KTimeLineControl extends KEntity
 		// ウィジェット生成
 		_selectedTime = 0;
 		priorDragMode = getOption("priorDragMode", TIMELINE_PRIOR_DRAG_AREA);
-		expandListSelectionFromView = getOption("expandListSelectionFromView", false);
+		extendListSelectionFromView = getOption("extendListSelectionFromView", false);
 
 		baseWidget = new KHorizontalSpliterLayout(window, %[ name: name + "_spliter", splitRatio: 0,
 															 style: %[ margin: 0,
@@ -4526,6 +4552,24 @@ class KTimeLineControl extends KEntity
 	 *
 	 * @return 選択をしているかどうか
 	 ------------------------------*/
+	property hasListSelection {
+		getter {
+			return list.hasSelection;
+		}
+	}
+
+	property hasSingleListSelection {
+		getter {
+			return list.hasSingleSelection;
+		}
+	}
+
+	property hasMultipleListSelection {
+		getter {
+			return list.hasMultipleSelection;
+		}
+	}
+
 	property hasSelection {
 		getter {
 			return _layerView.hasSelection;
@@ -5176,30 +5220,55 @@ class KTimeLineControl extends KEntity
 		view.shrinkFrames(stride);
 	}
 
+	function extendListSelectionToView {
+		if (hasArea)
+			resetArea();
+
+		list.drawItemList.each(function(item) {
+			if (! item.supportSelection
+				|| ! item.selected)
+				return;
+			item.selectAllFrames();
+		});
+	}
+
 	function onSinglePoint {
 	}
 
 	function onDrawView() {
 	}
 
-	function expandListSelection() {
-		if (! expandListSelectionFromView)
+	function beginListSelection() {
+		if (! extendListSelectionFromView)
+			return;
+		if (! multipleSelection)
+			return;
+
+		list.drawItemList.each(function(item) { item.prevSelected = item.selected; });
+	}
+
+	function resetListSelection() {
+		list.drawItemList.each(function(item) { item.selected = item.prevSelected; });
+	}
+
+	function extendListSelection() {
+		if (! extendListSelectionFromView)
 			return;
 		if (! multipleSelection)
 			return;
 
 		if (hasArea) {
-			expandListSelectionByArea();
+			extendListSelectionByArea();
 			return;
 		}
 
 		if (view.rangeSelectorActive) {
-			expandListSelectionBySelection();
+			extendListSelectionBySelection();
 			return;
 		}
 	}
 
-	function expandListSelectionByArea() {
+	function extendListSelectionByArea() {
 		var indexRect = view.areaIndexRect;
 		for (var i = 0; i < drawItemList.count; i++) {
 			var item = drawItemList[i];
@@ -5212,14 +5281,24 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
-	function expandListSelectionBySelection() {
+	function extendListSelectionBySelection() {
 		var indexRect = view.rangeSelectorIndexRect;
 		for (var i = 0; i < drawItemList.count; i++) {
 			var item = drawItemList[i];
-			if (item.supportSelection
+			var newlySelected = item.supportSelection
 				&& indexRect.top <= i
-				&& i <= indexRect.bottom)
-				item.selected = true;
+				&& i <= indexRect.bottom;
+			switch (view.rangeSelectMode) {
+			case view.RANGE_SELECT_SET:
+				item.selected = newlySelected;
+				break;
+			case view.RANGE_SELECT_ADD:
+				item.selected = item.prevSelected || newlySelected;
+				break;
+			case view.RANGE_SELECT_FLIP:
+				item.selected = (item.prevSelected ^ newlySelected) || item.hasSelection;
+				break;
+			}
 		}
 	}
 };

@@ -612,6 +612,24 @@ class KList extends KVirtualWidget
 		}
 	}
 
+	property selectionCount {
+		getter {
+			return drawItemList.inject(0, function(item, sum) { return item.selected ? sum + 1 : sum; });
+		}
+	}
+
+	property hasSingleSelection {
+		getter {
+			return selectionCount == 1;
+		}
+	}
+
+	property hasMultipleSelection {
+		getter {
+			return selectionCount > 1;
+		}
+	}
+
 	// 選択アイテムのリスト
 	property selectedItemList {
 		getter {
