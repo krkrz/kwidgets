@@ -9,7 +9,7 @@ class TestBed extends KWindow
 { 
 	function TestBed {
 		super.KWindow(%[ name: "testbed",
-						 caption: "テストベッド",
+						 caption: "テストベッド：漢字交じりのキャプション",
 						 borderStyle: bsSizeable,
 						 customToolBar: true,
 						 alwaysSetToMinSize: false,

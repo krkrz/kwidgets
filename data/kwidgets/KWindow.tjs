@@ -234,9 +234,8 @@ class KWindow extends Window
 				return _caption;
 		}
 		setter(v) {
-			if (! _captionOverriden)
-				super.caption = v;
-			else
+			super.caption = v;
+			if (_captionOverriden)
 				_caption = v;
 		}
 	}

@@ -45,9 +45,9 @@ public:
 	}
 
 	enum class Style : DWORD {
-		windowed		 = WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX,
-		aero_borderless  = WS_POPUP			   | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX,
-		basic_borderless = WS_POPUP			   | WS_THICKFRAME				| WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX
+		windowed		 = WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CLIPCHILDREN,
+		aero_borderless  = WS_POPUP			   | WS_THICKFRAME | WS_CAPTION | WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN,
+		basic_borderless = WS_POPUP			   | WS_THICKFRAME				| WS_SYSMENU | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_CLIPCHILDREN
 	};
 
 	bool maximized(void) const {
@@ -145,7 +145,6 @@ public:
 
 	void requireReceiver() {
 		if (mReceiverRefCount++ == 0) {
-			TVPAddLog(L"register receiver");
 			ncbPropAccessor window(mObjthis, mObjthis);
 			window.FuncCall(0, L"registerMessageReceiver", NULL, NULL, wrmRegister, tTVInteger(&receiver), tTVInteger(this));
 		}
@@ -153,7 +152,6 @@ public:
 
 	void releaseReceiver() {
 		if (--mReceiverRefCount == 0) {
-			TVPAddLog(L"unregister receiver");
 			ncbPropAccessor window(mObjthis, mObjthis);
 			window.FuncCall(0, L"registerMessageReceiver", NULL, NULL, wrmUnregister, tTVInteger(&receiver), tTVInteger(this));
 		}
@@ -193,6 +191,7 @@ public:
 		}
 
 		}
+
 		return false;
 	}
 
@@ -201,6 +200,7 @@ public:
 			return;
 
 		mBorderless = enabled;
+
 		if (mBorderless)
 			requireReceiver();
 		else
@@ -216,8 +216,10 @@ public:
 			set_shadow(mBorderlessShadow && (new_style != Style::windowed));
 
 			// redraw frame
-			::SetWindowPos(mHwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
-			::ShowWindow(mHwnd, SW_SHOW);
+			if (::IsWindowVisible(mHwnd)) {
+				::SetWindowPos(mHwnd, nullptr, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
+				::ShowWindow(mHwnd, SW_SHOW);
+			}
 		}
 	}
 
@@ -253,7 +255,7 @@ public:
 	}
 
 	void pushClose() {
-		SendMessage(mHwnd, WM_SYSCOMMAND, SC_CLOSE, 0);
+		PostMessage(mHwnd, WM_SYSCOMMAND, SC_CLOSE, 0);
 	}
 
 	void setCaptionRect(tjs_int l, tjs_int t, tjs_int w, tjs_int h) {
