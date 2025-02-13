@@ -1901,9 +1901,9 @@ class KTimeLineLayerView extends KVirtualWidget
 		if (button == mbLeft
 			&& leftPressed) {
 			if (shift == 0) {
+				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
 				var layerIndex = list.findItemIndex(y);;
 				if (layerIndex >= 0) {
-					owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
 					owner.selectedLayer = list.findItemIndex(y);
 					owner.resetSelection();
 					resetArea();
@@ -1915,6 +1915,9 @@ class KTimeLineLayerView extends KVirtualWidget
 							item.setSelection([ point[1] ]);
 					}
 					owner.onSinglePoint();
+				} else {
+					resetSelection();
+					resetArea();
 				}
 			} else if (shift == ssShift
 					   && point !== void) {
@@ -1941,9 +1944,9 @@ class KTimeLineLayerView extends KVirtualWidget
 				&& areaRect.contains(x, y)) {
 				owner.onTimeLineRightClick(owner.selectedTime);
 			} else {
+				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
 				var layerIndex = list.findItemIndex(y);;
 				if (layerIndex >= 0) {
-					owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
 					if (! hasMultipleSelection
 						&& ! (owner.extendListSelectionFromView && owner.hasMultipleListSelection)) {
 						owner.selectedLayer = layerIndex;
@@ -1958,6 +1961,9 @@ class KTimeLineLayerView extends KVirtualWidget
 					}
 					var item = owner.drawItemList[owner.selectedLayer];
 					item.onTimeLineRightClick(owner.selectedTime);
+				} else {
+					resetSelection();
+					resetArea();
 				}
 			}
 		}
