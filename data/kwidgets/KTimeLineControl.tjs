@@ -1952,6 +1952,7 @@ class KTimeLineLayerView extends KVirtualWidget
 						owner.selectedLayer = layerIndex;
 						resetSelection();
 						resetArea();
+						updatePoint(generateNewPoint(x, y));
 						if (point !== void) {
 							var item = owner.drawItemList[point[0]];
 							if (item.supportSelection)
