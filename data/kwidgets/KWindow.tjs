@@ -73,6 +73,10 @@ class KWindow extends Window
 	var styleStates = [];
 	var scrollObservers = [];
 	var curDraggingWidget;
+	var hasMenu = false;
+	var _menu;
+	var _caption;
+	var _captionOverriden = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -154,7 +158,96 @@ class KWindow extends Window
 		// windowExプラグインのイベントを有効にする
 		registerExEvent();
 
+		var noDefaultMenu = getOption("noDefaultMenu", false);
+
 		// メニューに細工
+		if (! noDefaultMenu) {
+			embedMenuFunctions(menu);
+			hasMenu = true;
+		}
+
+		// プライマリウィジェットを作る
+		add(new KPrimaryWidget(this, getOption("customToolBar", false)));
+
+		// メニュー用チェックマーク
+		menuCheckedLayer = new Layer(this, primaryLayer);
+		menuCheckedLayer.loadImages("k_checked");
+		menuCheckedLayer.setSizeToImageSize();
+
+		// missing を有効にする
+		Scripts.setCallMissing(this);
+
+		if (k_kirikiriz) {
+			// ヒントレイヤを用意
+			hintLayer = new KTextLabel(this, %[ id: "hint" ]);
+			hintLayer.parent = primaryLayer;
+			hintLayer.visible = false;
+			hintLayer.ignoreHintSensing = true;
+			hintLayer.hitThreshold = 256;
+		}
+		if (! ignoreGlobalZoom)
+			super.setZoom(global.KWindow.globalZoomNumer, global.KWindow.globalZoomDenom);
+	}
+
+	function finalize {
+		visible = false;
+		if (dict !== void)
+			storePersistentDictionary(dict);
+		_existentWindowList.remove(this);
+		if (hasMenu)
+			invalidate(menu);
+		super.finalize(...);
+	}
+
+	property id {
+		getter {
+			return _id;
+		}
+	}
+
+	property customToolBar {
+		getter {
+			return primaryWidget.customToolBar;
+		}
+	}
+
+	property menu {
+		getter {
+			if (_menu === void)
+				return super.menu;
+			else
+				return _menu;
+		}
+	}
+
+	function overrideCaption(prop) {
+		*prop = this.caption;
+		&_caption = prop;
+		_captionOverriden = true;
+	}
+
+	property caption {
+		getter {
+			if (! _captionOverriden)
+				return super.caption;
+			else
+				return _caption;
+		}
+		setter(v) {
+			if (! _captionOverriden)
+				super.caption = v;
+			else
+				_caption = v;
+		}
+	}
+
+	function overrideMenu(menu) {
+		_menu = menu;
+		menu.onChildValueModified = onChildValueModified;
+		hasMenu = true;
+	}
+
+	function embedMenuFunctions(menu) {
 		menu.find = function(name) {
 			for (var i = 0; i < children.count; i++) {
 				var child = children[i];
@@ -228,43 +321,6 @@ class KWindow extends Window
 				}
 			}
 		} incontextof(menu);
-
-		// プライマリウィジェットを作る
-		add(new KPrimaryWidget(this));
-
-		// メニュー用チェックマーク
-		menuCheckedLayer = new Layer(this, primaryLayer);
-		menuCheckedLayer.loadImages("k_checked");
-		menuCheckedLayer.setSizeToImageSize();
-
-		// missing を有効にする
-		Scripts.setCallMissing(this);
-
-		if (k_kirikiriz) {
-			// ヒントレイヤを用意
-			hintLayer = new KTextLabel(this, %[ id: "hint" ]);
-			hintLayer.parent = primaryLayer;
-			hintLayer.visible = false;
-			hintLayer.ignoreHintSensing = true;
-			hintLayer.hitThreshold = 256;
-		}
-		if (! ignoreGlobalZoom)
-			super.setZoom(global.KWindow.globalZoomNumer, global.KWindow.globalZoomDenom);
-	}
-
-	function finalize {
-		visible = false;
-		if (dict !== void)
-			storePersistentDictionary(dict);
-		_existentWindowList.remove(this);
-		invalidate(menu);
-		super.finalize(...);
-	}
-
-	property id {
-		getter {
-			return _id;
-		}
 	}
 
 	property createNewWindowAsChild {
@@ -456,9 +512,11 @@ class KWindow extends Window
 		widget = primaryWidget.find(name);
 		if (widget !== void)
 			return widget;
-		widget = menu.find(name);
-		if (widget !== void)
-			return widget;
+		if (hasMenu) {
+			widget = menu.find(name);
+			if (widget !== void)
+				return widget;
+		}
 		for (var i = 0; i < _findPath.count; i++) {
 			var object = _findPath[i];
 			var widget = object.find(name);
@@ -545,7 +603,8 @@ class KWindow extends Window
 		// ウィジェットをバインド
 		primaryWidget.bindPersistentDictionary(dict);
 		// メニューをバインド
-		menu.bindPersistentDictionary(dict);
+		if (hasMenu)
+			menu.bindPersistentDictionary(dict);
 
 		// nameが指定されてたらウィンドウもバインド
 		if (name != "") {
@@ -563,7 +622,8 @@ class KWindow extends Window
 	// 永続化辞書に値をストアする
 	function storePersistentDictionary() {
 		primaryWidget.storePersistentDictionary();
-		menu.storePersistentDictionary();
+		if (hasMenu)
+			menu.storePersistentDictionary();
 
 		if (dict !== void) {
 			if (name != "") {
@@ -751,11 +811,15 @@ class KWindow extends Window
 		_existentWindowList.insert(0, this);
 		if (focusedLayer instanceof "KWidget")
 			focusedLayer.onWindowActivate();
+		if (customToolBar !== void)
+			customToolBar.addCustomStyleState("windowActive");
 	}
 
 	function onDeactivate {
 		if (focusedLayer instanceof "KWidget")
 			focusedLayer.onWindowDeactivate();
+		if (customToolBar !== void)
+			customToolBar.removeCustomStyleState("windowActive");
 	}
 
 	function onMouseMove() {
@@ -763,7 +827,8 @@ class KWindow extends Window
 	}
 
 	function invalidateMenuIcon {
-		asyncCaller.callOnce(menu.invalidateMenuIcon);
+		if (hasMenu)
+			asyncCaller.callOnce(menu.invalidateMenuIcon);
 	}
 
 	/**------------------------------

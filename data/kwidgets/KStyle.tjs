@@ -474,10 +474,14 @@ mixin(KStyleReference, KStyleObject);
 class KStyleRepository
 {
 	var classStyleMap = %[];
+	var rawClassStyleMap = %[];
 	var classWeakStyleMap = %[];
+	var rawClassWeakStyleMap = %[];
 	var idStyleMap = %[];
+	var rawIdStyleMap = %[];
 	var _style;
 	var className = "KStyleRepository";
+	var rawThemeMap = %[];
 	var themeMap = %[];
 	var aliasMap = %[];
 	var styleNotficationLockCount = 0;
@@ -546,6 +550,7 @@ class KStyleRepository
 	}
 
 	function registerClassStyle(className, style) {
+		rawClassStyleMap[className] = style;
 		classStyleMap[className] = normalizeStyle(style);
 		invalidateStyles();
 	}
@@ -553,12 +558,15 @@ class KStyleRepository
 	function overwriteClassStyle(className, style) {
 		if (typeof(classStyleMap[className]) === K_UNDEFINED)
 			registerClassStyle(...);
-		else
-			(Dictionary.assign incontextof classStyleMap[className])(normalizeStyle(style), false);
+		else {
+			(Dictionary.assign incontextof rawClassStyleMap[className])(style, false);
+			classStyleMap[className] = normalizeStyle(rawClassStyleMap[className]);
+		}
 		invalidateStyles();
 	}
 
 	function registerClassWeakStyle(className, style) {
+		rawClassWeakStyleMap[className] = style;
 		classWeakStyleMap[className] = normalizeStyle(style);
 		invalidateStyles();
 	}
@@ -566,12 +574,15 @@ class KStyleRepository
 	function overwriteClassWeakStyle(className, style) {
 		if (typeof(classWeakStyleMap[className]) === K_UNDEFINED)
 			registerClassWeakStyle(...);
-		else
-			(Dictionary.assign incontextof classWeakStyleMap[className])(normalizeStyle(style), false);
+		else {
+			(Dictionary.assign incontextof rawClassWeakStyleMap[className])(style, false);
+			classWeakStyleMap[className] = normalizeStyle(rawClassWeakStyleMap[className]);
+		}
 		invalidateStyles();
 	}
 
 	function registerIdStyle(idName, style) {
+		rawIdStyleMap[idName] = style;
 		idStyleMap[idName] = normalizeStyle(style);
 		invalidateStyles();
 	}
@@ -579,12 +590,15 @@ class KStyleRepository
 	function overwriteIdStyle(idName, style) {
 		if (typeof(idStyleMap[idName]) === K_UNDEFINED)
 			registerIdStyle(...);
-		else
-			(Dictionary.assign incontextof idStyleMap[idMame])(normalizeStyle(style), false);
+		else {
+			(Dictionary.assign incontextof rawIdStyleMap[idMame])(style, false);
+			idStyleMap[idName] = normalizeStyle(rawIdStyleMap[idName]);
+		}
 		invalidateStyles();
 	}
 
 	function registerTheme(themeName, style) {
+		rawThemeMap[themeName] = style;
 		themeMap[themeName] = normalizeStyle(style);
 		invalidateStyles(true);
 	}
@@ -592,9 +606,24 @@ class KStyleRepository
 	function overwriteTheme(themeName, style) {
 		if (typeof(themeMap[themeName]) == K_UNDEFINED)
 			registerTheme(...);
-		else
-			(Dictionary.assign incontextof themeMap[themeMame])(normalizeStyle(style), false);
+		else {
+			(Dictionary.assign incontextof rawThemeMap[themeMame])(style, false);
+			themeMap[themeName] = normalizeStyle(rawThemeMap[themeMame]);
+		}
 		invalidateStyles(true);
+	}
+
+	function findRawTheme(themeName) {
+		if (themeName instanceof "Array") {
+			var result = %[];
+			for (var i = 0; i < themeName.count; i++) 
+				result = unionDictionary(result, findRawTheme(themeName[i]), true);
+			return result;
+		} else if (themeName != ""
+				   && typeof(rawThemeMap[themeName]) != K_UNDEFINED)
+			return rawThemeMap[themeName];
+		else
+			return %[];
 	}
 
 	function findTheme(themeName) {
@@ -768,13 +797,13 @@ class KStyleRepository
 
 			var style;
 			if (typeof(def.styleOfKlass) != K_UNDEFINED)
-				style = classStyleMap[def.styleOfKlass];
+				style = rawClassStyleMap[def.styleOfKlass];
 			else if (typeof(def.styleOfClass) != K_UNDEFINED)
-				style = classStyleMap[def.styleOfClass];
+				style = rawClassStyleMap[def.styleOfClass];
 			else if (typeof(def.styleOfId) != K_UNDEFINED)
-				style = idStyleMap[def.styleOfId];
+				style = rawIdStyleMap[def.styleOfId];
 			else if (typeof(def.styleOfTheme) != K_UNDEFINED)
-				style = findTheme(def.styleOfTheme);
+				style = findRawTheme(def.styleOfTheme);
 
 			if (typeof(def.style) != K_UNDEFINED) {
 				if (style === void)

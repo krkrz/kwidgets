@@ -1945,7 +1945,7 @@ class KTimeLineLayerView extends KVirtualWidget
 				if (layerIndex >= 0) {
 					owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
 					if (! hasMultipleSelection
-						&& ! owner.hasMultipleListSelection) {
+						&& ! (owner.extendListSelectionFromView && owner.hasMultipleListSelection)) {
 						owner.selectedLayer = layerIndex;
 						resetSelection();
 						resetArea();

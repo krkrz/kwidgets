@@ -30,6 +30,27 @@ class KContextMenu extends KWindow
     menu.add(rootItem);
   }
 
+	property isAvoidDictionaryRegistration {
+		getter {
+			return rootItem.isAvoidDictionaryRegistration;
+		}
+		setter(v) {
+			rootItem.isAvoidDictionaryRegistration = v;
+		}
+	}
+
+	function bindPersistentDictionary {
+		rootItem.bindPersistentDictionary(...);
+	}
+
+	function storePersistentDictionary {
+		rootItem.storePersistentDictionary(...);
+	}
+
+	function invalidateMenuIcon {
+		rootItem.invalidateMenuIcon();
+	}
+
   /**------------------------------
    * 子ウィジェットへの参照(互換インターフェース
    ------------------------------*/

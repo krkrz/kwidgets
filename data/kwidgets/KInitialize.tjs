@@ -58,6 +58,7 @@ Scripts.execStorage("KTextInputSlider.tjs");
 Scripts.execStorage("KTextEdit.tjs");
 Scripts.execStorage("KTagTextEdit.tjs");
 Scripts.execStorage("KGridLayout.tjs");
+Scripts.execStorage("KCustomToolBar.tjs");
 Scripts.execStorage("KRadioLayout.tjs");
 Scripts.execStorage("KAbsoluteLayout.tjs");
 Scripts.execStorage("KRelativeLayout.tjs");

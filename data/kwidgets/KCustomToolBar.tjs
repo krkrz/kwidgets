@@ -1,0 +1,168 @@
+// -*- coding: utf-8 -*-
+
+
+global.KCustomToolBarWidgetStyleDefinition =
+	[
+			%[ key: "menuId" ],
+			%[ key: "captionId" ],
+			%[ key: "buttonId" ]
+	];
+
+class KCustomToolBarMenuInterface
+{
+	var owner;
+	var menu;
+
+	function KCustomToolBarMenuInterface(owner, menu) {
+		this.owner = owner;
+		this.menu = menu;
+	}
+
+	function touch() {
+		owner.menuButton.visible = true;
+	}
+
+	property isAvoidDictionaryRegistration {
+		getter {
+			return menu.isAvoidDictionaryRegistration;
+		}
+		setter(v) {
+			touch();
+			menu.isAvoidDictionaryRegistration = v;
+		}
+	}
+
+	function find {
+		return menu.find(...);
+	}
+
+	function bindPersistentDictionary {
+		menu.bindPersistentDictionary(...);
+	}
+
+	function storePersistentDictionary {
+		menu.storePersistentDictionary(...);
+	}
+
+	function clearItems {
+		touch();
+		menu.clearItems();
+	}
+
+	function addSeparator {
+		touch();
+		menu.addSeparator();
+	}
+
+	function addItem {
+		touch();
+		menu.addItem(...);
+	}
+
+	function addToggleItem {
+		touch();
+		menu.addToggleItem(...);
+	}
+
+	function invalidateMenuIcon {
+		touch();
+		menu.invalidateMenuIcon(...);
+	}
+}
+
+class KCustomToolBar extends KHorizontalBarLayout
+{
+	var menu;
+	var menuInterface;
+
+	function KCustomToolBar(window, options = %[]) {
+		super.KHorizontalBarLayout(...);
+
+		add(new KTextButton(window, %[ name: "_menu", label: "≡", visible: false ]));
+		add(new global.KGridLayout(window, %[ name: "_captionLeftSideGrid", visible: false ]));
+		add(new KTextLabel(window, %[ name: "_caption", marginalMaxWidth: K_WIDGET_MAX_POSSIBLE_WIDTH, stlye: %[ variable: true ] ]));
+		add(new global.KGridLayout(window, %[ name: "_captionRightSideGrid", visible: false ]));
+		add(new KTextButton(window, %[ name: "_minimize", label: "＿" ]));
+		add(new KTextButton(window, %[ name: "_maximize", label: "□" ]));
+		add(new KTextButton(window, %[ name: "_close", label: "×" ]));
+		_caption.hitThreshold = 256;
+
+		window.overrideCaption(&(_caption.label));
+
+		menu = new KContextMenu(window, false);
+		menuInterface = new KCustomToolBarMenuInterface(this, menu);
+		window.overrideMenu(menuInterface);
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KCustomToolBarWidgetStyleDefinition);
+		}
+	}
+
+	property captionLeftSideGrid {
+		getter {
+			return _captionLeftSideGrid;
+		}
+	}
+
+	property captionRightSideGrid {
+		getter {
+			return _captionRightSideGrid;
+		}
+	}
+
+	property caption {
+		getter {
+			return _caption;
+		}
+	}
+
+	property menuButton {
+		getter {
+			return _menu;
+		}
+	}
+
+	property maximizeButton {
+		getter {
+			return _maximize;
+		}
+	}
+
+	property minimizeButton {
+		getter {
+			return _minimize;
+		}
+	}
+
+	property closeButton {
+		getter {
+			return _close;
+		}
+	}
+
+	function onChildValueModified(child) {
+		switch (child.name) {
+		case "_minimize": window.minimize(); break;
+		case "_maximize": window.maximized ? window.showRestore() : window.maximize(); break;
+		case "_close": window.pushClose(); break;
+		case "_menu": menu.show(this, _menu.left, height); break;
+		}
+	}
+
+	function onDrawContents() {
+		_menu.id = widgetStyle.menuId;
+		_caption.id = widgetStyle.captionId;
+		_minimize.id = widgetStyle.buttonId;
+		_maximize.id = widgetStyle.buttonId;
+		_close.id = widgetStyle.buttonId;
+		super.onDrawContents();
+	}
+
+	function onLocateLayout() {
+		super.onLocateLayout();
+		window.setCaptionRect(_caption.left, 0, _caption.width, height);
+
+	}
+};

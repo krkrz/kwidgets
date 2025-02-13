@@ -17,6 +17,7 @@ class KPrimaryWidget extends KLayout
 	var iconDepot;
 	var dummyIcon;
 	var primitiveIconBuilder;
+	var customToolBar;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -24,7 +25,7 @@ class KPrimaryWidget extends KLayout
 	 * KPrimaryWidget は KWindow により自動的に作成され、ユーザーが
 	 * 明示的にnewすることは無い
 	 ------------------------------*/
-	function KPrimaryWidget(win) {
+	function KPrimaryWidget(win, useCustomToolBar = false) {
 		// 親呼び出し
 		super.KLayout(win, %[ name: "", primary: true ]);
 		// イメージを持たない
@@ -40,6 +41,14 @@ class KPrimaryWidget extends KLayout
 		iconDepot = %[];
 		// プリミティブアイコンビルダ
 		primitiveIconBuilder = new KPrimitiveIconBuilder(window);
+
+		// カスタムツールバーを構築
+		if (useCustomToolBar) {
+			window.borderless = true;
+			customToolBar = new KCustomToolBar(window);
+			customToolBar.parent = this;
+		}
+
 		// ウィンドウにはアタッチ済み
 		attachToWindow();
 	}
@@ -117,16 +126,22 @@ class KPrimaryWidget extends KLayout
 	function onCalculateLayout {
 		if (child === void)
 			return;
+		var toolBarHeight = customToolBar !== void ? customToolBar.minHeight : 0;
 		setMinMaxSize(borderPaddingWidth + child.minWidth + child.marginHorizontal,
-					  borderPaddingHeight + child.minHeight + child.marginVertical,
+					  borderPaddingHeight + child.minHeight + child.marginVertical + toolBarHeight,
 					  borderPaddingWidth + child.maxWidth + child.marginHorizontal,
-					  borderPaddingHeight + child.maxHeight + child.marginVertical);
+					  borderPaddingHeight + child.maxHeight + child.marginVertical + toolBarHeight);
 	}
 
 	function onLocateLayout() {
 		if (child === void)
 			return;
-		embedChild(0, 0, width, height, child, true);
+		var toolBarHeight = customToolBar !== void ? customToolBar.minHeight : 0;
+		if (customToolBar !== void) {
+			customToolBar.setPos(0, 0);
+			customToolBar.setSize(width, toolBarHeight);
+		}
+		embedChild(0, toolBarHeight, width, height - toolBarHeight, child, true);
 	}
 
 	property styleParent {

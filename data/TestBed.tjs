@@ -8,21 +8,23 @@ class TestStyleProxy extends KStyleProxy
 class TestBed extends KWindow
 { 
 	function TestBed {
-		Debug.message("start test bed");
-		
 		super.KWindow(%[ name: "testbed",
 						 caption: "テストベッド",
 						 borderStyle: bsSizeable,
+						 customToolBar: true,
 						 alwaysSetToMinSize: false,
 //						 style: %[ isClass: %[ KGridLayout: %[ space: 10, margin: 10 ] ] ],
 						 style: %[ isClass: %[ KWidget: %[ align: ALIGN_CENTER ] ] ],
-						 theme: "dialog",
+						 theme: [ "dialog" ]
 					   ]);
 
 		var testTab = new KTabLayout(this, %[ name: "testTab", disableHiddenChild: true, style: %[ tabStyle: TAB_STYLE_SCROLL, tabAlign: ALIGN_CENTER ] ]);
 //		Debug.message("before attach to window");
 //		primaryWidget.add(testTab);
 //		Debug.message("after attach to window");
+
+		customToolBar.captionLeftSideGrid.visible = true;
+		customToolBar.captionLeftSideGrid.add(0, 0, new KImageLabel(this, %[ icon: "gotta_mail" ]));
 
 		with (testTab) {
 				.add("カスタムUI", new KScrollLayout(this, %[ theme: "variable", vertical: true, horizontal: false, name: "customUIScroll" ]));
@@ -207,9 +209,21 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 				.hclBar.setFixedSize(300, 16);
 		}
 
-		Debug.message("before attach to window");
+/*		
+		primaryWidget.add(new KGridLayout(this, %[ name: "rootGrid" ]));
+		rootGrid.add(0, 0, new KCustomToolBar(this, %[ name: "toolBar" ]));
+		rootGrid.add(0, 1, testTab);
+*/
 		primaryWidget.add(testTab);
-		Debug.message("after attach to window");
+
+
+		menu.addItem("ファイル", "fileItem");
+		menu.addItem("表示", "visibleItem");
+		menu.addItem("ヘルプ", "helpItem");
+		fileItem.addItem("開く", "openItem");
+		fileItem.addItem("保存する", "saveItem");
+		fileItem.addItem("閉じる", "closeItem");
+
 
 		var dict = new KPersistentDictionary(System.dataPath + "testbed_dict.txt");
 		add(dict);
