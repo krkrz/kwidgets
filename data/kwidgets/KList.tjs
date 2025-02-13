@@ -2153,6 +2153,9 @@ class KListItem
 
 		invalidateStyleCallback();
 
+		if (modified)
+			onStyleModified();
+
 		if (forceUpdate && modified) {
 			if (itemVisible) {
 				var iconList = validIconList;
@@ -2174,6 +2177,9 @@ class KListItem
 				}
 			}
 		}
+	}
+
+	function onStyleModified() {
 	}
 
 	function invalidateStyleCallback() {
