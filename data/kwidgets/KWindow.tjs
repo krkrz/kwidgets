@@ -240,6 +240,15 @@ class KWindow extends Window
 		}
 	}
 
+	property borderlessCaptionDrag {
+		getter {
+			return customToolBar.captionDrag;
+		}
+		setter(v) {
+			customToolBar.captionDrag = v;
+		}
+	}
+
 	function overrideMenu(menu) {
 		_menu = menu;
 		menu.onChildValueModified = onChildValueModified;
