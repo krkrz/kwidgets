@@ -839,6 +839,7 @@ class TimeLineSample extends KWindow
           buttonGrid.add(2, 0, new KImageButton(this, "button_rewind", "rewind"));
       vsplit.add(new KTimeLineControl(this, %[ name: "timelineControl",
 											   multipleSelection: true,
+											   copySingleFrameAsNoWidth: true,
 											   expandListSelectionFromView: true ]
 											 ));
 

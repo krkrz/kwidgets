@@ -2284,6 +2284,10 @@ class KTimeLineLayerView extends KVirtualWidget
 			   && result[-1] === void)
 			result.erase(result.count - 1);
 
+		if (owner.copySingleFrameAsNoWidth
+			&& hasSingleSelection)
+			result[0].frames[0].length = 1;
+
 		resetArea();
 
 		return result;
@@ -2311,6 +2315,10 @@ class KTimeLineLayerView extends KVirtualWidget
 		while (result.count > 0
 			   && result[-1] === void)
 			result.erase(result.count - 1);
+
+		if (owner.copySingleFrameAsNoWidth
+			&& hasSingleSelection)
+			result[0].frames[0].length = 1;
 
 		resetArea();
 
@@ -4184,6 +4192,7 @@ class KTimeLineControl extends KEntity
 
 	var priorDragMode = TIMELINE_PRIOR_DRAG_AREA;
 	var extendListSelectionFromView = false;
+	var copySingleFrameAsNoWidth = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -4244,6 +4253,7 @@ class KTimeLineControl extends KEntity
 		_selectedTime = 0;
 		priorDragMode = getOption("priorDragMode", TIMELINE_PRIOR_DRAG_AREA);
 		extendListSelectionFromView = getOption("extendListSelectionFromView", false);
+		copySingleFrameAsNoWidth = getOption("copySingleFrameAsNoWidth", false);
 
 		baseWidget = new KHorizontalSpliterLayout(window, %[ name: name + "_spliter", splitRatio: 0,
 															 style: %[ margin: 0,
