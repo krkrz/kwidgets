@@ -95,7 +95,7 @@ public:
 		HWND hWnd = getLayerWindowHWND(objthis);	//	ウィンドウハンドルを取得
 
 		//	数値の指定があれば、その分加える
-		if(numparams >= 1 && param[0]->Type() == tvtInteger)
+		if(numparams >= 1)
 			left	+= (tjs_int)param[0]->AsInteger();
 
 		//	レイヤー拡大倍率が変更されていれば、その分座標を変更する
@@ -125,7 +125,7 @@ public:
 		HWND hWnd = getLayerWindowHWND(objthis);	//	ウィンドウハンドルを取得
 
 		//	数値の指定があれば、その分加える
-		if(numparams >= 1 && param[0]->Type() == tvtInteger)
+		if(numparams >= 1)
 			top	+= (tjs_int)param[0]->AsInteger();
 
 		//	レイヤー拡大倍率が変更されていれば、その分座標を変更する

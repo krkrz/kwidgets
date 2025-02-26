@@ -669,10 +669,10 @@ class KRadioMenuItem extends KMenuItem
     if (enabled)
       onValueModified(value);
   }
-  
+
   /*------------------------------
    * メニューアイテムがクリックされた時に呼ばれる関数
-   * 
+   *
    * valueを反転し、invalidateValueを呼ぶ
    ------------------------------*/
   function onClick {

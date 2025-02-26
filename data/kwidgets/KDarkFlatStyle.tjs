@@ -111,6 +111,11 @@
 				"k_tab_scroll_right" => "$triangle(5,8,r,#f0f0f0)",
 				"k_check_on_light" => "checked_8x8_light",
 				"k_check_off_light" => "$frame(8,8)",
+
+				"k_menu_default_unchecked" => "$frame(15,15)",
+				"k_menu_default_checked" => "$composite($frame(15,15),$image(k_checked))",
+				"k_menu_default_radio" => "$composite($frame(15,15),$circle(7,#f0f0f0))",
+
 			]
 		],
 
@@ -920,7 +925,7 @@
 
 		%[ klass: "KCustomToolBar",
 		   style: %[ paddingHorizontal: 7,
-					 paddingVertical: 3,
+					 paddingVertical: 0,
 					 space: 6,
 					 backgroundColor: 0xff606060,
 					 windowActive: %[ backgroundColor: 0xff606068 ],
@@ -938,7 +943,7 @@
 		   style: %[ fontHeight: 12,
 					 margin: 0,
 					 paddingHorizontal: 16,
-					 paddingVertical: 4,
+					 paddingVertical: 7,
 					 borderStyle: BORDER_STYLE_NONE,
 					 borderWidth: 0,
 					 borderRadius: 0,
@@ -965,6 +970,43 @@
 					 hover: %[ backgroundColor: 0xff888898 ],
 					 mouseDownLeft: %[ backgroundColor: 0xff9d9dad ],
 				   ],
+		 ],
+
+		%[ klass: "KCustomMenuList",
+		   style: %[ marginHorizontal: 3,
+					 marginVertical: 3,
+					 spaceHorizontal: 10,
+					 ignoreToggleWidth: true,
+				   ]
+		 ],
+
+		%[ klass: "KCustomMenuListItem",
+		   style: %[ spaceVertical: 10,
+					 paddingLeft: 0,
+					 paddingRight: 10,
+					 selected: %[ itemColor: void ],
+					 focus: %[ itemColor: void ],
+					 statePriority: [ "hover", "focus", "selected" ],
+				   ]
+		 ],
+
+		%[ klass: "KCustomMenuSeparatorListItem",
+		   style: %[ paddingVertical: 3,
+					 separatorHeight: 1,
+					 separatorColor: 0xff808080 ],
+		 ],
+
+		%[ klass: "KCustomMenuButton",
+		   style: %[ fontHeight: 12,
+					 margin: 0,
+					 paddingHorizontal: 10,
+					 paddingVertical: 7,
+					 borderStyle: BORDER_STYLE_NONE,
+					 borderWidth: 0,
+					 borderRadius: 0,
+					 backgroundColor: 0,
+					 hover: %[ backgroundColor: 0xff808080 ],
+					 focusable: false ]
 		 ]
 ]
 

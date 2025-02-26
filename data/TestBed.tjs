@@ -11,7 +11,7 @@ class TestBed extends KWindow
 		super.KWindow(%[ name: "testbed",
 						 caption: "テストベッド：漢字交じりのキャプション",
 						 borderStyle: bsSizeable,
-						 customToolBar: true,
+						 customToolBar: %[ useMenuBar: true, appIcon: "ball" ],
 						 alwaysSetToMinSize: false,
 //						 style: %[ isClass: %[ KGridLayout: %[ space: 10, margin: 10 ] ] ],
 						 style: %[ isClass: %[ KWidget: %[ align: ALIGN_CENTER ] ] ],
@@ -23,8 +23,8 @@ class TestBed extends KWindow
 //		primaryWidget.add(testTab);
 //		Debug.message("after attach to window");
 
-		customToolBar.captionLeftSideGrid.visible = true;
-		customToolBar.captionLeftSideGrid.add(0, 0, new KImageLabel(this, %[ icon: "gotta_mail" ]));
+//		customToolBar.captionLeftSideGrid.visible = true;
+//		customToolBar.captionLeftSideGrid.add(0, 0, new KImageLabel(this, %[ icon: "gotta_mail" ]));
 
 		with (testTab) {
 				.add("カスタムUI", new KScrollLayout(this, %[ theme: "variable", vertical: true, horizontal: false, name: "customUIScroll" ]));
@@ -219,11 +219,22 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 
 		menu.addItem("ファイル", "fileItem");
 		menu.addItem("表示", "visibleItem");
-		menu.addItem("ヘルプ", "helpItem");
+		menu.addItem("ラジオテスト", "radioNestItem");
+		menu.addItem("クリック", "clickItem");
+		visibleItem.addItem("縦に長いメニューのテスト", "longMenuItem");
 		fileItem.addItem("開く", "openItem");
 		fileItem.addItem("保存する", "saveItem");
 		fileItem.addItem("閉じる", "closeItem");
+		fileItem.addItem("かなり長いテキストを設定した時にメニューの幅に自動的に制限がかかる動作の確認をしてみるよ。さあうまく動作するかな？かなり長いテキストを設定した時にメニューの幅に自動的に制限がかかる動作の確認をしてみるよ。さあうまく動作するかな？かなり長いテキストを設定した時にメニューの幅に自動的に制限がかかる動作の確認をしてみるよ。さあうまく動作するかな？かなり長いテキストを設定した時にメニューの幅に自動的に制限がかかる動作の確認をしてみるよ");
+		visibleItem.addItem("設定");
+		radioNestItem.addRadioItem("ラジオその1", 1, "radioItem");
+		radioNestItem.addRadioItem("ラジオその2", 2, "radioItem");
+		radioNestItem.addRadioItem("ラジオその3", 3, "radioItem");
+		radioNestItem.addRadioItem("ラジオその4", 4, "radioItem");
+		radioNestItem.addRadioItem("ラジオその5", 5, "radioItem");
 
+		for (var i = 0; i < 70; i++)
+			longMenuItem.addItem("項目%d".sprintf(i + 1));
 
 		var dict = new KPersistentDictionary(System.dataPath + "testbed_dict.txt");
 		add(dict);

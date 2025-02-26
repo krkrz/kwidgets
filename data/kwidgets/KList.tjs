@@ -80,7 +80,8 @@ class KLabelEdit extends KTextInput {
  ----------------------------------------------------------------------*/
 global.KListArgsFormat =
 	[
-			%[ key: "name", defaultValue: "" ]
+			%[ key: "name", defaultValue: "" ],
+			%[ key: "autoHintFadedLabel", defaultValue: false ]
 	];
 
 global.KListWidgetStyleDefinition =
@@ -106,7 +107,7 @@ class KList extends KVirtualWidget
 	var depth = -1;
 	var root;
 	var drawItemList = [];
-	var treeWidth, treeHeight;
+	var treeWidth, treeHeight, treeRWidth, treeMaxWidth;
 	var childList = [];
 	var prevSlideWidth = 0;
 	var _focusedItem = void;
@@ -143,6 +144,7 @@ class KList extends KVirtualWidget
 	var mouseDownItem = void;
 	var _disableNotice = false;
 	var _updateRequired = false;
+	var autoHintFadedLabel = false;
 	
 	/*------------------------------
 	 * リストビュー
@@ -165,6 +167,7 @@ class KList extends KVirtualWidget
 		_disableNotice = getOption("disableNotice", false);
 		singleClickOpenToggle = getOption("singleClickOpenToggle", false);
 		traceUnfocusableItem = getOption("traceUnfocusableItem", false);
+		autoHintFadedLabel = getOption("autoHintFadedLabel", false);
 		hitThreshold = 0;
 		root = this;
 		setMarginalMinMaxSize(0, 0, K_WIDGET_MAX_POSSIBLE_WIDTH, K_WIDGET_MAX_POSSIBLE_WIDTH);
@@ -501,7 +504,6 @@ class KList extends KVirtualWidget
 		for (var i = 0; i < items.count; i++) {
 			var child = items[i];
 			child.invalidateStyles(true, true);
-//			child.updateIconLayerList();
 		}
 	}
 
@@ -890,8 +892,8 @@ class KList extends KVirtualWidget
 		}
 
 		// サイズを再設定
-		if (resizeRequired) 
-			setMinMaxSize(treeWidth, treeHeight, treeWidth, treeHeight);
+		if (resizeRequired)
+			setMinMaxSize(treeWidth, treeHeight, treeMaxWidth, treeHeight);
 
 		// リストを開いた場合その子を注視
 		if (openNoticeItem !== void
@@ -975,11 +977,16 @@ class KList extends KVirtualWidget
 	function relocateItems() {
 		treeWidth = 0;
 		treeHeight = 0;
+		treeRWidth = 0;
+		treeMaxWidth = 0;
 
 		for (var i = 0; i < drawItemList.count; i++) {
 			var item = drawItemList[i];
 			item.drawIndex = i;
 			item.locate(item.depth * slideWidth, treeHeight);
+			treeRWidth = Math.max(treeRWidth, item.rwidth);
+			treeMaxWidth = Math.max(treeMaxWidth,
+									item.width + item.depth * slideWidth);
 			if (! widgetStyle.variable)
 				treeWidth = Math.max(treeWidth,
 									 item.width + item.depth * slideWidth);
@@ -988,6 +995,8 @@ class KList extends KVirtualWidget
 									 K_WIDGET_MIN_POSSIBLE_WIDTH + item.depth * slideWidth);
 			treeHeight += item.height;
 		}
+		treeWidth += treeRWidth;
+		treeMaxWidth += treeRWidth;
 	}
 
 	function onRelocate() {
@@ -1334,6 +1343,9 @@ class KList extends KVirtualWidget
 	function onMouseMove(x, y, shift) {
 		super.onMouseMove(...);
 		var item = findItem(y);
+		if (item !== void
+			&& ! item.enabled)
+			item = void;
 
 		if (item !== curPointItem) {
 			var prevPointItem = curPointItem;
@@ -1906,6 +1918,8 @@ global.K_LIST_ITEM_APPEARANCE_STYLE_DEFINITION = [
 		%[ key: "spaceVertical" ],
 		%[ key: "spaceHorizontal" ],
 		%[ key: "spaceToggle"  ],
+		%[ key: "paddingLeft", defaultValue: 0 ],
+		%[ key: "paddingRight", defaultValue: 0 ],
 		%[ key: "paddingTop", defaultValue: 0 ],
 		%[ key: "paddingBottom", defaultValue: 0 ],
 		%[ key: "lineSpacing", defaultValue: 0 ]
@@ -1924,23 +1938,26 @@ class KListItem
 	var _itemVisible = false;
 	var _visible = true;
 	var childList = [];
+	var rwidth;
 	var name;
 	var _label;
+	var labelSize = %[ width: 0, height: 0 ];
+	var textInfo;
+	var _rlabel;
+	var rlabelSize = %[ width: 0, height: 0 ];
+	var rtextInfo;
 	var _hint;
 	var _status;
 	// ウィジェット
 	var _nameCache = %[];
 	var left, top, width, height;
 	var iconWidth;
-	var labelWidth;
 	var iconLayerList;
 	var ownIconLayerList;
 	var _selected = false;
 	var _isRecordOpenedToDictionary = false;
 	var _enabled = true;
 	var _curNodeEnabled = true;
-	var labelSize = %[ width: 0, height: 0];
-	var textInfo;
 	var cursor = crDefault;
 	var _options;
 	var _style;
@@ -1967,14 +1984,19 @@ class KListItem
 		_isRecordOpenedToDictionary = getOption("isRecordOpenedToDictionary", false);
 		_isAvoidDictionaryRegistration = getOption("isAvoidDictionaryRegistration", false);
 		_opened = getOption("opened", false);
+		_enabled = getOption("enabled", true);
 		_depth = -1;
-		_label = getOption("label");
+		_label = getOption("label", "");
+		_rlabel = getOption("rlabel", "");
 		_hint = getOption("hint", "");
 		_status = getOption("status", "");
 		_style = getOption("style", %[]);
 		_id = getOption("id", "");
 		iconLayerList = [];
-		ownIconLayerList = [];    // missing を有効にする
+		ownIconLayerList = [];
+		var icon = getOption("icon", void);
+		if (icon !== void)
+			_style.icons = [ icon ];
 		Scripts.setCallMissing(this);
 		initStyleObject();
 	}
@@ -1994,7 +2016,8 @@ class KListItem
 
 	property toggleWidth {
 		getter {
-			return root.toggleWidth + spaceToggle;
+			var w = root.toggleWidth;
+			return w == 0 ? 0 : w + spaceToggle;
 		}
 	}
 
@@ -2411,6 +2434,21 @@ class KListItem
 		}
 	}
 
+	property rlabel {
+		getter {
+			return _rlabel;
+		}
+		setter (value) {
+			if (_rlabel == value)
+				return;
+			_rlabel = value;
+			if (_itemVisible) {
+				updateSize();
+				requireRelocate();
+			}
+		}
+	}
+
 	/**------------------------------
 	 * 縦スペース
 	 *
@@ -2489,6 +2527,24 @@ class KListItem
 		}
 		setter(v) {
 			overwriteStyle(%[ paddingBottom: v ]);
+		}
+	}
+
+	property paddingLeft {
+		getter {
+			return appearanceStyle.paddingLeft;
+		}
+		setter(v) {
+			overwriteStyle(%[ paddingLeft: v ]);
+		}
+	}
+
+	property paddingRight {
+		getter {
+			return appearanceStyle.paddingRight;
+		}
+		setter(v) {
+			overwriteStyle(%[ paddingRight: v ]);
 		}
 	}
 
@@ -3857,22 +3913,10 @@ class KListItem
 		top = y;
 	}
 
-	function calcLabelSize() {
-		// 改行で分割
-		var lines = label.split(/\r\n|\r|\n/);
-		// サイズを計算して返す
-		var tw = 0, th = 0;
-		var linseSpacing;
-		for(var i=0; i<lines.count; i++) {
-			tw = Math.max(tw, root.font.getTextWidth(lines[i]));
-		}
-		th = (size - root.spaceVertical) * lines.count + root.spaceVertical + lineSpacing * (lines.count - 1);
-		return %[ width: tw, height: th ];
-	}
-
 	function updateSize() {
 		var prevWidth = width;
 		var prevHeight = height;
+		var prevRWidth = rwidth;
 		height = 0;
 		height = Math.max(height, root.findIcon(root.widgetStyle.toggleOpenIcon).height);
 		iconWidth = 0;
@@ -3881,10 +3925,13 @@ class KListItem
 			height = Math.max(iconLayerList[i].height);
 		}
 		textInfo = labelSize = root.extractTextArea(currentFontStyle, label, lineSpacing);
+		rtextInfo = rlabelSize = root.extractTextArea(currentFontStyle, rlabel, lineSpacing);
 		root.applyFontStyle(root.font, root.fontStyle);
-		width = toggleWidth + iconWidth + labelSize.width;
+		width = toggleWidth + iconWidth + labelSize.width + paddingLeft;
+		rwidth = paddingRight + ((rlabel == "") ? 0 : spaceHorizontal + rlabelSize.width);
 		height = Math.max(height, labelSize.height + spaceVertical + paddingTop + paddingBottom);
-		return width != prevWidth || height != prevHeight;
+		height = Math.max(height, rlabelSize.height + spaceVertical + paddingTop + paddingBottom);
+		return width != prevWidth || height != prevHeight || rwidth != prevRWidth;
 	}
 
 	function getChildInsertionX {
@@ -4092,9 +4139,16 @@ class KListItem
 		var lines = label.split(/\r\n|\r|\n/);
 		var rect = labelRect;
 		var style = currentFontStyle;
+		var labelResult =
+			root.drawTextArea(currentFontStyle,
+							  left + rect.left, top + rect.top, Math.min(textInfo.width, root.width - root.treeRWidth - (left + rect.left)), lineSpacing,
+							  textInfo.texts, textInfo.textWidths, ALIGN_LEFT);
+		if (root.autoHintFadedLabel)
+			hint = labelResult.inRange ? "" : label;
+		var rRect = rlabelRect;
 		root.drawTextArea(currentFontStyle,
-						  left + rect.left, top + rect.top, Math.min(textInfo.width, root.width - (left + rect.left)), lineSpacing,
-						  textInfo.texts, textInfo.textWidths, ALIGN_LEFT);
+						  root.width + rRect.right - rRect.width, top + rRect.top, rtextInfo.width, lineSpacing,
+						  rtextInfo.texts, rtextInfo.textWidths, ALIGN_RIGHT);
 		root.applyFontStyle(root.font, root.fontStyle);
 		if (childCount) {
 			var toggle;
@@ -4112,7 +4166,7 @@ class KListItem
 		}
 		var iconList = validIconList;
 		if (iconList.count) {
-			var x = left + toggleWidth;
+			var x = left + paddingLeft + toggleWidth;
 			for (var i = 0; i < iconList.count; i++) {
 				var iconLayer = iconLayerList[i];
 				var y = int(top + rect.top + (rect.height - iconLayer.height) / 2);
@@ -4126,8 +4180,15 @@ class KListItem
 	// ラベル矩形
 	property labelRect {
 		getter {
-			return %[ left:(toggleWidth + iconWidth), top:int(spaceVertical / 2 + paddingTop),
+			return %[ left:(toggleWidth + iconWidth + paddingLeft), top:int(spaceVertical / 2 + paddingTop),
 					  width:width - (toggleWidth + iconWidth), height: labelSize.height];
+		}
+	}
+
+	property rlabelRect {
+		getter {
+			return %[ right: -paddingRight, top:int(spaceVertical / 2 + paddingTop),
+					  width: rlabelSize.width, height: rlabelSize.height];
 		}
 	}
 

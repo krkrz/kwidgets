@@ -167,7 +167,7 @@ class KWindow extends Window
 		}
 
 		// プライマリウィジェットを作る
-		add(new KPrimaryWidget(this, getOption("customToolBar", false)));
+		add(new KPrimaryWidget(this, getOption("customToolBar", void)));
 
 		// メニュー用チェックマーク
 		menuCheckedLayer = new Layer(this, primaryLayer);

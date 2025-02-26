@@ -25,7 +25,7 @@ class KPrimaryWidget extends KLayout
 	 * KPrimaryWidget は KWindow により自動的に作成され、ユーザーが
 	 * 明示的にnewすることは無い
 	 ------------------------------*/
-	function KPrimaryWidget(win, useCustomToolBar = false) {
+	function KPrimaryWidget(win, customToolBarOption = void) {
 		// 親呼び出し
 		super.KLayout(win, %[ name: "", primary: true ]);
 		// イメージを持たない
@@ -43,9 +43,11 @@ class KPrimaryWidget extends KLayout
 		primitiveIconBuilder = new KPrimitiveIconBuilder(window);
 
 		// カスタムツールバーを構築
-		if (useCustomToolBar) {
+		if (customToolBarOption !== void) {
+			if (! customToolBarOption instanceof "Dictionary")
+				customToolBarOption = %[];
 			window.borderless = true;
-			customToolBar = new KCustomToolBar(window);
+			customToolBar = new KCustomToolBar(window, customToolBarOption);
 			customToolBar.parent = this;
 		}
 

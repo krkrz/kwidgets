@@ -64,6 +64,7 @@ Scripts.execStorage("KAbsoluteLayout.tjs");
 Scripts.execStorage("KRelativeLayout.tjs");
 Scripts.execStorage("KScrollLayout.tjs");
 Scripts.execStorage("KMenu.tjs");
+Scripts.execStorage("KCustomMenu.tjs");
 Scripts.execStorage("KContextMenu.tjs");
 Scripts.execStorage("KList.tjs");
 Scripts.execStorage("KFrameLayout.tjs");

@@ -1,0 +1,1188 @@
+//----------------------------------------------------------------------
+// カスタムメニューアイテムの基底
+//----------------------------------------------------------------------
+class KCustomMenuItem
+{
+	// 公開プロパティ
+	var window; // window参照
+	var parent; // 親MenuItem
+	var _caption; // キャプション
+	var name; // 名前
+	var enabled = true; // 有効?
+	var visible = true; // 可視?
+	var _checked = false; // チェックが入ってる？
+	var _shortcut = ""; // ショートカットテキスト
+	var isAvoidDictionaryRegistration = false; // 辞書登録の可否
+	var _value = void; // 値 (dispatch時に通知される値)
+	var group = 0;
+	var radio = false;
+
+	// 非公開インターフェース
+	var _nameCache = %[]; // 検索用の名前キャッシュ
+	var _children = []; // 子メニューアイテム
+	var _dict; // 辞書
+
+	var defaultUnchecked = "k_menu_default_unchecked";
+	var defaultChecked = "k_menu_default_checked";
+	var iconCheckedLayer = defaultChecked;
+	var iconUncheckedLayer = defaultUnchecked;
+
+	//----------------------------------------------------------------------
+	// 生成・破棄
+	//----------------------------------------------------------------------
+	function KCustomMenuItem(window, caption = "", name = "") {
+		this.window = window;
+		this._caption = "" + caption;
+		this.name = name;
+		Scripts.setCallMissing(this);
+	}
+
+	function finalize {
+		_children.each(function(child) { invalidate child; });
+		invalidate iconCheckedLayer;
+		invalidate iconUncheckedLayer;
+	}
+
+	//----------------------------------------------------------------------
+	// 辞書登録
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// 辞書のバインド
+	function bindPersistentDictionary(dict) {
+		if (isAvoidDictionaryRegistration)
+			return;
+
+		_dict = dict;
+		onBindPersistentDictionary(dict);
+
+		for (var i = 0; i < _children.count; i++) {
+			var child = _children[i];
+			child.bindPersistentDictionary(dict);
+		}
+	}
+
+	//------------------------------
+	// 辞書登録のストア
+	function storePersistentDictionary(dict) {
+		if (_dict !== void)
+			onStorePersistentDictionary(_dict);
+
+		for (var i = 0; i < children.count; i++) {
+			var child = children[i];
+			child.storePersistentDictionary();
+		}
+	}
+
+	//------------------------------
+	// 辞書バインドのコールバック
+	function onBindPersistentDictionary(dict) {
+	}
+
+	//------------------------------
+	// 辞書ストアのコールバック
+	function onStorePersistentDictionary(dict) {
+	}
+
+	//----------------------------------------------------------------------
+	// ウィジェット参照
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// 子リスト(Readonly)
+	property children {
+		getter {
+			var result = [];
+			result.assign(_children);
+			return result;
+		}
+	}
+
+	//------------------------------
+	// 親ウィジェット
+	property parentWidget {
+		getter {
+			if (parent === void)
+				return window;
+			else
+				window;
+		}
+	}
+
+	//------------------------------
+	// インデックス
+	property index {
+		getter {
+			return parent._children.find(this);
+		}
+	}
+
+	//------------------------------
+	// ルートメニューアイテム
+	property root {
+		getter {
+			for (var w = this; w.parent !== void; w = w.parent)
+				return w;
+		}
+	}
+
+	//------------------------------
+	// 子のカウント
+	property childCount {
+		getter {
+			return _children.count;
+		}
+	}
+
+	property hasChild {
+		getter {
+			return _children.count > 0;
+		}
+	}
+
+	//------------------------------
+	// 子を参照
+	function childAt(index) {
+		return _children[index];
+	}
+
+	//------------------------------
+	// 任意の名前を持つ子を参照
+	function find(name) {
+		if (this.name === name)
+			return this;
+		for (var i = 0; i < _children.count; i++) {
+			var child = _children[i];
+			var widget = child.find(name);
+			if (widget)
+				return widget;
+		}
+		return void;
+	}
+
+	//------------------------------
+	// 任意の名前で子孫を参照し、キャッシュに残す
+	function missing(get_or_set, name, value) {
+		if (! get_or_set) {
+			if (typeof(global[name]) != "undefined")
+				return false;
+			if (typeof(_nameCache[name]) != "undefined") {
+				var widget = _nameCache[name];
+				if (widget isvalid
+					&& widget.name == name) {
+						*value = widget;
+					return true;
+				} else {
+					delete _nameCache[name];
+				}
+			}
+			var widget = find(name);
+			if (widget) {
+				_nameCache[name] = widget;
+					*value = widget;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	//------------------------------
+	// 有効?
+	property nodeEnabled {
+		getter {
+			if (! enabled)
+				return false;
+			if (parent !== void)
+				return parent.nodeEnabled;
+			return enabled;
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// 子の登録・削除操作(ローレベル)
+	//----------------------------------------------------------------------
+	function add(item) {
+		item.parent = this;
+		_children.add(item);
+		onChildViewModified();
+	}
+
+	function insert(item, index) {
+		item.parent = this;
+		_children.insert(index, item);
+		onChildViewModified();
+	}
+
+	function remove(item) {
+		item.parent = void;
+		_children.remove(item);
+		onChildViewModified();
+	}
+
+	//----------------------------------------------------------------------
+	// 子の登録・削除操作
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// 全ての子をクリアする
+	function clearItems {
+		while (_children.count) {
+			var child = _children[0];
+			remove(child);
+			invalidate child;
+		}
+	}
+
+	//------------------------------
+	// セパレーターを追加
+	function addSeparator {
+		add(new KCustomMenuSeparatorItem(window));
+	}
+
+	//------------------------------
+	// メニューアイテムを追加
+	function addItem(caption, name = "", enabled = true, func = void) {
+		var item = new global.KCustomMenuItem(window, caption, name);
+
+		item.enabled = enabled;
+		if (func)
+			item.onValueModified = func;
+		add(item);
+		return item;
+	}
+
+	//------------------------------
+	// バリューメニューアイテムを追加
+	function addValueItem(caption, value, name = "", enabled = true, func = void) {
+		var item = new global.KCustomMenuItem(window, caption, name);
+		item.enabled = enabled;
+		item.value = value;
+		if (func)
+			item.onValueModified = func;
+		add(item);
+		return item;
+	}
+
+	//------------------------------
+	// トグルメニューアイテムを追加
+	function addToggleItem(caption, value = false, name = "", enabled = true, func = void) {
+		var item = new global.KCustomMenuToggleItem(window, caption, name);
+		item.enabled = enabled;
+		item.value = value;
+		if (func)
+			item.onValueModified = func;
+		add(item);
+		return item;
+	}
+
+	//------------------------------
+	// ラジオメニューアイテムを追加
+	function addRadioItem(caption, value, name = "", enabled = true, func = void) {
+		var item = new global.KCustomMenuRadioItem(window, caption, value, name);
+		item.enabled = enabled;
+		if (func)
+			item.onValueModified = func;
+		add(item);
+		item.onAddToParent(this);
+		return item;
+	}
+
+	//------------------------------
+	// アイテムのコンパクションを行う
+	function doCompact(pat = /^(.*)_([^_]*)$/, upperLimit = 2) {
+		for (var i = 0; i < childCount; i++)
+			childAt(i).doCompact(pat);
+		var matches = %[];
+		for (var i = 0; i < childCount; i++) {
+			var label = childAt(i).caption;
+			if (! pat.test(label))
+				continue;
+			var header = pat.matches[1];
+			if (typeof(matches[header]) == K_UNDEFINED)
+				matches[header] = 1;
+			else
+				matches[header]++;
+		}
+		var headers = dictionaryKeys(matches);
+		for (var i = 0; i < headers.count; i++) {
+			var header = headers[i];
+			if (matches[header] <= upperLimit)
+				headers.erase(i--);
+		}
+		matches = %[];
+		var newItems = [];
+		for (var i = 0; i < childCount; i++) {
+			var child = childAt(i);
+			var label = child.caption;
+			for (var j = 0; j < headers.count; j++) {
+				var header = headers[j];
+				if (label.indexOf(header) == 0) {
+					if (typeof(matches[header]) === K_UNDEFINED) {
+						var menuItem = new global.KCustomMenuItem(window, header);
+						matches[header] = menuItem;
+						newItems.add(%[ index: i, item: menuItem ]);
+					}
+					remove(child);
+					matches[header].add(child);
+					i--;
+					break;
+				}
+			}
+		}
+		for (var i = newItems.count - 1; i >= 0; i--)
+			insert(newItems[i].item, newItems[i].index);
+	}
+
+	//----------------------------------------------------------------------
+	// プロパティ
+	//----------------------------------------------------------------------
+	property caption {
+		getter {
+			return _caption;
+		}
+		setter(v) {
+			_caption = "" + v;
+			onViewModified();
+		}
+	}
+
+	property shortcut {
+		getter {
+			return _shortcut;
+		}
+		setter(v) {
+			_shortcut = v;
+			onViewModified();
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// 値のハンドリング
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// 値更新のコールバック
+	function onValueModified(newValue, oldValue) {
+		parent.onChildValueModified(this, newValue, oldValue);
+	}
+
+	//------------------------------
+	// 子の値更新のコールバック
+	function onChildValueModified(child, newValue, oldValue) {
+		parent.onChildValueModified(...);
+	}
+
+	//------------------------------
+	// 値のディスパッチ
+	function dispatch() {
+		if (nodeEnabled)
+			onValueModified(value);
+	}
+
+	function invalidateValue {
+		dispatch();
+	}
+
+	//------------------------------
+	// クリック時動作
+	function onClick {
+		dispatch();
+	}
+
+	//------------------------------
+	// valueプロパティ
+	property value {
+		getter {
+			return _value;
+		}
+		setter(v) {
+			_value = v;
+		}
+	}
+
+	//------------------------------
+	// checkedプロパティ
+	property checked {
+		getter {
+			return _checked;
+		}
+		setter(v) {
+			_checked = v;
+			if (v && radio) {
+				var items = parent._children;
+				for (var i = 0; i < items.count; i++) {
+					var item = items[i];
+					if (item !== this
+						&& item.radio
+						&& item.group == group)
+						item._checked = false;
+				}
+			}
+			onViewModified();
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// アイコン関連
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// 任意のアイコンを設定する。
+	property icon {
+		setter(v) {
+			invalidate iconCheckedLayer;
+			invalidate iconUncheckedLayer;
+			iconCheckedLayer = defaultChecked;
+			iconUncheckedLayer = defaultUnchecked;
+			if (v instanceof "Layer") {
+				iconUncheckedLayer = new global.Layer(root.window, root.window.primaryLayer);
+				iconUncheckedLayer.assignImages(v);
+				iconUncheckedLayer.setSize(v.width, v.height);
+				iconCheckedLayer = new global.Layer(root.window, root.window.primaryLayer);
+				iconCheckedLayer.assignImages(v);
+				iconCheckedLayer.setSize(v.width, v.height);
+				iconCheckedLayer.operateRect((iconCheckedLayer.width - root.window.menuCheckedLayer.width) / 2,
+											 (iconCheckedLayer.height - root.window.menuCheckedLayer.height) / 2,
+											 root.window.menuCheckedLayer,
+											 0, 0, root.window.menuCheckedLayer.width, root.window.menuCheckedLayer.height);
+			} else if (typeof(v) == "String") {
+				iconUncheckedLayer = new global.Layer(root.window, root.window.primaryLayer);
+				iconUncheckedLayer.loadImages(v);
+				iconUncheckedLayer.setSizeToImageSize();
+				iconCheckedLayer = new global.Layer(root.window, root.window.primaryLayer);
+				iconCheckedLayer.assignImages(iconUncheckedLayer);
+				iconCheckedLayer.setSizeToImageSize();
+				iconCheckedLayer.operateRect((iconCheckedLayer.width - root.window.menuCheckedLayer.width) / 2,
+											 (iconCheckedLayer.height - root.window.menuCheckedLayer.height) / 2,
+											 root.window.menuCheckedLayer,
+											 0, 0, root.window.menuCheckedLayer.width, root.window.menuCheckedLayer.height);
+			}
+		}
+	}
+
+	//------------------------------
+	// 任意のアイコンを文字で設定する
+	property iconChar {
+		setter(v) {
+			var tmpLayer = new global.Layer(root.window, root.window.primaryLayer);
+			var w = System.getSystemMetrics("CYMENUCHECK");
+			tmpLayer.setImageSize(w, w);
+			tmpLayer.setSizeToImageSize();
+			tmpLayer.fillRect(0, 0, w, w, 0);
+			tmpLayer.font.height = w - 2;
+			tmpLayer.drawText((w - tmpLayer.font.getTextWidth(w)) / 2, 1, v, 0);
+			icon = tmpLayer;
+			invalidate tmpLayer;
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// メニューのポップアップ
+	//----------------------------------------------------------------------
+	function popup(flags, x, y) {
+		var menuWindow = new KCustomMenuWindow(this);
+		menuWindow.buildListItems();
+		x = window.primaryLayer.getScreenLeft(x);
+		y = window.primaryLayer.getScreenTop(y);
+		menuWindow.setPos(x, y);
+		menuWindow.visible = true;
+		this.menuWindow = menuWindow;
+	}
+
+	//----------------------------------------------------------------------
+	// リストアイテムの生成
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// 生成するリストアイテムのクラスを指定
+	property listItemClass {
+		getter {
+			return KCustomMenuListItem;
+		}
+	}
+
+	//------------------------------
+	// リストアイテムを生成
+	function buildListItem(controller) {
+		var item = new listItemClass(%[ owner: this,
+										label: caption,
+										rlabel: childCount ? ">" : shortcut,
+										icon: checked ? iconCheckedLayer : iconUncheckedLayer,
+										enabled: enabled,
+										controller: controller ]);
+		return item;
+	}
+
+	//----------------------------------------------------------------------
+	// イベント処理
+	//----------------------------------------------------------------------
+
+	//----------------------------------------
+	// ビューが変わった
+	function onViewModified {
+		if (parent !== void)
+			parent.onChildViewModified();
+	}
+
+	//------------------------------
+	// 子のビューが変わった
+	function onChildViewModified {
+	}
+}
+
+//----------------------------------------------------------------------
+// セパレーター
+//----------------------------------------------------------------------
+class KCustomMenuSeparatorItem extends KCustomMenuItem
+{
+	function KCustomMenuSeparatorItem {
+		super.KCustomMenuItem(...);
+		enabled = false;
+	}
+
+	property listItemClass {
+		getter {
+			return KCustomMenuSeparatorListItem;
+		}
+	}
+}
+
+//----------------------------------------------------------------------
+// トグルアイテム
+//----------------------------------------------------------------------
+class KCustomMenuToggleItem extends KCustomMenuItem
+{
+	//----------------------------------------------------------------------
+	// 生成・破棄
+	//----------------------------------------------------------------------
+	function KCustomMenuToggleItem {
+		super.KCustomMenuItem(...);
+		_value = false;
+	}
+
+	//----------------------------------------------------------------------
+	// 永続化辞書を値にバインドする
+	//----------------------------------------------------------------------
+	function onBindPersistentDictionary(dict) {
+		if (name !== "")
+			value = dict.init(name, value);
+	}
+
+	function onStorePersistentDictionary(dict) {
+		if (name !== "")
+			dict.set(name, value);
+	}
+
+	//----------------------------------------------------------------------
+	// value プロパティ
+	//----------------------------------------------------------------------
+	property value {
+		getter {
+			return checked;
+		}
+		setter(v) {
+			checked = v;
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// クリック時処理
+	//----------------------------------------------------------------------
+	function onClick() {
+		if (! nodeEnabled)
+			return;
+		value = ! value;
+		onValueModified(value, ! value);
+	}
+};
+
+//----------------------------------------------------------------------
+// ラジオアイテム
+//----------------------------------------------------------------------
+class KCustomMenuRadioItem extends KCustomMenuItem
+{
+	//----------------------------------------------------------------------
+	// 生成・破棄
+	//----------------------------------------------------------------------
+	function KCustomMenuRadioItem(window, caption, value, name) {
+		super.KCustomMenuItem(window, caption, name);
+		_value = value;
+		iconCheckedLayer = "k_menu_default_radio";
+	}
+
+	//----------------------------------------------------------------------
+	// 永続化辞書を値にバインドする
+	//----------------------------------------------------------------------
+	function onBindPersistentDictionary(dict) {
+		if (name !== void
+			&& checked)
+			value = dict.init(name, _value);
+	}
+
+	function onStorePersistentDictionary(dict) {
+		if (name !== void
+			&& checked)
+			dict.set(name, _value);
+	}
+
+	//----------------------------------------------------------------------
+	//  親にaddされたら
+	//----------------------------------------------------------------------
+	function onAddToParent(parent) {
+		var newGroup = 1;
+
+		for (var i = 0; i < parent.childCount; i++) {
+			var child = parent.childAt(i);
+			if (child.radio) {
+				// すでに同じ名前の子が同階層にあったらグループをそろえる
+				if (child.name == name) {
+					group = child.group;
+					radio = true;
+					return;
+				} else {
+					newGroup = Math.max(newGroup, child.group + 1);
+				}
+			}
+		}
+
+		// 同じ名前の子がまだ同階層になければグループを新設する
+		group = int(newGroup);
+		radio = true;
+		checked = true;
+	}
+
+	//----------------------------------------------------------------------
+	// valueプロパティ
+	//----------------------------------------------------------------------
+	property value {
+		getter {
+			// 同階層の子の内checkが入ってるもののvalueを返す
+			for (var i = 0; i < parent.childCount; i++) {
+				var child = parent.childAt(i);
+				if (child.radio
+					&& child.group == group
+					&& child.checked) {
+					return child._value;
+				}
+			}
+			return void;
+		}
+		setter(v) {
+			// 同階層の子の内、値が一致するものにチェックを入れる
+			for (var i = 0; i < parent.children.count; i++) {
+				var child = parent.children[i];
+				if (child.radio
+					&& child.group == group
+					&& child._value == v) {
+					child.checked = true;
+				}
+			}
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// クリック時処理
+	//----------------------------------------------------------------------
+	function onClick {
+		if (! nodeEnabled)
+			return;
+
+		var oldValue = value;
+		checked = true;
+		onValueModified(_value, oldValue);
+	}
+};
+
+//----------------------------------------------------------------------
+// メニューリスト
+//----------------------------------------------------------------------
+class KCustomMenuList extends KList
+{
+	function KCustomMenuList {
+		super.KList(...);
+	}
+}
+
+//----------------------------------------------------------------------
+// メニューリストアイテム
+//----------------------------------------------------------------------
+class KCustomMenuListItem extends KListItem
+{
+	function KCustomMenuListItem {
+		super.KListItem(...);
+	}
+
+	//------------------------------
+	// マウスエンター
+	function onMouseEnter {
+		// コントローラーに通知
+		var controller = getOption("controller");
+		var owner = getOption("owner");
+		controller.noticeItem(this, owner);
+	}
+
+	//------------------------------
+	// マウスクリック
+	function onClick {
+		// 子を持たない時のみ、メニューアイテムクリックイベント発生
+		var owner = getOption("owner");
+		if (owner.hasChild)
+			return;
+		var controller = getOption("controller");
+		controller.onMenuItemClick(getOption("owner"));
+	}
+
+}
+
+//----------------------------------------------------------------------
+// メニューリストセパレーターアイテム
+//----------------------------------------------------------------------
+global.KCustomMenuSeparatorListItemWidgetStyle =
+	[
+			%[ key: "separatorHeight", defaultValue: 1 ],
+			%[ key: "separatorColor", defaultValue: 0xffa0a0a0 ]
+	];
+
+class KCustomMenuSeparatorListItem extends KCustomMenuListItem
+{
+	function KCustomMenuSeparatorListItem {
+		super.KCustomMenuListItem(...);
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KCustomMenuSeparatorListItemWidgetStyle);
+		}
+	}
+
+	//------------------------------
+	/// サイズ設定
+	function updateSize {
+		// サイズ設定をオーバーライド
+		var prevHeight = height;
+		width = 0;
+		height = widgetStyle.separatorHeight + paddingTop + paddingBottom;
+		return height != prevHeight;
+	}
+
+	//------------------------------
+	// 描画
+	function onDraw {
+		// バックグラウンドと横線を描画
+		fillBackground();
+		root.fillRect( paddingLeft + 15 + spaceHorizontal / 2, top + paddingTop,
+					   root.width - 15 - spaceHorizontal / 2 - paddingLeft, widgetStyle.separatorHeight,
+					   widgetStyle.separatorColor);
+	}
+}
+
+//----------------------------------------------------------------------
+// メニューウィンドウ
+//----------------------------------------------------------------------
+class KCustomMenuWindow extends KWindow
+{
+	var owner;
+	var controller;
+	var isRoot;
+
+	//----------------------------------------------------------------------
+	// 生成・破棄
+	//----------------------------------------------------------------------
+	function KCustomMenuWindow(owner, window = owner.window, controller, isRoot) {
+		super.KWindow("", window);
+		this.owner = owner;
+		this.controller = controller;
+		this.isRoot = isRoot;
+
+		borderStyle = bsNone;
+		stayOnTop = true;
+		focusable = false;
+		alwaysSetToMinSize = true;
+
+		primaryWidget.add(new KFrameLayout(this,
+										  %[ id: "combobox_dropdown_frame",
+											 name: "frame" ]));
+		frame.add(new KCustomMenuList(this,
+									  %[ name: "list",
+									   ]));
+	}
+
+	//----------------------------------------------------------------------
+	// リストアイテム生成
+	//----------------------------------------------------------------------
+	function buildListItems {
+		for (var i = 0; i < owner.childCount; i++) {
+			var menuItem = owner.childAt(i);
+			var listItem = menuItem.buildListItem(controller);
+			list.add(listItem);
+		}
+		list.onPaint();
+		invalidateLayout();
+	}
+
+	//----------------------------------------------------------------------
+	// 強制クローズ処理
+	//----------------------------------------------------------------------
+	function onPopupHide {
+		closeMenu();
+	}
+
+	function closeMenu {
+		if (isRoot) {
+			controller.cancelMenu();
+		}
+	}
+}
+
+//----------------------------------------------------------------------
+// メニューウィンドウコントローラー
+//----------------------------------------------------------------------
+class KCustomMenuWindowController
+{
+	// メニュアイテムにマウスオーバーしてからメニュー表示までのインターバル
+	var NOTIFY_INTERVAL = 200;
+	// メニューのトリガを管理するタイマー
+	var triggerTimer;
+	// トリガするメニューアイテム
+	var menuItemToTrigger;
+	var listItemToTrigger;
+	// 現在のサブメニューの階層をあらわすインデックスのリスト
+	var curLocator = [];
+	// ルートメニューアイテム
+	var rootMenuItem;
+	// メニューウィンドウのリスト
+	var menuWindows = [];
+	// メニューを表示するモニタの矩形
+	var monitorRect;
+
+	//----------------------------------------------------------------------
+	// 生成・破棄
+	//----------------------------------------------------------------------
+	function KCustomMenuWindowController {
+		triggerTimer = new Timer(this, "onTrigger");
+		triggerTimer.capacity = 1;
+		triggerTimer.interval = NOTIFY_INTERVAL;
+	}
+
+	//----------------------------------------------------------------------
+	// メニュー動作中？
+	//----------------------------------------------------------------------
+	property running {
+		getter {
+			return rootMenuItem !== void;
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// メニューウィンドウを全てクリアする
+	//----------------------------------------------------------------------
+	function clearMenuWindows() {
+		menuWindows.each(function(win) { win.close(); invalidate win; });
+		menuWindows.clear();
+		curLocator.clear();
+		triggerTimer.enabled = false;
+		menuItemToTrigger = void;
+		listItemToTrigger = void;
+		rootMenuItem = void;
+		monitorRect = void;
+	}
+
+	//----------------------------------------------------------------------
+	// メニューウィンドウを生成する
+	//----------------------------------------------------------------------
+	function createMenuWindow(menuItem, parentWindow = void, isRoot = false) {
+		var menuWindow = new KCustomMenuWindow(menuItem, parentWindow, this, isRoot);
+		menuWindow.buildListItems();
+		if (menuWindow.height > monitorRect.height
+		   || menuWindow.width > monitorRect.width) {
+			var realHeight = menuWindow.height * menuWindow.zoomDenom / menuWindow.zoomNumer;
+			var realWidth = menuWindow.width * menuWindow.zoomDenom / menuWindow.zoomNumer;
+			var zoom = Math.min(monitorRect.height / realHeight,
+								monitorRect.width / realWidth);
+			menuWindow.setZoom(int(zoom * 10000), 10000);
+		}
+		return menuWindow;
+	}
+
+	//----------------------------------------------------------------------
+	// メニュー矩形に一番近いモニタの矩形を返す。
+	//----------------------------------------------------------------------
+	function getNearestMonitorRect(rect) {
+		// モニタ情報を取得
+		var displays = System.getDisplayMonitors();
+		var minLen = 1000000;
+		var minDisplayRect;
+		for (var i = 0; i < displays.count; i++) {
+			var display = displays[i];
+			var monitorRect = new KRect(display.work.x,
+										display.work.y,
+										display.work.w,
+										display.work.h);
+			// モニタ矩形とメニュー矩形が交差するならそのモニタ矩形を返す
+			if (monitorRect.intersects(rect))
+				return monitorRect;
+			// モニタ矩形とメニュー矩形の距離が最小になるモニタ矩形を選んで返す。
+			var lengths = [];
+			if (rect.left >= monitorRect.right)
+				lengths.add(rect.left - monitorRect.left);
+			if (rect.right <= monitorRect.left)
+				lengths.add(monitorRect.left - rect.right);
+			if (rect.top >= monitorRect.bottom)
+				lengths.add(rect.top - monitorRect.bottom);
+			if (rect.bottom <= monitorRect.top)
+				lengths.add(monitorRect.top - rect.bottom);
+			var len = lengths.min();
+			if (len < minLen) {
+				minLen = len;
+				minDisplayRect = monitorRect;
+			}
+		}
+		return minDisplayRect;
+	}
+
+	//----------------------------------------------------------------------
+	// ルートメニューをポップアップする
+	//----------------------------------------------------------------------
+	function popupRootMenu(menuRect, item, parentWindow) {
+		// 既存のメニューウィンドウを全てクリアする
+		clearMenuWindows();
+		rootMenuItem = item;
+
+		// メニューを表示する範囲となるモニタ矩形を取得する
+		monitorRect = getNearestMonitorRect(menuRect);
+
+		// ルートメニューウィンドウを生成する
+		var menuWindow = createMenuWindow(rootMenuItem, parentWindow, true);
+		menuWindows.add(menuWindow);
+
+		// モニタ矩形に収まるように、メニューの表示範囲を算出する。
+		var x, y;
+		x = menuRect.left;
+		if (x < monitorRect.left)
+			x = monitorRect.left;
+		if (x + menuWindow.width > monitorRect.right)
+			x = monitorRect.right - menuWindow.width;
+
+		if (monitorRect.bottom - menuRect.bottom >= menuWindow.height)
+			y = menuRect.bottom;
+		else
+			y = menuRect.top - menuWindow.height;
+
+		x = int(Math.max(monitorRect.left, Math.min(monitorRect.right - menuWindow.width, x)));
+		y = int(Math.max(monitorRect.top, Math.min(monitorRect.bottom - menuWindow.height, y)));
+
+		// メニューの表示を開始する。
+		menuWindow.setPos(x, y);
+		menuWindow.visible = true;
+	}
+
+	//----------------------------------------------------------------------
+	// サブメニューをポップアップする
+	//----------------------------------------------------------------------
+	function popupSubMenu(menuRect, menuItem) {
+		// サブメニューウィンドウを生成する
+		// (直前の階層のメニューの子として生成する)
+		var menuWindow = createMenuWindow(menuItem, menuWindows[-1], false);
+		menuWindows.add(menuWindow);
+
+		// モニタ矩形に収まるように、メニューの表示範囲を算出する
+		var x, y;
+		if (menuRect.right + menuWindow.width < monitorRect.right)
+			x = menuRect.right;
+		else
+			x = menuRect.left - menuWindow.width;
+
+		if (y + menuWindow.height > monitorRect.bottom)
+			y = menuRect.bottom - menuWindow.height;
+		else
+			y = menuRect.top;
+
+		x = int(Math.max(monitorRect.left, Math.min(monitorRect.right - menuWindow.width, x)));
+		y = int(Math.max(monitorRect.top, Math.min(monitorRect.bottom - menuWindow.height, y)));
+
+		// メニューの表示を開始する
+		menuWindow.setPos(x, y);
+		menuWindow.visible = true;
+	}
+
+	//----------------------------------------------------------------------
+	// メニューアイテムに注目する
+	// (300ms後に当該メニューを開く
+	//----------------------------------------------------------------------
+	function noticeItem(listItem, menuItem) {
+		listItemToTrigger = listItem;
+		menuItemToTrigger = menuItem;
+		triggerTimer.enabled = false;
+		triggerTimer.enabled = true;
+	}
+
+	//----------------------------------------------------------------------
+	// メニュー開閉トリガ
+	//----------------------------------------------------------------------
+	function onTrigger {
+		triggerTimer.enabled = false;
+
+		// 新規ロケーターを構成する
+		var newLocator = [];
+		for (var item = menuItemToTrigger; item != rootMenuItem; item = item.parent) {
+			if (item.hasChild)
+				newLocator.unshift(item.index);
+		}
+
+		// 新規ロケーターの長さが既存のロケータより短いなら、その分メニューウィンドウを閉じる
+		while (newLocator.count < curLocator.count) {
+			curLocator.pop();
+			var tailMenuWindow = menuWindows.pop();
+			tailMenuWindow.close();
+			invalidate tailMenuWindow;
+		}
+
+		// 新規ロケーターと既存のロケータの末尾がそろわないならその分メニューウィンドウを閉じる
+		while (newLocator.count == curLocator.count
+			   && curLocator.count > 0
+			   && newLocator[-1] != curLocator[-1]) {
+				curLocator.pop();
+				var tailMenuWindow = menuWindows.pop();
+				tailMenuWindow.close();
+				invalidate tailMenuWindow;
+		}
+
+		// 新規ロケーターが既存ロケーターより大きいなら新規メニューを開く
+		if (newLocator.count > curLocator.count) {
+			curLocator = newLocator;
+			var window = listItemToTrigger.root.window;
+			var zoom = window.zoomNumer / window.zoomDenom;
+			var item = listItemToTrigger;
+			var x = item.root.getScreenLeft(0);
+			var y = item.root.getScreenTop(item.top);
+			popupSubMenu(new KRect(x, y,
+								   int(item.root.width * zoom),
+								   int(item.height * zoom)),
+						 menuItemToTrigger);
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// キャンセル
+	//----------------------------------------------------------------------
+	function cancelMenu {
+		clearMenuWindows();
+		onMenuCancel();
+	}
+
+	//----------------------------------------------------------------------
+	// メニューアイテムクリックコールバック
+	//----------------------------------------------------------------------
+	function onMenuItemClick(menuItem) {
+		// ウィンドウをクリア
+		clearMenuWindows();
+		// メニューアイテム自身のコールバックを発生させる。
+		menuItem.onClick();
+		// メニュー全体のコールバックを発生させる
+		onMenuDecide();
+	}
+
+	//----------------------------------------------------------------------
+	// コールバック
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// メニューキャンセル
+	//------------------------------
+	function onMenuCancel {
+	}
+
+	//------------------------------
+	// メニュー決定l
+	//------------------------------
+	function onMenuDecide {
+	}
+}
+
+//----------------------------------------------------------------------
+// カスタムメニューバー
+//----------------------------------------------------------------------
+class KCustomMenuBar extends KHorizontalBarLayout
+{
+	var controller;
+	var rootMenuItem;
+	var running = false;
+
+	function KCustomMenuBar(window, options = %[]) {
+		super.KHorizontalBarLayout(...);
+		controller = getOption("controller");
+		rootMenuItem = getOption("rootMenuItem");
+		rootMenuItem.onChildViewModified = onMenuBarModified;
+		controller.onMenuCancel = onMenuStop;
+		controller.onMenuDecide = onMenuStop;
+	}
+
+	function onMenuBarModified() {
+		asyncCaller.callOnce(updateMenuBar);
+	}
+
+	function onMenuStop {
+		running = false;
+	}
+
+	function updateMenuBar {
+		removeAll();
+		for (var i = 0; i < rootMenuItem.childCount; i++) {
+			var item = rootMenuItem.childAt(i);
+			add(new KCustomMenuButton(window, %[ label: item.caption,
+												 index: i ]));
+		}
+		add(new KTextLabel(window, %[ label: "|",
+									  name: "_partition",
+									  enabled: false ]));
+		_partition.enabled = false;
+	}
+
+	function onMenuButtonPress(index) {
+		var item = rootMenuItem.childAt(index);
+		if (! item.hasChild) {
+			running = false;
+			item.onClick();
+		} else {
+			running = true;
+			openMenu(index);
+		}
+	}
+
+	function onMenuButtonEnter(index) {
+		if (running) {
+			var item = rootMenuItem.childAt(index);
+			if (item.hasChild)
+				openMenu(index);
+			else
+				controller.clearMenuWindows();
+		}
+	}
+
+	function openMenu(index) {
+		controller.popupRootMenu(childAt(index, 0).screenRect,
+								 rootMenuItem.childAt(index),
+								 window);
+	}
+}
+
+class KCustomMenuButton extends KTextButton
+{
+	var index;
+
+	function KCustomMenuButton(window, options = %[]) {
+		var myOptions = %[ dispatchOnMouseDown: true ];
+		options = unionDictionary(options, myOptions, true);
+		super.KTextButton(window, options);
+		index = getOption("index");
+	}
+
+	function onMouseEnter {
+		super.onMouseEnter(...);
+		parent.onMenuButtonEnter(index);
+	}
+
+	function onValueModified {
+		parent.onMenuButtonPress(index);
+	}
+}

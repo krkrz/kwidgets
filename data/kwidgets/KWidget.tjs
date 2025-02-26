@@ -3535,6 +3535,16 @@ class KWidget extends Layer
 			return %[ x: x - dx, y: y - dy ];
 	}
 
+	property screenRect {
+		getter {
+			var zoom = window.zoomNumer / window.zoomDenom;
+			return new KRect(getScreenLeft(0),
+							 getScreenTop(0),
+							 int(width * zoom),
+							 int(height * zoom));
+		}
+	}
+
 	function onWindowActivate {
 	}
 

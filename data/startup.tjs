@@ -17,6 +17,7 @@ switch (System.exeBits) {
 case 32: Storages.addAutoPath("plugin/"); break;
 case 64: Storages.addAutoPath("plugin64/"); break;
 }
+@set (K2COMPAT_PURGE_DUMMYPROP_LOG = 1)
 var k2compatPath = System.exePath + "k2compat.xp3";
 if (Storages.isExistentStorage(k2compatPath)) {
 	Storages.addAutoPath(k2compatPath + ">");

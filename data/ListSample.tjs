@@ -159,7 +159,9 @@ class ListSample extends KWindow
     // スクロールレイアウトを作リ、その中にリストを配置
     primaryWidget.add(new KScrollLayout(this, true, true, "scroll"));
     scroll.resize = true;
-      scroll.add(new KList(this, %[ name: "list" ]));
+      scroll.add(new KList(this, %[ name: "list",
+									autoHintFadedLabel: true,
+									style: %[ variable: true ] ]));
 
     // リスト項目を配置しまくる
     list.spaceVertical = 2;
@@ -174,7 +176,8 @@ class ListSample extends KWindow
     list.add(new KListItem("トップ項目8はトグルを操作できない", "listitem8"));
     list.add(new KListItem("トップ項目9は太く大きい", "listitem9"));
       list.add(new KListItem(%[ label: "トップ項目10は下側のパディングが大きい", name: "listitem10", style: %[ paddingBottom: 20, icon: "gotta_mail" ] ]));
-    listitem7.hint = "こんな風にリストアイテムに対して\nヒントを設定することができる";
+	  list.add(new KListItem(%[ name: "listitem11", label: "トップ項目11は", rlabel: "右側にもラベルを持っている", style: %[ paddingRight: 10 ] ]));
+      listitem7.hint = "こんな風にリストアイテムに対して\nヒントを設定することができる";
     listitem9.fontBold = true;
     listitem9.fontItalic = true;
     listitem9.fontUnderline = true;

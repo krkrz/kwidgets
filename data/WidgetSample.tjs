@@ -98,6 +98,7 @@ class WidgetSample extends KWindow
 	function WidgetSample() {
 		super.KWindow(%[ name: "widgetsample_window",
 						 theme: "dialog",
+						 customToolBar: true,
 						 style: %[
 							 isClass: %[
 								 KWidget: %[
