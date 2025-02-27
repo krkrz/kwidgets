@@ -98,7 +98,7 @@ class WidgetSample extends KWindow
 	function WidgetSample() {
 		super.KWindow(%[ name: "widgetsample_window",
 						 theme: "dialog",
-						 customToolBar: true,
+						 customToolBar: %[ useMenuBar: true ],
 						 style: %[
 							 isClass: %[
 								 KWidget: %[
@@ -144,7 +144,7 @@ class WidgetSample extends KWindow
 		menuTop.addItem("項目が多いから自動でネストにする_5");
 		menuTop.addSeparator();
 		menuTop.addItem("カスタムダイアログ", "customDialogTest");
-
+		
 		menu.addItem("ズーム", "zoomRoot");
 		zoomRoot.addRadioItem("50%", 50, "zoom");
 		zoomRoot.addRadioItem("60%", 60, "zoom");

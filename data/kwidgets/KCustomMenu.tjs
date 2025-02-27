@@ -423,6 +423,17 @@ class KCustomMenuItem
 	}
 
 	//----------------------------------------------------------------------
+	// ショートカットの解決
+	//----------------------------------------------------------------------
+	function resolveShortcut(keyText) {
+		if (shortcut == keyText) {
+			onClick();
+			return true;
+		}
+		return _children.any(keyText, function(item, keyText) { return item.resolveShortcut(keyText); });
+	}
+
+	//----------------------------------------------------------------------
 	// アイコン関連
 	//----------------------------------------------------------------------
 

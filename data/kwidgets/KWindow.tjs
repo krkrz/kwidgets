@@ -918,6 +918,15 @@ class KWindow extends Window
 	function removeScrollObserver(observer) {
 		scrollObservers.remove(observer);
 	}
+
+	function onKeyDown(key, shift) {
+		if (_menu !== void) {
+			var keyText = System.getKeyNameText(key, shift);
+			if (_menu.resolveShortcut(keyText))
+				return;
+		}
+		super.onKeyDown(...);
+	}
 };
 
 mixin(KWindow, KStyleObject);
