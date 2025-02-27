@@ -819,15 +819,16 @@ class KWindow extends Window
 		_existentWindowList.insert(0, this);
 		if (focusedLayer instanceof "KWidget")
 			focusedLayer.onWindowActivate();
-		if (customToolBar !== void)
-			customToolBar.addCustomStyleState("windowActive");
+		if (customToolBar !== void) {
+			customToolBar.onWindowActivate();
+		}
 	}
 
 	function onDeactivate {
 		if (focusedLayer instanceof "KWidget")
 			focusedLayer.onWindowDeactivate();
 		if (customToolBar !== void)
-			customToolBar.removeCustomStyleState("windowActive");
+			customToolBar.onWindowDeactivate();
 	}
 
 	function onMouseMove() {
