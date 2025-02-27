@@ -140,9 +140,21 @@ class KCustomToolBar extends KHorizontalBarLayout
 		}
 	}
 
-	property menuButton {
+	property menuEnabled {
 		getter {
-			return _menu;
+			if (find("_menu") !== void)
+				return _menu.enabled;
+			else if (find("_menuBar") !== void)
+				return _menuBar.enabled;
+			else
+				return false;
+		}
+
+		setter(v) {
+			if (find("_menu") !== void)
+				_menu.enabled = v;
+			else if (find("_menuBar") !== void)
+				_menuBar.enabled = v;
 		}
 	}
 
