@@ -105,7 +105,7 @@ class KCustomMenuItem
 			if (parent === void)
 				return window;
 			else
-				window;
+				return parent;
 		}
 	}
 
@@ -363,13 +363,13 @@ class KCustomMenuItem
 	//------------------------------
 	// 値更新のコールバック
 	function onValueModified(newValue, oldValue) {
-		parent.onChildValueModified(this, newValue, oldValue);
+		parentWidget.onChildValueModified(this, newValue, oldValue);
 	}
 
 	//------------------------------
 	// 子の値更新のコールバック
 	function onChildValueModified(child, newValue, oldValue) {
-		parent.onChildValueModified(...);
+		parentWidget.onChildValueModified(...);
 	}
 
 	//------------------------------
@@ -730,6 +730,14 @@ class KCustomMenuListItem extends KListItem
 		var controller = getOption("controller");
 		var owner = getOption("owner");
 		controller.noticeItem(this, owner);
+	}
+
+	//------------------------------
+	// マウスリーブ
+	function onMouseLeave {
+		var controller = getOption("controller");
+		var owner = getOption("owner");
+		controller.noticeItem(this.parent, owner.parent);
 	}
 
 	//------------------------------
@@ -1119,6 +1127,9 @@ class KCustomMenuBar extends KHorizontalBarLayout
 	var rootMenuItem;
 	var running = false;
 
+	//----------------------------------------------------------------------
+	// 生成・破棄
+	//----------------------------------------------------------------------
 	function KCustomMenuBar(window, options = %[]) {
 		super.KHorizontalBarLayout(...);
 		controller = getOption("controller");
@@ -1128,39 +1139,78 @@ class KCustomMenuBar extends KHorizontalBarLayout
 		controller.onMenuDecide = onMenuStop;
 	}
 
+	//----------------------------------------------------------------------
+	// メニューバー管理
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// ルートの子のViewが更新されたらメニュー更新
+	//------------------------------
 	function onMenuBarModified() {
 		asyncCaller.callOnce(updateMenuBar);
 	}
 
-	function onMenuStop {
-		running = false;
-	}
-
+	//------------------------------
+	// メニューバーを更新
+	//------------------------------
 	function updateMenuBar {
+		// 一旦全削除
 		removeAll();
+		// 子のキャプションでメニューボタン追加
 		for (var i = 0; i < rootMenuItem.childCount; i++) {
 			var item = rootMenuItem.childAt(i);
 			add(new KCustomMenuButton(window, %[ label: item.caption,
 												 index: i ]));
 		}
+		// ツールバーキャプションとの間のスプリッタ追加
 		add(new KTextLabel(window, %[ label: "|",
 									  name: "_partition",
 									  enabled: false ]));
 		_partition.enabled = false;
 	}
 
+	//----------------------------------------------------------------------
+	// メニュー駆動
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// メニューを開く
+	//------------------------------
+	function openMenu(index) {
+		controller.popupRootMenu(childAt(index, 0).screenRect,
+								 rootMenuItem.childAt(index),
+								 window);
+	}
+
+	//------------------------------
+	// メニューの駆動を止める
+	//------------------------------
+	function onMenuStop {
+		running = false;
+	}
+
+	//------------------------------
+	// メニューバーのボタンが押された時
+	//------------------------------
 	function onMenuButtonPress(index) {
 		var item = rootMenuItem.childAt(index);
+		// 子無しなら即座にクリックイベント発生
 		if (! item.hasChild) {
 			running = false;
 			item.onClick();
-		} else {
+		}
+		// 子ありならメニューを開く
+		else {
 			running = true;
 			openMenu(index);
 		}
 	}
 
+	//------------------------------
+	// メニューバーのボタンにホバーした時
+	//------------------------------
 	function onMenuButtonEnter(index) {
+		// メニュー駆動中なら、ホバーしたアイテムに合わせてメニュー更新
 		if (running) {
 			var item = rootMenuItem.childAt(index);
 			if (item.hasChild)
@@ -1170,17 +1220,18 @@ class KCustomMenuBar extends KHorizontalBarLayout
 		}
 	}
 
-	function openMenu(index) {
-		controller.popupRootMenu(childAt(index, 0).screenRect,
-								 rootMenuItem.childAt(index),
-								 window);
-	}
 }
 
+//----------------------------------------------------------------------
+// カスタムメニューボタン
+//----------------------------------------------------------------------
 class KCustomMenuButton extends KTextButton
 {
 	var index;
 
+	//----------------------------------------------------------------------
+	// 生成・破棄
+	//----------------------------------------------------------------------
 	function KCustomMenuButton(window, options = %[]) {
 		var myOptions = %[ dispatchOnMouseDown: true ];
 		options = unionDictionary(options, myOptions, true);
@@ -1188,12 +1239,103 @@ class KCustomMenuButton extends KTextButton
 		index = getOption("index");
 	}
 
+	//----------------------------------------------------------------------
+	// イベント処理
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// マウスエンターをオーナーに通知
+	//------------------------------
 	function onMouseEnter {
 		super.onMouseEnter(...);
 		parent.onMenuButtonEnter(index);
 	}
 
+	//------------------------------
+	// ボタン押下をオーナーに通知
+	//------------------------------
 	function onValueModified {
 		parent.onMenuButtonPress(index);
+	}
+}
+
+//----------------------------------------------------------------------
+// カスタムコンテキストメニュー
+//----------------------------------------------------------------------
+class KCustomContextMenu
+{
+	var parentWindow;
+	var toExit;
+	var rootMenuItem;
+	var controller;
+
+	//----------------------------------------------------------------------
+	// 生成・破棄
+	//----------------------------------------------------------------------
+	function KCustomContextMenu(parentWindow = null, toExit = true) {
+		if (parentWindow === null)
+			parentWindow = Window.mainWindow;
+		this.parentWindow = parentWindow;
+		this.toExit = toExit;
+		rootMenuItem = new KCustomMenuItem(parentWindow, "root", "root");
+		controller = new KCustomMenuWindowController();
+		controller.onMenuCancel = this.onMenuClose;
+		controller.onMenuDecide = this.onMenuClose;
+		Scripts.setCallMissing(this);
+	}
+
+	function finalize {
+		invalidate rootMenuItem;
+		invalidate controller;
+	}
+
+	//----------------------------------------------------------------------
+	// 未定義関数は rootMenuItem にフォワードする
+	//----------------------------------------------------------------------
+	function missing(get_or_set, name, value) {
+		if (! get_or_set) {
+			if (typeof(rootMenuItem[name]) != K_UNDEFINED) {
+				*value = &rootMenuItem[name];
+				return true;
+			}
+		}
+		return false;
+	}
+
+	//----------------------------------------------------------------------
+	// メニューの表示開始
+	//----------------------------------------------------------------------
+	function show(baseLayer = void, x = void, y = void) {
+		if (baseLayer === void) {
+			baseLayer = parentWindow.primaryLayer;
+			x = baseLayer.cursorX;
+			y = baseLayer.cursorY;
+		}
+		x = baseLayer.getScreenLeft(x);
+		y = baseLayer.getScreenTop(y);
+
+		controller.popupRootMenu(new KRect(x, y, 0, 0),
+								 rootMenuItem,
+								 parentWindow);
+	}
+
+	//----------------------------------------------------------------------
+	// イベント処理
+	//----------------------------------------------------------------------
+
+	//------------------------------
+	// メニューが閉じた時に呼ばれる
+	//------------------------------
+	function onMenuClose {
+		if (toExit) {
+			onExit();
+			invalidate this;
+		}
+	}
+
+	//------------------------------
+	// 終了時コールバック
+	//------------------------------
+	function onExit {
 	}
 }
