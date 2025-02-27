@@ -177,6 +177,6 @@ class KCustomToolBar extends KHorizontalBarLayout
 
 	function onWindowDeactivate {
 		removeCustomStyleState("windowActive");
-		menuController.clearMenuWindows();
+		menuController.cancelMenu();
 	}
 };
