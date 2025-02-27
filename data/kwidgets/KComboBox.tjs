@@ -499,12 +499,11 @@ class KComboDropdownWindow extends KWindow
 	var owner;
 
 	function KComboDropdownWindow(owner) {
-		super.KWindow("", owner.window);
+		super.KWindow(%[ borderStyle: bsNone,
+						 stayOnTop: true,
+						 focusable: false ],
+					  owner.window);
 		this.owner = owner;
-
-		borderStyle = bsNone;
-		stayOnTop = true;
-		focusable = false;
 
 		var fontStyle = owner.curFontStyle;
 		var scrollRequired = owner.count > owner.dispCount;

@@ -56,6 +56,15 @@ class KPrimaryWidget extends KLayout
 	}
 
 	//------------------------------
+	// カスタムツールバーを表示する
+	property customToolBarVisible {
+		getter {
+			return customToolBar !== void
+				&& customToolBar.visible;
+		}
+	}
+
+	//------------------------------
 	// アイコンをロードしてキャッシュする
 	function findIcon(filename) {
 		var key = filename;
@@ -128,7 +137,7 @@ class KPrimaryWidget extends KLayout
 	function onCalculateLayout {
 		if (child === void)
 			return;
-		var toolBarHeight = customToolBar !== void ? customToolBar.minHeight : 0;
+		var toolBarHeight = customToolBarVisible ? customToolBar.minHeight : 0;
 		setMinMaxSize(borderPaddingWidth + child.minWidth + child.marginHorizontal,
 					  borderPaddingHeight + child.minHeight + child.marginVertical + toolBarHeight,
 					  borderPaddingWidth + child.maxWidth + child.marginHorizontal,
@@ -138,8 +147,8 @@ class KPrimaryWidget extends KLayout
 	function onLocateLayout() {
 		if (child === void)
 			return;
-		var toolBarHeight = customToolBar !== void ? customToolBar.minHeight : 0;
-		if (customToolBar !== void) {
+		var toolBarHeight = customToolBarVisible ? customToolBar.minHeight : 0;
+		if (customToolBarVisible) {
 			customToolBar.setPos(0, 0);
 			customToolBar.setSize(width, toolBarHeight);
 		}

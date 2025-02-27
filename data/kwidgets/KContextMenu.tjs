@@ -21,9 +21,9 @@ class KNativeContextMenu extends KWindow
 		if (! k_kirikiriz)
 			super.KWindow("", null, true);
 		else if (parentWindow)
-			super.KWindow("", parentWindow, true);
+			super.KWindow(%[ customToolBar: void], parentWindow, true);
 		else
-			super.KWindow("", global.Window.mainWindow, true);
+			super.KWindow(%[ customToolBar: void], global.Window.mainWindow, true);
     toExit = _toExit;
     // 表示座標を得るために、プライマリレイヤをサイズ設定
     primaryLayer.setFixedSize(1, 1);

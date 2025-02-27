@@ -159,6 +159,10 @@ class WidgetSample extends KWindow
 		zoomRoot.addRadioItem("150%", 150, "zoom");
 		zoom.value = 100;
 
+		menu.addItem("画像メニュー", "imageMenu");
+		imageMenu.addItem("画像を表示するメニュー");
+		imageMenu.addItem("!(sphere)");
+
 		menuAction1.shortcut = "Ctrl+1";
 		menuAction2.shortcut = "Ctrl+2";
 		menuToggle1.shortcut = "Ctrl+3";

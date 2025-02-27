@@ -1007,6 +1007,22 @@
 					 backgroundColor: 0,
 					 hover: %[ backgroundColor: 0xff808080 ],
 					 focusable: false ]
+		 ],
+
+		%[ theme: "toolbar_miniCaption",
+		   style: %[
+			   isId: %[
+				   toolbar_closeButton: %[
+					   padding: 5,
+				   ],
+			   ],
+			   isClass: %[
+				   KCustomMenuButton: %[
+					   paddingHorizontal: 5,
+					   paddingVertical: 5,
+				   ],
+			   ]
+		   ]
 		 ]
 ]
 

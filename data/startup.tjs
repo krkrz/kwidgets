@@ -53,6 +53,8 @@ if (enableTestBed)
 Scripts.execStorage("TestCase.tjs");
 
 
+// KWindow.defaultCustomToolBarOption = %[ useMenuButton: true, appIcon: "ball" ];
+
 //----------------------------------------------------------------------
 // サンプルランチャー
 //----------------------------------------------------------------------

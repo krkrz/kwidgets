@@ -1994,9 +1994,10 @@ class KListItem
 		_id = getOption("id", "");
 		iconLayerList = [];
 		ownIconLayerList = [];
-		var icon = getOption("icon", void);
-		if (icon !== void)
-			_style.icons = [ icon ];
+		if (hasOption("icon"))
+			_style.icons = [ getOption("icon") ];
+		else if (hasOption("icons"))
+			_style.icons = getOption("icons");
 		Scripts.setCallMissing(this);
 		initStyleObject();
 	}
@@ -2029,6 +2030,10 @@ class KListItem
 			return options[key];
 		else
 			return defaultValue;
+	}
+
+	function hasOption(key, options = _options) {
+		return (typeof(options[key]) != K_UNDEFINED);
 	}
 
 	/**------------------------------

@@ -703,6 +703,17 @@ class KWidget extends Layer
 	}
 
 	/**------------------------------
+	 // テーマを設定l
+	 ------------------------------*/
+	function setTheme(theme) {
+		if (equalStruct(theme, _theme))
+			return;
+		_theme = theme;
+		updateTheme();
+		invalidateStylesToDescendants();
+	}
+
+	/**------------------------------
 	 * ウィジェットオプションを取得
 	 ------------------------------*/
 	function getOption(key, defaultValue, options = _options) {
@@ -710,6 +721,10 @@ class KWidget extends Layer
 			return options[key];
 		else
 			return defaultValue;
+	}
+
+	function hasOption(key, options = _options) {
+		return (typeof(options[key]) != K_UNDEFINED);
 	}
 
 	/**------------------------------

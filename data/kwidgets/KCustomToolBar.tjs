@@ -9,12 +9,33 @@ global.KCustomToolBarWidgetStyleDefinition =
 			%[ key: "closeButtonId" ]
 	];
 
+global.KCustomToolBarBorderStyleDefaultDefinition =
+	%[
+		visible: true,
+		showAppIcon: true,
+		resizable: true,
+		hideMinMax: false,
+		minimizable: true,
+		maximizable: true,
+		miniCaption: false,
+	];
+
+global.KCustomToolBarBorderStyleDefinitions = [
+		%[ visible: false, resizable: false ],	// bsNone,
+		%[ showAppIcon: false, resizable: false, maximizable: false ], // beSingle
+		%[], // bsSizeable,
+		%[ showAppIcon: false, resizable: false, hideMinMax: true ], // bsDialog
+		%[ showAppIcon: false, resizable: false, hideMinMax: true, miniCaption: true ], // bsToolWinndow
+		%[ showAppIcon: false, hideMinMax: true, miniCaption: true ], // bsSizeToolWin
+];
+
 class KCustomToolBar extends KHorizontalBarLayout
 {
 	var menu;
 	var menuInterface;
 	var menuController;
 	var _captionDrag = true;
+	var _windowBorderStyle = bsSizeable;
 	var useMenuButton = false;
 	var useMenuBar = false;
 
@@ -43,13 +64,17 @@ class KCustomToolBar extends KHorizontalBarLayout
 
 		var appIcon = getOption("appIcon", void);
 		if (appIcon !== void)
-			add(new KImageLabel(window, %[ icon : appIcon ]));
-		if (useMenuButton)
-			add(new KTextButton(window, %[ name: "_menu", label: "≡" ]));
+			add(new KImageLabel(window, %[ name: "_appIcon", icon : appIcon ]));
+		if (useMenuButton) {
+			add(new KTextButton(window, %[ name: "_menu", label: "≡", visible: false ]));
+			menu.onChildViewModified = onInvalidateMenuButton;
+		}
 		if (useMenuBar)
 			add(new KCustomMenuBar(window, %[ name: "_menuBar",
 											  controller: menuController,
-											  rootMenuItem: menu ]));
+											  rootMenuItem: menu,
+											  visible: false
+											]));
 		add(new global.KHorizontalBarLayout(window, %[ name: "_menuBar" ]));
 		add(new global.KGridLayout(window, %[ name: "_captionLeftSideGrid", visible: false ]));
 		add(new KTextLabel(window, %[ name: "_caption", marginalMaxWidth: K_WIDGET_MAX_POSSIBLE_WIDTH, style: %[ variable: true ] ]));
@@ -61,11 +86,7 @@ class KCustomToolBar extends KHorizontalBarLayout
 		_caption.hitThreshold = 256;
 
 		window.overrideCaption(&(_caption.label));
-
-
-//		menu = new KCustomMenuItem(window, "root", "root");
-//		menuInterface = new KCustomToolBarMenuInterface(this, menu);
-//		window.overrideMenu(menuInterface);
+		window.overrideBorderStyle(&windowBorderStyle);
 	}
 
 	function finalize {
@@ -104,6 +125,18 @@ class KCustomToolBar extends KHorizontalBarLayout
 	property caption {
 		getter {
 			return _caption;
+		}
+	}
+
+	property windowBorderStyle {
+		getter {
+			return _windowBorderStyle;
+		}
+		setter(v) {
+			if (v == _windowBorderStyle)
+				return;
+			_windowBorderStyle = v;
+			updateWindowBorderStyle();
 		}
 	}
 
@@ -178,5 +211,23 @@ class KCustomToolBar extends KHorizontalBarLayout
 	function onWindowDeactivate {
 		removeCustomStyleState("windowActive");
 		menuController.cancelMenu();
+	}
+
+	function updateWindowBorderStyle() {
+		var def = KCustomToolBarBorderStyleDefinitions[_windowBorderStyle];
+		def = unionDictionary(KCustomToolBarBorderStyleDefaultDefinition, def, true);
+		if (find("_appIcon") !== void)
+			_appIcon.visible = def.showAppIcon;
+		window.borderlessResize = def.resizable;
+		_minimize.visible = ! def.hideMinMax;
+		_maximize.visible = ! def.hideMinMax;
+		_minimize.enabled = def.minimizable;
+		_maximize.enabled = def.maximizable;
+		setTheme(def.miniCaption ? "toolbar_miniCaption": "");
+		visible = def.visible;
+	}
+
+	function onInvalidateMenuButton {
+		_menu.visible = menu.hasChild;
 	}
 };
