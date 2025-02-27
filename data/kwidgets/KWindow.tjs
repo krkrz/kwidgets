@@ -179,6 +179,7 @@ class KWindow extends Window
 		caption = getOption("caption", caption);
 		borderStyle = getOption("borderStyle", borderStyle);
 		focusable = getOption("focusable", focusable);
+		stayOnTop = getOption("stayOnTop", stayOnTop);
 		_alwaysSetToMinSize = getOption("alwaysSetToMinSize", false);
 
 		// missing を有効にする
