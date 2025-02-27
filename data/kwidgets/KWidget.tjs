@@ -1040,12 +1040,12 @@ class KWidget extends Layer
 			 targetLayer = targetLayer.parent) {
 			if ((targetLayer instanceof "KWidget")) {
 				if (exclude_self)
-					return void;
+					return null;
 				else
 					return targetLayer;
 			}
 		}
-		return void;
+		return null;
 	}
 
 	/*----------------------------------------------------------------------

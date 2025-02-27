@@ -588,11 +588,12 @@ class KWindow extends Window
 														primaryLayer.cursorY,
 														false,
 													   true);
-			while (targetWidget !== void
+
+			while (targetWidget !== null
 				   && ! targetWidget.nodeEnabled)
 				targetWidget = targetWidget.parent;
-			if (targetWidget !== void
-				&& targetWidget.nodeEnabled)
+
+			if (targetWidget !== null)
 				targetWidget.onHoverMouseWheel(ev.shift,
 											   ev.delta,
 											   targetWidget.cursorX,
