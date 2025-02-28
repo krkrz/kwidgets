@@ -3075,8 +3075,10 @@ class KWidget extends Layer
 					continue;
 				dragTarget = targetWindow.primaryLayer.getWidgetAt(targetWindow.primaryLayer.cursorX,
 																   targetWindow.primaryLayer.cursorY);
-				if (dragTarget)
+				if (dragTarget === null) {
+					dragTarget = void;
 					break;
+				}
 			}
 
 			// ターゲットウィジェットが継続していたら

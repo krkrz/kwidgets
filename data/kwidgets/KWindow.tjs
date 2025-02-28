@@ -857,7 +857,7 @@ class KWindow extends Window
 
 		var targetWidget = primaryLayer.getWidgetAt(primaryLayer.cursorX,
 													primaryLayer.cursorY);
-		if (targetWidget)
+		if (targetWidget !== null)
 			targetWidget.onFileDrop(targetWidget.cursorX,
 									targetWidget.cursorY,
 									files,
