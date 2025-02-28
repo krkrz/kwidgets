@@ -146,7 +146,7 @@
 		%[
 			klass: "KWidget",
 			style: %[
-				fontColor: 0xfff0f0f0,
+				fontColor: 0xf0f0f0,
 				fontHeight: 12,
 				fontAntiAlias: false,
 				backgroundColor: "normal_bg",
