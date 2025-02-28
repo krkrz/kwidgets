@@ -421,8 +421,6 @@ class WidgetSample extends KWindow
 		// テキストボードにテキストエディットの値を反映
 		textboard.value = textedit.value;
 
-		// ズームの初期値を反映させる
-		zoom.invalidateValue();
 		// テストタブの有効かを反映
 		tabs.tabAt(tabs.childCount - 1).select();
 	}

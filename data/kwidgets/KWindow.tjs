@@ -79,6 +79,7 @@ class KWindow extends Window
 	var _captionOverriden = false;
 	var _borderStyle;
 	var _borderStyleOverriden = false;
+	var recordZoom = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -181,6 +182,7 @@ class KWindow extends Window
 		focusable = getOption("focusable", focusable);
 		stayOnTop = getOption("stayOnTop", stayOnTop);
 		_alwaysSetToMinSize = getOption("alwaysSetToMinSize", false);
+		recordZoom = getOption("recordZoom", false);
 
 		// missing を有効にする
 		Scripts.setCallMissing(this);
@@ -656,8 +658,15 @@ class KWindow extends Window
 		// nameが指定されてたらウィンドウもバインド
 		if (name != "") {
 			this.dict = dict;
-			width = dict.init(name + "_width", width) * global.KWindow.globalZoomNumer / global.KWindow.globalZoomDenom;
-			height = dict.init(name + "_height", height) * global.KWindow.globalZoomNumer / global.KWindow.globalZoomDenom;
+			var numer = 1;
+			var denom = 1;
+			if (recordZoom) {
+				numer = dict.init(name + "_numer", 1);
+				denom = dict.init(name + "_denom", 1);
+			}
+			setZoom(numer, denom);
+			width = int(dict.init(name + "_width", width) * (global.KWindow.globalZoomNumer * numer) / (global.KWindow.globalZoomDenom * denom) + 0.5);
+			height = int(dict.init(name + "_height", height) * (global.KWindow.globalZoomNumer * numer) / (global.KWindow.globalZoomDenom * denom) + 0.5);
 			left = dict.init(name + "_left", left);
 			top = dict.init(name + "_top", top);
 		}
@@ -674,6 +683,10 @@ class KWindow extends Window
 
 		if (dict !== void) {
 			if (name != "") {
+				if (recordZoom) {
+					dict.set(name + "_numer", _numer);
+					dict.set(name + "_denom", _denom);
+				}
 				dict.set(name + "_left", left);
 				dict.set(name + "_top", top);
 				if (onceResize) {
@@ -809,16 +822,23 @@ class KWindow extends Window
 		invalidateLayout();
 	}
 
-    function setZoom(numer, denom) {
+    function setZoom(numer, denom, preservePhysicalSize = false) {
 		_numer = numer;
 		_denom = denom;
 		var w, h;
-		w = innerWidth * zoomDenom / zoomNumer;
-		h = innerHeight * zoomDenom / zoomNumer;
+		if (! preservePhysicalSize) {
+			w = innerWidth * zoomDenom / zoomNumer;
+			h = innerHeight * zoomDenom / zoomNumer;
+		}
 		super.setZoom(numer * global.KWindow.globalZoomNumer, denom * global.KWindow.globalZoomDenom);
-		invalidateLayout();
-		setSize(w * zoomNumer / zoomDenom + (width - innerWidth),
-				h * zoomNumer / zoomDenom + (height - innerHeight));
+		if (preservePhysicalSize) {
+			onResize();
+		}
+		else {
+			invalidateLayout();
+			setSize(w * zoomNumer / zoomDenom + (width - innerWidth),
+					h * zoomNumer / zoomDenom + (height - innerHeight));
+		}
 	}
 
 	/*------------------------------
