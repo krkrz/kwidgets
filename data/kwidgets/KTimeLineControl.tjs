@@ -25,9 +25,6 @@ global.TIMELINE_NO_SELECTION = 0;
 global.TIMELINE_PARTIAL_SELECTION = 1;
 global.TIMELINE_FULL_SELECTION = 2;
 
-global.TIMELINE_PRIOR_DRAG_AREA = 0;
-global.TIMELINE_PRIOR_DRAG_SELECTION = 1;
-
 /*----------------------------------------------------------------------
  * タイムラインユーティリティ
  ----------------------------------------------------------------------*/
@@ -1236,21 +1233,14 @@ class KTimeLineLayerView extends KVirtualWidget
 		shift &= ssCtrl | ssShift;
 		leftPressed = false;
 		rightPressed = false;
-		if (shift == 0
-		   || shift == ssAlt) {
-			rangeSelectMode = RANGE_SELECT_SET;
-			beginRangeSelector(x, y);
 
-		} else if (shift & ssShift) {
+		if (shift & ssShift) {
 			rangeSelectMode  = RANGE_SELECT_ADD;
 			beginRangeSelector(x, y);
 			prevSelections = getAllSelections();
-
-		} else if (shift & ssCtrl) {
-			rangeSelectMode  = RANGE_SELECT_FLIP;
-			beginRangeSelector(x, y);
-			prevSelections = getAllSelections();
 		}
+
+		// ignore RANGE_SELECT_SET, RANGE_SELECT_ADD
 	}
 
 	//------------------------------
@@ -1732,27 +1722,18 @@ class KTimeLineLayerView extends KVirtualWidget
 		if (inDrag)
 			return;
 
-		if (shift & (ssCtrl | ssShift))
+		if (shift & ssShift)
 			dragEnterRangeSelector(...);
-		else if (shift & ssAlt) {
-			switch (owner.priorDragMode) {
-			case TIMELINE_PRIOR_DRAG_AREA: dragEnterRangeSelector(...); break;
-			case TIMELINE_PRIOR_DRAG_SELECTION: dragEnterAreaAssign(...); break;
-			}
-		}
-		else if (isPointInArea(x, y))
+		else if ((shift & (ssCtrl)) &&  isPointInArea(x, y))
 			dragEnterAreaMove(...);
+		else if ((shift & ssCtrl) && isPointInSelection(x, y))
+			dragEnterSelection(...);
 		else if (curCustomMouseEvent !== void)
 			dragEnterCustomMouseEvent(...);
 		else if (boundaryDragFrameIndex >= 0)
 			dragEnterFrameBoundary(...);
-		else if (isPointInSelection(x, y))
-			dragEnterSelection(...);
 		else {
-			switch (owner.priorDragMode) {
-			case TIMELINE_PRIOR_DRAG_AREA: dragEnterAreaAssign(...); break;
-			case TIMELINE_PRIOR_DRAG_SELECTION: dragEnterRangeSelector(...); break;
-			}
+			dragEnterAreaAssign(...);
 		}
 	}
 
@@ -1927,11 +1908,6 @@ class KTimeLineLayerView extends KVirtualWidget
 					resetArea();
 				}
 			} else if (shift == ssShift
-					   && point !== void) {
-				var item = owner.drawItemList[point[0]];
-				if (item.supportSelection)
-					item.addSelection([ point[1] ]);
-			} else if (shift == ssCtrl
 					   && point !== void) {
 				var item = owner.drawItemList[point[0]];
 				if (item.supportSelection)
@@ -4197,7 +4173,6 @@ class KTimeLineControl extends KEntity
 
 	var baseWidget;
 
-	var priorDragMode = TIMELINE_PRIOR_DRAG_AREA;
 	var extendListSelectionFromView = false;
 	var copySingleFrameAsNoWidth = false;
 
@@ -4258,7 +4233,6 @@ class KTimeLineControl extends KEntity
 
 		// ウィジェット生成
 		_selectedTime = 0;
-		priorDragMode = getOption("priorDragMode", TIMELINE_PRIOR_DRAG_AREA);
 		extendListSelectionFromView = getOption("extendListSelectionFromView", false);
 		copySingleFrameAsNoWidth = getOption("copySingleFrameAsNoWidth", false);
 
