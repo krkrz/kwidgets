@@ -924,7 +924,8 @@
 		   style: %[ padding: 4 ] ],
 
 		%[ klass: "KCustomToolBar",
-		   style: %[ paddingHorizontal: 7,
+		   style: %[ paddingLeft: 7,
+					 paddingRight: 0,
 					 paddingVertical: 0,
 					 space: 6,
 					 backgroundColor: 0xff606060,
