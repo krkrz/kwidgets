@@ -810,6 +810,7 @@ class KCustomMenuSeparatorListItem extends KCustomMenuListItem
 	}
 }
 
+
 //----------------------------------------------------------------------
 // メニューウィンドウ
 //----------------------------------------------------------------------
@@ -835,9 +836,20 @@ class KCustomMenuWindow extends KWindow
 		primaryWidget.add(new KFrameLayout(this,
 										  %[ id: "combobox_dropdown_frame",
 											 name: "frame" ]));
-		frame.add(new KCustomMenuList(this,
-									  %[ name: "list",
-									   ]));
+		frame.add(new KScrollLayout(this,
+									%[ name: "scroll",
+									   horizontal: false,
+									   vertical: false,
+									   marginalMinWidth: 0,
+									   marginalMinHeight: 0,
+									   marginalMaxWidth: 0,
+									   marginalMaxHeight: 0,
+									   style: %[ borderWidth: 0,
+												 borderStyle: BORDER_STYLE_NONE ]
+									 ]));
+		scroll.add(new KCustomMenuList(this,
+									   %[ name: "list",
+										]));
 	}
 
 	//----------------------------------------------------------------------
@@ -926,13 +938,15 @@ class KCustomMenuWindowController
 	function createMenuWindow(menuItem, parentWindow = void, isRoot = false) {
 		var menuWindow = new KCustomMenuWindow(menuItem, parentWindow, this, isRoot);
 		menuWindow.buildListItems();
-		if (menuWindow.height > monitorRect.height
-		   || menuWindow.width > monitorRect.width) {
-			var realHeight = menuWindow.height * menuWindow.zoomDenom / menuWindow.zoomNumer;
-			var realWidth = menuWindow.width * menuWindow.zoomDenom / menuWindow.zoomNumer;
-			var zoom = Math.min(monitorRect.height / realHeight,
-								monitorRect.width / realWidth);
-			menuWindow.setZoom(int(zoom * 10000), 10000);
+		if (menuWindow.width > monitorRect.width) {
+			menuWindow.alwaysSetToMinSize = false;
+			menuWindow.scroll.horizontal = true;
+			menuWindow.width = monitorRect.width;
+		}
+		if (menuWindow.height > monitorRect.height) {
+			menuWindow.alwaysSetToMinSize = false;
+			menuWindow.scroll.vertical = true;
+			menuWindow.height = monitorRect.height;
 		}
 		return menuWindow;
 	}
@@ -1161,7 +1175,7 @@ class KCustomMenuBar extends KHorizontalBarLayout
 	// ルートの子のViewが更新されたらメニュー更新
 	//------------------------------
 	function onMenuBarModified() {
-		asyncCaller.callOnce(updateMenuBar);
+		asyncCaller.callOnce(updateMenuBar, string(this));
 	}
 
 	//------------------------------

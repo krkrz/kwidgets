@@ -11,7 +11,7 @@ class TestBed extends KWindow
 		super.KWindow(%[ name: "testbed",
 						 caption: "テストベッド：漢字交じりのキャプション",
 						 borderStyle: bsSizeable,
-//						 customToolBar: %[ useMenuBar: true, appIcon: "ball" ],
+						 customToolBar: %[ useMenuBar: true, appIcon: "ball" ],
 						 alwaysSetToMinSize: false,
 //						 style: %[ isClass: %[ KGridLayout: %[ space: 10, margin: 10 ] ] ],
 						 style: %[ isClass: %[ KWidget: %[ align: ALIGN_CENTER ] ] ],
