@@ -942,11 +942,13 @@ class KCustomMenuWindowController
 			menuWindow.alwaysSetToMinSize = false;
 			menuWindow.scroll.horizontal = true;
 			menuWindow.width = monitorRect.width;
+			menuWindow.invalidateLayout();
 		}
 		if (menuWindow.height > monitorRect.height) {
 			menuWindow.alwaysSetToMinSize = false;
 			menuWindow.scroll.vertical = true;
 			menuWindow.height = monitorRect.height;
+			menuWindow.invalidateLayout();
 		}
 		return menuWindow;
 	}
