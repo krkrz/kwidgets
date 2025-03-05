@@ -57,10 +57,11 @@ class KFrameLayout extends KLayout
 		_label = getOption("label", "");
 		_helpText = getOption("helpText", "");
 		_checkable = getOption("checkable", false);
-		_checked = getOption("cheecked", true);
+		_checked = getOption("checked", true);
 		focusable = getOption("focusable", window.defaultFocusable) && _checkable;
 		overwriteStyle(%[ frameType: _type ]);
-		addCustomStyleState("checked");
+		if (_checkable && _checked)
+			addCustomStyleState("checked");
 	}
 
 	property widgetStyleDefinition {
@@ -142,6 +143,8 @@ class KFrameLayout extends KLayout
 			return _checked;
 		}
 		setter(v) {
+			if (! _checkable)
+				return;
 			if (_checked == v)
 				return;
 			_checked = v;
@@ -162,7 +165,8 @@ class KFrameLayout extends KLayout
 	function add(child) {
 		this.child = child;
 		child.parent = this;
-		child.enabled = _checked;
+		if (_checkable)
+			child.enabled = _checked;
 		redrawContents();
 	}
 
@@ -301,8 +305,10 @@ class KFrameLayout extends KLayout
 
 		if (checkButtonPress) {
 			checkButtonPress = false;
-			if (checkBounds.contains(x, y))
+			if (checkBounds.contains(x, y)) {
 				checked = ! checked;
+				onCheckModified(checked);
+			}
 		}
 	}
 
@@ -311,8 +317,12 @@ class KFrameLayout extends KLayout
 			&& focused
 			&& (key == VK_SPACE || key == VK_RETURN)) {
 			checked = ! checked;
+			onCheckModified(checked);
 		} else {
 			super.onKeyDown(...);
 		}
+	}
+
+	function onCheckModified {
 	}
 }
