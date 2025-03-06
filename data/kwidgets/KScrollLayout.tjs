@@ -47,30 +47,39 @@ class KScrollBar extends KEntity
 	// ボタン作成
 	function initWidgets() {
 		// 上ボタン
-		backwardButton = new KImageButton(window, %[ // label: widgetStyle.backwardButtonLabel,
-			dispatchOnMouseDown: true,
-													 autoDispatchStartInterval: 200,
-													 autoDispatchRepeatInterval: 16,
+		backwardButton = new KImageButton(window,
+										  %[ // label: widgetStyle.backwardButtonLabel,
+											  dispatchOnMouseDown: true,
+											  autoDispatchStartInterval: 200,
+											  autoDispatchRepeatInterval: 16,
 //													 // id: widgetStyle.buttonId,
-			name: "_backward",
-													 focusable: false ]);
+											  name: "_backward",
+											  focusable: false,
+											  style: %[ variable: false ],
+										  ]);
 		backwardButton.parent = this;
 		// 下ボタン
-		forwardButton = new KImageButton(window, %[ // label: widgetStyle.forwardButtonLabel,
-													dispatchOnMouseDown: true,
-													autoDispatchStartInterval: 200,
-													autoDispatchRepeatInterval: 16,
-//													id: widgetStyle.buttonId,
-													name: "_forward",
-													focusable: false ]);
+		forwardButton = new KImageButton(window, %
+										 [ // label: widgetStyle.forwardButtonLabel,
+											 dispatchOnMouseDown: true,
+											 autoDispatchStartInterval: 200,
+											 autoDispatchRepeatInterval: 16,
+											 //													id: widgetStyle.buttonId,
+											 name: "_forward",
+											 focusable: false,
+											 style: %[ variable: false ],
+										 ]);
 		forwardButton.parent = this;
 		// レンジポインタ
 		rangePointer = new KRangePointer2D(window,
-										   %[ hKnobStride: 1,
-											  vKnobStride: 1,
-											  name: "_pointer",
-											  interpolation: true,
-											  focusable: false ]);
+										   %[
+											   hKnobStride: 1,
+											   vKnobStride: 1,
+											   name: "_pointer",
+											   interpolation: true,
+											   focusable: false,
+											   style: %[ variable: false ],
+										   ]);
 		rangePointer.parent = this;
 	}
 
