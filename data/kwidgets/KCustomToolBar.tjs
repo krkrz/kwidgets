@@ -206,8 +206,10 @@ class KCustomToolBar extends KHorizontalBarLayout
 	}
 
 	function invalidateCaptionDrag {
-		if (_captionDrag)
-			window.setCaptionRect(_caption.left, 0, _caption.width, height);
+		if (_captionDrag) {
+			var s = window.zoomNumer / window.zoomDenom;
+			window.setCaptionRect(_caption.left * s, 0, _caption.width * s, height * s);
+		}
 		else
 			window.setCaptionRect(0, 0, 0, 0);
 	}
@@ -219,6 +221,10 @@ class KCustomToolBar extends KHorizontalBarLayout
 	function onWindowDeactivate {
 		removeCustomStyleState("windowActive");
 		menuController.cancelMenu();
+	}
+
+	function onWindowZoom {
+		invalidateCaptionDrag();
 	}
 
 	function updateWindowBorderStyle() {

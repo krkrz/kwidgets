@@ -831,6 +831,7 @@ class KWindow extends Window
 			h = innerHeight * zoomDenom / zoomNumer;
 		}
 		super.setZoom(numer * global.KWindow.globalZoomNumer, denom * global.KWindow.globalZoomDenom);
+
 		if (preservePhysicalSize) {
 			onResize();
 		}
@@ -839,6 +840,9 @@ class KWindow extends Window
 			setSize(w * zoomNumer / zoomDenom + (width - innerWidth),
 					h * zoomNumer / zoomDenom + (height - innerHeight));
 		}
+
+		if (customToolBar !== void)
+			customToolBar.onWindowZoom(zoomNumer, zoomDenom);
 	}
 
 	/*------------------------------
