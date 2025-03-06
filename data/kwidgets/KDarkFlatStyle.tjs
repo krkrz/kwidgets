@@ -652,7 +652,7 @@
 		   style: %[
 			   borderWidth: 1,
 			   borderStyle: BORDER_STYLE_SOLID,
-			   borderRadius: 3,
+			   borderRadius: 4,
 			   padding: 2,
 			   hover: %[ backgroundColor: "toggle_bg_hover",
 						 borderRadius: "toggle_border_hover" ],

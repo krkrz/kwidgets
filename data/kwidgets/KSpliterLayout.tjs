@@ -364,8 +364,11 @@ class KSpliterLayout extends KLayout
 			shutterToggle.id = widgetStyle.shutterToggleId;
 			shutterToggle.direction = shutterOpened ^ (shutterIndex == 0);
 			shutterToggle.bringToFront();
-			shutterToggle.setPos(spliterHandle.left + (spliterHandle.width - shutterToggle.width) / 2,
-								 spliterHandle.top + (spliterHandle.height - shutterToggle.height) / 2);
+			var x = spliterHandle.left + (spliterHandle.width - shutterToggle.width) / 2;
+			var y = spliterHandle.top + (spliterHandle.height - shutterToggle.height) / 2;
+			x = Math.max(0, Math.min(width - shutterToggle.width, x));
+			y = Math.max(0, Math.min(height - shutterToggle.height, y));
+			shutterToggle.setPos(x, y);
 		}
 	}
 
