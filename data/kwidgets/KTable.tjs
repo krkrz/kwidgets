@@ -3705,6 +3705,9 @@ class KTableColumn
 	function onRowValueUpdate(row, value) {
 	}
 
+	function onSizeModified(row) {
+	}
+
 	// パケット判定
 	function isPacketAcceptable(row, packet) {
 		if (innerDrag) {
