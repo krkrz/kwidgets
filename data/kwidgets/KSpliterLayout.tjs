@@ -75,7 +75,8 @@ global.KSpliterLayoutWidgetStyleDefinition =
 	[
 			%[ key: "handleSize", defaultValue: 5 ],
 			%[ key: "handleId", defaultValue: "" ],
-			%[ key: "shutterToggleId", defaultValue: "" ]
+			%[ key: "shutterToggleId", defaultValue: "" ],
+			%[ key: "keepMinSize", defaultValue: false ]
 	];
 
 class KSpliterLayout extends KLayout
@@ -94,6 +95,7 @@ class KSpliterLayout extends KLayout
 	var _shutterEnabled = false;
 	var _shutterOpened = true;
 	var _shutterIndex = 0;
+	var keepMinSize = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -113,6 +115,7 @@ class KSpliterLayout extends KLayout
 		_splitAlignment = getOption("splitAlignment", ALIGN_CENTER);
 		shutterEnabled = getOption("shutterEnabled", false);
 		shutterIndex = getOption("shutterIndex", 0);
+		keepMinSize = getOption("keepMinSize", false);
 	}
 
 	property widgetStyleDefinition {
@@ -300,26 +303,38 @@ class KSpliterLayout extends KLayout
 
 		for (var i = 0; i < 2; i++) {
 			var child = childList[i];
+			childMinW[i] = child.minWidth + child.marginHorizontal;
+			childMinH[i] = child.minHeight + child.marginVertical;
+			childMaxW[i] = child.maxWidth + child.marginHorizontal;
+			childMaxH[i] = child.maxHeight + child.marginVertical;
+			if (child instanceof "KSpliterLayout") {
+				childMinW[i] += borderPaddingWidth;
+				childMinH[i] += borderPaddingWidth;
+				childMaxW[i] += borderPaddingHeight;
+				childMaxH[i] += borderPaddingHeight;
+			}
+
 			if (! shutterOpened
 				&& i == shutterIndex) {
-				childMinW[i] = 0;
-				childMinH[i] = 0;
+				if (! keepMinSize) {
+					childMinW[i] = 0;
+					childMinH[i] = 0;
+				}
 				childMaxW[i] = 0;
 				childMaxH[i] = 0;
-			} else {
-				childMinW[i] = child.minWidth + child.marginHorizontal;
-				childMinH[i] = child.minHeight + child.marginVertical;
-				childMaxW[i] = child.maxWidth + child.marginHorizontal;
-				childMaxH[i] = child.maxHeight + child.marginVertical;
-				if (child instanceof "KSpliterLayout") {
-					childMinW[i] += borderPaddingWidth;
-					childMinH[i] += borderPaddingWidth;
-					childMaxW[i] += borderPaddingHeight;
-					childMaxH[i] += borderPaddingHeight;
-				}
 			}
 		}
-		setMinMaxSize(calcMinMaxSize()*);
+		var minmax = calcMinMaxSize();
+		minmax[0] = Math.min(minmax[0], minmax[2]);
+		minmax[1] = Math.min(minmax[1], minmax[3]);
+
+		if (! shutterOpened
+			&& keepMinSize) {
+			childMinW[shutterIndex] = 0;
+			childMinH[shutterIndex] = 0;
+		}
+
+		setMinMaxSize(minmax*);
 	}
 
 	// 再描画
