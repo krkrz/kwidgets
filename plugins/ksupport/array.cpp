@@ -604,28 +604,31 @@ public:
 
 	//----------------------------------------------------------------------
 	// flatten関数
-	static tTJSVariant __flatten__(iTJSDispatch2 *rootArray) {
+	static tTJSVariant __flatten__(iTJSDispatch2 *rootArray, tjs_uint maxDepth) {
 		auto result = createArray();
 		ncbPropAccessor resultObj(result);
 
 		struct ArrayTravel {
 			ArrayTravel(iTJSDispatch2* array,
-						 tjs_uint count,
-						 tjs_uint index)
-				: array(array), count(count), index(index) {
+						tjs_uint count,
+						tjs_uint index,
+						tjs_uint depth)
+				: array(array), count(count), index(index), depth(depth) {
 			}
 
 			iTJSDispatch2* array;
 			tjs_uint count;
 			tjs_uint index;
+			tjs_uint depth;
 		};
 		std::stack<ArrayTravel> arrayTravelStack;
 
-		arrayTravelStack.push(ArrayTravel(rootArray, countArray(tTJSVariant(rootArray, rootArray)), 0));
+		arrayTravelStack.push(ArrayTravel(rootArray, countArray(tTJSVariant(rootArray, rootArray)), 0, 0));
 
 		iTJSDispatch2 *current;
 		tjs_uint count = 0;
 		tjs_uint index = 0;
+		tjs_uint depth = 0;
 
 		for(;;) {
 			if (index >= count) {
@@ -635,18 +638,21 @@ public:
 				current = fs.array;
 				count = fs.count;
 				index = fs.index;
+				depth = fs.depth;
 				arrayTravelStack.pop();
 				continue;
 			}
 			tTJSVariant elm;
 			current->PropGetByNum(0, index, &elm, current);
-			if (elm.Type() == tvtObject) {
+			if (elm.Type() == tvtObject
+				&& (maxDepth == 0 || depth < maxDepth)) {
 				auto elmDispatch = elm.AsObjectNoAddRef();
 				if (elmDispatch->IsInstanceOf(0, NULL, NULL, L"Array", elmDispatch) == TJS_S_TRUE) {
-					arrayTravelStack.push(ArrayTravel(current, count, index + 1));
+					arrayTravelStack.push(ArrayTravel(current, count, index + 1, depth));
 					current = elmDispatch;
 					count = countArray(elm);
 					index = 0;
+					depth++;
 					continue;
 				}
 			}
@@ -657,10 +663,11 @@ public:
 	}
 
 	static tjs_error TJS_INTF_METHOD _flatten(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
-		if (numparams != 0)
+		if (numparams > 1)
 			return TJS_E_BADPARAMCOUNT;
+		tjs_uint maxDepth = numparams == 0 ? 0 : tjs_uint(tjs_int(*param[0]));
 		if (result)
-			*result = __flatten__(objthis);
+			*result = __flatten__(objthis, maxDepth);
 		return TJS_S_OK;
 	}
 
