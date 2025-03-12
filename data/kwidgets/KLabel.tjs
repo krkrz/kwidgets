@@ -10,6 +10,8 @@ global.KLabelArgsFormat =
 global.KLabelWidgetStyleDefinition =
 	[
 			%[ key: "variable", defaultValue: false ],
+			%[ key: "fixMinWidth", defaultValue: false ],
+			%[ key: "fixMaxWidth", defaultValue: true ],
 			%[ key: "width", defaultValue: void ]
 	];
 
@@ -74,8 +76,15 @@ class KLabel extends KEntity
 			setFixedSize(widgetStyle.width, minH);
 		else if (! widgetStyle.variable)
 			setFixedSize(minW, minH);
-		else
-			setMinMaxSize(Math.min(minW, K_WIDGET_MIN_POSSIBLE_WIDTH), minH, minW, minH);
+		else {
+			var maxW = minW;
+			if (! widgetStyle.fixMinWidth)
+				minW = Math.min(minW, K_WIDGET_MIN_POSSIBLE_WIDTH);
+			if (! widgetStyle.fixMaxWidth)
+				maxW = Math.max(maxW, K_WIDGET_MAX_POSSIBLE_WIDTH);
+			maxW = Math.max(minW, maxW);
+			setMinMaxSize(minW, minH, maxW, minH);
+		}
 
 		// ボーダー描画
 		drawBorder(borderStyle, 0, 0, width, height);
@@ -110,7 +119,8 @@ class KTextCapability
 
 	function onDrawLabel(x, y, w, h) {
 		var drawResult = drawTextArea(fontStyle, x, y, w, widgetStyle.lineSpacing, textArea.texts, textArea.textWidths, widgetStyle.textAlign);
-		if (widgetStyle.variable) {
+		if (widgetStyle.variable
+			|| widgetStyle.maxLabelWidth > 0) {
 			if (! drawResult.inRange)
 				hint = getOption("hint", label);
 			else
