@@ -113,6 +113,7 @@ class KSpliterLayout extends KLayout
 		spliterHandle.parent = this;
 		_splitRatio = getOption("splitRatio", 0.5);
 		_splitAlignment = getOption("splitAlignment", ALIGN_CENTER);
+		_shutterOpened = getOption("shutterOpened", true);
 		shutterEnabled = getOption("shutterEnabled", false);
 		shutterIndex = getOption("shutterIndex", 0);
 		keepMinSize = getOption("keepMinSize", false);
@@ -128,7 +129,7 @@ class KSpliterLayout extends KLayout
 	 ------------------------------*/
 	function onUnserialize(dict, key) {
 		splitRatio =    dict.init(key + "_split_ratio", splitRatio);
-		shutterOpened = dict.init(key + "_shutter_opened", true);
+		shutterOpened = dict.init(key + "_shutter_opened", _shutterOpened);
 	}
 
 	function onSerialize(dict, key) {
