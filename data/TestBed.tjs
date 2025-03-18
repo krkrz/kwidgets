@@ -233,8 +233,12 @@ __段落__を*まとめて*改行が_適切_に入るかどうかを確認して
 		radioNestItem.addRadioItem("ラジオその4", 4, "radioItem");
 		radioNestItem.addRadioItem("ラジオその5", 5, "radioItem");
 
-		for (var i = 0; i < 70; i++)
-			longMenuItem.addItem("項目%d".sprintf(i + 1));
+		for (var i = 0; i < 70; i++) {
+			var item = longMenuItem.addItem("項目%d".sprintf(i + 1));
+			item.addItem("子1");
+			item.addItem("子2");
+			item.addItem("子3");
+		}
 
 		var dict = new KPersistentDictionary(System.dataPath + "testbed_dict.txt");
 		add(dict);

@@ -122,6 +122,14 @@ class KCustomMenuItem
 	}
 
 	//------------------------------
+	// デプス
+	property depth {
+		getter {
+			return parent === void ? 0 : parent.depth + 1;
+		}
+	}
+
+	//------------------------------
 	// ルートメニューアイテム
 	property root {
 		getter {
@@ -866,7 +874,7 @@ class KCustomMenuWindow extends KWindow
 	}
 
 	//----------------------------------------------------------------------
-	// 強制クローズ処理
+w	// 強制クローズ処理
 	//----------------------------------------------------------------------
 	function onPopupHide {
 		closeMenu();
@@ -876,6 +884,16 @@ class KCustomMenuWindow extends KWindow
 		if (isRoot) {
 			controller.cancelMenu();
 		}
+	}
+
+	//----------------------------------------------------------------------
+	// マウスホイール時特殊処理
+	//----------------------------------------------------------------------
+	function onMouseWheel {
+		// スクロールが有効なら、直近のサブメニューをキャンセルする
+		if (scroll.horizontal || scroll.vertical)
+			controller.cancelSubMenuOfDepth(owner.depth);
+		super.onMouseWheel(...);
 	}
 }
 
@@ -899,6 +917,8 @@ class KCustomMenuWindowController
 	var menuWindows = [];
 	// メニューを表示するモニタの矩形
 	var monitorRect;
+	// ルートウィンドウ
+	var rootParentWindow;
 
 	//----------------------------------------------------------------------
 	// 生成・破棄
@@ -950,6 +970,7 @@ class KCustomMenuWindowController
 			menuWindow.height = monitorRect.height;
 			menuWindow.invalidateLayout();
 		}
+		menuWindow.scroll.setChildViewPos(0, 0);
 		return menuWindow;
 	}
 
@@ -993,6 +1014,9 @@ class KCustomMenuWindowController
 	// ルートメニューをポップアップする
 	//----------------------------------------------------------------------
 	function popupRootMenu(menuRect, item, parentWindow) {
+		// ルートの親ウィンドウを記録しておく
+		rootParentWindow = parentWindow;
+
 		// 既存のメニューウィンドウを全てクリアする
 		clearMenuWindows();
 		rootMenuItem = item;
@@ -1066,9 +1090,24 @@ class KCustomMenuWindowController
 	}
 
 	//----------------------------------------------------------------------
+	// 特定デプスのサブメニューをキャンセル
+	//----------------------------------------------------------------------
+	function cancelSubMenuOfDepth(depth) {
+		if (rootParentWindow.customToolBar.useMenuButton)
+			depth++;
+
+		if (depth < menuWindows.count) {
+			curLocator.pop();
+			var tailMenuWindow = menuWindows.pop();
+			tailMenuWindow.close();
+			invalidate tailMenuWindow;
+		}
+	}
+
+	//----------------------------------------------------------------------
 	// メニュー開閉トリガ
 	//----------------------------------------------------------------------
-	function onTrigger {
+	function onTrigger() {
 		triggerTimer.enabled = false;
 
 		// 新規ロケーターを構成する
