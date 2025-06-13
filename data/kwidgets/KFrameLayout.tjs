@@ -209,7 +209,7 @@ class KFrameLayout extends KLayout
 				labelFieldHeight = Math.max(labelFieldHeight, findIcon(widgetStyle.helpIcon).height);
 
 			drawnBorderTop = int(labelFieldHeight / 2);
-			contentTop = Math.max(labelFieldHeight + spaceVertical, drawnBorderTop + borderPaddingTop) - borderPaddingTop;
+			contentTop = Math.max(labelFieldHeight + spaceVertical, labelFieldHeight + borderPaddingTop) - borderPaddingTop;
 
 			minH += contentTop;
 			maxH += contentTop;
