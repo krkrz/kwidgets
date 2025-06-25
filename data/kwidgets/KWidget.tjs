@@ -3527,7 +3527,7 @@ class KWidget extends Layer
 		var isAncestor = target.isAncestorOf(this);
 		var isDescendant = target.isDescendantOf(this);
 
-		if (! isAncestor && ! isDescendantOf)
+		if (! isAncestor && ! isDescendant)
 			throw new Exception("coordinate conversion target is not family of this widget.");
 
 		var from, to;
@@ -3540,7 +3540,7 @@ class KWidget extends Layer
 
 		var dx = 0, dy = 0;
 		for (var layer = from;
-			 layer.parent && layer.parent != to;
+			 layer != to;
 			 layer = layer.parent) {
 			dx += layer.left;
 			dy += layer.top;
