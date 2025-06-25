@@ -54,6 +54,7 @@ Scripts.execStorage("TestCase.tjs");
 
 
 // KWindow.defaultCustomToolBarOption = %[ useMenuButton: true, appIcon: "ball" ];
+KContextMenu.useCustomMenu = true;
 
 //----------------------------------------------------------------------
 // サンプルランチャー

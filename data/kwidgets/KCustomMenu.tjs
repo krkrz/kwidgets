@@ -858,6 +858,14 @@ class KCustomMenuWindow extends KWindow
 		scroll.add(new KCustomMenuList(this,
 									   %[ name: "list",
 										]));
+
+		if (isRoot)
+			appCallbackManager.addHandler(this);
+	}
+
+	function finalize {
+		appCallbackManager.removeHandler(this);
+		super.finalize();
 	}
 
 	//----------------------------------------------------------------------
@@ -876,6 +884,10 @@ class KCustomMenuWindow extends KWindow
 	//----------------------------------------------------------------------
 	// 強制クローズ処理
 	//----------------------------------------------------------------------
+	function onAppDeactivate() {
+		closeMenu();
+	}
+
 	function onPopupHide {
 		closeMenu();
 	}

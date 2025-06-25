@@ -329,6 +329,44 @@ global.asyncCaller = new AsyncCaller();
 
 
 
+//----------------------------------------------------------------------
+// アプリケーションコールバックマネージャー
+class AppCallbackManager {
+	var objs = [];
+
+	function AppCallbackManager() {
+		System.onActivate = onActivate;
+		System.onDeactivate = onDeactivate;
+	}
+
+	function addHandler(obj) {
+		objs.add(obj);
+	}
+
+	function removeHandler(obj) {
+		objs.remove(obj);
+	}
+
+	function onActivate {
+		objs.each(function(obj) {
+			if (obj isvalid
+				&& typeof(obj.onAppActivate) != K_UNDEFINED)
+				obj.onAppActivate();
+		});
+	}
+
+	function onDeactivate {
+		objs.each(function(obj) {
+			if (obj isvalid
+				&& typeof(obj.onAppDeactivate) != K_UNDEFINED)
+				obj.onAppDeactivate();
+		});
+	}
+};
+
+global.appCallbackManager = new AppCallbackManager();
+
+
 
 //----------------------------------------------------------------------
 // スムーズ補完
@@ -443,3 +481,5 @@ class KInterpolateDispatcher {
 	function onStop() {
 	}
 };
+
+

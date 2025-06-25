@@ -557,7 +557,19 @@ class KComboDropdownWindow extends KWindow
 			list.seeFocusedItem();
 		}
 
+		appCallbackManager.addHandler(this);
+
 		visible = true;
+	}
+
+	function finalize {
+		appCallbackManager.removeHandler(this);
+		super.finalize();
+	}
+
+	function onAppDeactivate() {
+		owner.onCancel();
+		closeSelf();
 	}
 
 	function onPopupHide() {
