@@ -162,8 +162,8 @@ class KTabLayout extends KLayout
 	 * @param type フレームタイプ。FRAME_FLATTEN, FRAME_SUNKEN, FRAME_RAISEDのいずれかを選択する。
 	 * @param name 名前
 	 ------------------------------*/
-	function KTabLayout(window, args*) {
-		var opts = args.count == 0 ? %[] : parseOldStyleWidgetArgs(KTabLayoutArgsFormat, args*);
+	function KTabLayout(window, *) {
+		var opts = parseOldStyleWidgetArgs(KTabLayoutArgsFormat, *);
 		super.KLayout(window, opts);
 		//		frameLayer = new global.KWidget(window);
 //		frameLayer.parent = this;
