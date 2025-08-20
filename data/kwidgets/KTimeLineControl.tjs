@@ -1735,6 +1735,10 @@ class KTimeLineLayerView extends KVirtualWidget
 		else {
 			dragEnterAreaAssign(...);
 		}
+
+		if (inDrag) {
+			owner.onViewDragEnter();
+		}
 	}
 
 	//------------------------------
@@ -1752,11 +1756,19 @@ class KTimeLineLayerView extends KVirtualWidget
 			dragMoveSelection(...);
 		if (inDragRangeSelector)
 			dragMoveRangeSelector(...);
+
+		if (inDrag) {
+			owner.onViewDragMove();
+		}
 	}
 
 	//------------------------------
 	// ドラッグ終了
 	function onDragLeave(x, y, shift) {
+		if (inDrag) {
+			owner.onViewDragLeave();
+		}
+
 		if (inDragAreaAssign)
 			dragLeaveAreaAssign(...);
 		if (inDragAreaMove)
@@ -4829,6 +4841,18 @@ class KTimeLineControl extends KEntity
 	 * playOverLastFrameがtrueになって呼ばれる。
 	 ------------------------------*/
 	function onStop(playOverLastFrame) {
+	}
+
+	/**------------------------------
+	 * ビューのドラッグが発生した時のコールバック
+	 ------------------------------*/
+	function onViewDragEnter() {
+	}
+
+	function onViewDragMove() {
+	}
+
+	function onViewDragLeave() {
 	}
 
 	// 実際の停止処理
