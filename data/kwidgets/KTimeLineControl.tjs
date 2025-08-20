@@ -4249,7 +4249,15 @@ class KTimeLineControl extends KEntity
 		_layerListScroll.hideHorizontalBar = true;
 		_layerListScroll.hideVerticalBar = true;
 		_layerListScroll.add(new timelineLayerListClass(window, this, "_layerList"));
-		_rightGrid.add(0, 0, new KScrollLayout(window, %[ horizontal: true, vertical: false, name: "_timeLocatorScroll", hideHorizontalBar: true, marginalMinHeight: 0, marginalMaxHeight: 0]));
+		_rightGrid.add(0, 0, new KScrollLayout(window, %[ horizontal: true, vertical: false,
+														  name: "_timeLocatorScroll",
+														  hideHorizontalBar: true,
+														  marginalMinHeight: 0,
+														  marginalMaxHeight: 0 ,
+														  style: %[ borderStyle: BORDER_STYLE_NONE,
+																	borderWidthTop: 0,
+																	borderWidthBottom: 0,
+																  ] ]));
 		//    _timeLocatorScroll.hideHorizontalBar = true;
 		_timeLocatorScroll.add(new KTimeLineTimeLocator(window, this, "_timeLocator"));
 		_rightGrid.add(0, 1, new KScrollLayout(window, true, true, "_layerViewScroll"), 2);
