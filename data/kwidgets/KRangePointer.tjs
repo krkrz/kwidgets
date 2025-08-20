@@ -492,12 +492,16 @@ class KRangePointer2D extends KValueEntity
 	//------------------------------
 	// ノブのマウスイベント
 	//------------------------------
-	function onKnobMouseDown(x, y) {
-		focus();
-		knobDragging = true;
-		hParams.dragBeganCursor = x + knob.left;
-		vParams.dragBeganCursor = y + knob.top;
-		dragBeganValue = pointerValue;
+	function onKnobMouseDown(x, y, button, shift) {
+		if (button == mbLeft) {
+			focus();
+			knobDragging = true;
+			hParams.dragBeganCursor = x + knob.left;
+			vParams.dragBeganCursor = y + knob.top;
+			dragBeganValue = pointerValue;
+		}
+		if (button == mbRight)
+			onRightClick();
 	}
 
 	function onKnobMouseMove(x, y) {
