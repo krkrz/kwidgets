@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <dwmapi.h>
+#include <cstdio>
 
 #include "tp_stub.h"
 #include "ncbind.hpp"
@@ -146,20 +147,24 @@ public:
 	void requireReceiver() {
 		if (mReceiverRefCount++ == 0) {
 			ncbPropAccessor window(mObjthis, mObjthis);
-			window.FuncCall(0, L"registerMessageReceiver", NULL, NULL, wrmRegister, tTVInteger(&receiver), tTVInteger(this));
+			window.FuncCall(0, L"registerMessageReceiver", NULL, NULL, wrmRegister, tTVInteger(&receiver), tTVInteger(mObjthis));
 		}
 	}
 
 	void releaseReceiver() {
 		if (--mReceiverRefCount == 0) {
 			ncbPropAccessor window(mObjthis, mObjthis);
-			window.FuncCall(0, L"registerMessageReceiver", NULL, NULL, wrmUnregister, tTVInteger(&receiver), tTVInteger(this));
+			window.FuncCall(0, L"registerMessageReceiver", NULL, NULL, wrmUnregister, tTVInteger(&receiver), tTVInteger(mObjthis));
 		}
 	}
 
 	static bool __stdcall receiver(void *userdata, tTVPWindowMessage *mes) {
-		WindowSupport *inst = static_cast<WindowSupport*>(userdata);
-		return inst->onMessage(mes);
+		auto obj = (iTJSDispatch2*)userdata;
+		WindowSupport *inst = ncbInstanceAdaptor<WindowSupport>::GetNativeInstance(obj);
+		if (inst != NULL)
+			return inst->onMessage(mes);
+		else
+			return false;
 	}
 
 	bool onMessage(tTVPWindowMessage *mes) {
