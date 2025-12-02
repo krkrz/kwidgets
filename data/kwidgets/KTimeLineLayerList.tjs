@@ -1,0 +1,66 @@
+/*----------------------------------------------------------------------
+ * レイヤリスト(内部パーツ)
+ ----------------------------------------------------------------------*/
+class KTimeLineLayerList extends KList
+{
+	var owner;
+
+	// コンストラクタ
+	function KTimeLineLayerList(window, owner, name) {
+		super.KList(window, name);
+		this.owner = owner;
+	}
+
+	property TIMELINE_FRAME_WIDTH {
+		getter {
+			return owner.TIMELINE_FRAME_WIDTH;
+		}
+	}
+
+	// 描画イベントをオーナーに通知
+	function onUpdateHierarchy {
+		owner.onListModified();
+	}
+
+	// 選択イベントをオーナーに通知
+	function onFocusItem() {
+		if (owner.playing)
+			owner.playing = false;
+		owner.onListSelect(...);
+	}
+
+	function onSearchPrevFocusable(layer) {
+		owner.onSearchPrevFocusable(layer);
+		super.onSearchPrevFocusable(owner.searchTarget);
+	}
+
+	function redrawAllItemsView {
+		for (var i = 0; i < drawItemList.count; i++) {
+			if (drawItemList[i] !== void
+				&& (drawItemList[i] isvalid))
+				drawItemList[i].redrawAllFrame();
+		}
+	}
+
+	function onKeyDown(key, shift) {
+		if ((shift & ssAlt)
+			&& (key == VK_LEFT
+				|| key == VK_RIGHT
+				|| key == VK_UP
+				|| key == VK_DOWN)) {
+			owner._layerView.onKeyDown(...);
+			focus();
+			return;
+		} else {
+			super.onKeyDown(...);
+		}
+	}
+
+	function onBeginLabelEdit {
+		owner.onBeginLabelEdit(...);
+	}
+
+	function onFinishLabelEdit {
+		owner.onFinishLabelEdit(...);
+	}
+}

@@ -1,0 +1,404 @@
+
+/*----------------------------------------------------------------------
+ * タイムロケーター(内部パーツ)
+ ----------------------------------------------------------------------*/
+global.KTimeLineTimeLocatorWidgetStyleDefinition =
+	[
+			%[ key: "frameBorderColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "activeColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "cursorColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "indicatorBackgroundColor", resolveColor: "resolveColor" ],
+			%[ key: "indicatorFontColor", resolveColor: "resolveColor" ]
+	];
+
+
+class KTimeLineTimeLocator extends KVirtualWidget
+{
+	// オーナー(タイムラインコントロール本体)
+	var owner;
+	// ドラッグ中か？
+	var dragging;
+
+	// ドラッグ関係
+	var frameDragMoving;
+	var frameDragItemList;
+	var frameDragFrameList;
+	var frameDragTime;
+	var frameDragPrevTime, frameDragMinTime;
+	var frameDragLeftList;
+
+	// アクティブレンジ
+	var activeBegin = void;
+	var activeEnd = void;
+	var activeDragging = false;
+	var activeDragBeginTime;
+	var _activeRangeEnabled = false;
+
+	var mouseDragScrollInterp;
+
+	// コンストラクタ
+	function KTimeLineTimeLocator(window, owner, name) {
+		super.KVirtualWidget(window, name);
+
+		setFixedSize(2000, 0); // TIMELINE_LOCATOR_HEIGHT);
+		this.owner = owner;
+//		canvas.fontHeight = 12;
+//		canvas.font.bold = true;
+		dragging = false;
+
+		mouseDragScrollInterp =
+			new KInterpolateDispatcher(this,
+									   %[ valueName: "viewPosition",
+										  dispatchName: "",
+										  interval: 120,
+										  exponent: 0.5,
+										  lerpFunction: function(a, b, t)
+										  { return %[ left: a.left + (b.left - a.left) * t ]; } ]);
+	}
+
+	function finalize {
+		invalidate mouseDragScrollInterp;
+		super.finalize();
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTimeLineTimeLocatorWidgetStyleDefinition);
+		}
+	}
+
+	property TIMELINE_FRAME_WIDTH {
+		getter {
+			return owner.TIMELINE_FRAME_WIDTH;
+		}
+	}
+
+	function updateCursor {
+//		var x = owner.selectedTime;
+//		redrawRect(x * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, height);
+	}
+
+	function setActiveRange(begin, end) {
+		activeBegin = begin;
+		activeEnd = end;
+		redrawAll();
+	}
+
+	property activeRangeBegin {
+		getter {
+			return activeBegin;
+		}
+		setter (v) {
+			activeBegin = v;
+			if (activeBegin !== void
+				&& activeEnd !== void
+				&& activeBegin > activeEnd) {
+				activeEnd = activeBegin;
+			}
+			redrawAll();
+		}
+	}
+
+	property activeRangeEnd {
+		getter {
+			return activeEnd;
+		}
+		setter (v) {
+			activeEnd = v;
+			if (activeBegin !== void
+				&& activeEnd !== void
+				&& activeBegin > activeEnd) {
+				activeBegin = activeEnd;
+			}
+			redrawAll();
+		}
+	}
+
+	property activeRangeEnabled {
+		getter {
+			return _activeRangeEnabled;
+		}
+		setter (v) {
+			_activeRangeEnabled = v;
+			if (! v)
+				setActiveRange(void, void);
+		}
+	}
+
+	function beforeFullUpdate() {
+		setFixedSize(minWidth, fontStyle.fontHeight + layoutStyle.spaceVertical);
+	}
+
+	// 描画
+	function onDraw(l, t, w, h) {
+		// フレーム幅単位で表示
+		var fromX, toX, fromY, toY;
+		fromX = int(l / TIMELINE_FRAME_WIDTH);
+		toX = int((l + w + TIMELINE_FRAME_WIDTH - 1) / TIMELINE_FRAME_WIDTH);
+
+		// ロケータのバックグラウンドを描画
+		for (var x = fromX; x < toX; x ++) {
+			fillRect(x * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, height, borderStyle.backgroundColor);
+			fillRect(x * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH - 1, height - 5, 1, 4, widgetStyle.frameBorderColor);
+			fillRect(x * TIMELINE_FRAME_WIDTH, height - 1, TIMELINE_FRAME_WIDTH, 1, widgetStyle.frameBorderColor);
+		}
+		// 5マス単位で時刻表示
+		var stride;
+		if (TIMELINE_FRAME_WIDTH >= 10)
+			stride = 5;
+		else
+			stride = 10;
+		var dFromX, dToX;
+		dFromX = int(fromX / stride);
+		dToX = int((toX + stride - 1) / stride);
+		for (var x = dFromX; x < dToX; x++) {
+			drawUIText(fontStyle, x * stride * TIMELINE_FRAME_WIDTH, (height - fontStyle.fontHeight) / 2, string(x * stride));
+		}
+		// 現在時刻表示
+		var indStyle = duplicateStruct(fontStyle);
+		indStyle.fontColor = widgetStyle.indicatorFontColor;
+		var time = owner.selectedTime;
+		var x = (time * TIMELINE_FRAME_WIDTH) + TIMELINE_FRAME_WIDTH / 2 - 1;
+		var w = font.getTextWidth(time);
+		var x = x - 2 - w / 2;
+		x = Math.max(0, x);
+		fillRect(x, 0, w + 4, height, widgetStyle.indicatorBackgroundColor);
+		drawUIText(indStyle, x + 2, (height - fontStyle.fontHeight) / 2, time);
+
+		// アクティブ強調
+		if (activeBegin !== void
+			|| activeEnd !== void) {
+			var activeBeginX, activeEndX;
+			if (activeBegin === void)
+				activeBeginX = fromX;
+			else
+				activeBeginX = activeBegin;
+			if (activeEnd === void)
+				activeEndX = toX;
+			else
+				activeEndX = activeEnd;
+
+			for (var x = fromX; x < toX; x++) {
+				var active = (activeBeginX <= x && x <= activeEndX);
+				if (! active) {
+					colorRect(x * TIMELINE_FRAME_WIDTH, 0, TIMELINE_FRAME_WIDTH, height, borderStyle.backgroundColor & 0xFFFFFF, 192);
+				} else {
+					fillRect(x * TIMELINE_FRAME_WIDTH, height - 1, TIMELINE_FRAME_WIDTH, 1, widgetStyle.activeColor);
+				}
+				if (x == activeBeginX - 1
+					|| x == activeEndX)
+					fillRect(x * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH - 1, height - 5, 1, 4, widgetStyle.activeColor);
+			}
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// マウス処理
+	property viewPosition {
+		getter {
+			var rect = viewingRect;
+			return %[ left: rect.left ];
+		}
+		setter(v) {
+			if (equalStruct(v, viewPosition))
+				return;
+			var layerViewRect = owner._layerView.viewingRect;
+			noticeRect(v.left, 0, layerViewRect.width, height);
+			owner._layerView.noticeRect(v.left, layerViewRect.top, layerViewRect.width, layerViewRect.height);
+			asyncCaller.callOnce(fakeMouseMove);
+		}
+	}
+
+	function fakeMouseMove() {
+		var keys = [
+			[ VK_SHIFT, ssShift ],
+			[ VK_CONTROL, ssCtrl ],
+			[ VK_MENU, ssAlt ],
+			[ VK_LBUTTON, ssLeft ],
+			[ VK_RBUTTON, ssRight ],
+			[ VK_MBUTTON, ssMiddle ]
+		];
+
+		var shift = keys.inject(0, function(key, value) {
+			if (System.getKeyState(key[0]))
+				return value + key[1];
+			else
+				return value;
+		});
+
+		onMouseMove(cursorX, cursorY, shift);
+	}
+
+	function nop {
+	}
+
+	property mouseIncludeViewPosition {
+		getter {
+			var rect = viewingRect;
+			var x = cursorX;
+			var l;
+
+			if (x < rect.left)
+				l = x;
+			else if (x > rect.right)
+				l = x - rect.width;
+			else
+				l = rect.left;
+
+			return %[ left: l ];
+		}
+	}
+
+	// マウスダウン
+	function onMouseDown(x, y, button, shift) {
+		super.onMouseDown(...);
+
+		// オーナーが「再生中」のクリックなら、即座に再生停止
+		if (owner.playing)
+			owner.playing = false;
+		// Shift+左クリックでレンジドラッグ開始
+		if (owner.editable
+			&& _activeRangeEnabled
+			&& button == mbLeft
+			&& (shift & ssShift)) {
+			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+			owner.resetSelection();
+			setActiveRange(void, void);
+			activeDragBeginTime = owner.selectedTime;
+			activeDragging = true;
+			return;
+		}
+		// Ctrl+左クリックでフレームドラッグ開始
+		if (owner.editable
+			&& button == mbLeft
+			&& (shift & ssCtrl)) {
+			var curTime = int(x / TIMELINE_FRAME_WIDTH);
+			if (curTime != owner.selectedTime)
+				return;
+			owner.resetSelection();
+			owner.renderAtTimeModification = false;
+			frameDragMoving = true;
+			frameDragTime = frameDragPrevTime = owner.selectedTime;
+			frameDragItemList = owner._layerList.descendants;
+			frameDragFrameList = [];
+			frameDragMinTime = 0;
+			var leftMap = %[];
+			leftMap[frameDragTime] = true;
+			for (var i = 0; i < frameDragItemList.count; i++) {
+				var item = frameDragItemList[i];
+				item.mapLeftSideFrame(frameDragTime, leftMap);
+				frameDragFrameList.add(ktimeline_shallow_copy_frame_list(item.frameList));
+			}
+			frameDragLeftList = dictionaryKeys(leftMap);
+			for (var i = 0; i < frameDragLeftList.count; i++)
+				frameDragLeftList[i] = +frameDragLeftList[i];
+			frameDragLeftList.sort();
+			frameDragMinTime = Math.max(frameDragLeftList.count - 1, 0);
+			return;
+		}
+
+		// 左クリックでドラッグ開始
+		if (button == mbLeft) {
+			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+//			owner.resetSelection();
+			dragging = true;
+			return;
+		}
+		// 右クリックでコールバック関数をキック
+		if (owner.editable
+			&& button == mbRight) {
+			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+			owner.resetSelection();
+			owner.onTimeLocatorRightClick(owner.selectedTime);
+			return;
+		}
+	}
+
+	// マウスムーブ
+	function onMouseMove(x, y, shift) {
+		super.onMouseMove(...);
+
+		if ((shift & (ssLeft | ssRight | ssMiddle)) != 0) 
+			mouseDragScrollInterp.interpolate(mouseIncludeViewPosition);
+
+		// フレームドラッグ中なら、処理
+		if (frameDragMoving) {
+			owner.selectedTime = int(Math.max(int(x / TIMELINE_FRAME_WIDTH), frameDragMinTime));
+			owner.resetSelection();
+			var curTime = owner.selectedTime;
+			if (curTime != frameDragPrevTime) {
+				frameDragPrevTime = curTime;
+				var fromTime = frameDragTime;
+				var toTime = curTime;
+				if (toTime < fromTime
+					&& frameDragLeftList.count) {
+					var toLeft = [];
+					toLeft.assign(frameDragLeftList);
+					for (var i = toLeft.count - 1; i >= 0; i--) {
+						if (toLeft[i] > toTime) {
+							toLeft[i] = toTime--;
+						} else {
+							break;
+						}
+					}
+					fromTime = frameDragLeftList;
+					toTime = toLeft;
+				}
+				for (var i = 0; i < frameDragItemList.count; i++) {
+					var item = frameDragItemList[i];
+					item.frameList = ktimeline_shallow_copy_frame_list(frameDragFrameList[i]);
+					item.moveFrame(fromTime, toTime, true);
+				}
+			}
+			return;
+		}
+		// 左ドラッグ中なら、選択を変更
+		if (dragging) {
+			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+//			owner.resetSelection();
+			return;
+		}
+		// アクティブレンジドラッグ中なら、アクティブレンジを変更
+		if (activeDragging) {
+			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+			owner.resetSelection();
+			if (owner.selectedTime == activeDragBeginTime)
+				setActiveRange(void, void);
+			else
+				setActiveRange(Math.min(activeDragBeginTime, owner.selectedTime),
+							   Math.max(activeDragBeginTime, owner.selectedTime));
+		}
+	}
+
+	// マウスアップ
+	function onMouseUp(x, y, button, shift) {
+		super.onMouseUp(...);
+
+		// フレームドラッグを解除
+		if (frameDragMoving
+			&& button == mbLeft) {
+			owner.renderAtTimeModification = true;
+			frameDragMoving = false;
+			if (owner.selectedTime != frameDragTime) {
+				owner.onRenderFrame();
+				owner.onMultipleFrameDragged();
+			}
+			return;
+		}
+		// 左ドラッグを解除
+		if (dragging
+			&& button == mbLeft) {
+			dragging = false;
+			return;
+		}
+		// アクティブドラッグを解除
+		if (activeDragging
+			&& button == mbLeft) {
+			activeDragging = false;
+			return;
+		}
+	}
+
+	function onHoverMouseWheel {
+	}
+}
