@@ -26,9 +26,9 @@ global.TIMELINE_PARTIAL_SELECTION = 1;
 global.TIMELINE_FULL_SELECTION = 2;
 
 global.TIMELINE_SELECTION_MODE_MASK_RANGE = 1;
-global.TIMELINE_SELECTION_MDOE_MASK_FRAME = 2;
-global.TIMELINE_KEYFRAME_LEFTSIDE = 0;
-global.TIMELINE_KEYFRAME_RIGHTSIDE = 1;
+global.TIMELINE_SELECTION_MODE_MASK_FRAME = 2;
+global.TIMELINE_KEYFRAME_PRIOR_SIDE_LEFT = 0;
+global.TIMELINE_KEYFRAME_PRIOR_SIDE_RIGHT = 1;
 
 
 /*----------------------------------------------------------------------
@@ -168,6 +168,8 @@ class KTimeLineControl extends KEntity
 
 	var extendListSelectionFromView = false;
 	var copySingleFrameAsNoWidth = false;
+	var selectionModeMask = TIMELINE_SELECTION_MODE_MASK_RANGE | TIMELINE_SELECTION_MODE_MASK_FRAME;
+	var keyframePriorSide = TIMELINE_KEYFRAME_PRIOR_SIDE_LEFT;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -289,6 +291,8 @@ class KTimeLineControl extends KEntity
 
 		_frameWidth = TIMELINE_FRAME_WIDTH_LIST[_viewWidth];
 		multipleSelection = getOption("multipleSelection", false);
+		selectionModeMask = getOption("selectionModeMask", selectionModeMask);
+		keyframePriorSide = getOption("keyframePriorSide", keyframePriorSide);
 	}
 
 	/*------------------------------
@@ -1312,4 +1316,29 @@ class KTimeLineControl extends KEntity
 			}
 		}
 	}
+
+	property selectionModeRangeEnabled {
+		getter {
+			return (selectionModeMask & TIMELINE_SELECTION_MODE_MASK_RANGE) != 0;
+		}
+	}
+
+	property selectionModeFrameEnabled {
+		getter {
+			return (selectionModeMask & TIMELINE_SELECTION_MODE_MASK_FRAME) != 0;
+		}
+	}
+
+	property keyframePriorSideLeft {
+		getter {
+			return keyframePriorSide == TIMELINE_KEYFRAME_PRIOR_SIDE_LEFT;
+		}
+	}
+
+	property keyframePriorSideRight {
+		getter {
+			return keyframePriorSide == TIMELINE_KEYFRAME_PRIOR_SIDE_RIGHT;
+		}
+	}
+
 };

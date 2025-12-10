@@ -831,7 +831,7 @@ class KTimeLineItem extends KListItem
 	 ------------------------------*/
 	function pasteSelection(pasteTime, frames) {
 		selection = [];
-		frames.each(pasteTime, function(frame, pasteTime) {
+		frames.each(pasteTime, owner.selectionModeFrameEnabled, function(frame, pasteTime, selectionEnabled) {
 			frame = duplicateStruct(frame);
 			if (frame.length === void) {
 				delete frame.length;
@@ -846,12 +846,14 @@ class KTimeLineItem extends KListItem
 			if (frameList.count == 0) {
 				frameList.add(frame);
 				frameList.add(%[ time: endTime === void ? frame.time + 1 : endTime, type: TIMELINE_FRAME_TYPE_NULL ]);
-				selection.add(0);
+				if (selectionEnabled)
+					selection.add(0);
 			} else {
 				var beginIndex = findFrame(beginTime, true);
 				if (beginIndex < 0) {
 					frameList.insert(0, frame);
-					selection.add(0);
+					if (selectionEnabled)
+						selection.add(0);
 					if (frameList[1].time > endTime) 
 						frameList.insert(1, %[ time: endTime, type: TIMELINE_FRAME_TYPE_NULL ]);
 				} else if (frameAt(beginIndex).time != beginTime) {
@@ -870,7 +872,8 @@ class KTimeLineItem extends KListItem
 				for (var i = endIndex - 1; i >= beginIndex; i--) 
 					frameList.erase(i);
 				frameList.insert(beginIndex, frame);
-				selection.add(beginIndex);
+				if (selectionEnabled)
+					selection.add(beginIndex);
 			}
 		} incontextof(this) );
 		invalidateNullFrame();

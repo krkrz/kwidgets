@@ -1233,17 +1233,17 @@ class KTimeLineLayerView extends KVirtualWidget
 		if (inDrag)
 			return;
 
-		if (shift & ssShift)
+		if ((shift & ssShift) && owner.selectionModeFrameEnabled)
 			dragEnterRangeSelector(...);
 		else if ((shift & (ssCtrl)) &&  isPointInArea(x, y))
 			dragEnterAreaMove(...);
-		else if ((shift & ssCtrl) && isPointInSelection(x, y))
+		else if ((shift & ssCtrl) && owner.selectionModeFrameEnabled && isPointInSelection(x, y))
 			dragEnterSelection(...);
 		else if (curCustomMouseEvent !== void)
 			dragEnterCustomMouseEvent(...);
 		else if (boundaryDragFrameIndex >= 0)
 			dragEnterFrameBoundary(...);
-		else {
+		else if (owner.selectionModeRangeEnabled) {
 			dragEnterAreaAssign(...);
 		}
 
@@ -1422,7 +1422,8 @@ class KTimeLineLayerView extends KVirtualWidget
 					updatePoint(generateNewPoint(x, y));
 					if (point !== void) {
 						var item = owner.drawItemList[point[0]];
-						if (item.supportSelection)
+						if (owner.selectionModeFrameEnabled
+							&& item.supportSelection)
 							item.setSelection([ point[1] ]);
 					}
 					owner.onSinglePoint();
@@ -1433,7 +1434,8 @@ class KTimeLineLayerView extends KVirtualWidget
 			} else if (shift == ssShift
 					   && point !== void) {
 				var item = owner.drawItemList[point[0]];
-				if (item.supportSelection)
+				if (owner.selectionModeFrameEnabled
+					&& item.supportSelection)
 					item.flipSelection([ point[1] ]);
 			}
 		}
@@ -1461,7 +1463,8 @@ class KTimeLineLayerView extends KVirtualWidget
 						updatePoint(generateNewPoint(x, y));
 						if (point !== void) {
 							var item = owner.drawItemList[point[0]];
-							if (item.supportSelection)
+							if (owner.selectionModeFrameEnabled
+								&& item.supportSelection)
 								item.setSelection([ point[1] ]);
 						}
 						owner.onSelectionModified();
@@ -1597,7 +1600,7 @@ class KTimeLineLayerView extends KVirtualWidget
 				}
 				return;
 			}
-			if (shift & ssCtrl) {
+			if ((shift & ssCtrl) && owner.selectionModeFrameEnabled) {
 				var step = (shift & ssShift) ? 10 : 1;
 				shiftSelection(-step);
 				owner.selectedTime -= step;
@@ -1644,7 +1647,7 @@ class KTimeLineLayerView extends KVirtualWidget
 				owner.onRenderFrame();
 				return;
 			}
-			if (shift & ssCtrl) {
+			if ((shift & ssCtrl) && owner.selectionModeFrameEnabled) {
 				var step = (shift & ssShift) ? 10 : 1;
 				shiftSelection(step);
 				owner.selectedTime += step;

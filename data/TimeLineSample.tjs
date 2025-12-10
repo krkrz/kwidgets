@@ -840,7 +840,9 @@ class TimeLineSample extends KWindow
       vsplit.add(new KTimeLineControl(this, %[ name: "timelineControl",
 											   multipleSelection: true,
 											   copySingleFrameAsNoWidth: true,
-											   expandListSelectionFromView: true ]
+											   expandListSelectionFromView: true,
+											   selectionModeMask: TIMELINE_SELECTION_MODE_MASK_RANGE,
+											 ]
 											 ));
 
     // パラメータ初期化
