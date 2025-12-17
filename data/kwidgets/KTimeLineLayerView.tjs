@@ -682,7 +682,14 @@ class KTimeLineLayerView extends KVirtualWidget
 			list.drawItemList[i].releaseSelection();
 	}
 
-	function selectAll {
+	function selectAll() {
+		if (owner.selectionModeFrameEnabled)
+			selectAllByFrames();
+		else if (owner.selectionModeRangeEnabled)
+			selectAllByRanges();
+	}
+
+	function selectAllByFrames {
 		var allEmpty = true;
 		var allFull = true;
 		var list = owner.selectionTargetDrawItemList;
@@ -710,6 +717,50 @@ class KTimeLineLayerView extends KVirtualWidget
 		} else {
 			list.each(function(item) { item.setSelection(item.fullSelection); });
 		}
+	}
+
+	function selectAllByRanges() {
+		var time = selectedTime;
+		var layer = selectedLayer;
+		if (time < 0 || layer < 0)
+			return;
+
+		var l, t, r, b;
+		var makeEmpty = false;
+
+		if (! hasArea) {
+			var item = owner.childAt(layer);
+			l = 0; r = owner.lastTime; t = b = layer;
+		} else {
+			if (areaIndexRect.left == 0
+				&& areaIndexRect.right - 1 == owner.lastTime) {
+				if (areaIndexRect.top == 0
+					&& areaIndexRect.bottom - 1 == owner.drawItemList.count - 1) {
+					makeEmpty = true;
+				} else {
+					l = 0; r = owner.lastTime; t = 0; b = owner.drawItemList.count - 1;
+				}
+			} else {
+				l = 0; r = owner.lastTime;
+				t = areaIndexRect.top;
+				b = areaIndexRect.bottom - 1;
+			}
+		}
+
+		if (makeEmpty)
+			resetArea();
+		else {
+			setAreaByIndex(l, t, r, b);
+			redrawArea();
+		}
+	}
+
+	function setAreaByIndex(l, t, r, b) {
+		areaIndexRect = new KRect(l, t, r - l + 1, b - t + 1);
+		areaRect = new KRect(l * TIMELINE_FRAME_WIDTH,
+							 drawItemList[t].top,
+							 (r - l + 1) * TIMELINE_FRAME_WIDTH,
+							 drawItemList[b].top + drawItemList[b].height - drawItemList[t].top);
 	}
 
 	//----------------------------------------------------------------------
@@ -1613,11 +1664,21 @@ class KTimeLineLayerView extends KVirtualWidget
 			if (shift & ssAlt) {
 				if (owner.selectedLayer >= 0) {
 					var item = list.drawItemList[owner.selectedLayer];
-					var frameIndex = item.findFrame(owner.selectedTime -1, true);
-					var frame = item.frameAt(frameIndex);
-					if (frame !== void) {
-						owner.selectedTime = frame.time;
-						cursorMoved = true;
+					if (owner.keyframePriorSideLeft) {
+						var frameIndex = item.findFrame(owner.selectedTime - 1, true);
+						var frame = item.frameAt(frameIndex);
+						if (frame !== void) {
+							owner.selectedTime = frame.time;
+							cursorMoved = true;
+						}
+					}
+					else if (owner.keyframePriorSideRight) {
+						var frameIndex = item.findFrame(owner.selectedTime, true);
+						var frame = item.frameAt(frameIndex);
+						if (frame !== void) {
+							owner.selectedTime = frame.time - 1;
+							cursorMoved = true;
+						}
 					} else {
 						owner.selectedTime = 0;
 						cursorMoved = true;
@@ -1660,17 +1721,23 @@ class KTimeLineLayerView extends KVirtualWidget
 			if (shift & ssAlt) {
 				if (owner.selectedLayer >= 0) {
 					var item = list.drawItemList[owner.selectedLayer];
-					var frameIndex = item.findFrame(owner.selectedTime);
-					if (frameIndex < item.frameCount - 1) {
-						owner.selectedTime = item.frameAt(frameIndex + 1).time;
-						cursorMoved = true;
+					if (owner.keyframePriorSideLeft) {
+						var frameIndex = item.findFrame(owner.selectedTime, true);
+						if (frameIndex < item.frameCount - 1) {
+							owner.selectedTime = item.frameAt(frameIndex + 1).time;
+							cursorMoved = true;
+						}
+					} else if (owner.keyframePriorSideRight) {
+						var frameIndex = item.findFrame(owner.selectedTime + 1, true);
+						if (frameIndex < item.frameCount - 1) {
+							owner.selectedTime = item.frameAt(frameIndex + 1).time - 1;
+							cursorMoved = true;
+						}
 					}
 				}
 			} else {
-				{
-					owner.selectedTime++;
-					cursorMoved = true;
-				}
+				owner.selectedTime++;
+				cursorMoved = true;
 			}
 			break;
 		case VK_UP:
@@ -1729,7 +1796,8 @@ class KTimeLineLayerView extends KVirtualWidget
 				resetArea();
 
 			if (! cursorKeyAreaAssignBeginLayer
-				&& ! hasMultipleSelection) {
+				&& ! hasMultipleSelection
+				&& owner.selectionModeFrameEnabled) {
 				var item = drawItemList[selectedLayer];
 				if (item.supportSelection) {
 					var frameIndex = item.findFrame(selectedTime);
@@ -1766,13 +1834,20 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	property isCopyFramesAvailable {
 		getter {
-			return hasWorkZone;
+			return hasWorkZone || (! owner.selectionModeFrameEnabled && owner.pointEffectiveFrameHead);
 		}
 	}
 
 	function copyFrames {
-		if (! hasWorkZone)
-			return [];
+		if (! hasWorkZone) {
+			if (owner.selectionModeFrameEnabled
+				|| ! owner.pointEffectiveFrameHead
+				|| selectedLayer < 0
+				|| selectedTime < 0)
+				return [];
+
+			setAreaByIndex(selectedTime, selectedLayer, selectedTime, selectedLayer);
+		}
 
 		pointWorkZoneCorner();
 
@@ -1803,8 +1878,15 @@ class KTimeLineLayerView extends KVirtualWidget
 	}
 
 	function cutFrames {
-		if (! hasWorkZone)
-			return [];
+		if (! hasWorkZone) {
+			if (owner.selectionModeFrameEnabled
+				|| ! owner.pointEffectiveFrameHead
+				|| selectedLayer < 0
+				|| selectedTime < 0)
+				return [];
+
+			setAreaByIndex(selectedTime, selectedLayer, selectedTime, selectedLayer);
+		}
 
 		pointWorkZoneCorner();
 
@@ -1964,4 +2046,5 @@ class KTimeLineLayerView extends KVirtualWidget
 	function onSelectionModified() {
 		owner.onSelectionModified();
 	}
+
 };

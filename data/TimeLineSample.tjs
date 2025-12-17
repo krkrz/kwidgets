@@ -700,40 +700,33 @@ class TimeLineSampleLayerItem extends TimeLineSampleItem
   //------------------------------
   // タイムライン上でキーを押した際の処理
   //------------------------------
-  function onTimeLineKeyDown(key, shift) {
-    switch (key) {
-	default:
-		owner.onTimeLineKeyDown(...);
-		break;
-    case VK_INSERT:
-      var time = root.owner.selectedTime;
-      var frame = frameAt(findFrame(time));
-      if ((frame !== void && frame.type != TIMELINE_FRAME_TYPE_NULL && frame.time != time) || (frame !== void && frame.type == TIMELINE_FRAME_TYPE_NULL) || frame === void)
-        onInsertFrame(time);
-      break;
-      // Insertでキーフレーム削除
-    case VK_DELETE:
-      var time = root.owner.selectedTime;
-      var frame = frameAt(findFrame(time));
-      if (frame !== void && frame.type != TIMELINE_FRAME_TYPE_NULL && frame.time == time)
-        onDeleteFrame(time);
-      break;
-      // Insertでキーフレーム挿入
-    case VK_HOME:
-      var time = root.owner.selectedTime;
-      var frame = frameAt(findFrame(time));
-      if (frame !== void && frame.type != TIMELINE_FRAME_TYPE_NULL && frame.time != time)
-        onSplitFrame(time);
-      break;
-      // ENDで空フレーム挿入
-    case VK_END:
-      var time = root.owner.selectedTime;
-      var frame = frameAt(findFrame(time));
-      if (frame !== void && frame.type != TIMELINE_FRAME_TYPE_NULL)
-        onNullFrame(time);
-      break;
-    }
- } 
+	function onTimeLineKeyDown(key, shift) {
+		var time = owner.selectedTime;
+		switch (key) {
+		default:
+			owner.onTimeLineKeyDown(...);
+			break;
+		case VK_INSERT:
+			if (! pointEffectiveFrameHead)
+				onInsertFrame(time);
+			break;
+			// Deleteでキーフレーム削除
+		case VK_DELETE:
+			if (pointEffectiveFrameHead)
+				onDeleteFrame(time);
+			break;
+			// Insertでキーフレーム挿入
+		case VK_HOME:
+			if (pointEffectiveFrame && ! pointFrameHead)
+				onSplitFrame(time);
+			break;
+			// ENDで空フレーム挿入
+		case VK_END:
+			if (pointEffectiveFrame)
+				onNullFrame(time);
+			break;
+		}
+	} 
 
   //------------------------------
   // キーフレーム挿入
@@ -842,6 +835,7 @@ class TimeLineSample extends KWindow
 											   copySingleFrameAsNoWidth: true,
 											   expandListSelectionFromView: true,
 											   selectionModeMask: TIMELINE_SELECTION_MODE_MASK_RANGE,
+											   keyframePriorSide: TIMELINE_KEYFRAME_PRIOR_SIDE_RIGHT,
 											 ]
 											 ));
 

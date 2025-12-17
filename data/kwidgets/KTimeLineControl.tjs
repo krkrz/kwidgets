@@ -1207,7 +1207,7 @@ class KTimeLineControl extends KEntity
 
 	property isCopyFramesAvailable {
 		getter {
-			return view.hasWorkZone;
+			return view.isCopyFramesAvailable;
 		}
 	}
 

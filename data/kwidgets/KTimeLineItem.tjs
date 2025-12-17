@@ -14,7 +14,7 @@ class KTimeLineItem extends KListItem
 	// 選択範囲
 	var selection = [];
 	// マーカーマスク
-	var markerMask = TIMELINE_MARKER_MASK_LEFT;
+	var markerMask = TIMELINE_MARKER_MASK_RIGHT; // LEFT;
 	// 範囲選択対応
 	var supportSelection = true;
 
@@ -167,6 +167,16 @@ class KTimeLineItem extends KListItem
 			return frameList[index];
 	}
 
+
+	/*------------------------------
+	 * タイムラインが空かどうか判定する
+	 ------------------------------*/
+	property isEmpty {
+		getter {
+			return frameList.count == 0;
+		}
+	}
+
 	/**------------------------------
 	 * 時間を対応してフレームを検索する
 	 *
@@ -251,6 +261,18 @@ class KTimeLineItem extends KListItem
 	}
 
 	/**------------------------------
+	 * フレームの右側の時間をを取得する
+	 *
+	 * @param index インデックス
+	 ------------------------------*/
+	function frameRightTimeAt(index) {
+		if (index < frameList.count - 1)
+			return frameList[index].time - 1;
+		else
+			return void;
+	}
+
+	/**------------------------------
 	 * 時間に対応したフレーム情報を計算する
 	 *
 	 * @param time 時間
@@ -316,23 +338,49 @@ class KTimeLineItem extends KListItem
 		var frameIndex = findFrame(time, true);
 		var frame = frameAt(frameIndex);
 
-		if (frame !== void
-			&& frame.time == time) {
-			frameList.erase(frameIndex);
-			correctSelectionByRemoveIndex(frameIndex);
-			frameIndex--;
+		if (owner.keyframePriorSideLeft) {
+			if (frame !== void
+				&& frame.time == time) {
+				frameList.erase(frameIndex);
+				correctSelectionByRemoveIndex(frameIndex);
+				frameIndex--;
+			}
+
+			var newFrame;
+			if (type == TIMELINE_FRAME_TYPE_NULL)
+				newFrame = createNewFrame(time, type, void);
+			else
+				newFrame = createNewFrame(time, type, content);
+
+			frameList.insert(frameIndex + 1, newFrame);
+			correctSelectionByInsertIndex(frameIndex);
+			if (doInvalidate)
+				invalidateNullFrame();
 		}
+		else if (owner.keyframePriorSideRight) {
+			var frameRightTime = frameRightTimeAt(frameIndex);
+			if (frame !== void
+				&& frameRightTime === time) {
+				frame.type = type;
+				frame.content = type == TIMELINE_FRAME_TYPE_NULL ? void : content;
+			} else if (frame !== void) {
+				var newFrame = createNewFrame(frame.time, type, content);
+				frame.time = time + 1;
 
-		var newFrame;
-		if (type == TIMELINE_FRAME_TYPE_NULL)
-			newFrame = createNewFrame(time, type, void);
-		else
-			newFrame = createNewFrame(time, type, content);
-
-		frameList.insert(frameIndex + 1, newFrame);
-		correctSelectionByInsertIndex(frameIndex);
-		if (doInvalidate)
-			invalidateNullFrame();
+				frameList.insert(frameIndex, newFrame);
+				correctSelectionByInsertIndex(frameIndex + 1);
+				if (doInvalidate)
+					invalidateNullFrame();
+			} else {
+				var newFrame = createNewFrame(time, type, content);
+				frameList.insert(0, newFrame);
+				if (frameList.count > 1
+					&& frameList[1].time != time + 1)
+					frameList.insert(1, createNewFrame(time + 1, TIMELINE_FRAME_TYPE_NULL, void));
+				if (doInvalidate)
+					invalidateNullFrame();
+			}
+		}
 	}
 
 	/**------------------------------
@@ -381,34 +429,47 @@ class KTimeLineItem extends KListItem
 	 * それ以外のフレームは splitContinuousFrame()関数を使って分割される。
 	 ------------------------------*/
 	function splitFrame(time) {
+		if (! (pointEffectiveFrame && ! pointFrameHead))
+			return;
+
 		var frameIndex = findFrame(time);
-		if (frameIndex < 0)
-			return;
 		var frame = frameAt(frameIndex);
-		if (frame.type == TIMELINE_FRAME_TYPE_NULL
-			|| frame.type == TIMELINE_FRAME_TYPE_SINGLE
-			|| frame.time == time)
+		if (frame.type == TIMELINE_FRAME_TYPE_SINGLE)
 			return;
+
+		if (owner.keyframePriorSideRight)
+			time++;
+
 		var newFrames;
 		if (frame.type == TIMELINE_FRAME_TYPE_TWEEN) {
-			var nextFrame = frameAt(frameIndex + 1);
-			if (nextFrame === void
-				|| frameIndex == frameCount - 2) {
-				var loopBeginTime = root.owner.loopBeginTime;
-				var loopEndTime = root.owner.loopEndTime;
-				if (loopBeginTime >= 0
-					&& loopEndTime > frame.time
-					&& loopBeginTime < frame.time
-					&& findFrame(loopBeginTime) >= 0
-					&& frameAt(findFrame(loopBeginTime)).type != TIMELINE_FRAME_TYPE_NULL) {
-					nextFrame = createNewFrame(root.owner.loopEndTime, TIMELINE_FRAME_TYPE_CONTINUOUS, getCompleteFrameContent(loopBeginTime));
+			if (owner.keyframePriorSideLeft) {
+				var nextFrame = frameAt(frameIndex + 1);
+				if (nextFrame === void
+					|| frameIndex == frameCount - 2) {
+					var loopBeginTime = root.owner.loopBeginTime;
+					var loopEndTime = root.owner.loopEndTime;
+					if (loopBeginTime >= 0
+						&& loopEndTime > frame.time
+						&& loopBeginTime < frame.time
+						&& findFrame(loopBeginTime) >= 0
+						&& frameAt(findFrame(loopBeginTime)).type != TIMELINE_FRAME_TYPE_NULL) {
+						nextFrame = createNewFrame(root.owner.loopEndTime, TIMELINE_FRAME_TYPE_CONTINUOUS, getCompleteFrameContent(loopBeginTime));
+					}
 				}
+				if (nextFrame !== void
+					&& nextFrame.type != TIMELINE_FRAME_TYPE_NULL)
+					newFrames = splitTweenFrame(frame, nextFrame, time);
+				else
+					newFrames = splitContinuousFrame(frame, time);
+			} else if (owner.keyframePriorSideRight) {
+				var length = frameLengthAt(frameIndex);
+				var prevFrame = frameAt(frameIndex - 1);
+				if (prevFrame !== void
+					&& prevFrame.type != TIMELINE_FRAME_TYPE_NULL)
+					newFrames = splitTweenFrameRight(prevFrame, frame, time, length);
+				else
+					newFrames = splitContinuousFrame(frame, time);
 			}
-			if (nextFrame !== void
-				&& nextFrame.type != TIMELINE_FRAME_TYPE_NULL)
-				newFrames = splitTweenFrame(frame, nextFrame, time);
-			else
-				newFrames = splitContinuousFrame(frame, time);
 		} else
 			newFrames = splitContinuousFrame(frame, time);
 		frameList[frameIndex] = newFrames[0];
@@ -629,7 +690,10 @@ class KTimeLineItem extends KListItem
 			var frameIndex = findFrame(owner.selectedTime);
 			if (frameIndex >= 0) {
 				var frame = frameAt(frameIndex);
-				return frame.time == owner.selectedTime;
+				if (owner.keyframePriorSideLeft)
+					return frame.time == owner.selectedTime;
+				else if (owner.keyframePriorSideRight)
+					return frame.time + frameLengthAt(frameIndex) -1 == owner.selectedTime;
 			}
 			return false;
 		}
@@ -657,8 +721,12 @@ class KTimeLineItem extends KListItem
 			var frameIndex = findFrame(owner.selectedTime);
 			if (frameIndex >= 0) {
 				var frame = frameAt(frameIndex);
-				return frame.type != TIMELINE_FRAME_TYPE_NULL
-					&& frame.time == owner.selectedTime;
+				if (frame.type != TIMELINE_FRAME_TYPE_NULL) {
+					if (owner.keyframePriorSideLeft)
+						return frame.time == owner.selectedTime;
+					else if (owner.keyframePriorSideRight)
+						return frame.time + frameLengthAt(frameIndex) - 1 == owner.selectedTime;
+				}
 			}
 			return false;
 		}
@@ -696,6 +764,22 @@ class KTimeLineItem extends KListItem
 		return result;
 	}
 
+	function copyFrameRangeRight(beginTime, endTime) {
+		var result = [];
+		for (var i = 0; i < frameList.count - 1; i++) {
+			var frame = frameList[i];
+			var nextFrame = frameList[i + 1];
+			var time = nextFrame.time - 1;
+			if (beginTime <= time
+				&& time < endTime) {
+				var copyFrame = duplicateStruct(frame);
+				copyFrame.time = nextFrame.time - 1 - beginTime;
+				result.add(copyFrame);
+			}
+		}
+		return result;
+	}
+
 	/**------------------------------
 	 * 指定の範囲のフレーム情報をカットする
 	 *
@@ -710,6 +794,23 @@ class KTimeLineItem extends KListItem
 			var frame = frameList[i];
 			if (beginTime <= frame.time
 				&& frame.time < endTime) {
+				frameList.erase(i);
+				i--;
+			}
+		}
+		invalidateNullFrame();
+		return result;
+	}
+
+	function cutFrameRangeRight(beginTime, endTime) {
+		var result = copyFrameRangeRight(beginTime, endTime);
+		// 範囲内にあるフレームをひとまず削除
+		for (var i = 0; i < frameList.count - 1; i++) {
+			var frame = frameList[i];
+			var nextFrame = frameList[i + 1];
+			var time = nextFrame.time - 1;
+			if (beginTime <= time
+				&& time < endTime) {
 				frameList.erase(i);
 				i--;
 			}
@@ -753,6 +854,31 @@ class KTimeLineItem extends KListItem
 		invalidateNullFrame();
 	}
 
+	function pasteFrameRight(time, copyFrameList) {
+		// リストが空ならそのまま。
+		if (copyFrameList.count == 0)
+			return;
+		var beginTime, endTime;
+		beginTime = time + copyFrameList[0].time;
+		endTime = time + copyFrameList[-1].time + 1;
+		// 範囲内にあるフレームをひとまず削除
+		for (var i = 0; i < frameList.count - 1; i++) {
+			var nextFrame = frameList[i];
+			var time = nextFrame.time - 1;
+			if (beginTime <= time
+				&& time < endTime) {
+				frameList.erase(i);
+				i--;
+			}
+		}
+		// 挿入可能位置にフレームを全て挿入
+		var insertIndex;
+		for (var i = 0; i < copyFrameList.count; i++) {
+			var frame = copyFrameList[i];
+			insertKeyFrame(time + frame.time, frame.type, frame.content);
+		}
+	}
+
 	/*------------------------------
 	 * エリア内のフレームをコピーする
 	 ------------------------------*/
@@ -783,10 +909,20 @@ class KTimeLineItem extends KListItem
 	 * フレームをコピーする
 	 ------------------------------*/
 	function copyFrames(beginTime, endTime) {
-		if (owner.hasSelection)
-			return copyFramesBySelection(...);
-		else
-			return copyFramesByArea(...);
+		if (owner.selectionModeFrameEnabled) {
+			if (owner.hasSelection)
+				return copyFramesBySelection(...);
+			else
+				return copyFramesByArea(...);
+		} else if (owner.selectionModeRangeEnabled) {
+			if (! supportSelection
+				|| ! view.isItemInArea(this))
+				return [];
+			if (owner.keyframePriorSideLeft)
+				return copyFrameRange(...);
+			else if (owner.keyframePriorSideRight)
+				return copyFrameRangeRight(...);
+		}
 	}
 
 	/*------------------------------
@@ -820,16 +956,35 @@ class KTimeLineItem extends KListItem
 	 * フレームをカットする
 	 ------------------------------*/
 	function cutFrames(beginTime, endTime) {
-		if (owner.hasSelection)
-			return cutFramesBySelection(...);
-		else
-			return cutFramesByArea(...);
+		if (owner.selectionModeFrameEnabled) {
+			if (owner.hasSelection)
+				return cutFramesBySelection(...);
+			else
+				return cutFramesByArea(...);
+		} else if (owner.selectionModeRangeEnabled) {
+			if (! supportSelection
+				|| ! view.isItemInArea(this))
+				return [];
+			if (owner.keyframePriorSideLeft)
+				return cutFrameRange(...);
+			else if (owner.keyframePriorSideRight)
+				return cutFrameRangeRight(...);
+		}
 	}
 
 	/*------------------------------
 	 * 選択範囲をペーストする
 	 ------------------------------*/
 	function pasteSelection(pasteTime, frames) {
+		if (! owner.selectionModeFrameEnabled
+			&& owner.selectionModeRangeEnabled) {
+			if (owner.keyframePriorSideLeft)
+				pasteFrame(...);
+			else if (owner.keyframePriorSideRight)
+				pasteFrameRight(...);
+			return;
+		}
+
 		selection = [];
 		frames.each(pasteTime, owner.selectionModeFrameEnabled, function(frame, pasteTime, selectionEnabled) {
 			frame = duplicateStruct(frame);
@@ -1207,6 +1362,8 @@ class KTimeLineItem extends KListItem
 
 	// 新規フレームを作成して返す
 	function createNewFrame(time, type, content) {
+		if (type == TIMELINE_FRAME_TYPE_NULL)
+			content = void;
 		return %[ time: time,
 				  type: type,
 				  content: content ];
@@ -1225,6 +1382,15 @@ class KTimeLineItem extends KListItem
 		var result = [];
 		result[0] = duplicateStruct(fromFrame);
 		result[1] = createNewFrame(splitTime, fromFrame.type, tweenFrameContent(fromFrame.content, toFrame.content, (splitTime - fromFrame.time) / (toFrame.time - fromFrame.time)));
+		return result;
+	}
+
+	// 補完フレームを2つに分割する(キーフレーム右側バージョン)
+	function splitTweenFrameRight(fromFrame, toFrame, splitTime, frameLength) {
+		var result = [];
+		var beginTime = toFrame.time;
+		result[0] = createNewFrame(toFrame.time, toFrame.type, tweenFrameContent(fromFrame.content, toFrame.content, (splitTime - toFrame.time) / frameLength));
+		result[1] = createNewFrame(splitTime, toFrame.type, duplicateStruct(toFrame.content));
 		return result;
 	}
 
