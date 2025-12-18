@@ -1341,4 +1341,158 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
+	function getTargetFramesByArea(targetClassName) {
+		// 操作対象になるレイヤとフレームを数え上げる
+		var targetItemInfoList = [];
+		var targetItemList = [];
+		var targetFrameList = [];
+		var targetItemFrameIndexList = [];
+
+		var frameLength = 0;
+
+		// 選択状態で無い時は、カーソルの差しているフレームを対象にする
+		if (! hasArea) {
+			var item = drawItemList[selectedLayer];
+			if (item.supportSelection
+				&& item.pointEffectiveFrameHead) {
+				var index = item.findFrame(selectedTime);
+				var frame = item.frameAt(index);
+				var targetItemInfo = %[ targetFrameList: [ frame ] ];
+				targetItemInfoList.add(targetItemInfo);
+				frameLength = item.frameLengthAt(index);
+				targetItemList.add(item);
+				targetItemFrameIndexList.add([ index ]);
+				targetFrameList.add(frame);
+			}
+		} else {
+			// 選択状態の場合は、選択範囲内のフレームを対象にする
+			var itemList = drawItemList;
+			var targetItemInfo = %[ targetFrameList: [] ];
+			var begin = view.areaIndexRect.left;
+			var end = view.areaIndexRect.right;
+			for (var i = 0; i < itemList.count; i++) {
+				var item = itemList[i];
+				if (targetClassName != ""
+					&& ! (item instanceof targetClassName))
+					continue;
+				if (item.supportSelection
+					&& view.isItemInArea(item)) {
+					var from = item.findFrame(begin, true);
+					var to = item.findFrame(end, true);
+					var frameIndexList = [];
+
+					for (var j = from; j <= to; j++) {
+						var frame = item.frameAt(j);
+						if (frame === void)
+							continue;
+						var length = item.frameLengthAt(j);
+						var time;
+						if (keyframePriorSideLeft)
+							time = frame.time;
+						else if (keyframePriorSideRight)
+							time = frame.time + length - 1;
+						if (frame !== void
+							&& begin <= time
+							&& time < end
+							&& frame.type != TIMELINE_FRAME_TYPE_NULL) {
+							frameLength = int(Math.max(frameLength, length));
+							targetFrameList.add(frame);
+							targetItemInfo.targetFrameList.add(frame);
+							frameIndexList.add(j);
+						}
+					}
+					if (frameIndexList.count) {
+						targetItemInfoList.add(targetItemInfo);
+						targetItemList.add(item);
+						targetItemFrameIndexList.add(frameIndexList);
+					}
+				}
+			}
+		}
+
+		return %[
+			frameLength: frameLength,
+			targetItemInfoList: targetItemInfoList,
+			targetItemList: targetItemList,
+			targetFrameList: targetFrameList,
+			targetItemFrameIndexList: targetItemFrameIndexList,
+		];
+	}
+
+	function getTargetFramesBySelection(targetClassName) {
+		var targetItemInfoList = [];
+		var targetItemList = [];
+		var targetFrameList = [];
+		var targetItemFrameIndexList = [];
+
+		var frameLength = 0;
+
+		// 選択状態をチェック
+		var hasTarget = false;
+
+		if (! hasSelection
+			|| hasSingleSelection) {
+			selectCurrentPoint();
+		}
+
+		if (hasMultipleSelection)
+			hasTarget = true;
+		else if (hasSingleSelection) {
+			var item = list.selection;
+			if (item !== void
+				&& item.hasSelection
+				&& item.pointEffectiveFrameHead) {
+				hasTarget = true;
+			}
+		}
+
+		// 選択状態の場合は、選択範囲内のフレームを対象にする
+		if (hasTarget) {
+			var itemList = drawItemList;
+			var targetItemInfo = %[ targetFrameList: [] ];
+			for (var i = 0; i < itemList.count; i++) {
+				var item = itemList[i];
+				if (targetClassName != ""
+					&& ! (item instanceof targetClassName))
+					continue;
+				if (item.hasSelection) {
+					var frameIndexList = duplicateStruct(item.selection);
+					for (var j = 0; j < frameIndexList.count; j++) {
+						var frameIndex = frameIndexList[j];
+						var frame = item.frameAt(frameIndex);
+						frameLength = int(Math.max(frameLength, item.frameLengthAt(frameIndex)));
+						targetFrameList.add(frame);
+						targetItemInfo.targetFrameList.add(frame);
+					}
+					targetItemInfoList.add(targetItemInfo);
+					targetItemList.add(item);
+					targetItemFrameIndexList.add(frameIndexList);
+				}
+			}
+		}
+
+		return %[
+			frameLength: frameLength,
+			targetItemInfoList: targetItemInfoList,
+			targetItemList: targetItemList,
+			targetFrameList: targetFrameList,
+			targetItemFrameIndexList: targetItemFrameIndexList,
+		];
+	}
+
+	function getTargetFrames(targetClassName = "") {
+		if (selectionModeFrameEnabled)
+			return getTargetFramesBySelection(targetClassName);
+		else if (selectionModeRangeEnabled)
+			return getTargetFramesByArea(targetClassName);
+
+		return %[
+			frameLength: 0,
+			targetItemInfoList: [],
+			targetItemList: [],
+			targetFrameList: [],
+			targetItemFrameIndexList: [],
+		];
+	}
+
 };

@@ -14,7 +14,7 @@ class KTimeLineItem extends KListItem
 	// 選択範囲
 	var selection = [];
 	// マーカーマスク
-	var markerMask = TIMELINE_MARKER_MASK_RIGHT; // LEFT;
+	var markerMask = TIMELINE_MARKER_MASK_LEFT;
 	// 範囲選択対応
 	var supportSelection = true;
 
