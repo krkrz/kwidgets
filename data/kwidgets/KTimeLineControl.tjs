@@ -1352,17 +1352,20 @@ class KTimeLineControl extends KEntity
 
 		// 選択状態で無い時は、カーソルの差しているフレームを対象にする
 		if (! hasArea) {
-			var item = drawItemList[selectedLayer];
-			if (item.supportSelection
-				&& item.pointEffectiveFrameHead) {
-				var index = item.findFrame(selectedTime);
-				var frame = item.frameAt(index);
-				var targetItemInfo = %[ targetFrameList: [ frame ] ];
-				targetItemInfoList.add(targetItemInfo);
-				frameLength = item.frameLengthAt(index);
-				targetItemList.add(item);
-				targetItemFrameIndexList.add([ index ]);
-				targetFrameList.add(frame);
+			if (selectedLayer >= 0
+				&& selectedTime >= 0) {
+				var item = drawItemList[selectedLayer];
+				if (item.supportSelection
+					&& item.pointEffectiveFrameHead) {
+					var index = item.findFrame(selectedTime);
+					var frame = item.frameAt(index);
+					var targetItemInfo = %[ targetFrameList: [ frame ] ];
+					targetItemInfoList.add(targetItemInfo);
+					frameLength = item.frameLengthAt(index);
+					targetItemList.add(item);
+					targetItemFrameIndexList.add([ index ]);
+					targetFrameList.add(frame);
+				}
 			}
 		} else {
 			// 選択状態の場合は、選択範囲内のフレームを対象にする
