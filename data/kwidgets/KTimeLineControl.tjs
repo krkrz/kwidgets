@@ -551,6 +551,15 @@ class KTimeLineControl extends KEntity
 	}
 
 	/**------------------------------
+	 * viewのカーソルが有効か
+------------------------------*/
+	property viewCursorActive {
+		getter {
+			return view.cursorActive;
+		}
+	}
+
+	/**------------------------------
 	 * 選択をしているかどうか
 	 *
 	 * @return 選択をしているかどうか
@@ -1326,6 +1335,18 @@ class KTimeLineControl extends KEntity
 	property selectionModeFrameEnabled {
 		getter {
 			return (selectionModeMask & TIMELINE_SELECTION_MODE_MASK_FRAME) != 0;
+		}
+	}
+
+	property selectionModeRangeOnly {
+		getter {
+			return selectionModeMask == TIMELINE_SELECTION_MODE_MASK_RANGE;
+		}
+	}
+
+	property selectionModeFrameOnly {
+		getter {
+			return selectionModeMask == TIMELINE_SELECTION_MODE_MASK_FRAME;
 		}
 	}
 

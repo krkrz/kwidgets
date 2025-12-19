@@ -227,11 +227,24 @@ class KTimeLineLayerView extends KVirtualWidget
 		getter {
 			return owner.selectedTime;
 		}
+		setter (v) {
+			owner.selectedTime = v;
+		}
 	}
 
 	property selectedLayer {
 		getter {
 			return owner.selectedLayer;
+		}
+		setter (v) {
+			owner.selectedLayer = v;
+		}
+	}
+
+	property cursorActive {
+		getter {
+			return selectedTime >= 0
+				&& selectedLayer >= 0;
 		}
 	}
 
@@ -1621,49 +1634,78 @@ class KTimeLineLayerView extends KVirtualWidget
 			super.onKeyDown(...);
 			break;
 
+
+			//----------------------------------------------------------------------
+			// 左カーソル
 		case VK_LEFT:
-			if (hasArea
-				&& (shift & ssCtrl)) {
+			//--------------------------------------------------
+			// Ctrlキーオペレーション(範囲移動)
+			if (shift & ssCtrl) {
+				// Shiftで移動量10倍
 				var step = (shift & ssShift) ? 10 : 1;
-				var movable = true;
-				for (var i = 0; i < list.drawItemList.count; i++) {
-					if (! isIndexInArea(i))
-						continue;
-					var item = list.drawItemList[i];
-					step = Math.min(step, areaIndexRect.left - item.leftSideFrameNum(areaIndexRect.left));
-					if (step <= 0) {
-						movable = false;
-						break;
-					}
-				}
-				if (movable) {
+				//------------------------------
+				// エリア移動
+				if (hasArea) {
+					var movable = true;
 					for (var i = 0; i < list.drawItemList.count; i++) {
-						if (isIndexInArea(i)) {
-							var item = list.drawItemList[i];
-							item.moveFrame(areaIndexRect.left, areaIndexRect.left - step, true, false);
+						if (! isIndexInArea(i))
+							continue;
+						var item = list.drawItemList[i];
+						step = Math.min(step, areaIndexRect.left - item.leftSideFrameNum(areaIndexRect.left));
+						if (step <= 0) {
+							movable = false;
+							break;
 						}
 					}
-					areaIndexRect.offsetBy(-step, 0);
-					areaRect.offsetBy(-step * TIMELINE_FRAME_WIDTH, 0);
-					list.redrawAllItemsView();
-					owner.onMultipleFrameDragged();
-					owner.onRenderFrame();
+					if (movable) {
+						for (var i = 0; i < list.drawItemList.count; i++) {
+							if (isIndexInArea(i)) {
+								var item = list.drawItemList[i];
+								item.moveFrame(areaIndexRect.left, areaIndexRect.left - step, true, false);
+							}
+						}
+						areaIndexRect.offsetBy(-step, 0);
+						areaRect.offsetBy(-step * TIMELINE_FRAME_WIDTH, 0);
+						list.redrawAllItemsView();
+						owner.onMultipleFrameDragged();
+						owner.onRenderFrame();
+						owner.selectedTime -= step;
+						notifyMove();
+					}
+					return;
 				}
-				return;
+				//------------------------------
+				// カーソル移動
+				else if (owner.selectionModeRangeOnly) {
+					if (cursorActive) {
+						var item = list.drawItemList[owner.selectedLayer];
+						step = Math.min(step, owner.selectedTime - item.leftSideFrameNum(owner.selectedTime));
+						if (step > 0) {
+							item.moveFrame(owner.selectedTime, owner.selectedTime - step, true);
+							item.onFrameDragged();
+							owner.onRenderFrame();
+							owner.selectedTime -= step;
+							notifyMove();
+							return;
+						}
+					}
+				}
+				//------------------------------
+				// 選択フレーム移動
+				else if (owner.selectionModeFrameEnabled) {
+					shiftSelection(-step);
+					owner.selectedTime -= step;
+					notifyMove();
+					return;
+				}
 			}
-			if ((shift & ssCtrl) && owner.selectionModeFrameEnabled) {
-				var step = (shift & ssShift) ? 10 : 1;
-				shiftSelection(-step);
-				owner.selectedTime -= step;
-				noticeRect(owner.selectedTime * TIMELINE_FRAME_WIDTH,
-						   owner.selectedLayer * TIMELINE_FRAME_HEIGHT,
-						   TIMELINE_FRAME_WIDTH,
-						   TIMELINE_FRAME_HEIGHT);
-				return;
-			}
+			//--------------------------------------------------
+			// Altオペレーション(キーフレーム間移動)
 			if (shift & ssAlt) {
 				if (owner.selectedLayer >= 0) {
 					var item = list.drawItemList[owner.selectedLayer];
+					//------------------------------
+					// 左キーフレーム時挙動
 					if (owner.keyframePriorSideLeft) {
 						var frameIndex = item.findFrame(owner.selectedTime - 1, true);
 						var frame = item.frameAt(frameIndex);
@@ -1672,62 +1714,97 @@ class KTimeLineLayerView extends KVirtualWidget
 							cursorMoved = true;
 						}
 					}
+					//------------------------------
+					// 右キーフレーム時挙動
 					else if (owner.keyframePriorSideRight) {
 						var frameIndex = item.findFrame(owner.selectedTime, true);
 						var frame = item.frameAt(frameIndex);
 						if (frame !== void) {
 							owner.selectedTime = frame.time - 1;
 							cursorMoved = true;
-						}
+						} else if (item.frameCount > 0
+								   && selectedTime < item.frameAt(0).time)
+							selectedTime = 0;
 					} else {
 						owner.selectedTime = 0;
 						cursorMoved = true;
 					}
 				}
-			} else {
+			}
+			//--------------------------------------------------
+			// カーソル移動
+			else {
 				if (owner.selectedTime > 0) {
 					owner.selectedTime--;
 					cursorMoved = true;
 				}
 			}
 			break;
+
+			//----------------------------------------------------------------------
+			// 右カーソル
 		case VK_RIGHT:
-			if (hasArea
-				&& (shift & ssCtrl)) {
+			//--------------------------------------------------
+			// Ctrlキーオペレーション(範囲移動)
+			if (shift & ssCtrl) {
+				// Shiftで移動量10倍
 				var step = (shift & ssShift) ? 10 : 1;
-				for (var i = 0; i < list.drawItemList.count; i++) {
-					if (isIndexInArea(i)) {
-						var item = list.drawItemList[i];
-						item.moveFrame(areaIndexRect.left, areaIndexRect.left + step, true, false);
+				//------------------------------
+				// エリア移動
+				if (hasArea) {
+					for (var i = 0; i < list.drawItemList.count; i++) {
+						if (isIndexInArea(i)) {
+							var item = list.drawItemList[i];
+							item.moveFrame(areaIndexRect.left, areaIndexRect.left + step, true, false);
+						}
 					}
+					areaIndexRect.offsetBy(step, 0);
+					areaRect.offsetBy(step * TIMELINE_FRAME_WIDTH, 0);
+					list.redrawAllItemsView();
+					owner.onMultipleFrameDragged();
+					owner.onRenderFrame();
+					owner.selectedTime += step;
+					notifyMove();
+					return;
 				}
-				areaIndexRect.offsetBy(step, 0);
-				areaRect.offsetBy(step * TIMELINE_FRAME_WIDTH, 0);
-				list.redrawAllItemsView();
-				owner.onMultipleFrameDragged();
-				owner.onRenderFrame();
-				return;
+				//------------------------------
+				// カーソル移動
+				else if (selectedLayer >= 0) {
+					var item = list.drawItemList[selectedLayer];
+					item.moveFrame(selectedTime, selectedTime + step, true);
+					item.onFrameDragged();
+					owner.onRenderFrame();
+					owner.selectedTime += step;
+					notifyMove();
+					return;
+				}
+				//------------------------------
+				// 選択フレーム移動
+				if ((shift & ssCtrl) && owner.selectionModeFrameEnabled) {
+					var step = (shift & ssShift) ? 10 : 1;
+					shiftSelection(step);
+					owner.selectedTime += step;
+					notifyMove();
+					return;
+				}
 			}
-			if ((shift & ssCtrl) && owner.selectionModeFrameEnabled) {
-				var step = (shift & ssShift) ? 10 : 1;
-				shiftSelection(step);
-				owner.selectedTime += step;
-				noticeRect(owner.selectedTime * TIMELINE_FRAME_WIDTH,
-						   owner.selectedLayer * TIMELINE_FRAME_HEIGHT,
-						   TIMELINE_FRAME_WIDTH,
-						   TIMELINE_FRAME_HEIGHT);
-				return;
-			}
-			if (shift & ssAlt) {
+			//--------------------------------------------------
+			// Altオペレーション(キーフレーム間移動)
+			else if (shift & ssAlt) {
 				if (owner.selectedLayer >= 0) {
 					var item = list.drawItemList[owner.selectedLayer];
+					//------------------------------
+					// 左キーフレーム時挙動
 					if (owner.keyframePriorSideLeft) {
 						var frameIndex = item.findFrame(owner.selectedTime, true);
 						if (frameIndex < item.frameCount - 1) {
 							owner.selectedTime = item.frameAt(frameIndex + 1).time;
 							cursorMoved = true;
 						}
-					} else if (owner.keyframePriorSideRight) {
+					}
+					//------------------------------
+					// 右キーフレーム時挙動
+					else if (owner.keyframePriorSideRight) {
 						var frameIndex = item.findFrame(owner.selectedTime + 1, true);
 						if (frameIndex < item.frameCount - 1) {
 							owner.selectedTime = item.frameAt(frameIndex + 1).time - 1;
@@ -1735,7 +1812,10 @@ class KTimeLineLayerView extends KVirtualWidget
 						}
 					}
 				}
-			} else {
+			}
+			//--------------------------------------------------
+			// カーソル移動
+			else {
 				owner.selectedTime++;
 				cursorMoved = true;
 			}
