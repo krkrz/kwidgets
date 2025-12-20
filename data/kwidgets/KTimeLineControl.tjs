@@ -750,12 +750,6 @@ class KTimeLineControl extends KEntity
 	 * タイムラインが右クリックされた
 	 ------------------------------*/
 	function onTimeLineRightClick {
-	}
-
-	/**------------------------------
-	 * タイムラインが右クリックされた
-	 ------------------------------*/
-	function onTimeLineRightClick {
 		var menu = new KContextMenu(window);
 		onBuildCommonTimeLineContextMenu(menu);
 		if (menu.childCount == 0)
@@ -1362,7 +1356,7 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
-	function getTargetFramesByArea(targetClassName) {
+	function getTargetFramesByArea(targetClassName = "", pickWholeFrame = false) {
 		// 操作対象になるレイヤとフレームを数え上げる
 		var targetItemInfoList = [];
 		var targetItemList = [];
@@ -1377,7 +1371,8 @@ class KTimeLineControl extends KEntity
 				&& selectedTime >= 0) {
 				var item = drawItemList[selectedLayer];
 				if (item.supportSelection
-					&& item.pointEffectiveFrameHead) {
+					&& ((pickWholeFrame && item.pointEffectiveFrame)
+						|| item.pointEffectiveFrameHead)) {
 					var index = item.findFrame(selectedTime);
 					var frame = item.frameAt(index);
 					var targetItemInfo = %[ targetFrameList: [ frame ] ];
@@ -1504,11 +1499,11 @@ class KTimeLineControl extends KEntity
 		];
 	}
 
-	function getTargetFrames(targetClassName = "") {
+	function getTargetFrames(targetClassName = "", pickWholeFrame = false) {
 		if (selectionModeFrameEnabled)
-			return getTargetFramesBySelection(targetClassName);
+			return getTargetFramesBySelection(targetClassName, pickWholeFrame);
 		else if (selectionModeRangeEnabled)
-			return getTargetFramesByArea(targetClassName);
+			return getTargetFramesByArea(targetClassName, pickWholeFrame);
 
 		return %[
 			frameLength: 0,

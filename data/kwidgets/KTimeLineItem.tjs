@@ -17,6 +17,8 @@ class KTimeLineItem extends KListItem
 	var markerMask = TIMELINE_MARKER_MASK_LEFT;
 	// 範囲選択対応
 	var supportSelection = true;
+	// 連続フレームを補完フレームとして扱う
+	var forceTweenFrame = false;
 
 	/**------------------------------
 	 * コンストラクタ
@@ -298,7 +300,8 @@ class KTimeLineItem extends KListItem
 			else
 				return void;
 		case TIMELINE_FRAME_TYPE_CONTINUOUS:
-			return frame.content;
+			if (! forceTweenFrame)
+				return frame.content;
 		case TIMELINE_FRAME_TYPE_TWEEN:
 			var nextFrame = frameAt(frameIndex + 1);
 			if (nextFrame.type == TIMELINE_FRAME_TYPE_NULL) {
@@ -441,7 +444,8 @@ class KTimeLineItem extends KListItem
 			time++;
 
 		var newFrames;
-		if (frame.type == TIMELINE_FRAME_TYPE_TWEEN) {
+		if (frame.type == TIMELINE_FRAME_TYPE_TWEEN
+			|| (forceTweenFrame && frame.type == TIMELINE_FRAME_TYPE_CONTINUOUS)) {
 			if (owner.keyframePriorSideLeft) {
 				var nextFrame = frameAt(frameIndex + 1);
 				if (nextFrame === void

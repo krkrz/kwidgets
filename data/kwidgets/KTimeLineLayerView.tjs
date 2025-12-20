@@ -2038,9 +2038,9 @@ class KTimeLineLayerView extends KVirtualWidget
 		});
 	}
 
-	function expandFramesByArea(stride = 1) { 
-		drawItemList.each(this, stride, function(item, self, stride) {
-			if (! self.isItemInArea(item)
+	function expandFramesByArea(stride = 1) {
+		drawItemList.eachWithIndex(this, stride, function(item, index, self, stride) {
+			if (! (self.isItemInArea(item) || (! self.hasArea && index == self.selectedLayer))
 				|| ! item.supportSelection)
 				return;
 			var frameList = item.frameList;
@@ -2053,15 +2053,17 @@ class KTimeLineLayerView extends KVirtualWidget
 	}
 
 	function shrinkFramesByArea(stride = 1) {
-		drawItemList.each(this, stride, function(item, self, stride) {
-			if (! self.isItemInArea(item)
+		drawItemList.eachWithIndex(this, stride, function(item, index, self, stride) {
+			if (! (self.isItemInArea(item) || (! self.hasArea && index == self.selectedLayer))
 				|| ! item.supportSelection)
 				return;
 			var frameList = item.frameList;
-			if (frameList.count > 0)
-				frameList[0].time = Math.max(0, frameList[0].time - stride);
-			for (var i = 1; i < frameList.count; i++)
-				frameList[i].time = int(Math.max(frameList[i - 1].time + 1, frameList[i].time - (i + 1) * stride));
+			var step = 1;
+			for (var i = 0; i < frameList.count; i++)
+				if (frameList[i].time != 0)
+					frameList[i].time -=  (step++) * stride;
+			for (var i = 0; i < frameList.count; i++)
+				frameList[i].time = int(Math.max(frameList[i].time, i));
 			item.redrawAllFrame();
 		});
 	}
@@ -2110,14 +2112,16 @@ class KTimeLineLayerView extends KVirtualWidget
 	}
 
 	function expandFrames(stride = 1) {
-		if (hasArea)
+		if (hasArea
+			|| owner.selectionModeRangeOnly)
 			expandFramesByArea(stride);
 		else if (hasSelection)
 			expandFramesBySelection(stride);
 	}
 
 	function shrinkFrames(stride = 1) {
-		if (hasArea)
+		if (hasArea
+			|| owner.selectionModeRangeOnly)
 			shrinkFramesByArea(stride);
 		else if (hasSelection)
 			shrinkFramesBySelection(stride);
