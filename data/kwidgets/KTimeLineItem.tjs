@@ -127,6 +127,12 @@ class KTimeLineItem extends KListItem
 		}
 	}
 
+	property inArea {
+		getter {
+			return view.isItemInArea(this);
+		}
+	}
+
 	/**------------------------------
 	 * フレームリスト
 	 *
