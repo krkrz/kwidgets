@@ -375,10 +375,10 @@ class KTimeLineItem extends KListItem
 				if (doInvalidate)
 					invalidateNullFrame();
 			} else {
-				var newFrame = createNewFrame(time, type, content);
+				var newFrame = createNewFrame(0, type, content);
 				frameList.insert(0, newFrame);
-				if (frameList.count > 1
-					&& frameList[1].time != time + 1)
+				if (frameList.count == 1
+					|| frameList[1].time != time + 1)
 					frameList.insert(1, createNewFrame(time + 1, TIMELINE_FRAME_TYPE_NULL, void));
 				if (doInvalidate)
 					invalidateNullFrame();
