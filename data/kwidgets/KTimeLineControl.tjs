@@ -1386,7 +1386,6 @@ class KTimeLineControl extends KEntity
 		} else {
 			// 選択状態の場合は、選択範囲内のフレームを対象にする
 			var itemList = drawItemList;
-			var targetItemInfo = %[ targetFrameList: [] ];
 			var begin = view.areaIndexRect.left;
 			var end = view.areaIndexRect.right;
 			for (var i = 0; i < itemList.count; i++) {
@@ -1399,6 +1398,7 @@ class KTimeLineControl extends KEntity
 					var from = item.findFrame(begin, true);
 					var to = item.findFrame(end, true);
 					var frameIndexList = [];
+					var targetItemInfo = %[ targetFrameList: [] ];
 
 					for (var j = from; j <= to; j++) {
 						var frame = item.frameAt(j);
