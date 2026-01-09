@@ -353,6 +353,11 @@ class KTimeLineItem extends KListItem
 				frameList.erase(frameIndex);
 				correctSelectionByRemoveIndex(frameIndex);
 				frameIndex--;
+			} else if (frame !== void
+					   && frameIndex == frameList.count - 1
+					   && frame.type == TIMELINE_FRAME_TYPE_NULL) {
+				frameList.erase(frameIndex);
+				frameIndex--;
 			}
 
 			var newFrame;
