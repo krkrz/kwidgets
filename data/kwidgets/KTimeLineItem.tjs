@@ -924,7 +924,7 @@ class KTimeLineItem extends KListItem
 				return copyFramesBySelection(...);
 			else
 				return copyFramesByArea(...);
-		} else if (owner.selectionModeRangeEnabled) {
+		} else if (owner.selectionModeAreaEnabled) {
 			if (! supportSelection
 				|| ! view.isItemInArea(this))
 				return [];
@@ -971,7 +971,7 @@ class KTimeLineItem extends KListItem
 				return cutFramesBySelection(...);
 			else
 				return cutFramesByArea(...);
-		} else if (owner.selectionModeRangeEnabled) {
+		} else if (owner.selectionModeAreaEnabled) {
 			if (! supportSelection
 				|| ! view.isItemInArea(this))
 				return [];
@@ -987,7 +987,7 @@ class KTimeLineItem extends KListItem
 	 ------------------------------*/
 	function pasteSelection(pasteTime, frames) {
 		if (! owner.selectionModeFrameEnabled
-			&& owner.selectionModeRangeEnabled) {
+			&& owner.selectionModeAreaEnabled) {
 			if (owner.keyframePriorSideLeft)
 				pasteFrame(...);
 			else if (owner.keyframePriorSideRight)

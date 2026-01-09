@@ -698,7 +698,7 @@ class KTimeLineLayerView extends KVirtualWidget
 	function selectAll() {
 		if (owner.selectionModeFrameEnabled)
 			selectAllByFrames();
-		else if (owner.selectionModeRangeEnabled)
+		else if (owner.selectionModeAreaEnabled)
 			selectAllByRanges();
 	}
 
@@ -1307,7 +1307,7 @@ class KTimeLineLayerView extends KVirtualWidget
 			dragEnterCustomMouseEvent(...);
 		else if (boundaryDragFrameIndex >= 0)
 			dragEnterFrameBoundary(...);
-		else if (owner.selectionModeRangeEnabled) {
+		else if (owner.selectionModeAreaEnabled) {
 			dragEnterAreaAssign(...);
 		}
 
@@ -1676,7 +1676,7 @@ class KTimeLineLayerView extends KVirtualWidget
 				}
 				//------------------------------
 				// カーソル移動
-				else if (owner.selectionModeRangeOnly) {
+				else if (owner.selectionModeAreaOnly) {
 					if (cursorActive) {
 						var item = list.drawItemList[owner.selectedLayer];
 						step = Math.min(step, owner.selectedTime - item.leftSideFrameNum(owner.selectedTime));
@@ -2113,7 +2113,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	function expandFrames(stride = 1) {
 		if (hasArea
-			|| owner.selectionModeRangeOnly)
+			|| owner.selectionModeAreaOnly)
 			expandFramesByArea(stride);
 		else if (hasSelection)
 			expandFramesBySelection(stride);
@@ -2121,7 +2121,7 @@ class KTimeLineLayerView extends KVirtualWidget
 
 	function shrinkFrames(stride = 1) {
 		if (hasArea
-			|| owner.selectionModeRangeOnly)
+			|| owner.selectionModeAreaOnly)
 			shrinkFramesByArea(stride);
 		else if (hasSelection)
 			shrinkFramesBySelection(stride);

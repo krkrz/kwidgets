@@ -25,7 +25,7 @@ global.TIMELINE_NO_SELECTION = 0;
 global.TIMELINE_PARTIAL_SELECTION = 1;
 global.TIMELINE_FULL_SELECTION = 2;
 
-global.TIMELINE_SELECTION_MODE_MASK_RANGE = 1;
+global.TIMELINE_SELECTION_MODE_MASK_AREA = 1;
 global.TIMELINE_SELECTION_MODE_MASK_FRAME = 2;
 global.TIMELINE_KEYFRAME_PRIOR_SIDE_LEFT = 0;
 global.TIMELINE_KEYFRAME_PRIOR_SIDE_RIGHT = 1;
@@ -168,7 +168,7 @@ class KTimeLineControl extends KEntity
 
 	var extendListSelectionFromView = false;
 	var copySingleFrameAsNoWidth = false;
-	var selectionModeMask = TIMELINE_SELECTION_MODE_MASK_RANGE | TIMELINE_SELECTION_MODE_MASK_FRAME;
+	var selectionModeMask = TIMELINE_SELECTION_MODE_MASK_AREA | TIMELINE_SELECTION_MODE_MASK_FRAME;
 	var keyframePriorSide = TIMELINE_KEYFRAME_PRIOR_SIDE_LEFT;
 
 	/**------------------------------
@@ -1320,9 +1320,9 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
-	property selectionModeRangeEnabled {
+	property selectionModeAreaEnabled {
 		getter {
-			return (selectionModeMask & TIMELINE_SELECTION_MODE_MASK_RANGE) != 0;
+			return (selectionModeMask & TIMELINE_SELECTION_MODE_MASK_AREA) != 0;
 		}
 	}
 
@@ -1332,9 +1332,9 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
-	property selectionModeRangeOnly {
+	property selectionModeAreaOnly {
 		getter {
-			return selectionModeMask == TIMELINE_SELECTION_MODE_MASK_RANGE;
+			return selectionModeMask == TIMELINE_SELECTION_MODE_MASK_AREA;
 		}
 	}
 
@@ -1361,7 +1361,6 @@ class KTimeLineControl extends KEntity
 		var targetItemInfoList = [];
 		var targetItemList = [];
 		var targetFrameList = [];
-		var targetItemFrameIndexList = [];
 
 		var frameLength = 0;
 
@@ -1375,11 +1374,10 @@ class KTimeLineControl extends KEntity
 						|| item.pointEffectiveFrameHead)) {
 					var index = item.findFrame(selectedTime);
 					var frame = item.frameAt(index);
-					var targetItemInfo = %[ targetFrameList: [ frame ] ];
+					var targetItemInfo = %[ targetFrameList: [ frame ], frameIndexList: [ index ] ];
 					targetItemInfoList.add(targetItemInfo);
 					frameLength = item.frameLengthAt(index);
 					targetItemList.add(item);
-					targetItemFrameIndexList.add([ index ]);
 					targetFrameList.add(frame);
 				}
 			}
@@ -1397,8 +1395,7 @@ class KTimeLineControl extends KEntity
 					&& view.isItemInArea(item)) {
 					var from = item.findFrame(begin, true);
 					var to = item.findFrame(end, true);
-					var frameIndexList = [];
-					var targetItemInfo = %[ targetFrameList: [] ];
+					var targetItemInfo = %[ targetFrameList: [], frameIndexList: [] ];
 
 					for (var j = from; j <= to; j++) {
 						var frame = item.frameAt(j);
@@ -1417,13 +1414,12 @@ class KTimeLineControl extends KEntity
 							frameLength = int(Math.max(frameLength, length));
 							targetFrameList.add(frame);
 							targetItemInfo.targetFrameList.add(frame);
-							frameIndexList.add(j);
+							targetItemInfo.frameIndexList.add(j);
 						}
 					}
-					if (frameIndexList.count) {
+					if (targetItemInfo.frameIndexList.count) {
 						targetItemInfoList.add(targetItemInfo);
 						targetItemList.add(item);
-						targetItemFrameIndexList.add(frameIndexList);
 					}
 				}
 			}
@@ -1431,10 +1427,9 @@ class KTimeLineControl extends KEntity
 
 		return %[
 			frameLength: frameLength,
-			targetItemInfoList: targetItemInfoList,
 			targetItemList: targetItemList,
 			targetFrameList: targetFrameList,
-			targetItemFrameIndexList: targetItemFrameIndexList,
+			targetItemInfoList: targetItemInfoList,
 		];
 	}
 
@@ -1442,7 +1437,6 @@ class KTimeLineControl extends KEntity
 		var targetItemInfoList = [];
 		var targetItemList = [];
 		var targetFrameList = [];
-		var targetItemFrameIndexList = [];
 
 		var frameLength = 0;
 
@@ -1483,9 +1477,10 @@ class KTimeLineControl extends KEntity
 						targetFrameList.add(frame);
 						targetItemInfo.targetFrameList.add(frame);
 					}
+					targetItemInfo.frameIndexList = frameIndexList;
 					targetItemInfoList.add(targetItemInfo);
 					targetItemList.add(item);
-					targetItemFrameIndexList.add(frameIndexList);
+					targetItemInfoLisFrameIndexList.add(frameIndexList);
 				}
 			}
 		}
@@ -1495,22 +1490,20 @@ class KTimeLineControl extends KEntity
 			targetItemInfoList: targetItemInfoList,
 			targetItemList: targetItemList,
 			targetFrameList: targetFrameList,
-			targetItemFrameIndexList: targetItemFrameIndexList,
 		];
 	}
 
 	function getTargetFrames(targetClassName = "", pickWholeFrame = false) {
 		if (selectionModeFrameEnabled)
 			return getTargetFramesBySelection(targetClassName, pickWholeFrame);
-		else if (selectionModeRangeEnabled)
+		else if (selectionModeAreaEnabled)
 			return getTargetFramesByArea(targetClassName, pickWholeFrame);
 
 		return %[
 			frameLength: 0,
-			targetItemInfoList: [],
 			targetItemList: [],
 			targetFrameList: [],
-			targetItemFrameIndexList: [],
+			targetItemInfoList: [],
 		];
 	}
 
