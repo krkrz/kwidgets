@@ -413,8 +413,17 @@ class KTimeLineItem extends KListItem
 	}
 
 	function deleteKeyFrameAt(frameIndex) {
-		frameList[frameIndex].content = void;
-		frameList[frameIndex].type = TIMELINE_FRAME_TYPE_NULL;
+		if (owner.selectionModeFrameEnabled) {
+			frameList[frameIndex].content = void;
+			frameList[frameIndex].type = TIMELINE_FRAME_TYPE_NULL;
+		} else {
+			if (owner.keyframePriorSideLeft) {
+				frameList.erase(frameIndex);
+			} else {
+				frameList[frameIndex + 1].time = frameList[frameIndex].time;
+				frameList.erase(frameIndex);
+			}
+		}
 		invalidateNullFrame();
 		root.owner.onRenderFrame();
 	}
