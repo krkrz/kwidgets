@@ -275,7 +275,7 @@ class KTimeLineItem extends KListItem
 	 ------------------------------*/
 	function frameRightTimeAt(index) {
 		if (index < frameList.count - 1)
-			return frameList[index].time - 1;
+			return frameList[index + 1].time - 1;
 		else
 			return void;
 	}
@@ -368,8 +368,6 @@ class KTimeLineItem extends KListItem
 
 			frameList.insert(frameIndex + 1, newFrame);
 			correctSelectionByInsertIndex(frameIndex);
-			if (doInvalidate)
-				invalidateNullFrame();
 		}
 		else if (owner.keyframePriorSideRight) {
 			var frameRightTime = frameRightTimeAt(frameIndex);
@@ -391,9 +389,11 @@ class KTimeLineItem extends KListItem
 				if (frameList.count == 1
 					|| frameList[1].time != time + 1)
 					frameList.insert(1, createNewFrame(time + 1, TIMELINE_FRAME_TYPE_NULL, void));
-				if (doInvalidate)
-					invalidateNullFrame();
 			}
+		}
+		if (doInvalidate) {
+			invalidateNullFrame();
+			root.owner.onRenderFrame();
 		}
 	}
 
