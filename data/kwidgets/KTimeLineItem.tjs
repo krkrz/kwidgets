@@ -818,7 +818,6 @@ class KTimeLineItem extends KListItem
 			var frame = frameList[i];
 			if (beginTime <= frame.time
 				&& frame.time < endTime) {
-				frameList[i + 1].time = frameList[i].time;
 				frameList.erase(i);
 				i--;
 			}

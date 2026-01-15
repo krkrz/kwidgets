@@ -835,7 +835,7 @@ class TimeLineSample extends KWindow
 											   copySingleFrameAsNoWidth: true,
 											   expandListSelectionFromView: true,
 											   selectionModeMask: TIMELINE_SELECTION_MODE_MASK_AREA,
-											   keyframePriorSide: TIMELINE_KEYFRAME_PRIOR_SIDE_RIGHT,
+											   keyframePriorSide: TIMELINE_KEYFRAME_PRIOR_SIDE_LEFT, // RIGHT,
 											 ]
 											 ));
 
