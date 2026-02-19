@@ -280,7 +280,7 @@ class KCustomUI extends KGridLayout
 
 		id = gridId = getOption("gridId", "widget_grid");
 
-		var uiDefs = getOption("uis", []);
+		var uiDefs = dup(getOption("uis", []));
 		uiList = [];
 
 		var valueModifiedFunc = getOption("onValueModified", void);
@@ -386,6 +386,7 @@ class KCustomUI extends KGridLayout
 				}
 				var level = new KListItem(%[ name: getOption("name", "", uiDef),
 											 label: getOption("label", "", uiDef),
+											 status: getOption("status", "", uiDef),
 											 opened: getOption("opened", false, uiDef),
 											 isRecordOpenedToDictionary: getOption("record", false, uiDef),
 											 id: "em_caption" ]);
