@@ -629,6 +629,13 @@ class KScrollLayout extends KLayout
 	}
 
 	/**------------------------------
+	 * childビューの更新を通知する
+	 ------------------------------*/
+	function notifyChildViewModification() {
+		onChildViewModified(childViewLeft, childViewTop, childViewWidth, childViewHeight, childWidth, childHeight);
+	}
+
+	/**------------------------------
 	 * childの位置を設定する
 	 ------------------------------*/
 	function setChildViewPos(l, t) {

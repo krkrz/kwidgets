@@ -1,0 +1,2136 @@
+/*----------------------------------------------------------------------
+ * レイヤビュー(内部パーツ)
+ ----------------------------------------------------------------------*/
+global.KTimeLineLayerViewWidgetStyleDefinition =
+	[
+			%[ key: "singleFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "continuousFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "tweenFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "oneSecondFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "halfSecondFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "fifthFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "normalFrameBgColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "frameSignColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "frameBorderColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "backgroundBorderColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "cursorColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "loopSingleFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "loopContinuousFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "rangeSelectorColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "areaSelectorColor", defaultValue: 0x80000000, resolver: "resolveColor" ],
+			%[ key: "selectedFrameBlend" ],
+			%[ key: "selectedFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "hoverFrameBlend" ],
+			%[ key: "hoverFrameColor", defaultValue: 0, resolver: "resolveColor" ],
+			%[ key: "showVerticalBorder", defaultValue: true ],
+			%[ key: "showHorizontalBorder", defaultValue: true ],
+			%[ key: "itemSelectedNormalFrameBgColor", defaultValue: 0, resolver: "resolveColor" ]
+	];
+
+class KTimeLineLayerView extends KVirtualWidget
+{
+	// オーナー(タイムラインコントロール本体)
+	var owner;
+	// レイヤリストへの参照
+	var list;
+	// フレームトップマーカー
+	var frameLeftMarkerLayer;
+	var frameRightMarkerLayer;
+	var oneSecondFrameBgLayer;
+	var halfSecondFrameBgLayer;
+	var fifthFrameBgLayer;
+	var normalFrameBgLayer;
+	// 破線app
+	var dashLineApp;
+
+	// マウスドラッグ範囲外補完ディスパッチャ
+	var mouseDragScrollInterp;
+
+	// バッファレイヤ
+	var bufLayer;
+
+	// カーソル
+	var cursorLayerU, cursorLayerC, cursorLayerL;
+
+	// ポイント
+	var point = void;
+	var prevPoint = void;
+	// 直前の選択範囲
+	var prevSelections;
+	// ボタンが押された
+	var leftPressed = false, rightPressed = false;
+
+	// コンストラクタ
+	function KTimeLineLayerView(window, owner, name) {
+		super.KVirtualWidget(window, %[ name: name, middleButtonDrag: true ]);
+
+		this.owner = owner;
+		list = owner._layerList;
+		setMinMaxSize(2000, list.minHeight, 2000, list.maxHeight);
+		focusable = window.defaultFocusable;
+		cursorKeyRangeSelectorDragging = false;
+		rangeDragMoving = false;
+
+		frameLeftMarkerLayer = new global.Layer(window, this);
+		frameRightMarkerLayer = new global.Layer(window, this);
+
+		cursorLayerU = new global.Layer(window, this);
+		cursorLayerU.hitThreshold = 256;
+		cursorLayerU.setSize(1, 10000);
+		cursorLayerL = new global.Layer(window, this);
+		cursorLayerL.hitThreshold = 256;
+		cursorLayerL.setSize(1, 10000);
+		cursorLayerC = new global.Layer(window, this);
+		cursorLayerC.hitThreshold = 256;
+
+//		onUpdateFrameWidth();
+
+		bufLayer = new global.Layer(window, this);
+
+		if (typeof(global["GdiPlus"]) != "undefined") {
+			dashLineApp = new GdiPlus.Appearance();
+			dashLineApp.addPen(WIN_DARKEN2, %[ width: 1, dashStyle: [ 3, 2 ] ], 0.5, 0);
+		}
+
+		mouseDragScrollInterp =
+			new KInterpolateDispatcher(this,
+									   %[ valueName: "viewPosition",
+										  dispatchName: "",
+										  interval: 120,
+										  exponent: 0.5,
+										  lerpFunction: function(a, b, t)
+										  { return %[ left: a.left + (b.left - a.left) * t,
+													  top: a.top + (b.top - a.top) * t ]; } ]);
+	}
+
+	function finalize {
+		invalidate mouseDragScrollInterp;
+		super.finalize();
+	}
+
+	property drawItemList {
+		getter {
+			return list.drawItemList;
+		}
+	}
+
+	property widgetStyleDefinition {
+		getter {
+			return concatArray(super.widgetStyleDefinition, KTimeLineLayerViewWidgetStyleDefinition);
+		}
+	}
+
+	property singleFrameColor {
+		getter {
+			return widgetStyle.singleFrameColor;
+		}
+	}
+
+	property continousFrameColor {
+		getter {
+			return widgetStyle.continuousFrameColor;
+		}
+	}
+
+	property tweenFrameColor {
+		getter {
+			return widgetStyle.tweenFrameColor;
+		}
+	}
+
+	property frameSignColor {
+		getter {
+			return widgetStyle.frameSignColor;
+		}
+	}
+
+	property selectionColor {
+		getter {
+			return widgetStyle.selectionColor;
+		}
+	}
+
+	property hoverFrameBlend {
+		getter {
+			return widgetStyle.hoverFrameBlend;
+		}
+	}
+
+	property hoverFrameColor {
+		getter {
+			return widgetStyle.hoverFrameColor;
+		}
+	}
+
+	property selectedFrameBlend {
+		getter {
+			return widgetStyle.selectedFrameBlend;
+		}
+	}
+
+	property selectedFrameColor {
+		getter {
+			return widgetStyle.selectedFrameColor;
+		}
+	}
+
+	property itemSelectedNormalFrameBgColor {
+		getter {
+			if (widgetStyle.itemSelectedNormalFrameBgColor !== 0)
+				return widgetStyle.itemSelectedNormalFrameBgColor;
+			else
+				return widgetStyle.normalFrameBgColor;
+		}
+	}
+
+	property TIMELINE_FRAME_WIDTH {
+		getter {
+			return owner.TIMELINE_FRAME_WIDTH;
+		}
+	}
+
+	property TIMELINE_FRAME_HEIGHT {
+		getter {
+			return fontStyle.fontHeight + layoutStyle.spaceVertical;
+		}
+	}
+
+	function operateColorRect(l, t, w, h, om, color) {
+		bufLayer.setSize(w, h);
+		if (color instanceof "Array") {
+			bufLayer.fillGradientRectUD(0, 0, w, h, color[0], color[1]);
+		} else {
+			bufLayer.fillRect(0, 0, w, h, color);
+		}
+		operateRect(l, t, bufLayer, 0, 0, w, h, om, 255);
+	}
+
+	function onUpdateFrameWidth() {
+		frameLeftMarkerLayer.setImageSize(6, TIMELINE_FRAME_HEIGHT);
+		frameLeftMarkerLayer.setSize(6, TIMELINE_FRAME_HEIGHT);
+		frameLeftMarkerLayer.fillRect(0, 0, 6, TIMELINE_FRAME_HEIGHT, 0);
+		var cw = 7;
+		for (var i = 0; i < cw - 2; i++)
+			frameLeftMarkerLayer.fillRect(2 + i, (TIMELINE_FRAME_HEIGHT - (cw - i * 2)) / 2, 1, cw - i * 2, WIN_DARKEN2);
+
+		frameRightMarkerLayer.assignImages(frameLeftMarkerLayer);
+		frameRightMarkerLayer.flipLR();
+		frameRightMarkerLayer.setSize(6, TIMELINE_FRAME_HEIGHT);
+	}
+
+	function onSearchNextFocusable(layer) {
+		owner.onSearchNextFocusable(layer);
+		super.onSearchNextFocusable(owner.searchTarget);
+	}
+
+	property selectedTime {
+		getter {
+			return owner.selectedTime;
+		}
+		setter (v) {
+			owner.selectedTime = v;
+		}
+	}
+
+	property selectedLayer {
+		getter {
+			return owner.selectedLayer;
+		}
+		setter (v) {
+			owner.selectedLayer = v;
+		}
+	}
+
+	property cursorActive {
+		getter {
+			return selectedTime >= 0
+				&& selectedLayer >= 0;
+		}
+	}
+
+	property timelineCursorX {
+		getter {
+			return owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2 - 1;
+		}
+	}
+
+	property timelineCursorY {
+		getter {
+			if (owner.selectedLayer < 0)
+				return -1;
+			var item = list.drawItemList[owner.selectedLayer];
+			return item.top + item.height / 2 - 1;
+		}
+	}
+
+	property timelineCursorColor {
+		getter {
+			return widgetStyle.cursorColor;
+		}
+	}
+
+	function updateCursor {
+		if (owner.selectedTime >= 0) {
+			var x = owner.selectedTime * TIMELINE_FRAME_WIDTH + TIMELINE_FRAME_WIDTH / 2 - 1;
+			if (owner.selectedLayer < 0) {
+				cursorLayerU.setPos(x, 0);
+				cursorLayerU.fillRect(0, 0, cursorLayerU.width, cursorLayerU.height, timelineCursorColor);
+				cursorLayerU.visible = true;
+				cursorLayerC.visible = false;
+				cursorLayerL.visible = false;
+			} else {
+				var item = owner.drawItemList[owner.selectedLayer];
+				var t = item.top;
+				var h = item.height;
+				var b = t + h;
+				cursorLayerU.fillRect(0, 0, cursorLayerU.width, cursorLayerU.height, timelineCursorColor);
+				cursorLayerL.fillRect(0, 0, cursorLayerL.width, cursorLayerL.height, timelineCursorColor);
+				cursorLayerU.setPos(x, t - cursorLayerU.height);
+				cursorLayerL.setPos(x, b);
+				cursorLayerC.setSize(TIMELINE_FRAME_WIDTH, h);
+				cursorLayerC.fillRect(0, 0, TIMELINE_FRAME_WIDTH, h, timelineCursorColor);
+				cursorLayerC.fillRect(1, 1, TIMELINE_FRAME_WIDTH - 2, h - 2, (timelineCursorColor & 0xffffff) | 0x40000000);
+				cursorLayerC.setPos(TIMELINE_FRAME_WIDTH * owner.selectedTime, t);
+				cursorLayerU.visible = true;
+				cursorLayerC.visible = true;
+				cursorLayerL.visible = true;
+			}
+		} else {
+			cursorLayerU.visible = false;
+			cursorLayerC.visible = false;
+			cursorLayerL.visible = false;
+		}
+
+		// adhoc implementation to avoid layer composite gritch.
+		_canvas.left++;
+		_canvas.left--;
+	}
+
+	function onFocus {
+		if (! System.getKeyState(VK_SHIFT))
+			cursorKeyRangeSelectorDragging = false;
+		//		owner.updateCursor();
+		super.onFocus();
+		owner._timeLocator.addCustomStyleState("focus");
+	}
+
+	function onBlur {
+		//		owner.updateCursor();
+		super.onBlur();
+		owner._timeLocator.removeCustomStyleState("focus");
+	}
+
+	function beforeFullUpdate() {
+		updateCursor();
+		onUpdateFrameWidth();
+	}
+
+	// 描画
+	function onDraw(l, t, w, h) {
+		// 時間単位で描画処理
+		var fromX, toX, fromY, toY;
+		fromX = int(l / TIMELINE_FRAME_WIDTH);
+		toX = int((l + w + TIMELINE_FRAME_WIDTH - 1) / TIMELINE_FRAME_WIDTH);
+		fromY = list.findItemIndex(t, true);
+		toY = list.findItemIndex(t + h, true);
+		fillRect(l, t, w, h, borderStyle.backgroundColor);
+		// アイテム単位でフレームを描画
+		for (var y = fromY; y <= toY; y++) {
+			if (y < 0)
+				continue;
+			if (! (list.drawItemList[y] isvalid))
+				continue;
+			if (y < list.drawItemList.count) {
+				list.drawItemList[y].drawTimeLine(this, y, fromX, toX);
+			}
+		}
+		// 範囲選択矩形を描画
+		var range = rangeSelectorRect;
+		if (range !== void) {
+			var color = widgetStyle.rangeSelectorColor & 0xffffff;
+			var alpha = (widgetStyle.rangeSelectorColor >> 24) & 0xff;
+			var edgeColor = color | 0xff000000;
+			colorRect(range.left, range.top, range.width, range.height, color, alpha);
+			fillRect(range.left, range.top, range.width, 1, edgeColor);
+			fillRect(range.left, range.top, 1, range.height, edgeColor);
+			fillRect(range.left, range.top + range.height - 1, range.width, 1, edgeColor);
+			fillRect(range.left + range.width - 1, range.top, 1, range.height, edgeColor);
+		}
+		// エリア矩形を描画
+		if (areaRect !== void) {
+			var color = widgetStyle.areaSelectorColor & 0xffffff;
+			var alpha = (widgetStyle.areaSelectorColor >> 24) & 0xff;
+			colorRect(areaRect.left, areaRect.top, areaRect.width, areaRect.height, color, alpha);
+		}
+		owner.onDrawView(this, l, t, w, h);
+		if (! nodeEnabled)
+			colorRect(l, t, w, h, borderStyle.backgroundColor & 0xffffff, 128);
+	}
+
+	property hasWorkZone {
+		getter {
+			return hasSelection || hasArea;
+		}
+	}
+
+	property workZoneIndexRect {
+		getter {
+			if (hasSelection)
+				return selectionIndexRect;
+			if (hasArea)
+				return areaIndexRect;
+			return void;
+		}
+	}
+
+	property workZoneEffectiveFrameLeftTop {
+		getter {
+			if (hasSelection)
+				return selectionEffectiveFrameLeftTop;
+			if (hasArea)
+				return areaEffectiveFrameLeftTop;
+		}
+	}
+
+	function isPointInWorkZone(x, y) {
+		return isPointInSelection(x, y) || isPointInArea(x, y);
+	}
+
+	property selectionIndexRect {
+		getter {
+			var result = %[ rect: void ];
+			drawItemList.eachWithIndex(result, function(item, index, result) {
+				if (item.hasSelection) {
+					var l = item.frameList[item.selection[0]].time;
+					var r = item.frameList[item.selection[-1] + 1].time;
+					if (result.rect == void) {
+						result.rect = new KRect(l, index, r - l, index + 1);
+					} else {
+						result.rect.left = Math.min(result.rect.left, l);
+						result.rect.right = Math.max(result.rect.right, r);
+						result.bottom = index + 1;
+					}
+				}
+			});
+			return result.rect;
+		}
+	}
+
+	property selectionEffectiveFrameLeftTop {
+		getter {
+			var rect = selectionIndexRect;
+			return %[ x: rect.left, y: rect.top ];
+		}
+	}
+
+	// マウスオーバー
+	function onMouseOver(layerItem, frameIndex) {
+	}
+
+	// ポイントが選択範囲内にあるかどうか判定
+	function isPointInSelection(x, y) {
+		var time = int(x / TIMELINE_FRAME_WIDTH);
+		var layer = list.findItemIndex(y);
+		if (layer < 0 || layer >= list.drawItemList.count)
+			return false;
+		var item = list.drawItemList[layer];
+		return item.selection.find(item.findFrame(time)) >= 0;
+	}
+
+	// マウスオーバー状態アップデート
+	function updateMouseOver(x, y) {
+		var curTime = int(x / TIMELINE_FRAME_WIDTH);
+		var curLayer = list.findItemIndex(y);
+		if (! (curTime < 0 || curLayer < 0 || curLayer >= list.drawItemList.count)) {
+			var item = list.drawItemList[curLayer];
+			var frameIndex = item.findFrame(curTime);
+			var frame = item.frameAt(frameIndex);
+			if (frame !== void
+				&& frame.type != TIMELINE_FRAME_TYPE_NULL
+				&& (frame.type != TIMELINE_FRAME_TYPE_SINGLE
+					|| x < frame.time * TIMELINE_FRAME_WIDTH)) {
+				if (prevFrame !== frame) {
+					prevFrame = frame;
+					onMouseOver(item, frameIndex);
+				}
+				return;
+			}
+		}
+
+		prevFrame = void;
+		onMouseOver(void, void);
+	}
+
+	property inDrag {
+		getter {
+			return cursorKeyRangeSelectorDragging
+				|| cursorKeyAreaAssignDragging
+				|| inDragFrameBoundary
+				|| inDragRangeSelector
+				|| inDragSelection
+				|| inDragAreaAssign
+				|| inDragAreaMove
+				|| inDragCustomMouseEvent;
+		}
+	}
+
+	// カーソル選択
+	function updateMouseCursor(x, y) {
+		updateMouseOver(...);
+		cursor = crDefault;
+		boundaryDragFrameIndex = -1;
+		curCustomMouseEvent = void;
+		if (cursorKeyRangeSelectorDragging
+			|| rangeDragMoving) {
+			return;
+		}
+		var curTime = int(x / TIMELINE_FRAME_WIDTH);
+		var curLayer = list.findItemIndex(y);
+		if (curTime < 0 || curLayer < 0 || curLayer >= list.drawItemList.count) {
+			return;
+		}
+		var item = list.drawItemList[curLayer];
+
+		curCustomMouseEvent = item.getCustomMouseEvent(x, y);
+		if (curCustomMouseEvent !== void) {
+			cursor = curCustomMouseEvent.cursor;
+			return;
+		}
+
+		var frameIndex = item.findFrame(curTime);
+		var frame = item.frameAt(frameIndex);
+		if (frame !== void
+			&& Math.abs(frame.time * TIMELINE_FRAME_WIDTH - x) <= 3) {
+			boundaryDragFrameIndex = frameIndex;
+			boundaryDragTime = frame.time;
+			boundaryDragLayer = curLayer;
+			cursor = crHSplit;
+			return;
+		}
+		var frameIndex = item.findFrame(curTime) + 1;
+		var frame = item.frameAt(frameIndex);
+		if (frame !== void
+			&& Math.abs(frame.time * TIMELINE_FRAME_WIDTH - x) <= 3) {
+			boundaryDragFrameIndex = frameIndex;
+			boundaryDragTime = frame.time;
+			boundaryDragLayer = curLayer;
+			cursor = crHSplit;
+			return;
+		}
+	}
+
+	function matchPoint(layer, frameIndex) {
+		return point !== void && point[0] == layer && point[1] == frameIndex;
+	}
+
+	function matchSelection(layer, frameIndex) {
+		return owner.drawItemList[layer].selection.find(frameIndex) >= 0;
+	}
+
+	function redrawPoint(point) {
+		if (point === void)
+			return;
+		var layer = point[0];
+		var frameIndex = point[1];
+		if (layer >= list.drawItemList.count)
+			return;
+		var item = list.drawItemList[layer];
+		item.redrawFrame(frameIndex);
+	}
+
+	function updatePoint(newPoint) {
+		if (equalStruct(newPoint, point))
+			return;
+		var prevPoint = point;
+		point = newPoint;
+		redrawPoint(prevPoint);
+		redrawPoint(point);
+		callPointCallback(prevPoint, "onPointLeave");
+		callPointCallback(point, "onPointEnter");
+	}
+
+	function callPointCallback(point, callback) {
+		if (point === void)
+			return;
+		list.drawItemList[point[0]][callback](point[1]);
+	}
+
+	function beginRangeSelector(x, y) {
+		rangeSelectorBegin = [ x, y ];
+		rangeSelectorEnd = [ x, y ];
+		owner.beginListSelection();
+	}
+
+	function updateRangeSelector(x, y) {
+		var range = rangeSelectorRect;
+		rangeSelectorEnd = [ x, y ];
+		range.unionWith(rangeSelectorRect);
+		redrawRect(range.left, range.top, range.width, range.height);
+		owner.extendListSelection();
+	}
+
+	function endRangeSelector() {
+		var range = rangeSelectorRect;
+		rangeSelectorBegin = rangeSelectorEnd = void;
+		redrawRect(range.left, range.top, range.width, range.height);
+	}
+
+	property rangeSelectorActive {
+		getter {
+			return rangeSelectorBegin !== void;
+		}
+	}
+
+	property rangeSelectorRect {
+		getter {
+			if (rangeSelectorBegin === void)
+				return void;
+			var l = Math.min(rangeSelectorBegin[0], rangeSelectorEnd[0]);
+			var r = Math.max(rangeSelectorBegin[0], rangeSelectorEnd[0]);
+			var t = Math.min(rangeSelectorBegin[1], rangeSelectorEnd[1]);
+			var b = Math.max(rangeSelectorBegin[1], rangeSelectorEnd[1]);
+			return new KRect(l, t, r - l + 1, b - t + 1);
+		}
+	}
+
+	property rangeSelectorIndexRect {
+		getter {
+			var rect = rangeSelectorRect;
+			var l = int(rect.left / TIMELINE_FRAME_WIDTH);
+			var t = owner._layerList.findItemIndex(rect.top, true);
+			var r = int(rect.right / TIMELINE_FRAME_WIDTH);
+			var b = owner._layerList.findItemIndex(rect.bottom, true);
+			return new KRect(l, t, (r - l), (b - t));
+		}
+	}
+
+	function getAllSelections() {
+		var selections = [];
+		var drawItemList = owner.drawItemList;
+		for (var i = 0; i < drawItemList.count; i++) 
+			selections.add(drawItemList[i].selection);
+		return selections;
+	}
+
+	function getRangeSelections() {
+		var range = rangeSelectorIndexRect;
+		var selections = [];
+		var drawItemList = owner.drawItemList;
+		for (var i = 0; i < drawItemList.count; i++) {
+			var item = drawItemList[i];
+			if (! item.supportSelection || i < range.top || i > range.bottom) {
+				selections.add([]);
+				continue;
+			}
+			var fromFrameIndex = item.findFrame(range.left, true);
+			var toFrameIndex = item.findFrame(range.right, true);
+			var newSelection = [];
+			for (var frameIndex = fromFrameIndex; frameIndex <= toFrameIndex; frameIndex++) {
+				if (frameIndex < 0)
+					continue;
+				var frame = item.frameAt(frameIndex);
+				if (frame.type != TIMELINE_FRAME_TYPE_NULL)
+					newSelection.add(frameIndex);
+			}
+			selections.add(newSelection);
+		}
+		return selections;
+	}
+
+	// 選択をしているかどうか
+	property selectionCount {
+		getter {
+			return drawItemList.inject(0, function(item, sum) { return sum + item.selectionCount; });
+		}
+	}
+
+	property hasSelection {
+		getter {
+			return drawItemList.any(function(item) { return item isvalid && item.hasSelection; });
+		}
+	}
+
+	property hasSingleSelection {
+		getter {
+			return selectionCount == 1;
+		}
+	}
+
+	property hasMultipleSelection {
+		getter {
+			return selectionCount >= 2;
+		}
+	}
+
+	function selectCurrentPoint() {
+		var layer = owner.selectedLayer;
+		var time = owner.selectedTime;
+		if (layer >= 0
+			&& layer < owner.drawItemList.count) {
+			var item = owner.drawItemList[layer];
+			var frameIndex = item.findFrame(time);
+			if (frameIndex >= 0) {
+				if (owner.hasSingleSelection
+					&& item.selection.count == 1
+					&& item.selection[0] == frameIndex)
+					;
+				else {
+					owner.resetSelection();
+					item.setSelection([ frameIndex ]);
+				}
+			}
+		}
+	}
+
+	function pointWorkZoneCorner() {
+		var rect = workZoneEffectiveFrameLeftTop;
+		if (rect !== void) {
+			owner.selectedTime = rect.x;
+			owner.selectedLayer = rect.y;
+		}
+	}
+
+	function resetSelection() {
+		for (var i = 0; i < list.drawItemList.count; i++)
+			list.drawItemList[i].releaseSelection();
+	}
+
+	function selectAll() {
+		if (owner.selectionModeFrameEnabled)
+			selectAllByFrames();
+		else if (owner.selectionModeAreaEnabled)
+			selectAllByRanges();
+	}
+
+	function selectAllByFrames {
+		var allEmpty = true;
+		var allFull = true;
+		var list = owner.selectionTargetDrawItemList;
+		for (var i = 0; i < list.count; i++) {
+			var item = list[i];
+			var type = item.selectionType;
+			if (type != TIMELINE_NO_SELECTION)
+				allEmpty = false;
+			if (type == TIMELINE_PARTIAL_SELECTION)
+				allFull = false;
+		}
+
+		if (allEmpty) {
+			if (owner.selectedLayer >= 0
+				&& owner.drawItemList[owner.selectedLayer].supportSelection
+				&& owner.drawItemList[owner.selectedLayer].fullSelection.count > 0) {
+				var item = owner.drawItemList[owner.selectedLayer];
+				item.setSelection(item.fullSelection);
+			}
+			else {
+				list.each(function(item) { item.setSelection(item.fullSelection); });
+			}
+		} else if (! allFull) {
+			list.each(function(item) { if (item.hasSelection) item.setSelection(item.fullSelection); });
+		} else {
+			list.each(function(item) { item.setSelection(item.fullSelection); });
+		}
+	}
+
+	function selectAllByRanges() {
+		var time = selectedTime;
+		var layer = selectedLayer;
+		if (time < 0 || layer < 0)
+			return;
+
+		var l, t, r, b;
+		var makeEmpty = false;
+
+		if (! hasArea) {
+			var item = owner.childAt(layer);
+			l = 0; r = owner.lastTime; t = b = layer;
+		} else {
+			if (areaIndexRect.left == 0
+				&& areaIndexRect.right - 1 == owner.lastTime) {
+				if (areaIndexRect.top == 0
+					&& areaIndexRect.bottom - 1 == owner.drawItemList.count - 1) {
+					makeEmpty = true;
+				} else {
+					l = 0; r = owner.lastTime; t = 0; b = owner.drawItemList.count - 1;
+				}
+			} else {
+				l = 0; r = owner.lastTime;
+				t = areaIndexRect.top;
+				b = areaIndexRect.bottom - 1;
+			}
+		}
+
+		if (makeEmpty)
+			resetArea();
+		else {
+			setAreaByIndex(l, t, r, b);
+			redrawArea();
+		}
+	}
+
+	function setAreaByIndex(l, t, r, b) {
+		areaIndexRect = new KRect(l, t, r - l + 1, b - t + 1);
+		areaRect = new KRect(l * TIMELINE_FRAME_WIDTH,
+							 drawItemList[t].top,
+							 (r - l + 1) * TIMELINE_FRAME_WIDTH,
+							 drawItemList[b].top + drawItemList[b].height - drawItemList[t].top);
+	}
+
+	//----------------------------------------------------------------------
+	// レンジセレクタドラッグ動作
+
+	// 選択範囲
+	var RANGE_SELECT_NONE = 0;
+	var RANGE_SELECT_SET = 1;
+	var RANGE_SELECT_ADD = 2;
+	var RANGE_SELECT_FLIP = 3;
+	var rangeSelectorBegin = void;
+	var rangeSelectorEnd = void;
+	var rangeSelectMode = RANGE_SELECT_NONE;
+
+	// カーソルキードラッグ
+	var cursorKeyRangeSelectorDragging = false;
+
+	//------------------------------
+	// レンジセレクタ判定
+	property inDragRangeSelector {
+		getter {
+			return rangeSelectMode != RANGE_SELECT_NONE;
+		}
+	}
+
+	//------------------------------
+	// レンジセレクタ開始
+	function dragEnterRangeSelector(x, y, shift) {
+		if (rangeSelectorActive)
+			return;
+		resetArea();
+		shift &= ssCtrl | ssShift;
+		leftPressed = false;
+		rightPressed = false;
+
+		if (shift & ssShift) {
+			rangeSelectMode  = RANGE_SELECT_ADD;
+			beginRangeSelector(x, y);
+			prevSelections = getAllSelections();
+		}
+
+		// ignore RANGE_SELECT_SET, RANGE_SELECT_ADD
+	}
+
+	//------------------------------
+	// レンジセレクタ移動
+	function dragMoveRangeSelector(x, y) {
+		switch (rangeSelectMode) {
+		case RANGE_SELECT_SET:
+			updateRangeSelector(x, y);
+			var selections = getRangeSelections();
+			var drawItemList = owner.drawItemList;
+			for (var i = 0; i < drawItemList.count; i++) 
+				drawItemList[i].setSelection(selections[i]);
+			break;
+
+		case RANGE_SELECT_ADD:
+			updateRangeSelector(x, y);
+			var selections = getRangeSelections();
+			var drawItemList = owner.drawItemList;
+			for (var i = 0; i < drawItemList.count; i++)  {
+				drawItemList[i].setSelection(prevSelections[i]);
+				drawItemList[i].addSelection(selections[i]);
+			}
+			break;
+
+		case RANGE_SELECT_FLIP:
+			updateRangeSelector(x, y);
+			var selections = getRangeSelections();
+			var drawItemList = owner.drawItemList;
+			for (var i = 0; i < drawItemList.count; i++)  {
+				drawItemList[i].setSelection(prevSelections[i]);
+				drawItemList[i].flipSelection(selections[i]);
+			}
+			break;
+		}
+	}
+
+	//------------------------------
+	// レンジセレクタ終了
+	function dragLeaveRangeSelector(x, y) {
+		switch (rangeSelectMode) {
+		case RANGE_SELECT_NONE:
+			return;
+		case RANGE_SELECT_SET:
+		case RANGE_SELECT_ADD:
+		case RANGE_SELECT_FLIP:
+			endRangeSelector();
+			if (! owner.extendListSelectionFromView) {
+				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+				owner.selectedLayer = list.findItemIndex(y, true);
+			}
+			break;
+		}
+		rangeSelectMode = RANGE_SELECT_NONE;
+	}
+
+	//----------------------------------------------------------------------
+	// 境界ドラッグ
+
+	// フレーム境界のドラッグ
+	var boundaryDragMoving;            // ドラッグ中
+	var boundaryDragFrameList;         // 元フレームリスト
+	var boundaryDragFrameIndex;        // ドラッグ開始フレームのインデックス
+	var boundaryDragTime;              // ドラッグ時間
+	var boundaryDragLayer;             // ドラッグレイヤ
+	var boundaryDragPrevTime;          // 前回の時間
+	var boundaryDragMinTime;           // 下限
+	var boundaryDragMoved;             // 動いた
+	var boundaryDragSaveLength;        // 長さ保存
+
+	//------------------------------
+	// 判定
+	property inDragFrameBoundary {
+		getter {
+			return boundaryDragMoving;
+		}
+	}
+
+	//------------------------------
+	// 開始
+	function dragEnterFrameBoundary(x, y, shift) {
+		leftPressed = false;
+		rightPressed = false;
+		resetArea();
+		var item = list.drawItemList[boundaryDragLayer];
+		boundaryDragFrameList = duplicateStruct(item.frameList);
+		boundaryDragPrevTime = boundaryDragTime;
+		boundaryDragMinTime = item.leftSideFrameNum(boundaryDragTime);
+		boundaryDragSaveLength = shift & ssCtrl;
+		boundaryDragMoving = true;
+		boundaryDragMoved = false;
+	}
+
+	//------------------------------
+	// 移動
+	function dragMoveFrameBoundary(x, y) {
+		var item = list.drawItemList[boundaryDragLayer];
+		var curTime = int((x + TIMELINE_FRAME_WIDTH / 2) / TIMELINE_FRAME_WIDTH);
+		curTime = int(Math.max(curTime, boundaryDragMinTime));
+		if (curTime != boundaryDragPrevTime) {
+			boundaryDragMoved = true;
+			boundaryDragPrevTime = curTime;
+			item.frameList = duplicateStruct(boundaryDragFrameList);
+			item.moveFrame(boundaryDragTime, curTime, boundaryDragSaveLength);
+		}
+	}
+
+	//------------------------------
+	// 終了
+	function dragLeaveFrameBoundary(x, y) {
+		boundaryDragMoving = false;
+		// 境界を結局動かしてないなら、カーソルをその位置へ移動
+		if (! boundaryDragMoved) {
+			owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+			owner.selectedLayer = list.findItemIndex(y, true);
+			focus();
+		}
+		if (boundaryDragTime != boundaryDragPrevTime) {
+			var item = list.drawItemList[boundaryDragLayer];
+			item.onFrameDragged();
+			owner.onRenderFrame();
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// 選択範囲ドラッグ
+
+	// 範囲ドラッグ
+	var rangeDragMoving;
+	var rangeDragTime;
+	var rangeDragPrevTime;
+	var rangeDragMinTime;
+	var rangeDragFrameList;
+	var rangeDragSelectionList;
+	var rangeDragOffset;
+	var rangeDragLeftList;
+	var rangeDragBeginX;
+	var rangeDragPrevOffset = 0;
+	var prevFrame;
+
+	//------------------------------
+	// 判定
+	property inDragSelection {
+		getter {
+			return rangeDragMoving;
+		}
+	}
+
+	//------------------------------
+	// 開始
+	function dragEnterSelection(x, y) {
+		leftPressed = false;
+		rightPressed = false;
+		resetArea();
+		rangeDragBeginX = x;
+		rangeDragMoving = true;
+		rangeDragFrameList = [];
+		rangeDragSelectionList = [];
+		rangeDragPrevOffset = 0;
+		for (var i = 0; i < list.drawItemList.count; i++) {
+			var item = list.drawItemList[i];
+			if (item.hasSelection) {
+				rangeDragFrameList.add(ktimeline_shallow_copy_frame_list(item.frameList));
+				rangeDragSelectionList.add(duplicateStruct(item.selection));
+			} else {
+				rangeDragFrameList.add(void);
+				rangeDragSelectionList.add(void);
+			}
+		}
+	}
+
+	//------------------------------
+	// 移動
+	function dragMoveSelection(x, y) {
+		// 初期位置からのオフセットで移動量を計算
+		var offset = int((x - rangeDragBeginX + TIMELINE_FRAME_WIDTH / 2) / TIMELINE_FRAME_WIDTH);
+		if (rangeDragPrevOffset == offset)
+			return;
+		rangeDragPrevOffset = offset;
+
+		// アイテムごとに判定
+		for (var i = 0; i < drawItemList.count; i++) {
+			var item = drawItemList[i];
+			if (! item.hasSelection)
+				continue;
+			// 選択範囲を持っている時のみ処理
+			item.selection = duplicateStruct(rangeDragSelectionList[i]);
+			item.frameList = ktimeline_shallow_copy_frame_list(rangeDragFrameList[i]);
+			var selection = item.selection;
+			var frameList = item.frameList;
+
+			// 左方向処理
+			var targets = duplicateStruct(selection);
+			if (offset > 0)
+				targets.reverse();
+			// 選択範囲に入っているフレームを処理
+			for (var j = 0; j < targets.count; j++) {
+				// オフセットだけ動かす
+				var frameIndex = targets[j];
+				frameList[frameIndex].time += offset;
+				// 自分の次のフレームが選択範囲に入ってなかったらそいつも動かす
+				if (selection.find(frameIndex + 1) < 0)
+					frameList[frameIndex + 1].time += offset;
+				// 動かした結果左方向でオーバーフローしたら辻褄を合わせる
+				if (offset < 0)
+					for (var k = frameIndex - 1; k >= 0; k--) {
+						if (frameList[k].time >= frameList[k + 1].time) {
+							// 空フレームなら削除する
+							if (frameList[k].type == TIMELINE_FRAME_TYPE_NULL) {
+								frameList.erase(k);
+								item.correctSelectionByRemoveIndex(k);
+								targets = item.selection;
+							}
+							// 空フレームでなければ既存フレームより左に持っていく
+							else {
+								frameList[k].time = frameList[k + 1].time - 1;
+							}
+						}
+					}
+				// 動かした結果右方向でオーバーフローしたら辻褄を合わせる
+				if (offset > 0)
+					for (var k = frameIndex + 1; k < frameList.count; k++) {
+						// 既存フレームより右に持っていく
+						if (frameList[k].time <= frameList[k - 1].time)
+							frameList[k].time = frameList[k - 1].time + 1;
+						// 空フレームで次のフレームより小さければ削除する
+						if (frameList[k].type == TIMELINE_FRAME_TYPE_NULL
+							&& k < frameList.count - 1
+							&& frameList[k].time >= frameList[k + 1].time ) {
+							frameList[k + 1].time = frameList[k].time;
+							frameList.erase(k);
+							item.correctSelectionByRemoveIndex(k);
+							targets = item.selection._reverse();
+							k--;
+						}
+					}
+			}
+			// 結果的にフレームの左端がマイナスを切っていたら補正する
+			for (var j = 0; j < frameList.count; j++) {
+				var frame = frameList[j];
+				// まずフレームの最低保証タイムを設定する
+				if (frame.time < j)
+					frame.time = j;
+				if (j == 0)
+					continue;
+				// 直前のフレームよりは右になるように設定する
+				var prevFrame = frameList[j - 1];
+				if (frame.time <= prevFrame.time) {
+					frame.time = prevFrame.time + 1;
+				}
+			}
+		}
+		redrawAll();
+	}
+
+	//------------------------------
+	// 終了
+	function dragLeaveSelection() {
+		rangeDragMoving = false;
+		owner.onMultipleFrameDragged();
+		owner.onRenderFrame();
+	}
+
+	//----------------------------------------------------------------------
+	// エリア指定
+
+	// カーソルキードラッグ
+	var cursorKeyAreaAssignDragging = false;
+	var cursorKeyAreaAssignBeginTime;
+	var cursorKeyAreaAssignBeginLayer;
+
+	var areaAssignDragMoving = false;
+	var areaAssignDragBegin, areaAssignDragEnd;
+	var areaIndexRect, areaRect;
+
+	property inDragAreaAssign {
+		getter {
+			return areaAssignDragMoving;
+		}
+	}
+
+	function isPointInArea(x, y) {
+		return areaRect !== void
+			&& areaRect.contains(x, y);
+	}
+
+	property hasArea {
+		getter {
+			return areaRect !== void;
+		}
+	}
+
+	property areaEffectiveFrameLeftTop {
+		getter {
+			if (areaRect === void)
+				return void;
+			for (var i = areaIndexRect.top; i < areaIndexRect.bottom; i++) {
+				var item = drawItemList[i];
+				var fromIndex = item.findFrame(areaIndexRect.left, true);
+				var toIndex = item.findFrame(areaIndexRect.right - 1, true);
+				if (fromIndex != toIndex
+					|| (fromIndex >= 0 && item.frameAt(fromIndex).time == areaIndexRect.left)) {
+					return %[ x: areaIndexRect.left, y: i ];
+				}
+			}
+			return void;
+		}
+	}
+
+	function isItemInArea(item) {
+		return isIndexInArea(drawItemList.find(item));
+	}
+
+	function isIndexInArea(y) {
+		return areaIndexRect !== void && areaIndexRect.top <= y && y < areaIndexRect.bottom;
+	}
+
+	function resetArea() {
+		redrawArea();
+		areaRect = areaIndexRect = void;
+	}
+
+	function redrawArea() {
+		if (areaRect !== void)
+			redrawRect(areaRect.left, areaRect.top, areaRect.width, areaRect.height);
+	}
+
+	function dragEnterAreaAssign(x, y) {
+		leftPressed = false;
+		rightPressed  = false;
+		resetSelection();
+		resetArea();
+		areaAssignDragMoving = true;
+		areaAssignDragBegin = [ int(x / TIMELINE_FRAME_WIDTH), list.findItemIndex(y, true) ];
+	}
+
+	function dragMoveAreaAssign(x, y) {
+		redrawArea();
+		areaAssignDragEnd = [ int(x / TIMELINE_FRAME_WIDTH), list.findItemIndex(y, true) ];
+		var l = Math.min(areaAssignDragBegin[0], areaAssignDragEnd[0]);
+		var r = Math.max(areaAssignDragBegin[0], areaAssignDragEnd[0]);
+		var t = Math.min(areaAssignDragBegin[1], areaAssignDragEnd[1]);
+		var b = Math.max(areaAssignDragBegin[1], areaAssignDragEnd[1]);
+		var drawItemList = owner.drawItemList;
+		l = Math.max(0, l);
+		r = Math.max(0, r);
+		t = Math.max(0, Math.min(drawItemList.count - 1, t));
+		b = Math.max(0, Math.min(drawItemList.count - 1, b));
+		areaIndexRect = new KRect(l, t, r - l + 1, b - t + 1);
+		areaRect = new KRect(l * TIMELINE_FRAME_WIDTH,
+							 drawItemList[t].top,
+							 (r - l + 1) * TIMELINE_FRAME_WIDTH,
+							 drawItemList[b].top + drawItemList[b].height - drawItemList[t].top);
+		redrawArea();
+		owner.extendListSelection();
+	}
+
+	function dragLeaveAreaAssign() {
+		areaAssignDragMoving = false;
+		areaAssignDragBegin = void;
+		areaAssignDragEnd = void;
+	}
+
+	//----------------------------------------------------------------------
+	// エリア移動
+	var areaMoveDragMoving = false;
+	var areaMoveDrageginX;
+	var areaMoveDragFrames = [];
+	var areaMoveDragLefts = [];
+	var areaMoveDragTime = 0;
+	var areaMoveDragPrevTime = 0;
+	var areaMoveDragOffset = 0;
+	var areaMoveDragMinTime = 0;
+
+	property inDragAreaMove {
+		getter {
+			return areaMoveDragMoving;
+		}
+	}
+
+	function dragEnterAreaMove(x) {
+		leftPressed = false;
+		rightPressed  = false;
+		areaMoveDragMoving = true;
+		areaMoveDragFrames = [];
+		areaMoveDragTime = areaMoveDragPrevTime = int(x / TIMELINE_FRAME_WIDTH);
+		areaMoveDragOffset = areaMoveDragTime - areaIndexRect.left;
+		var leftMap = %[];
+		leftMap[areaIndexRect.left] = true;
+		for (var i = 0; i < list.drawItemList.count; i++) {
+			if (i < areaIndexRect.top || i >= areaIndexRect.bottom)
+				continue;
+			var item = list.drawItemList[i];
+			areaMoveDragFrames[i] = ktimeline_shallow_copy_frame_list(item.frameList);
+			item.mapLeftSideFrame(areaIndexRect.left, leftMap);
+		}
+		areaMoveDragLefts = dictionaryKeys(leftMap)._map(function(elm) { return +elm; })._sort();
+		areaMoveDragMinTime = Math.max(areaMoveDragLefts.count - 1, 0);
+	}
+
+	function dragMoveAreaMove(x) {
+		var curTime = int(Math.max(int(x / TIMELINE_FRAME_WIDTH), areaMoveDragMinTime + areaMoveDragOffset));
+		if (curTime == areaMoveDragPrevTime)
+			return;
+		var offset = curTime - areaMoveDragPrevTime;
+		areaMoveDragPrevTime = curTime;
+		var fromTime = areaMoveDragTime - areaMoveDragOffset;
+		var toTime = curTime - areaMoveDragOffset;
+		if (toTime < fromTime
+			&& areaMoveDragLefts.count) {
+			var toLeft = [];
+			toLeft.assign(areaMoveDragLefts);
+			for (var i = toLeft.count - 1; i >= 0; i--) {
+				if (toLeft[i] > toTime) {
+					toLeft[i] = toTime--;
+				} else {
+					break;
+				}
+			}
+			fromTime = areaMoveDragLefts;
+			toTime = toLeft;
+		}
+		for (var i = 0; i < drawItemList.count; i++) {
+			if (i < areaIndexRect.top || i >= areaIndexRect.bottom)
+				continue;
+			var item = drawItemList[i];
+			item.frameList = ktimeline_shallow_copy_frame_list(areaMoveDragFrames[i]);
+			item.moveFrame(fromTime,
+						   toTime,
+						   true);
+		}
+		redrawArea();
+		areaIndexRect.offsetBy(offset, 0);
+		areaRect.offsetBy(offset * TIMELINE_FRAME_WIDTH, 0);
+		redrawArea();
+	}
+
+	function dragLeaveAreaMove() {
+		areaMoveDragMoving = false;
+		if (areaMoveDragPrevTime != areaMoveDragTime) {
+			owner.onMultipleFrameDragged();
+			owner.onRenderFrame();
+		}
+	}
+
+	//----------------------------------------------------------------------
+	// マウスイベント処理
+	var customMouseEventDragging = false;
+	var curCustomMouseEvent;
+
+	property inDragCustomMouseEvent {
+		getter {
+			return customMouseEventDragging;
+		}
+	}
+
+	function dragEnterCustomMouseEvent(x, y, shift) {
+		leftPressed = false;
+		rightPressed  = false;
+		customMouseEventDragging = true;
+		curCustomMouseEvent.callbacks.onDragEnter(curCustomMouseEvent.frameIndex, x, y, shift);
+	}
+
+	function dragMoveCustomMouseEvent(x, y, shift) {
+		curCustomMouseEvent.callbacks.onDragMove(curCustomMouseEvent.frameIndex, x, y, shift);
+	}
+
+	function dragLeaveCustomMouseEvent(x, y, shift) {
+		curCustomMouseEvent.callbacks.onDragLeave(curCustomMouseEvent.frameIndex, x, y, shift);
+		customMouseEventDragging = false;
+		curCustomMouseEvent = void;
+	}
+
+	//----------------------------------------------------------------------
+	// ドラッグ処理
+
+	//------------------------------
+	// ドラッグ開始
+	function onDragEnter(x, y, shift) {
+		if (inDrag)
+			return;
+
+		if ((shift & ssShift) && owner.selectionModeFrameEnabled)
+			dragEnterRangeSelector(...);
+		else if ((shift & (ssCtrl)) &&  isPointInArea(x, y))
+			dragEnterAreaMove(...);
+		else if ((shift & ssCtrl) && owner.selectionModeFrameEnabled && isPointInSelection(x, y))
+			dragEnterSelection(...);
+		else if (curCustomMouseEvent !== void)
+			dragEnterCustomMouseEvent(...);
+		else if (boundaryDragFrameIndex >= 0)
+			dragEnterFrameBoundary(...);
+		else if (owner.selectionModeAreaEnabled) {
+			dragEnterAreaAssign(...);
+		}
+
+		if (inDrag) {
+			owner.onViewDragEnter();
+		}
+	}
+
+	//------------------------------
+	// ドラッグ移動
+	function onDragMove(x, y, shift) {
+		if (inDragAreaAssign)
+			dragMoveAreaAssign(...);
+		if (inDragAreaMove)
+			dragMoveAreaMove(...);
+		if (inDragFrameBoundary)
+			dragMoveFrameBoundary(...);
+		if (inDragCustomMouseEvent)
+			dragMoveCustomMouseEvent(...);
+		if (inDragSelection)
+			dragMoveSelection(...);
+		if (inDragRangeSelector)
+			dragMoveRangeSelector(...);
+
+		if (inDrag) {
+			owner.onViewDragMove();
+		}
+	}
+
+	//------------------------------
+	// ドラッグ終了
+	function onDragLeave(x, y, shift) {
+		if (inDrag) {
+			owner.onViewDragLeave();
+		}
+
+		if (inDragAreaAssign)
+			dragLeaveAreaAssign(...);
+		if (inDragAreaMove)
+			dragLeaveAreaMove(...);
+		if (inDragFrameBoundary)
+			dragLeaveFrameBoundary(...);
+		if (inDragCustomMouseEvent)
+			dragLeaveCustomMouseEvent(...);
+		if (inDragSelection)
+			dragLeaveSelection(...);
+		if (inDragRangeSelector)
+			dragLeaveRangeSelector(...);
+	}
+
+	//----------------------------------------------------------------------
+	// マウス処理
+	property viewPosition {
+		getter {
+			var rect = viewingRect;
+			return %[ left: rect.left, top: rect.top ];
+		}
+		setter(v) {
+			if (equalStruct(v, viewPosition))
+				return;
+			var rect = viewingRect;
+			noticeRect(v.left, v.top, rect.width, rect.height);
+			asyncCaller.callOnce(fakeMouseMove);
+		}
+	}
+
+	function fakeMouseMove() {
+		var keys = [
+			[ VK_SHIFT, ssShift ],
+			[ VK_CONTROL, ssCtrl ],
+			[ VK_MENU, ssAlt ],
+			[ VK_LBUTTON, ssLeft ],
+			[ VK_RBUTTON, ssRight ],
+			[ VK_MBUTTON, ssMiddle ]
+		];
+
+		var shift = keys.inject(0, function(key, value) {
+			if (System.getKeyState(key[0]))
+				return value + key[1];
+			else
+				return value;
+		});
+
+		onMouseMove(cursorX, cursorY, shift);
+	}
+
+	function nop {
+	}
+
+	property mouseIncludeViewPosition {
+		getter {
+			var rect = viewingRect;
+			var x = cursorX, y = cursorY;
+			var l, t;
+
+			if (x < rect.left)
+				l = x;
+			else if (x > rect.right)
+				l = x - rect.width;
+			else
+				l = rect.left;
+
+			if (y < rect.top)
+				t = y;
+			else if (y > rect.bottom)
+				t = y - rect.height;
+			else
+				t = rect.top;
+
+			return %[ left: l, top: t ];
+		}
+	}
+
+	//------------------------------
+	// マウスダウン
+	function onMouseDown(x, y, button, shift) {
+		super.onMouseDown(...);
+		focus();
+
+		// オーナーが再生中なら即停止
+		if (owner.playing)
+			owner.playing = false;
+
+		if (button == mbLeft)
+			leftPressed = true;
+		if (button == mbRight)
+			rightPressed = true;
+	}
+
+	//------------------------------
+	// マウスムーブ
+	function generateNewPoint(x, y) {
+		var newPoint = void;
+		var pointLayer = list.findItemIndex(y);
+		if (pointLayer >= 0) {
+			var item = list.drawItemList[pointLayer];
+			var frameIndex = item.findFrame(x / TIMELINE_FRAME_WIDTH);
+			if (frameIndex >= 0) {
+				var frame = item.frameAt(frameIndex);
+				if (frame.type != TIMELINE_FRAME_TYPE_NULL)
+					newPoint = [ pointLayer, frameIndex ];
+			}
+		}
+		return newPoint;
+	}
+
+	function onMouseMove(x, y, shift) {
+		super.onMouseMove(...);
+
+		// マウスホバーしているフレームの表示更新
+		var newPoint = generateNewPoint(x, y);
+		if ((shift & (ssLeft | ssRight | ssMiddle)) == 0) {
+			updateMouseCursor(x, y);
+			updatePoint(newPoint);
+		} else {
+			mouseDragScrollInterp.interpolate(mouseIncludeViewPosition);
+			updatePoint(void);
+		}
+	}
+
+	//------------------------------
+	// マウスアップ
+	function onMouseUp(x, y, button, shift) {
+		super.onMouseUp(...);
+
+		if (button == mbLeft
+			&& leftPressed) {
+			if (shift == 0) {
+				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);
+				var layerIndex = list.findItemIndex(y);;
+				if (layerIndex >= 0) {
+					owner.selectedLayer = list.findItemIndex(y);
+					owner.resetSelection();
+					resetArea();
+					updateMouseCursor(x, y);
+					updatePoint(generateNewPoint(x, y));
+					if (point !== void) {
+						var item = owner.drawItemList[point[0]];
+						if (owner.selectionModeFrameEnabled
+							&& item.supportSelection)
+							item.setSelection([ point[1] ]);
+					}
+					owner.onSinglePoint();
+				} else {
+					resetSelection();
+					resetArea();
+				}
+			} else if (shift == ssShift
+					   && point !== void) {
+				var item = owner.drawItemList[point[0]];
+				if (owner.selectionModeFrameEnabled
+					&& item.supportSelection)
+					item.flipSelection([ point[1] ]);
+			}
+		}
+
+		leftPressed = false;
+
+		if (button == mbLeft) {
+			onSelectionModified();
+		}
+
+		if (button == mbRight
+			&& rightPressed) {
+			if (hasArea
+				&& areaRect.contains(x, y)) {
+				owner.onTimeLineRightClick(owner.selectedTime);
+			} else {
+				owner.selectedTime = int(x / TIMELINE_FRAME_WIDTH);;
+				var layerIndex = list.findItemIndex(y);;
+				if (layerIndex >= 0) {
+					if (! hasMultipleSelection
+						&& ! (owner.extendListSelectionFromView && owner.hasMultipleListSelection)) {
+						owner.selectedLayer = layerIndex;
+						resetSelection();
+						resetArea();
+						updatePoint(generateNewPoint(x, y));
+						if (point !== void) {
+							var item = owner.drawItemList[point[0]];
+							if (owner.selectionModeFrameEnabled
+								&& item.supportSelection)
+								item.setSelection([ point[1] ]);
+						}
+						owner.onSelectionModified();
+					}
+					var item = owner.drawItemList[owner.selectedLayer];
+					item.onTimeLineRightClick(owner.selectedTime);
+				} else {
+					resetSelection();
+					resetArea();
+				}
+			}
+		}
+
+		rightPressed = false;
+	}
+
+	function onMouseLeave {
+		prevFrame = void;
+		updatePoint(void);
+		super.onMouseLeave(...);
+	}
+
+	function notifyMove {
+		if (owner.selectedLayer < 0)
+			return;
+		owner.resetSelection();
+		var item = list.drawItemList[owner.selectedLayer];
+		noticeRect(owner.selectedTime * TIMELINE_FRAME_WIDTH,
+				   item.top,
+				   TIMELINE_FRAME_WIDTH,
+				   item.height);
+	}
+
+	function stepForwardFrame(step = 1) {
+		owner.selectedFrame += step;
+		notifyMove();
+	}
+
+	function stepBackwardFrame(step = 1) {
+		owner.selectedFrame -= step;
+		notifyMove();
+	}
+
+	function jumpForwardFrame {
+		if (owner.selectedLayer >= 0) {
+			var item = list.drawItemList[owner.selectedLayer];
+			var frameIndex = item.findFrame(owner.selectedTime);
+			if (frameIndex < item.frameCount - 1) {
+				owner.selectedTime = item.frameAt(frameIndex + 1).time;
+				notifyMove();
+			}
+		}
+	}
+
+	function jumpBackwardFrame {
+		if (owner.selectedLayer >= 0) {
+			var item = list.drawItemList[owner.selectedLayer];
+			var frameIndex = item.findFrame(owner.selectedTime -1, true);
+			var frame = item.frameAt(frameIndex);
+			if (frame !== void) {
+				owner.selectedTime = frame.time;
+				notifyMove();
+			} else {
+				owner.selectedTime = 0;
+				notifyMove();
+			}
+		}
+	}
+
+	function shiftSelection(offset) {
+		if (hasSelection) {
+			dragEnterSelection(0, 0);
+			dragMoveSelection(offset * TIMELINE_FRAME_WIDTH - TIMELINE_FRAME_WIDTH / 2, 0);
+			dragLeaveSelection();
+		} else if (owner.selectedLayer >= 0) {
+			var item = list.drawItemList[owner.selectedLayer];
+			var frameIndex = item.findFrame(owner.selectedTime);
+			if (frameIndex > 0) {
+				var frame = item.frameAt(frameIndex);
+				if (frame.type != TIMELINE_FRAME_TYPE_NULL) {
+					item.setSelection([ frameIndex ]);
+					dragEnterSelection(0, 0);
+					dragMoveSelection(offset * TIMELINE_FRAME_WIDTH - TIMELINE_FRAME_WIDTH / 2, 0);
+					dragLeaveSelection();
+					item.releaseSelection();
+					owner.onRenderFrame();
+				}
+			}
+		}
+	}
+
+	function onKeyDown(key, shift) {
+		var prevSelectedLayer = owner.selectedLayer;
+		var prevSelectedTime = owner.selectedTime;
+
+		var cursorMoved = false;
+		switch (key) {
+		default:
+			if (owner.selectedLayer >= 0)
+				list.drawItemList[owner.selectedLayer].onTimeLineKeyDown(key, shift);
+			else
+				owner.onTimeLineKeyDown(key, shift);
+			super.onKeyDown(...);
+			break;
+
+
+			//----------------------------------------------------------------------
+			// 左カーソル
+		case VK_LEFT:
+			//--------------------------------------------------
+			// Ctrlキーオペレーション(範囲移動)
+			if (shift & ssCtrl) {
+				// Shiftで移動量10倍
+				var step = (shift & ssShift) ? 10 : 1;
+				//------------------------------
+				// エリア移動
+				if (hasArea) {
+					var movable = true;
+					for (var i = 0; i < list.drawItemList.count; i++) {
+						if (! isIndexInArea(i))
+							continue;
+						var item = list.drawItemList[i];
+						step = Math.min(step, areaIndexRect.left - item.leftSideFrameNum(areaIndexRect.left));
+						if (step <= 0) {
+							movable = false;
+							break;
+						}
+					}
+					if (movable) {
+						for (var i = 0; i < list.drawItemList.count; i++) {
+							if (isIndexInArea(i)) {
+								var item = list.drawItemList[i];
+								item.moveFrame(areaIndexRect.left, areaIndexRect.left - step, true, false);
+							}
+						}
+						areaIndexRect.offsetBy(-step, 0);
+						areaRect.offsetBy(-step * TIMELINE_FRAME_WIDTH, 0);
+						list.redrawAllItemsView();
+						owner.onMultipleFrameDragged();
+						owner.onRenderFrame();
+						owner.selectedTime -= step;
+						notifyMove();
+					}
+					return;
+				}
+				//------------------------------
+				// カーソル移動
+				else if (owner.selectionModeAreaOnly) {
+					if (cursorActive) {
+						var item = list.drawItemList[owner.selectedLayer];
+						step = Math.min(step, owner.selectedTime - item.leftSideFrameNum(owner.selectedTime));
+						if (step > 0) {
+							item.moveFrame(owner.selectedTime, owner.selectedTime - step, true);
+							item.onFrameDragged();
+							owner.onRenderFrame();
+							owner.selectedTime -= step;
+							notifyMove();
+							return;
+						}
+					}
+				}
+				//------------------------------
+				// 選択フレーム移動
+				else if (owner.selectionModeFrameEnabled) {
+					shiftSelection(-step);
+					owner.selectedTime -= step;
+					notifyMove();
+					return;
+				}
+			}
+			//--------------------------------------------------
+			// Altオペレーション(キーフレーム間移動)
+			if (shift & ssAlt) {
+				if (owner.selectedLayer >= 0) {
+					var item = list.drawItemList[owner.selectedLayer];
+					//------------------------------
+					// 左キーフレーム時挙動
+					if (owner.keyframePriorSideLeft) {
+						var frameIndex = item.findFrame(owner.selectedTime - 1, true);
+						var frame = item.frameAt(frameIndex);
+						if (frame !== void) {
+							owner.selectedTime = frame.time;
+							cursorMoved = true;
+						}
+					}
+					//------------------------------
+					// 右キーフレーム時挙動
+					else if (owner.keyframePriorSideRight) {
+						var frameIndex = item.findFrame(owner.selectedTime, true);
+						var frame = item.frameAt(frameIndex);
+						if (frame !== void) {
+							owner.selectedTime = frame.time - 1;
+							cursorMoved = true;
+						} else if (item.frameCount > 0
+								   && selectedTime < item.frameAt(0).time)
+							selectedTime = 0;
+					} else {
+						owner.selectedTime = 0;
+						cursorMoved = true;
+					}
+				}
+			}
+			//--------------------------------------------------
+			// カーソル移動
+			else {
+				if (owner.selectedTime > 0) {
+					owner.selectedTime--;
+					cursorMoved = true;
+				}
+			}
+			break;
+
+			//----------------------------------------------------------------------
+			// 右カーソル
+		case VK_RIGHT:
+			//--------------------------------------------------
+			// Ctrlキーオペレーション(範囲移動)
+			if (shift & ssCtrl) {
+				// Shiftで移動量10倍
+				var step = (shift & ssShift) ? 10 : 1;
+				//------------------------------
+				// エリア移動
+				if (hasArea) {
+					for (var i = 0; i < list.drawItemList.count; i++) {
+						if (isIndexInArea(i)) {
+							var item = list.drawItemList[i];
+							item.moveFrame(areaIndexRect.left, areaIndexRect.left + step, true, false);
+						}
+					}
+					areaIndexRect.offsetBy(step, 0);
+					areaRect.offsetBy(step * TIMELINE_FRAME_WIDTH, 0);
+					list.redrawAllItemsView();
+					owner.onMultipleFrameDragged();
+					owner.onRenderFrame();
+					owner.selectedTime += step;
+					notifyMove();
+					return;
+				}
+				//------------------------------
+				// カーソル移動
+				else if (selectedLayer >= 0) {
+					var item = list.drawItemList[selectedLayer];
+					item.moveFrame(selectedTime, selectedTime + step, true);
+					item.onFrameDragged();
+					owner.onRenderFrame();
+					owner.selectedTime += step;
+					notifyMove();
+					return;
+				}
+				//------------------------------
+				// 選択フレーム移動
+				if ((shift & ssCtrl) && owner.selectionModeFrameEnabled) {
+					var step = (shift & ssShift) ? 10 : 1;
+					shiftSelection(step);
+					owner.selectedTime += step;
+					notifyMove();
+					return;
+				}
+			}
+			//--------------------------------------------------
+			// Altオペレーション(キーフレーム間移動)
+			else if (shift & ssAlt) {
+				if (owner.selectedLayer >= 0) {
+					var item = list.drawItemList[owner.selectedLayer];
+					//------------------------------
+					// 左キーフレーム時挙動
+					if (owner.keyframePriorSideLeft) {
+						var frameIndex = item.findFrame(owner.selectedTime, true);
+						if (frameIndex < item.frameCount - 1) {
+							owner.selectedTime = item.frameAt(frameIndex + 1).time;
+							cursorMoved = true;
+						}
+					}
+					//------------------------------
+					// 右キーフレーム時挙動
+					else if (owner.keyframePriorSideRight) {
+						var frameIndex = item.findFrame(owner.selectedTime + 1, true);
+						if (frameIndex < item.frameCount - 1) {
+							owner.selectedTime = item.frameAt(frameIndex + 1).time - 1;
+							cursorMoved = true;
+						}
+					}
+				}
+			}
+			//--------------------------------------------------
+			// カーソル移動
+			else {
+				owner.selectedTime++;
+				cursorMoved = true;
+			}
+			break;
+		case VK_UP:
+			if (shift & ssCtrl)
+				return;
+			if (owner.selectedLayer > 0) {
+				owner.selectedLayer--;
+				cursorMoved = true;
+			}
+			break;
+		case VK_DOWN:
+			if (shift & ssCtrl)
+				return;
+			if (owner.selectedLayer < list.drawItemList.count - 1) {
+				owner.selectedLayer++;
+				cursorMoved = true;
+			}
+			break;
+		}
+
+		if (cursorMoved) {
+			// notice pointed coordinate.
+			focus();
+			noticeRect(owner.selectedTime * TIMELINE_FRAME_WIDTH,
+					   owner.selectedLayer * TIMELINE_FRAME_HEIGHT,
+					   TIMELINE_FRAME_WIDTH,
+					   TIMELINE_FRAME_HEIGHT);
+			// begin cursor key area assign
+			if (shift & ssShift
+				&& ! cursorKeyAreaAssignDragging
+				&& prevSelectedLayer >= 0) {
+				resetArea();
+				cursorKeyAreaAssignDragging = true;
+				cursorKeyAreaAssignBeginTime = prevSelectedTime;
+				cursorKeyAreaAssignBeginLayer = prevSelectedLayer;
+				resetSelection();
+			}
+			// progress cursor key area assign
+			if (cursorKeyAreaAssignDragging) {
+				var selectionEndTime, selectionEndLayer;
+				selectionEndTime = owner.selectedTime;
+				selectionEndLayer = owner.selectedLayer;
+				var l, t, r, b;
+				l = int(Math.min(cursorKeyAreaAssignBeginTime, selectionEndTime));
+				t = int(Math.min(cursorKeyAreaAssignBeginLayer, selectionEndLayer));
+				r = int(Math.max(cursorKeyAreaAssignBeginTime, selectionEndTime));
+				b = int(Math.max(cursorKeyAreaAssignBeginLayer, selectionEndLayer));
+				redrawArea();
+				areaIndexRect = new KRect(l, t, r - l + 1, b - t + 1);
+				areaRect = new KRect(l * TIMELINE_FRAME_WIDTH,
+									 drawItemList[t].top,
+									 (r - l + 1) * TIMELINE_FRAME_WIDTH,
+									 drawItemList[b].top + drawItemList[b].height - drawItemList[t].top);
+				redrawArea();
+			} else
+				resetArea();
+
+			if (! cursorKeyAreaAssignBeginLayer
+				&& ! hasMultipleSelection
+				&& owner.selectionModeFrameEnabled) {
+				var item = drawItemList[selectedLayer];
+				if (item.supportSelection) {
+					var frameIndex = item.findFrame(selectedTime);
+					if (frameIndex >= 0
+						&& item.frameAt(frameIndex).type != TIMELINE_FRAME_TYPE_NULL) {
+						if (! item.hasSelection
+							|| item.selection[0] != frameIndex) {
+							resetSelection();
+							item.setSelection([ frameIndex ]);
+							onSelectionModified();
+							owner.onSinglePoint();
+						}
+					} else if (hasSelection) {
+						resetSelection();
+						onSelectionModified();
+					}
+				}
+			}
+		}
+	}
+
+	function onKeyUp(key, shift) {
+		switch (key) {
+		default:
+			super.onKeyUp(...);
+			break;
+
+		case VK_SHIFT:
+			cursorKeyAreaAssignDragging = false;
+			break;
+		}
+	}
+
+
+	property isCopyFramesAvailable {
+		getter {
+			return hasWorkZone || (! owner.selectionModeFrameEnabled && owner.pointEffectiveFrameHead);
+		}
+	}
+
+	function copyFrames {
+		if (! hasWorkZone) {
+			if (owner.selectionModeFrameEnabled
+				|| ! owner.pointEffectiveFrameHead
+				|| selectedLayer < 0
+				|| selectedTime < 0)
+				return [];
+
+			setAreaByIndex(selectedTime, selectedLayer, selectedTime, selectedLayer);
+		}
+
+		pointWorkZoneCorner();
+
+		var result =
+			drawItemList._map(_layerView.workZoneIndexRect, function(item, indexRect) {
+				var frames = item.copyFrames(indexRect.left, indexRect.right);
+				var row = %[ className: item.className, frames: frames ];
+				return row;
+			});
+
+		result.map(function(row) {
+			return row.frames.count > 0 ? row : void;
+		});
+		while (result.count > 0
+			   && result[0] === void)
+			result.erase(0);
+		while (result.count > 0
+			   && result[-1] === void)
+			result.erase(result.count - 1);
+
+		if (owner.copySingleFrameAsNoWidth
+			&& hasSingleSelection)
+			result[0].frames[0].length = 1;
+
+		resetArea();
+
+		return result;
+	}
+
+	function cutFrames {
+		if (! hasWorkZone) {
+			if (owner.selectionModeFrameEnabled
+				|| ! owner.pointEffectiveFrameHead
+				|| selectedLayer < 0
+				|| selectedTime < 0)
+				return [];
+
+			setAreaByIndex(selectedTime, selectedLayer, selectedTime, selectedLayer);
+		}
+
+		pointWorkZoneCorner();
+
+		var result =
+			drawItemList._map(_layerView.workZoneIndexRect, function(item, indexRect) {
+				var frames = item.cutFrames(indexRect.left, indexRect.right);
+				var row = %[ className: item.className, frames: frames ];
+				return row;
+			});
+
+		result.map(function(row) {
+			return row.frames.count > 0 ? row : void;
+		});
+		while (result.count > 0
+			   && result[0] === void)
+			result.erase(0);
+		while (result.count > 0
+			   && result[-1] === void)
+			result.erase(result.count - 1);
+
+		if (owner.copySingleFrameAsNoWidth
+			&& hasSingleSelection)
+			result[0].frames[0].length = 1;
+
+		resetArea();
+
+		return result;
+	}
+
+	function isPasteFramesAvailable(rows, baseLayer = owner.selectedLayer, baseTime = owner.selectedTime) {
+		resetSelection();
+		var params = %[ baseTime: baseTime,
+						baseLayer: baseLayer,
+						drawItemList: drawItemList,
+						success: false,
+					  ];
+
+		rows.eachWithIndex(params, function(row, index, params) {
+			if (row === void)
+				return;
+			var targetLayer = params.baseLayer + index;
+			if (targetLayer >= params.drawItemList.count)
+				return;
+			var targetItem = params.drawItemList[targetLayer];
+			if (targetItem.className != row.className)
+				return;
+			params.success = true;
+		});
+
+		return params.success;
+	}
+
+	function pasteFrames(rows, baseLayer = owner.selectedLayer, baseTime = owner.selectedTime) {
+		resetSelection();
+		var params = %[ baseTime: baseTime,
+						baseLayer: baseLayer,
+						drawItemList: drawItemList ];
+
+		rows.eachWithIndex(params, function(row, index, params) {
+			if (row === void)
+				return;
+			var targetLayer = params.baseLayer + index;
+			if (targetLayer >= params.drawItemList.count)
+				return;
+			var targetItem = params.drawItemList[targetLayer];
+			if (targetItem.className != row.className)
+				return;
+			targetItem.pasteSelection(params.baseTime, row.frames);
+		});
+	}
+
+	function expandFramesByArea(stride = 1) {
+		drawItemList.eachWithIndex(this, stride, function(item, index, self, stride) {
+			if (! (self.isItemInArea(item) || (! self.hasArea && index == self.selectedLayer))
+				|| ! item.supportSelection)
+				return;
+			var frameList = item.frameList;
+			var step = 1;
+			for (var i = 0; i < frameList.count; i++)
+				if (frameList[i].time != 0)
+					frameList[i].time += (step++) * stride;
+			item.redrawAllFrame();
+		});
+	}
+
+	function shrinkFramesByArea(stride = 1) {
+		drawItemList.eachWithIndex(this, stride, function(item, index, self, stride) {
+			if (! (self.isItemInArea(item) || (! self.hasArea && index == self.selectedLayer))
+				|| ! item.supportSelection)
+				return;
+			var frameList = item.frameList;
+			var step = 1;
+			for (var i = 0; i < frameList.count; i++)
+				if (frameList[i].time != 0)
+					frameList[i].time -=  (step++) * stride;
+			for (var i = 0; i < frameList.count; i++)
+				frameList[i].time = int(Math.max(frameList[i].time, i));
+			for (var i = 1; i < frameList.count; i++)
+				frameList[i].time = int(Math.max(frameList[i].time, frameList[i - 1].time + 1));
+			item.redrawAllFrame();
+		});
+	}
+
+	function expandFramesBySelection(stride = 1) {
+		drawItemList.each(stride, function(item, stride) {
+			var selection = item.selection;
+			if (selection.count == 0)
+				return;
+			var frameList = item.frameList;
+			var offset = 0;
+			if (selection.find(0) >= 0
+				&& frameList[0].time > 0)
+				frameList[0].time += (offset += stride);
+			for (var i = 1; i < frameList.count; i++) {
+				if (selection.find(i - 1) >= 0
+					|| (frameList[i - 1].type == TIMELINE_FRAME_TYPE_NULL
+						&& selection.find(i - 2) >= 0 && selection.find(i) >= 0))
+					frameList[i].time += (offset += stride);
+				else
+					frameList[i].time += offset;
+			}
+			item.redrawAllFrame();
+		});
+	}
+
+	function shrinkFramesBySelection(stride = 1) {
+		drawItemList.each(stride, function(item, stride) {
+			var selection = item.selection;
+			if (selection.count == 0)
+				return;
+			var frameList = item.frameList;
+			var offset = 0;
+			if (selection.find(0) >= 0)
+				frameList[0].time -= (offset = int(Math.min(frameList[0].time, stride)));
+			for (var i = 1; i < frameList.count; i++) {
+				if (selection.find(i - 1) >= 0
+					|| (frameList[i - 1].type == TIMELINE_FRAME_TYPE_NULL
+						&& selection.find(i - 2) >= 0 && selection.find(i) >= 0))
+					frameList[i].time -= (offset = (frameList[i].time - int(Math.max(frameList[i - 1].time + 1, frameList[i].time - (offset += stride)))));
+				else
+					frameList[i].time -= offset;
+			}
+			item.redrawAllFrame();
+		});
+	}
+
+	function expandFrames(stride = 1) {
+		if (hasArea
+			|| owner.selectionModeAreaOnly)
+			expandFramesByArea(stride);
+		else if (hasSelection)
+			expandFramesBySelection(stride);
+	}
+
+	function shrinkFrames(stride = 1) {
+		if (hasArea
+			|| owner.selectionModeAreaOnly)
+			shrinkFramesByArea(stride);
+		else if (hasSelection)
+			shrinkFramesBySelection(stride);
+	}
+
+	function onSelectionModified() {
+		owner.onSelectionModified();
+	}
+
+};
