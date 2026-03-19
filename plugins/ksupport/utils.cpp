@@ -936,6 +936,9 @@ tTJSVariant duplicateStruct(tTJSVariant src)
 	if (src.Type() != tvtObject)
 		return src;
 
+	if (src.AsObjectNoAddRef() == nullptr)
+		return src;
+
 	auto &o1 = src.AsObjectClosureNoAddRef();
 	if (o1.IsInstanceOf(0, NULL, NULL, L"Function", NULL) == TJS_S_TRUE)
 		return src;

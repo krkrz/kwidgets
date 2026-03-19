@@ -6,16 +6,17 @@ if (! k_kirikiriz) {
 	else
 		Storages.addAutoPath("kwidgets/plugin/");
 } else {
-	if (Storages.isExistentStorage(System.exePath + "kwidgets.xp3")) {
-		switch (System.exeBits) {
-		case 32: Storages.addAutoPath(System.exePath + "kwidgets.xp3>plugin/"); break;
-		case 64: Storages.addAutoPath(System.exePath + "kwidgets.xp3>plugin64/"); break;
-		}
+	var pp;
+	switch (System.exeBits) {
+	case 32: pp = "plugin/"; break;
+	case 64: pp = "plugin64/"; break;
+	}
+	if (Storages.isExistentStorage(System.exePath + pp + "ksupport.dll")) {
+		Storages.addAutoPath(System.exePath + pp);
+	} else if (Storages.isExistentStorage(System.exePath + "kwidgets.xp3")) {
+		Storages.addAutoPath(System.exePath + "kwidgets.xp3>" + pp);
 	} else {
-		switch (System.exeBits) {
-		case 32: Storages.addAutoPath("kwidgets/plugin/"); break;
-		case 64: Storages.addAutoPath("kwidgets/plugin64/"); break;
-		}
+		Storages.addAutoPath("kwidgets/" + pp);
 	}
 }
 
@@ -29,7 +30,6 @@ if (k_kirikiriz) {
 
 Plugins.link("ksupport.dll");
 Plugins.link("windowEx.dll");
-Plugins.link("LayerExScreen.dll");
 Scripts.execStorage("KDefs.tjs");
 Scripts.execStorage("KUtils.tjs");
 Scripts.execStorage("KStyle.tjs");
