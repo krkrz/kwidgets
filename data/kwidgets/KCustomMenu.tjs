@@ -1179,7 +1179,8 @@ class KCustomMenuWindowController
 		// メニューアイテム自身のコールバックを発生させる。
 		menuItem.onClick();
 		// メニュー全体のコールバックを発生させる
-		onMenuDecide();
+		if (this isvalid)
+			onMenuDecide();
 	}
 
 	//----------------------------------------------------------------------
