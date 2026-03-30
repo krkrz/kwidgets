@@ -114,6 +114,45 @@ public:
 	}
 
 	//----------------------------------------------------------------------
+	// map関数
+	static tTJSVariant __mapArray__(tTJSVariant array, tTJSVariant srcArray) {
+		ncbPropAccessor arrayObj(array);
+		auto arrayObjCount = countArray(array);
+
+		tTJSVariant result = createArray();
+		ncbPropAccessor resultObj(result);
+
+		ncbPropAccessor srcArrayObj(srcArray);
+
+
+		for (tjs_uint i = 0; i < arrayObjCount; i++) {
+			tjs_int idx = arrayObj.GetValue(i, ncbTypedefs::Tag<tjs_int>());
+			resultObj.FuncCall(0, L"add", &addHint, NULL, srcArrayObj.GetValue(idx, ncbTypedefs::Tag<tTJSVariant>()));
+		}
+
+		return result;
+	}
+
+	static tjs_error TJS_INTF_METHOD _mapArray(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		if (numparams != 1)
+			return TJS_E_BADPARAMCOUNT;
+		tTJSVariant srcArray = *(param[0]);
+		if (result)
+			*result = __mapArray__(tTJSVariant(objthis, objthis), srcArray);
+		return TJS_S_OK;
+	}
+
+	static tjs_error TJS_INTF_METHOD mapArray(tTJSVariant *result, tjs_int numparams, tTJSVariant **param, iTJSDispatch2 *objthis) {
+		tTJSVariant resultArray;
+		auto resultStatus = _mapArray(&resultArray, numparams, param, objthis);
+		if (resultStatus == TJS_E_BADPARAMCOUNT)
+			return resultStatus;
+		tTJSVariant arrayObj(objthis, objthis);
+		assignArray(resultArray, arrayObj);
+		return TJS_S_OK;
+	}
+
+	//----------------------------------------------------------------------
 	// filterMap関数
 	static tTJSVariant __filterMap__(tTJSVariant array, tTJSVariant func, std::vector<tTJSVariant*> &args) {
 		ncbPropAccessor arrayObj(array);
@@ -692,6 +731,9 @@ NCB_ATTACH_CLASS(ArraySupport, Array) {
 
 	NCB_METHOD_RAW_CALLBACK(filterMap, ArraySupport::filterMap, 0);
 	NCB_METHOD_RAW_CALLBACK(_filterMap, ArraySupport::_filterMap, 0);
+
+	NCB_METHOD_RAW_CALLBACK(mapArray, ArraySupport::mapArray, 0);
+	NCB_METHOD_RAW_CALLBACK(_mapArray, ArraySupport::_mapArray, 0);
 
 	NCB_METHOD_RAW_CALLBACK(select, ArraySupport::select, 0);
 	NCB_METHOD_RAW_CALLBACK(_select, ArraySupport::_select, 0);
