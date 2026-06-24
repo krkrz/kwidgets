@@ -275,7 +275,7 @@ class KTimeLineItem extends KListItem
 	 ------------------------------*/
 	function frameRightTimeAt(index) {
 		if (index < frameList.count - 1)
-			return frameList[index + 1].time - 1;
+			return int(frameList[index + 1].time - 1);
 		else
 			return void;
 	}
@@ -344,6 +344,7 @@ class KTimeLineItem extends KListItem
 	 * 空フレームの場合は content を明示的に指定してやる。
 	 ------------------------------*/
 	function insertKeyFrame(time, type, content = void, doInvalidate = true) {
+		time = int(time);
 		var frameIndex = findFrame(time, true);
 		var frame = frameAt(frameIndex);
 
@@ -908,6 +909,8 @@ class KTimeLineItem extends KListItem
 	 * エリア内のフレームをコピーする
 	 ------------------------------*/
 	function copyFramesByArea(beginTime, endTime) {
+		beginTime = int(beginTime);
+		endTime = int(endTime);
 		if (! supportSelection
 			|| ! view.isItemInArea(this))
 			return [];
@@ -922,6 +925,7 @@ class KTimeLineItem extends KListItem
 	 * 選択範囲のフレームをコピーする
 	 ------------------------------*/
 	function copyFramesBySelection(beginTime) {
+		beginTime = int(beginTime);
 		return selection._map(beginTime, function(i, beginTime) {
 			var frame = duplicateStruct(frameList[i]);
 			frame.length = frameList[i + 1].time - frame.time;
@@ -934,6 +938,8 @@ class KTimeLineItem extends KListItem
 	 * フレームをコピーする
 	 ------------------------------*/
 	function copyFrames(beginTime, endTime) {
+		beginTime = int(beginTime);
+		endTime = int(endTime);
 		if (owner.selectionModeFrameEnabled) {
 			if (owner.hasSelection)
 				return copyFramesBySelection(...);
@@ -954,6 +960,8 @@ class KTimeLineItem extends KListItem
 	 * エリア内のフレームをカットーする
 	 ------------------------------*/
 	function cutFramesByArea(beginTime, endTime) {
+		beginTime = int(beginTime);
+		endTime = int(endTime);
 		if (! supportSelection
 			|| ! view.isItemInArea(this))
 			return [];
@@ -968,6 +976,7 @@ class KTimeLineItem extends KListItem
 	 * 選択範囲のフレームをカットする
 	 ------------------------------*/
 	function cutFramesBySelection(beginTime) {
+		beginTime = int(beginTime);
 		var frames = copyFramesBySelection(beginTime);
 		selection._reverse().each(function(i) {
 			frameList[i].type = TIMELINE_FRAME_TYPE_NULL;
@@ -981,6 +990,8 @@ class KTimeLineItem extends KListItem
 	 * フレームをカットする
 	 ------------------------------*/
 	function cutFrames(beginTime, endTime) {
+		beginTime = int(beginTime);
+		endTime = int(endTime);
 		if (owner.selectionModeFrameEnabled) {
 			if (owner.hasSelection)
 				return cutFramesBySelection(...);
@@ -1001,6 +1012,7 @@ class KTimeLineItem extends KListItem
 	 * 選択範囲をペーストする
 	 ------------------------------*/
 	function pasteSelection(pasteTime, frames) {
+		pasteTime = int(pasteTime);
 		if (! owner.selectionModeFrameEnabled
 			&& owner.selectionModeAreaEnabled) {
 			if (owner.keyframePriorSideLeft)
@@ -1085,6 +1097,10 @@ class KTimeLineItem extends KListItem
 
 	// 不要なヌルフレームを削除する
 	function invalidateNullFrame {
+		// タイムをint変換する
+		for (var i = 0; i < frameList.count; i++) {
+			frameList[i].time = int(frameList[i].time);
+		}
 		// 連続するヌルフレームを統合する
 		for (var i = 1; i < frameList.count; i++) {
 			if (frameList[i - 1].type == TIMELINE_FRAME_TYPE_NULL
