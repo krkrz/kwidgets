@@ -257,7 +257,7 @@ class KTimeLineControl extends KEntity
 		_timeLocatorScroll.add(new KTimeLineTimeLocator(window, this, "_timeLocator"));
 		_rightGrid.add(0, 1, new KScrollLayout(window, true, true, "_layerViewScroll"), 2);
 		_layerViewScroll.add(new timelineLayerViewClass(window, this, "_layerView"));
-		_leftGrid.add(0, 0, new KGridLayout(window, %[ name: "_titleGrid" ]));
+		_leftGrid.add(0, 0, new KGridLayout(window, %[ name: "_titleGrid" ]));
 		_titleGrid.add(0, 0, new KTextLabel(window, %[ name: "_titleLabel" ]));
 		_titleGrid.add(1, 0, new KGridLayout(window, "additionalControlGrid"));
 		_titleGrid.add(2, 0, new KTextButton(window, %[ label: "M", name: "_viewWidthButton", style: %[ alignHorizontal: ALIGN_RIGHT, alignVertical: ALIGN_CENTER, padding: 2, fontHeight: 12 ] ]));
@@ -1356,6 +1356,11 @@ class KTimeLineControl extends KEntity
 		}
 	}
 
+	function matchTargetClass(item, targetClassName) {
+		return targetClassName == ""
+			|| (item instanceof targetClassName);
+	}
+
 	function getTargetFramesByArea(targetClassName = "", pickWholeFrame = false) {
 		// 操作対象になるレイヤとフレームを数え上げる
 		var targetItemInfoList = [];
@@ -1370,6 +1375,7 @@ class KTimeLineControl extends KEntity
 				&& selectedTime >= 0) {
 				var item = drawItemList[selectedLayer];
 				if (item.supportSelection
+					&& matchTargetClass(item, targetClassName)
 					&& ((pickWholeFrame && item.pointEffectiveFrame)
 						|| item.pointEffectiveFrameHead)) {
 					var index = item.findFrame(selectedTime);
@@ -1388,8 +1394,7 @@ class KTimeLineControl extends KEntity
 			var end = view.areaIndexRect.right;
 			for (var i = 0; i < itemList.count; i++) {
 				var item = itemList[i];
-				if (targetClassName != ""
-					&& ! (item instanceof targetClassName))
+				if (! matchTargetClass(item, targetClassName))
 					continue;
 				if (item.supportSelection
 					&& view.isItemInArea(item)) {
@@ -1465,8 +1470,7 @@ class KTimeLineControl extends KEntity
 			var targetItemInfo = %[ targetFrameList: [] ];
 			for (var i = 0; i < itemList.count; i++) {
 				var item = itemList[i];
-				if (targetClassName != ""
-					&& ! (item instanceof targetClassName))
+				if (! matchTargetClass(item, targetClassName))
 					continue;
 				if (item.hasSelection) {
 					var frameIndexList = duplicateStruct(item.selection);
