@@ -1669,7 +1669,13 @@ class KTimeLineLayerView extends KVirtualWidget
 						list.redrawAllItemsView();
 						owner.onMultipleFrameDragged();
 						owner.onRenderFrame();
-						owner.selectedTime -= step;
+						if (owner.keyframePriorSideLeft)
+							owner.selectedTime = int(Math.max(areaIndexRect.left, 0));
+						else
+							owner.selectedTime = int(Math.max(areaIndexRect.right - 1, 0));
+						var rect = viewingRect;
+						noticeRect(areaRect.left - TIMELINE_FRAME_WIDTH, rect.top, 0, rect.height);
+						noticeRect(areaRect.right, rect.top, 0, rect.height);
 						notifyMove();
 					}
 					return;
@@ -1763,7 +1769,13 @@ class KTimeLineLayerView extends KVirtualWidget
 					list.redrawAllItemsView();
 					owner.onMultipleFrameDragged();
 					owner.onRenderFrame();
-					owner.selectedTime += step;
+					if (owner.keyframePriorSideLeft)
+						owner.selectedTime = int(Math.max(areaIndexRect.left, 0));
+					else
+						owner.selectedTime = int(Math.max(areaIndexRect.right - 1, 0));
+					var rect = viewingRect;
+					noticeRect(areaRect.right + TIMELINE_FRAME_WIDTH, rect.top, 0, rect.height);
+					noticeRect(areaRect.left, rect.top, 0, rect.height);
 					notifyMove();
 					return;
 				}
