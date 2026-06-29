@@ -1673,9 +1673,9 @@ class KTimeLineLayerView extends KVirtualWidget
 							owner.selectedTime = int(Math.max(areaIndexRect.left, 0));
 						else
 							owner.selectedTime = int(Math.max(areaIndexRect.right - 1, 0));
-						var rect = viewingRect;
-						noticeRect(areaRect.left - TIMELINE_FRAME_WIDTH, rect.top, 0, rect.height);
-						noticeRect(areaRect.right, rect.top, 0, rect.height);
+						var t = areaRect.top - TIMELINE_FRAME_HEIGHT, h = areaRect.height + TIMELINE_FRAME_HEIGHT * 2;
+						noticeRect(areaRect.left - TIMELINE_FRAME_WIDTH, t, 0, h);
+						noticeRect(areaRect.right, t, 0, h);
 						notifyMove();
 					}
 					return;
@@ -1773,9 +1773,9 @@ class KTimeLineLayerView extends KVirtualWidget
 						owner.selectedTime = int(Math.max(areaIndexRect.left, 0));
 					else
 						owner.selectedTime = int(Math.max(areaIndexRect.right - 1, 0));
-					var rect = viewingRect;
-					noticeRect(areaRect.right + TIMELINE_FRAME_WIDTH, rect.top, 0, rect.height);
-					noticeRect(areaRect.left, rect.top, 0, rect.height);
+					var t = areaRect.top - TIMELINE_FRAME_HEIGHT, h = areaRect.height + TIMELINE_FRAME_HEIGHT * 2;
+					noticeRect(areaRect.right + TIMELINE_FRAME_WIDTH, t, 0, h);
+					noticeRect(areaRect.left, t, 0, h);
 					notifyMove();
 					return;
 				}
