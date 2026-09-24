@@ -796,10 +796,13 @@ class KWindow extends Window
 
 	function invalidateLayout {
 		var minW, minH, maxW, maxH;
-		minW = innerMinWidth * zoomNumer / zoomDenom + (width - innerWidth);
-		minH = innerMinHeight * zoomNumer / zoomDenom + (height - innerHeight);
-		maxW = innerMaxWidth * zoomNumer / zoomDenom + (width - innerWidth);
-		maxH = innerMaxHeight * zoomNumer / zoomDenom + (height - innerHeight);
+		// 本体の min/max が外形基準なら装飾ぶんを足す (inner 基準の本体では不要)
+		var frameW = global.KWindow.minMaxSizeIsInner ? 0 : (width - innerWidth);
+		var frameH = global.KWindow.minMaxSizeIsInner ? 0 : (height - innerHeight);
+		minW = innerMinWidth * zoomNumer / zoomDenom + frameW;
+		minH = innerMinHeight * zoomNumer / zoomDenom + frameH;
+		maxW = innerMaxWidth * zoomNumer / zoomDenom + frameW;
+		maxH = innerMaxHeight * zoomNumer / zoomDenom + frameH;
 		setMinSize(minW, minH);
 		setMaxSize(maxW, maxH);
 	}
@@ -994,6 +997,17 @@ class KWindow extends Window
 };
 
 mixin(KWindow, KStyleObject);
+
+// Window.setMinSize / setMaxSize が inner (クライアント) 基準かどうか。
+// 吉里吉里Z 2.3 以降は inner 基準、それより前は外形 (装飾込み) 基準。
+KWindow.minMaxSizeIsInner = (function {
+	var ver = typeof System.versionString != "undefined" ? System.versionString : "";
+	var m = /^(\d+)\.(\d+)/.exec(ver);
+	if (m === void || m.count < 3)
+		return false;
+	var major = +m[1], minor = +m[2];
+	return major > 2 || (major == 2 && minor >= 3);
+})();
 
 KWindow.globalZoomNumer = 1;
 KWindow.globalZoomDenom = 1;
