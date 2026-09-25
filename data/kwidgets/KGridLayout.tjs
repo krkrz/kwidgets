@@ -58,7 +58,9 @@ class KGridLayout extends KLayout
 
 	// 特定のポジションをあらわす文字列を返す
 	function posExp(x, y) {
-		return "" + x + ":" + y;
+		// 座標は実数で来ることがある (Math.max は常に実数を返す)。
+		// 実数の文字列化結果に依存しないよう整数化してキーにする。
+		return "" + int(x) + ":" + int(y);
 	}
 
 	// 特定のポジションにある子ウィジェットを返す
