@@ -393,9 +393,13 @@ class KCustomMenuItem
 
 	//------------------------------
 	// 値のディスパッチ
+	function notifyValue() {
+		onValueModified(value);
+	}
+
 	function dispatch() {
 		if (nodeEnabled)
-			onValueModified(value);
+			notifyValue();
 	}
 
 	function invalidateValue {

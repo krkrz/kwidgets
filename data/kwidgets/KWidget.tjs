@@ -3609,9 +3609,17 @@ class KValueWidget extends KWidget
 	 *
 	 * 現在の値で onValueModifiedを呼びます。
 	 ------------------------------*/
-	function invalidateValue {
+	function notifyValue() {
+		onValueModified(value);
+	}
+
+	function dispatch() {
 		if (nodeEnabled)
-			onValueModified(value);
+			notifyValue();
+	}
+
+	function invalidateValue {
+		dispatch();
 	}
 
 	/*------------------------------

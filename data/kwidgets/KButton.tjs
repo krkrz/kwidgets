@@ -111,7 +111,7 @@ class KButton extends KEntity
 	}
 
 	/**------------------------------
-	 * イベントを発生させ強制的に現在の値を通知する。
+	 * 値のプロパティ
 	 ------------------------------*/
 	property value {
 		getter {
@@ -127,11 +127,15 @@ class KButton extends KEntity
 	 *
 	 * 値trueで onValueModifiedを呼びます。
 	 ------------------------------*/
+	function notifyValue() {
+		onValueModified(_value);
+	}
+
 	function dispatch() {
 		fireAutoDispatch();
 
 		if (nodeEnabled)
-			onValueModified(_value);
+			notifyValue();
 	}
 
 	function invalidateValue {
