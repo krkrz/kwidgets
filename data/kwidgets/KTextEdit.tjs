@@ -605,9 +605,13 @@ class KTextEdit extends KVirtualWidget
 	 *
 	 * 現在の値で onValueModifiedを呼びます。
 	 ------------------------------*/
+	function notifyValue {
+		onValueModified(value);
+	}
+
 	function dispatch {
 		if (nodeEnabled)
-			onValueModified(value);
+			notifyValue();
 	}
 
 	/**------------------------------

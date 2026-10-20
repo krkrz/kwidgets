@@ -92,9 +92,13 @@ class KValueEntity extends KEntity
 	 *
 	 * 現在の値で onValueModifiedを呼びます。
 	 ------------------------------*/
-	function dispatch {
+	function notifyValue() {
+		onValueModified(value, value);
+	}
+
+	function dispatch() {
 		if (nodeEnabled)
-			onValueModified(value, value);
+			notifyValue();
 	}
 
 	function invalidateValue() {
