@@ -181,7 +181,13 @@ class KVirtualWidget extends KEntity
 
 		var rect = new KRect(vleft, vtop, vwidth, vheight);
 		_delayDrawRegion.include(rect);
-		update();
+		// 要求された範囲だけ更新する。引数なしの update() はレイヤ全体の更新になり、
+		// 下に大きなレイヤが重なっていると、小さな範囲を毎フレーム描き直すだけで
+		// ウィンドウ全体の合成がやり直されてとても重くなる
+		var r = rect.dup();
+		r.intersectWith(new KRect(0, 0, width, height));
+		if (r.isValid)
+			update(r.left, r.top, r.width, r.height);
 	}
 
 	/**------------------------------
